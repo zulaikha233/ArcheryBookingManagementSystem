@@ -1,0 +1,515 @@
+@model ArcheryAlley.Models.PaymentViewModel
+
+@{
+    ViewData["Title"] = "Payment";
+}
+
+<style>
+    :root {
+        --glass-bg: #A9BA9D;
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+    body {
+        background-color: #ECE7CA;
+        color: #2b3a2a;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .checkout-wrap {
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        max-width: 900px;
+        margin: 20px auto 50px;
+        padding: 40px 50px;
+        border-radius: 30px;
+        text-align: left;
+    }
+
+    /* Progress Indicator moved to Partial */
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 30px;
+        position: relative;
+        padding-bottom: 12px;
+        color: #2b3a2a;
+    }
+    .section-title::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 35px;
+        height: 2px;
+        background-color: #8A9A5B;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 60px;
+        margin-bottom: 40px;
+    }
+
+    .data-row {
+        display: flex;
+        padding: 15px 0;
+        border-bottom: 1px solid #2a2a2c;
+    }
+    .data-row:last-child {
+        border-bottom: none;
+    }
+    .data-label {
+        flex: 0 0 120px;
+        color: #000000;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .data-value {
+        flex: 1;
+        color: #eee;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .customer-box {
+        border: 1px solid #2a2a2c;
+        padding: 25px;
+    }
+
+    .customer-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        row-gap: 15px;
+        column-gap: 20px;
+    }
+    
+    .customer-info-row {
+        display: flex;
+        overflow: hidden;
+    }
+    .customer-info-row .data-label { flex: 0 0 80px; }
+    .customer-info-row .data-value {
+        word-break: break-word;
+        flex: 1;
+    }
+    
+    .additional-info {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #2a2a2c;
+        font-size: 0.85rem;
+        color: #000000;
+        font-weight: 600;
+    }
+
+    .total-box {
+        border: 1px solid #8A9A5B;
+        margin-top: 30px;
+        border-radius: 12px;
+    }
+    .total-top {
+        padding: 25px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    .total-top span {
+        text-decoration: underline;
+    }
+    .total-bottom {
+        padding: 25px;
+        background: rgba(255,255,255,0.02);
+        border-radius: 0 0 12px 12px;
+    }
+
+    .btn-proceed {
+        background: linear-gradient(135deg, #8A9A5B 0%, #6D7B48 100%);
+        color: #000;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: 0.3s;
+        margin-top: 25px;
+    }
+    .btn-proceed:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(138, 154, 91, 0.3);
+    }
+
+    .payment-radio {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.9rem;
+        color: #ddd;
+        font-weight: 500;
+        cursor: pointer;
+    }
+    .payment-radio input {
+        accent-color: #8A9A5B;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    .payment-ui-box {
+        margin-left: 28px;
+        padding: 20px;
+        background: #ddead1;
+        border: 1px solid rgba(138, 154, 91, 0.2);
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .payment-input {
+        width: 100%;
+        background: white;
+        border: 1px solid rgba(138, 154, 91, 0.3);
+        color: #2b3a2a;
+        padding: 12px 15px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        outline: none;
+        transition: 0.3s;
+    }
+    .payment-input:focus {
+        border-color: #8A9A5B;
+    }
+    .payment-input option {
+        background: white;
+        color: #2b3a2a;
+    }
+
+    /* Success Modal */
+    .custom-modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.8);
+        backdrop-filter: blur(10px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    .custom-modal-overlay.show {
+        opacity: 1;
+    }
+    .custom-modal {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 50px 40px;
+        text-align: center;
+        color: #2b3a2a;
+        box-shadow: 0 20px 40px rgba(138, 154, 91,0.15);
+        transform: scale(0.9);
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .custom-modal-overlay.show .custom-modal {
+        transform: scale(1);
+    }
+    .success-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #8A9A5B 0%, #6D7B48 100%);
+        color: black;
+        font-size: 40px;
+        line-height: 80px;
+        margin: 0 auto 20px;
+        box-shadow: 0 0 20px rgba(138, 154, 91,0.4);
+    }
+</style>
+
+<div id="successModal" class="custom-modal-overlay">
+    <div class="custom-modal">
+        <div class="success-icon">✓</div>
+        <h3 class="mb-2" style="font-weight: 700;">Payment Successful!</h3>
+        <p class="text-muted m-0" style="font-size: 0.9rem;">Your booking has been secured.<br/>Redirecting to receipt...</p>
+    </div>
+</div>
+
+<partial name="~/Views/Home/_BookingProgress.cshtml" model="4" />
+
+<div class="checkout-wrap">
+    <h3 class="section-title">Booking Details</h3>
+    
+    <div class="detail-grid">
+        <div class="col-left">
+            <div class="data-row" style="padding-top: 0">
+                <div class="data-label">Service:</div>
+                <div class="data-value">Archery Arena</div>
+            </div>
+            <div class="data-row">
+                <div class="data-label">Lanes:</div>
+                <div class="data-value">@Model.TargetDetails</div>
+            </div>
+            <div class="data-row">
+                <div class="data-label">Duration:</div>
+                <div class="data-value">@Model.Duration Hour(s)</div>
+            </div>
+        </div>
+        <div class="col-right">
+            <div class="data-row" style="padding-top: 0">
+                <div class="data-label">Date:</div>
+                <div class="data-value">@Model.Date</div>
+            </div>
+            <div class="data-row">
+                <div class="data-label">Time:</div>
+                <div class="data-value" style="display: flex; flex-direction: column; gap: 4px;">
+                    @if (!string.IsNullOrEmpty(Model.Time))
+                    {
+                        foreach (var tStr in Model.Time.Split(','))
+                        {
+                            <span>@tStr.Trim()</span>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="data-row">
+                <div class="data-label">Pax:</div>
+                <div class="data-value">@Model.NumberOfPax Archers</div>
+            </div>
+            <div class="data-row">
+                <div class="data-label">Target Face:</div>
+                <div class="data-value">@Model.TargetSize (@Model.TargetAmount Face@(Model.TargetAmount > 1 ? "s" : ""))</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-9">
+            <h3 class="section-title">Customer Details</h3>
+            <div class="customer-box">
+                <div class="customer-info-grid">
+                    <div class="customer-info-row">
+                        <div class="data-label">Name:</div>
+                        <div class="data-value" style="font-size: 0.85rem">@Model.CustomerName</div>
+                    </div>
+                    <div class="customer-info-row">
+                        <div class="data-label">Email:</div>
+                        <div class="data-value" style="font-size: 0.85rem">@Model.CustomerEmail</div>
+                    </div>
+                    <div class="customer-info-row">
+                        <div class="data-label">Phone:</div>
+                        <div class="data-value" style="font-size: 0.85rem">-</div>
+                    </div>
+                </div>
+                <div class="additional-info">
+                    Additional Information: None
+                </div>
+            </div>
+                <div class="total-box">
+                    <div class="total-top" id="priceDisplay">
+                        Total Price: <span id="displayedPrice">RM @Model.TotalPrice.ToString("0.00")</span>
+                    </div>
+                    <div class="total-bottom">
+
+                        <!-- Promo Code Section -->
+                        <div style="margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                            <div style="font-size: 0.8rem; color: #000000; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: 700;">
+                                <i class="bi bi-ticket-perforated me-1"></i> Promo / Voucher Code
+                            </div>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <input type="text" id="promoCodeInput"
+                                       placeholder="Enter promo code"
+                                       maxlength="20"
+                                       style="flex:1; background:#ddead1; border:1px solid rgba(138, 154, 91, 0.2);
+                                              color: #2b3a2a; border-radius:10px; padding:12px 14px;
+                                              font-family:'Outfit', sans-serif; font-weight:700; letter-spacing:1px;
+                                              text-transform:uppercase; outline:none; font-size:0.9rem;"
+                                       oninput="this.value=this.value.toUpperCase(); clearPromo()"
+                                       onfocus="this.style.borderColor='#8A9A5B'"
+                                       onblur="this.style.borderColor='rgba(138, 154, 91, 0.2)'" />
+                                <button type="button" onclick="applyPromo()"
+                                        style="background: linear-gradient(135deg, #8A9A5B, #6D7B48); border: none;
+                                               color:black; border-radius:10px; padding:12px 22px;
+                                               font-weight:800; font-size:0.85rem; letter-spacing:1px;
+                                               cursor:pointer; white-space:nowrap; transition:all 0.3s;
+                                               box-shadow: 0 4px 15px rgba(138, 154, 91, 0.2);"
+                                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(138, 154, 91, 0.3)'"
+                                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(138, 154, 91, 0.2)'">
+                                    APPLY
+                                </button>
+                            </div>
+                            <div id="promoMsg" style="margin-top:8px; font-size:0.82rem; display:none;"></div>
+                        </div>
+
+                        <div class="payment-methods">
+                            <label class="payment-radio mb-3">
+                                <input type="radio" name="paymentOption" value="fpx" checked onchange="togglePaymentUI()"> FPX Online Banking
+                            </label>
+                            <div id="fpxUI" class="payment-ui-box">
+                                <select class="payment-input">
+                                    <option value="">-- Select Retail Bank --</option>
+                                    <option value="Maybank2U">Maybank2E / Maybank2U</option>
+                                    <option value="CIMB Clicks">CIMB Clicks</option>
+                                    <option value="Public Bank">Public Bank</option>
+                                    <option value="RHB Now">RHB Now</option>
+                                    <option value="Bank Islam">Bank Islam</option>
+                                    <option value="AmBank">AmBank</option>
+                                    <option value="Hong Leong Connect">Hong Leong Connect</option>
+                                    <option value="BSN">BSN</option>
+                                </select>
+                                <small class="text-muted d-block mt-2" style="font-size: 0.75rem;">You will be securely redirected to your chosen bank's portal.</small>
+                            </div>
+
+                            <label class="payment-radio mb-3 mt-4">
+                                <input type="radio" name="paymentOption" value="card" onchange="togglePaymentUI()"> Credit / Debit Card
+                            </label>
+                            <div id="cardUI" class="payment-ui-box" style="display: none;">
+                                <input type="text" class="payment-input mb-2" placeholder="Card Number (e.g. 4500 1234 5678 9010)">
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="text" class="payment-input" placeholder="MM/YY">
+                                    <input type="text" class="payment-input" placeholder="CVV">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="btn-proceed w-100 mt-4" id="payConfirmBtn" onclick="finalizeBooking()">Confirm Payment</button>
+                    </div>
+                </div>  
+            <button class="btn btn-link text-decoration-none p-0 mt-4" onclick="window.history.back()" style="color: #6c757d; transition: 0.3s; box-shadow: none; border: none;"><i class="bi bi-arrow-left me-1"></i> Back to Details</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const originalPrice = @Model.TotalPrice;
+    let appliedPrice    = originalPrice;
+    let appliedRateCode = "@(Model.RateCode ?? "")";
+    const bookingDate   = "@Model.Date";
+
+    function togglePaymentUI() {
+        const method = document.querySelector('input[name="paymentOption"]:checked').value;
+        if (method === "fpx") {
+            document.getElementById("fpxUI").style.display = "block";
+            document.getElementById("cardUI").style.display = "none";
+        } else {
+            document.getElementById("fpxUI").style.display = "none";
+            document.getElementById("cardUI").style.display = "block";
+        }
+    }
+
+    async function applyPromo() {
+        const code  = document.getElementById('promoCodeInput').value.trim();
+        const msgEl = document.getElementById('promoMsg');
+
+        if (!code) {
+            msgEl.style.display = 'block';
+            msgEl.style.color   = '#f87171';
+            msgEl.textContent   = 'Please enter a promo code.';
+            return;
+        }
+
+        msgEl.style.display = 'block';
+        msgEl.style.color   = '#888';
+        msgEl.textContent   = 'Validating...';
+
+        try {
+            const resp = await fetch(`/Rate/ValidatePromoCode?code=${encodeURIComponent(code)}&date=${bookingDate}`);
+            const data = await resp.json();
+
+            if (data.valid) {
+                appliedRateCode = data.rateCode;
+                // Recalculate: promoRate is per hour, duration from model
+                const duration  = @Model.Duration;
+                appliedPrice    = data.finalPrice * duration;
+
+                document.getElementById('displayedPrice').innerHTML =
+                    `<span style="text-decoration:line-through; color:#666; font-size:0.85em;">RM ${originalPrice.toFixed(2)}</span>
+                     <span style="color:#15803d; margin-left:8px; font-weight:800;">RM ${appliedPrice.toFixed(2)}</span>`;
+
+                msgEl.style.color = '#15803d';
+                msgEl.innerHTML   = `<i class="bi bi-check-circle me-1"></i> ${data.message}`;
+                document.getElementById('promoCodeInput').style.borderColor = '#15803d';
+            } else {
+                clearPromo();
+                msgEl.style.display = 'block';
+                msgEl.style.color   = '#f87171';
+                msgEl.innerHTML     = `<i class="bi bi-x-circle me-1"></i> ${data.message}`;
+                document.getElementById('promoCodeInput').style.borderColor = '#f87171';
+            }
+        } catch (e) {
+            msgEl.style.color = '#f87171';
+            msgEl.textContent = 'Could not validate promo code. Try again.';
+        }
+    }
+
+    function clearPromo() {
+        appliedRateCode = '';
+        appliedPrice    = originalPrice;
+        document.getElementById('displayedPrice').textContent = `RM ${originalPrice.toFixed(2)}`;
+        document.getElementById('promoCodeInput').style.borderColor = 'rgba(255,255,255,0.1)';
+        const msgEl = document.getElementById('promoMsg');
+        msgEl.style.display = 'none';
+        msgEl.textContent   = '';
+    }
+
+    async function finalizeBooking() {
+        const confirmBtn = document.getElementById("payConfirmBtn");
+        confirmBtn.disabled = true;
+
+        const method = document.querySelector('input[name="paymentOption"]:checked').value;
+        
+        if (method === "fpx") {
+            const bank = document.querySelector('#fpxUI select').value;
+            if (!bank) {
+                showNotif("Please select a bank to proceed.", 'warning');
+                confirmBtn.disabled = false;
+                return;
+            }
+            confirmBtn.innerText = `Redirecting to ${bank}...`;
+        } else {
+            confirmBtn.innerText = "Authorizing Card...";
+        }
+
+        await new Promise(r => setTimeout(r, 1500));
+        confirmBtn.innerText = "Processing Payment...";
+
+        const formData = new FormData();
+        formData.append("SlotId", "@Model.SlotId");
+        formData.append("CustomerName", "@Model.CustomerName");
+        formData.append("CustomerEmail", "@Model.CustomerEmail");
+        const firstLane = "@Model.SelectedLanes".split(',')[0].trim();
+        formData.append("TargetNo", firstLane);
+        formData.append("RangeNo", "1");
+        formData.append("Duration", "@Model.Duration");
+        formData.append("TotalPrice", appliedPrice.toFixed(2));
+        formData.append("SelectedLanes", "@Model.SelectedLanes");
+        formData.append("SelectedLaneRanges", "@Model.SelectedLaneRanges");
+        formData.append("NumberOfPax", "@Model.NumberOfPax");
+        formData.append("RateCode", appliedRateCode);
+
+        try {
+            const response = await fetch('/Booking/CreateCustomerBooking', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                const modal = document.getElementById('successModal');
+                modal.style.display = 'flex';
+                setTimeout(() => modal.classList.add('show'), 10);
+                setTimeout(() => {
+                    window.location.href = "@Url.Action("Success", "Home")";
+                }, 2000);
+            } else {
+                showNotif("Booking failed: " + result.message, 'error');
+                confirmBtn.disabled = false;
+                confirmBtn.innerText = "Confirm Payment";
+            }
+        } catch (err) {
+            showNotif("Connection error. Please try again.", 'error');
+            confirmBtn.disabled = false;
+            confirmBtn.innerText = "Confirm Payment";
+        }
+    }
+</script>
+

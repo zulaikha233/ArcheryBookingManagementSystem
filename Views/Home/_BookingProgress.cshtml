@@ -1,0 +1,89 @@
+@model int
+@{
+    int activeStep = Model;
+}
+
+<div class="wizard-header text-center mb-5">
+    <h1 class="wizard-title">RESERVE YOUR <span>LANE</span></h1>
+    <div class="step-indicator">
+        <div class="step @(activeStep >= 1 ? "active" : "")" id="step1-indicator">
+            <span>1</span>
+            <p>Details</p>
+        </div>
+        <div class="step-line"></div>
+        <div class="step @(activeStep >= 2 ? "active" : "")" id="step2-indicator">
+            <span>2</span>
+            <p>Size</p>
+        </div>
+        <div class="step-line"></div>
+        <div class="step @(activeStep >= 3 ? "active" : "")" id="step3-indicator">
+            <span>3</span>
+            <p>Lane</p>
+        </div>
+        <div class="step-line"></div>
+        <div class="step @(activeStep >= 4 ? "active" : "")" id="step4-indicator">
+            <span>4</span>
+            <p>Payment</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .wizard-title {
+        font-weight: 800;
+        font-size: 3rem;
+        letter-spacing: -1px;
+        margin-bottom: 2rem;
+    }
+
+    .wizard-title span {
+        background: linear-gradient(to right, #8A9A5B, #6D7B48);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 40px;
+    }
+
+    .step {
+        text-align: center;
+        opacity: 0.4;
+        transition: 0.3s;
+    }
+
+    .step.active { opacity: 1; }
+
+    .step span {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #A9BA9D;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+        margin: 0 auto 8px;
+        font-weight: bold;
+    }
+
+    .step.active span {
+        background: linear-gradient(45deg, #8A9A5B, #6D7B48);
+        color: black;
+        border: none;
+        box-shadow: 0 0 20px rgba(138, 154, 91, 0.3);
+    }
+
+    .step p { font-size: 0.8rem; text-transform: uppercase; margin: 0; letter-spacing: 1px; color: #2b3a2a; }
+
+    .step-line {
+        width: 60px;
+        height: 1px;
+        background: rgba(0,0,0,0.1);
+        margin-top: -20px;
+    }
+</style>

@@ -1,0 +1,285 @@
+@model List<ArcheryAlley.Models.BookingSlots>
+
+<div class="container animate-in">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="hero-title" style="font-size: 2.5rem; margin: 0">ADMIN <span style="color: #2b3a2a">DASHBOARD</span></h1>
+            <p style="color: #b0b0b0">Manage Arena availability and lane configurations.</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <a asp-action="ManageRates" asp-controller="Rate"
+               class="btn text-decoration-none d-inline-flex align-items-center justify-content-center"
+               style="border-radius: 50px; font-weight: 600; border: 1px solid #f9c74f; color: #f9c74f; height: 45px; padding: 0 25px">
+                MANAGE RATES
+            </a>
+            <a asp-action="Register" asp-controller="Account"
+               class="btn text-decoration-none d-inline-flex align-items-center justify-content-center"
+               style="border-radius: 50px; font-weight: 600; border: 1px solid #8A9A5B; color: #8A9A5B; height: 45px; padding: 0 25px">
+                REGISTER STAFF
+            </a>
+            <button type="button" onclick="openAddModal()"
+                    class="btn-premium d-inline-flex align-items-center justify-content-center"
+                    style="height: 45px; padding: 0 25px; border-radius: 50px; border: none; cursor: pointer">
+                <i class="bi bi-plus-lg me-2"></i> NEW LANE SLOT
+            </button>
+        </div>
+    </div>
+
+    <div class="premium-card">
+        <table class="table mb-0" id="slotsTable">
+            <thead>
+                <tr>
+                    <th style="color: #8A9A5B; font-size: 0.78rem; letter-spacing: 1px">LANE ID</th>
+                    <th style="color: #8A9A5B; font-size: 0.78rem; letter-spacing: 1px">START TIME</th>
+                    <th style="color: #8A9A5B; font-size: 0.78rem; letter-spacing: 1px">END TIME</th>
+                    <th class="text-end" style="color: #8A9A5B; font-size: 0.78rem; letter-spacing: 1px">MANAGEMENT</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var slot in Model)
+                {
+                    <tr id="row-@slot.SlotId" style="transition: background 0.2s">
+                        <!-- View Mode -->
+                        <td class="fw-bold view-mode" style="color: #8A9A5B; vertical-align: middle">
+                            @slot.SlotId.ToString("D2")
+                        </td>
+                        <td class="view-mode" style="vertical-align: middle" id="start-display-@slot.SlotId">
+                            @slot.SlotStartTime.ToString(@"hh\:mm")
+                        </td>
+                        <td class="view-mode" style="vertical-align: middle" id="end-display-@slot.SlotId">
+                            @slot.SlotEndTime.ToString(@"hh\:mm")
+                        </td>
+                        <td class="text-end view-mode" style="vertical-align: middle">
+                            <div class="d-flex gap-2 justify-content-end">
+                                <button type="button" onclick="openEditRow(@slot.SlotId)"
+                                        style="height: 34px; padding: 0 16px; border-radius: 50px;
+                                               background: rgba(138, 154, 91,0.08); color: #8A9A5B;
+                                               border: 1px solid rgba(138, 154, 91,0.3); font-size: 0.78rem;
+                                               font-weight: 700; cursor: pointer; transition: all 0.2s"
+                                        onmouseover="this.style.background='rgba(138, 154, 91,0.18)'"
+                                        onmouseout="this.style.background='rgba(138, 154, 91,0.08)'">
+                                    <i class="bi bi-pencil me-1"></i> EDIT
+                                </button>
+                                <button type="button" onclick="confirmDelete(@slot.SlotId)"
+                                        style="height: 34px; padding: 0 16px; border-radius: 50px;
+                                               background: rgba(255,107,107,0.08); color: #ff6b6b;
+                                               border: 1px solid rgba(255,107,107,0.3); font-size: 0.78rem;
+                                               font-weight: 700; cursor: pointer; transition: all 0.2s"
+                                        onmouseover="this.style.background='rgba(255,107,107,0.18)'"
+                                        onmouseout="this.style.background='rgba(255,107,107,0.08)'">
+                                    <i class="bi bi-trash3 me-1"></i> DELETE
+                                </button>
+                            </div>
+                        </td>
+
+                        <!-- Edit Mode (hidden by default — same row, different cells shown) -->
+                        <td class="edit-mode" style="display:none; vertical-align: middle; color: #8A9A5B; font-weight: 700">
+                            @slot.SlotId.ToString("D2")
+                        </td>
+                        <td class="edit-mode" style="display:none; vertical-align: middle">
+                            <input type="time" id="edit-start-@slot.SlotId"
+                                   value="@slot.SlotStartTime.ToString(@"hh\:mm")"
+                                   style="background: rgba(255,255,255,0.06); border: 1px solid rgba(138, 154, 91,0.4);
+                                          color: #2b3a2a; border-radius: 8px; padding: 6px 12px; outline: none;
+                                          font-size: 0.9rem; width: 110px" />
+                        </td>
+                        <td class="edit-mode" style="display:none; vertical-align: middle">
+                            <input type="time" id="edit-end-@slot.SlotId"
+                                   value="@slot.SlotEndTime.ToString(@"hh\:mm")"
+                                   style="background: rgba(255,255,255,0.06); border: 1px solid rgba(138, 154, 91,0.4);
+                                          color: #2b3a2a; border-radius: 8px; padding: 6px 12px; outline: none;
+                                          font-size: 0.9rem; width: 110px" />
+                        </td>
+                        <td class="edit-mode text-end" style="display:none; vertical-align: middle">
+                            <div class="d-flex gap-2 justify-content-end">
+                                <button type="button" onclick="saveEdit(@slot.SlotId)"
+                                        style="height: 34px; padding: 0 16px; border-radius: 50px;
+                                               background: rgba(85,239,196,0.12); color: #55efc4;
+                                               border: 1px solid rgba(85,239,196,0.4); font-size: 0.78rem;
+                                               font-weight: 700; cursor: pointer; transition: all 0.2s">
+                                    <i class="bi bi-check-lg me-1"></i> SAVE
+                                </button>
+                                <button type="button" onclick="cancelEdit(@slot.SlotId)"
+                                        style="height: 34px; padding: 0 16px; border-radius: 50px;
+                                               background: rgba(255,255,255,0.04); color: #888;
+                                               border: 1px solid rgba(255,255,255,0.15); font-size: 0.78rem;
+                                               font-weight: 700; cursor: pointer; transition: all 0.2s">
+                                    CANCEL
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Slot Modal -->
+<div id="addSlotModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7);
+     z-index:9999; align-items:center; justify-content:center; backdrop-filter:blur(4px)">
+    <div class="premium-card" style="width:100%; max-width:420px; margin:0 16px; animation: fadeInUp 0.3s ease">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 style="color: #2b3a2a; font-weight:800; margin:0; font-size:1.1rem">
+                <i class="bi bi-plus-circle me-2" style="color:#8A9A5B"></i>ADD NEW SLOT
+            </h5>
+            <button onclick="closeAddModal()" style="background:none; border:none; color:#888; font-size:1.2rem; cursor:pointer">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="mb-4">
+            <label style="color:#b0b0b0; font-size:0.8rem; font-weight:700; letter-spacing:1px; display:block; margin-bottom:8px">
+                START TIME
+            </label>
+            <input type="time" id="modal-start"
+                   style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.15);
+                          color: #2b3a2a; border-radius:12px; padding:12px 16px; width:100%; outline:none;
+                          font-size:1rem; transition:border-color 0.2s"
+                   onfocus="this.style.borderColor='#8A9A5B'"
+                   onblur="this.style.borderColor='rgba(255,255,255,0.15)'" />
+        </div>
+        <div class="mb-5">
+            <label style="color:#b0b0b0; font-size:0.8rem; font-weight:700; letter-spacing:1px; display:block; margin-bottom:8px">
+                END TIME
+            </label>
+            <input type="time" id="modal-end"
+                   style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.15);
+                          color: #2b3a2a; border-radius:12px; padding:12px 16px; width:100%; outline:none;
+                          font-size:1rem; transition:border-color 0.2s"
+                   onfocus="this.style.borderColor='#8A9A5B'"
+                   onblur="this.style.borderColor='rgba(255,255,255,0.15)'" />
+        </div>
+        <div class="d-flex gap-3">
+            <button type="button" onclick="submitAddSlot()"
+                    class="btn-premium flex-grow-1" style="height:44px; border-radius:12px; border:none; cursor:pointer">
+                <i class="bi bi-plus-circle me-2"></i> CREATE SLOT
+            </button>
+            <button type="button" onclick="closeAddModal()"
+                    style="height:44px; padding:0 20px; border-radius:12px; border:1px solid rgba(255,255,255,0.15);
+                           background:transparent; color:#888; font-weight:700; cursor:pointer">
+                CANCEL
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // ── EDIT ROW ─────────────────────────────────────────
+        function openEditRow(slotId) {
+            const row = document.getElementById('row-' + slotId);
+            row.querySelectorAll('.view-mode').forEach(el => el.style.display = 'none');
+            row.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'table-cell');
+            row.style.background = 'rgba(138, 154, 91,0.04)';
+        }
+
+        function cancelEdit(slotId) {
+            const row = document.getElementById('row-' + slotId);
+            row.querySelectorAll('.view-mode').forEach(el => el.style.display = 'table-cell');
+            row.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'none');
+            row.style.background = '';
+        }
+
+        function saveEdit(slotId) {
+            const sst = document.getElementById('edit-start-' + slotId).value;
+            const set = document.getElementById('edit-end-'   + slotId).value;
+
+            if (!sst || !set) {
+                Swal.fire({ icon:'warning', title:'INCOMPLETE', text:'Please fill both start and end time.', background:'#1a1a1a', color:'#fff' });
+                return;
+            }
+
+            fetch('@Url.Action("EditSlot", "Slot")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `SlotId=${slotId}&SST=${encodeURIComponent(sst)}&SET=${encodeURIComponent(set)}`
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('start-display-' + slotId).textContent = data.start;
+                    document.getElementById('end-display-'   + slotId).textContent = data.end;
+                    cancelEdit(slotId);
+                    Swal.fire({ toast:true, position:'top-end', showConfirmButton:false, timer:2000, timerProgressBar:true,
+                        icon:'success', title:'Slot updated!', background:'#1a1a1a', color:'#55efc4' });
+                } else {
+                    Swal.fire({ icon:'error', title:'ERROR', text:data.message, background:'#1a1a1a', color:'#fff' });
+                }
+            });
+        }
+
+        // ── DELETE ───────────────────────────────────────────
+        function confirmDelete(slotId) {
+            Swal.fire({
+                title: 'DELETE SLOT?',
+                text: 'This lane will be decommissioned from the system.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff6b6b',
+                cancelButtonColor: '#2a2a2a',
+                confirmButtonText: 'YES, DELETE',
+                cancelButtonText: 'CANCEL',
+                background: '#1a1a1a',
+                color: '#fff',
+                iconColor: '#ff6b6b'
+            }).then(result => {
+                if (!result.isConfirmed) return;
+
+                fetch('@Url.Action("DeleteSlot", "Slot")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'SlotId=' + slotId
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        const row = document.getElementById('row-' + slotId);
+                        row.style.transition = 'opacity 0.4s, transform 0.4s';
+                        row.style.opacity    = '0';
+                        row.style.transform  = 'translateX(30px)';
+                        setTimeout(() => row.remove(), 420);
+                        Swal.fire({ toast:true, position:'top-end', showConfirmButton:false, timer:2000, timerProgressBar:true,
+                            icon:'success', title:'Slot deleted', background:'#1a1a1a', color:'#55efc4' });
+                    } else {
+                        Swal.fire({ icon:'error', title:'ERROR', text:data.message, background:'#1a1a1a', color:'#fff' });
+                    }
+                });
+            });
+        }
+
+        // ── ADD SLOT MODAL ───────────────────────────────────
+        function openAddModal() {
+            document.getElementById('addSlotModal').style.display = 'flex';
+        }
+        function closeAddModal() {
+            document.getElementById('addSlotModal').style.display = 'none';
+            document.getElementById('modal-start').value = '';
+            document.getElementById('modal-end').value   = '';
+        }
+        // Close on backdrop click
+        document.getElementById('addSlotModal').addEventListener('click', function(e) {
+            if (e.target === this) closeAddModal();
+        });
+
+        function submitAddSlot() {
+            const sst = document.getElementById('modal-start').value;
+            const set = document.getElementById('modal-end').value;
+
+            if (!sst || !set) {
+                Swal.fire({ icon:'warning', title:'INCOMPLETE', text:'Please fill both start and end time.', background:'#1a1a1a', color:'#fff' });
+                return;
+            }
+
+            // Submit via form POST (reuse existing AddSlot action)
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '@Url.Action("AddSlot", "Slot")';
+            form.innerHTML = `<input name="SST" value="${sst}"><input name="SET" value="${set}">`;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
+}
+

@@ -1,0 +1,48 @@
+@model ArcheryAlley.Models.BookingSlots
+
+<div class="container animate-in">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="text-center mb-5">
+                <h1 class="hero-title" style="font-size: 2.8rem;">NEW <span style="color: #2b3a2a">LANE SLOT</span></h1>
+                <p style="color: #b0b0b0">Configure your operations with precision.</p>
+            </div>
+
+            <div class="premium-card">
+                @if (ViewBag.ErrorMessage != null)
+                {
+                    <div class="alert alert-danger-custom mb-4">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewBag.ErrorMessage
+                    </div>
+                }
+
+                <form asp-action="AddSlot" method="post">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-uppercase" style="color: var(--primary); letter-spacing: 1px; font-size: 0.8rem">LANE START TIME</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-0">🕒</span>
+                            <input type="time" name="SST" class="form-control border-0 py-3" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-uppercase" style="color: var(--primary); letter-spacing: 1px; font-size: 0.8rem">LANE END TIME</label>
+                        <div class="input-group">
+                            <span class="input-group-text border-0">🔒</span>
+                            <input type="time" name="SET" class="form-control border-0 py-3" required />
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-5">
+                        <button type="submit" class="btn-premium py-3">Publish Slot</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="@Url.Action("ManageSlots", "Slot")" class="text-decoration-none" style="color: #6c757d; transition: 0.3s;"><i class="bi bi-arrow-left me-1"></i> Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+

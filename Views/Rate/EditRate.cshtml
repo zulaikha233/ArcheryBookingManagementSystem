@@ -1,0 +1,309 @@
+@model ArcheryAlley.Models.Rates
+@{
+    ViewBag.Title = "Edit Rate";
+
+    string catColor = Model.RateCategory switch
+    {
+        1 => "#8A9A5B",
+        2 => "#f9c74f",
+        3 => "#a29bfe",
+        4 => "#55efc4",
+        _ => "#aaa"
+    };
+
+    bool isFoc      = Model.RateCategory == 4;
+    bool isDiscount = Model.RateCategory == 2;
+    bool isNormal   = Model.RateCategory == 1 || Model.RateCategory == 3;
+
+    string catLabel = Model.RateCategory switch
+    {
+        1 => "Normal",
+        2 => "Discount",
+        3 => "Special",
+        4 => "FOC",
+        _ => "–"
+    };
+}
+
+<div class="container animate-in" style="max-width: 640px">
+
+    <!-- Back link -->
+    <a asp-action="ManageRates" class="text-decoration-none d-inline-flex align-items-center gap-2 mb-4"
+       style="color: #888; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.5px; transition: color 0.2s"
+       onmouseover="this.style.color='#8A9A5B'" onmouseout="this.style.color='#888'">
+        <i class="bi bi-arrow-left"></i> BACK TO MANAGE RATES
+    </a>
+
+    <!-- Header -->
+    <div class="mb-4">
+        <span id="headerCodeBadge" style="font-family: 'Courier New', monospace; font-size: 0.75rem; font-weight: 800;
+                     letter-spacing: 2px; color: @catColor; background: rgba(255,255,255,0.04);
+                     padding: 4px 14px; border-radius: 6px; border: 1px solid @catColor">
+            @Model.RateCode
+        </span>
+        <h1 class="hero-title mt-3" style="font-size: 2rem; margin: 0">
+            EDIT <span id="headerNameBadge" style="color: @catColor">@Model.RateName.ToUpper()</span>
+        </h1>
+        <p style="color: #888; margin-top: 6px">
+            Category: <strong style="color: @catColor">@catLabel</strong>
+        </p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="premium-card">
+        <form method="post" asp-action="EditRate" id="editRateForm">
+            <input type="hidden" name="RateId" value="@Model.RateId" />
+
+            <!-- Rate Code -->
+            <div class="mb-4">
+                <label for="rateCodeInput" style="color: #b0b0b0; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 8px">
+                    RATE CODE
+                </label>
+                <div style="position: relative">
+                    <input type="text" id="rateCodeInput" name="RateCode"
+                           value="@Model.RateCode"
+                           maxlength="20" required
+                           placeholder="e.g. DJOF23X"
+                           oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9\-]/g,''); document.getElementById('headerCodeBadge').textContent = this.value || 'CODE'"
+                           style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.15);
+                                  color: #2b3a2a; border-radius: 12px; padding: 12px 16px 12px 48px;
+                                  width: 100%; font-family: 'Courier New', monospace; font-size: 1rem;
+                                  font-weight: 700; letter-spacing: 2px; outline: none; transition: border-color 0.2s"
+                           onfocus="this.style.borderColor='@catColor'"
+                           onblur="this.style.borderColor='rgba(255,255,255,0.15)'" />
+                    <i class="bi bi-hash" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: @catColor; font-size: 1rem"></i>
+                </div>
+                <div style="color: #555; font-size: 0.78rem; margin-top: 6px">
+                    Letters, numbers and hyphens only. Max 20 characters.
+                </div>
+            </div>
+
+            <!-- Rate Name -->
+            <div class="mb-4">
+                <label for="rateNameInput" style="color: #b0b0b0; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 8px">
+                    RATE NAME
+                </label>
+                <div style="position: relative">
+                    <input type="text" id="rateNameInput" name="RateName"
+                           value="@Model.RateName"
+                           maxlength="100" required
+                           placeholder="e.g. Raya Promo"
+                           oninput="document.getElementById('headerNameBadge').textContent = (this.value || 'RATE').toUpperCase()"
+                           style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.15);
+                                  color: #2b3a2a; border-radius: 12px; padding: 12px 16px 12px 48px;
+                                  width: 100%; font-size: 1rem; outline: none; transition: border-color 0.2s"
+                           onfocus="this.style.borderColor='@catColor'"
+                           onblur="this.style.borderColor='rgba(255,255,255,0.15)'" />
+                    <i class="bi bi-tag" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: @catColor; font-size: 1rem"></i>
+                </div>
+            </div>
+
+            @if (isFoc)
+            {
+                <!-- FOC: nothing to edit for price, just show info -->
+                <div class="text-center py-4">
+                    <div style="font-size: 3rem; font-weight: 900; color: #55efc4; margin-bottom: 8px">FREE</div>
+                    <p style="color: #888">FOC rate is always RM 0.00. No price configuration needed.</p>
+                    <input type="hidden" name="BasePrice" value="0" />
+                    <input type="hidden" name="DiscountPercentage" value="100" />
+                </div>
+            }
+            else
+            {
+                <!-- Base Price -->
+                <div class="mb-4">
+                    <label for="basePrice" style="color: #b0b0b0; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 8px">
+                        BASE PRICE (RM)
+                    </label>
+                    <div class="input-group" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; overflow: hidden">
+                        <span style="background: transparent; border: none; color: @catColor; padding: 12px 16px; font-weight: 700; font-size: 1rem">RM</span>
+                        <input type="number" id="basePrice" name="BasePrice"
+                               value="@Model.BasePrice.ToString("F2")"
+                               step="0.50" min="0" required
+                               oninput="updatePreview()"
+                               style="background: transparent; border: none; color: #2b3a2a; font-size: 1rem; font-weight: 600; padding: 12px 16px; outline: none; width: 100%" />
+                    </div>
+                    <div style="color: #555; font-size: 0.78rem; margin-top: 6px">
+                        Default: Siang = RM 10.00 &nbsp;|&nbsp; Malam = RM 12.00
+                    </div>
+                </div>
+
+                <!-- Discount Percentage (all non-FOC categories) -->
+                <div class="mb-4">
+                    <label for="discountPct" style="color: #b0b0b0; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 8px">
+                        DISCOUNT (%)
+                    </label>
+                    <div style="display: flex; align-items: center; gap: 16px">
+                        <input type="range" id="discountSlider" min="0" max="100" step="1"
+                               value="@((int)(Model.DiscountPercentage ?? 0))"
+                               oninput="syncDiscount(this.value)"
+                               style="flex: 1; accent-color: #f9c74f; height: 6px; cursor: pointer" />
+                        <div class="input-group" style="width: 100px; background: rgba(255,255,255,0.04); border: 1px solid rgba(249,199,79,0.3); border-radius: 10px; overflow: hidden; flex-shrink: 0">
+                            <input type="number" id="discountPct" name="DiscountPercentage"
+                                   value="@((int)(Model.DiscountPercentage ?? 0))"
+                                   min="0" max="100" step="1" required
+                                   oninput="syncSlider(this.value)"
+                                   style="background: transparent; border: none; color: #f9c74f; font-size: 1rem; font-weight: 700; padding: 10px 8px; outline: none; width: 70%; text-align: right" />
+                            <span style="background: transparent; border: none; color: #f9c74f; font-weight: 700; padding: 10px 8px">%</span>
+                        </div>
+                    </div>
+                    <div style="color: #555; font-size: 0.78rem; margin-top: 6px">Set to 0 for no discount.</div>
+                </div>
+
+                @if (Model.RateCategory == 3)
+                {
+                    <!-- Promo Date Range (Special only) -->
+                    <div class="mb-4">
+                        <label style="color: #a29bfe; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 8px">
+                            <i class="bi bi-calendar-event me-1"></i> PROMO VALIDITY PERIOD
+                        </label>
+                        <div style="background: rgba(162,155,254,0.05); border: 1px solid rgba(162,155,254,0.2); border-radius: 14px; padding: 16px;">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <label style="color: #888; font-size: 0.75rem; letter-spacing: 1px; display: block; margin-bottom: 6px">VALID FROM</label>
+                                    <input type="date" name="ValidFrom"
+                                           value="@(Model.ValidFrom?.ToString("yyyy-MM-dd") ?? "")"
+                                           style="background: rgba(255,255,255,0.04); border: 1px solid rgba(162,155,254,0.3);
+                                                  color: #2b3a2a; border-radius: 10px; padding: 10px 14px; width: 100%; outline: none;"
+                                           onfocus="this.style.borderColor='#a29bfe'" onblur="this.style.borderColor='rgba(162,155,254,0.3)'" />
+                                </div>
+                                <div class="col-6">
+                                    <label style="color: #888; font-size: 0.75rem; letter-spacing: 1px; display: block; margin-bottom: 6px">VALID TO</label>
+                                    <input type="date" name="ValidTo"
+                                           value="@(Model.ValidTo?.ToString("yyyy-MM-dd") ?? "")"
+                                           style="background: rgba(255,255,255,0.04); border: 1px solid rgba(162,155,254,0.3);
+                                                  color: #2b3a2a; border-radius: 10px; padding: 10px 14px; width: 100%; outline: none;"
+                                           onfocus="this.style.borderColor='#a29bfe'" onblur="this.style.borderColor='rgba(162,155,254,0.3)'" />
+                                </div>
+                            </div>
+                            <div style="color: #666; font-size: 0.75rem; margin-top: 10px">
+                                <i class="bi bi-info-circle me-1"></i> Customer enters the Rate Code as promo during this period only. Leave blank for no expiry.
+                            </div>
+                        </div>
+                    </div>
+                }
+
+            } <!-- closes else (non-FOC) block -->
+
+            <!-- Active Status -->
+            <div class="mb-5">
+                <label style="color: #b0b0b0; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 12px">
+                    STATUS
+                </label>
+                <div class="d-flex gap-3">
+                    <label class="status-option" style="cursor: pointer">
+                        <input type="radio" name="IsActive" value="true" @(Model.IsActive ? "checked" : "") style="display: none"
+                               onchange="highlightStatus()" id="statusActive" />
+                        <div id="box-active"
+                             style="padding: 12px 24px; border-radius: 12px; border: 2px solid @(Model.IsActive ? "#55efc4" : "rgba(255,255,255,0.1)");
+                                    background: @(Model.IsActive ? "rgba(85,239,196,0.12)" : "rgba(255,255,255,0.04)");
+                                    color: @(Model.IsActive ? "#55efc4" : "#888"); font-weight: 700; font-size: 0.85rem;
+                                    letter-spacing: 0.5px; transition: all 0.2s; text-align: center">
+                            <i class="bi bi-check-circle me-1"></i> ACTIVE
+                        </div>
+                    </label>
+                    <label class="status-option" style="cursor: pointer">
+                        <input type="radio" name="IsActive" value="false" @(!Model.IsActive ? "checked" : "") style="display: none"
+                               onchange="highlightStatus()" id="statusInactive" />
+                        <div id="box-inactive"
+                             style="padding: 12px 24px; border-radius: 12px; border: 2px solid @(!Model.IsActive ? "#ff6b6b" : "rgba(255,255,255,0.1)");
+                                    background: @(!Model.IsActive ? "rgba(255,107,107,0.12)" : "rgba(255,255,255,0.04)");
+                                    color: @(!Model.IsActive ? "#ff6b6b" : "#888"); font-weight: 700; font-size: 0.85rem;
+                                    letter-spacing: 0.5px; transition: all 0.2s; text-align: center">
+                            <i class="bi bi-x-circle me-1"></i> INACTIVE
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            @if (!isFoc)
+            {
+                <!-- Live Preview -->
+                <div class="mb-5 p-4" style="background: rgba(255,255,255,0.03); border-radius: 14px; border: 1px dashed rgba(255,255,255,0.12)">
+                    <div style="color: #666; font-size: 0.78rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px">PRICE PREVIEW</div>
+                    <div id="pricePreview" style="font-size: 1.8rem; font-weight: 900; color: @catColor">
+                        RM @Model.FinalPrice.ToString("F2")
+                    </div>
+                    <div id="discountNote" style="color: #888; font-size: 0.82rem; margin-top: 4px">
+                        @(isDiscount && Model.DiscountPercentage > 0 ? $"{Model.DiscountPercentage}% discount on base RM {Model.BasePrice:F2}" : "")
+                    </div>
+                </div>
+            }
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-3">
+                <button type="submit" class="btn-premium flex-grow-1"
+                        style="height: 48px; font-size: 0.9rem; border-radius: 14px">
+                    <i class="bi bi-floppy me-2"></i> SAVE CHANGES
+                </button>
+                <a asp-action="ManageRates"
+                   style="height: 48px; padding: 0 24px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.15);
+                          background: transparent; color: #888; font-weight: 700; font-size: 0.9rem;
+                          display: flex; align-items: center; text-decoration: none; transition: all 0.2s"
+                   onmouseover="this.style.borderColor='#8A9A5B'; this.style.color='#8A9A5B'"
+                   onmouseout="this.style.borderColor='rgba(255,255,255,0.15)'; this.style.color='#888'">
+                    CANCEL
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Sync slider ↔ input
+        function syncDiscount(val) {
+            const input = document.getElementById('discountPct');
+            if (input) { input.value = val; updatePreview(); }
+        }
+        function syncSlider(val) {
+            const slider = document.getElementById('discountSlider');
+            if (slider) { slider.value = val; updatePreview(); }
+        }
+
+        function updatePreview() {
+            const base  = parseFloat(document.getElementById('basePrice')?.value || 0);
+            const disc  = parseFloat(document.getElementById('discountPct')?.value || 0);
+            const final = disc > 0 ? base * (1 - disc / 100) : base;
+
+            const preview = document.getElementById('pricePreview');
+            const note    = document.getElementById('discountNote');
+
+            if (preview) preview.textContent = 'RM ' + final.toFixed(2);
+            if (note)    note.textContent    = disc > 0 ? `${disc}% discount · RM ${base.toFixed(2)} → RM ${final.toFixed(2)}` : '';
+        }
+
+        // Status radio highlight
+        function highlightStatus() {
+            const activeChecked = document.getElementById('statusActive').checked;
+
+            const boxActive   = document.getElementById('box-active');
+            const boxInactive = document.getElementById('box-inactive');
+
+            if (activeChecked) {
+                boxActive.style.borderColor   = '#55efc4';
+                boxActive.style.background    = 'rgba(85,239,196,0.12)';
+                boxActive.style.color         = '#55efc4';
+                boxInactive.style.borderColor = 'rgba(255,255,255,0.1)';
+                boxInactive.style.background  = 'rgba(255,255,255,0.04)';
+                boxInactive.style.color       = '#888';
+            } else {
+                boxInactive.style.borderColor = '#ff6b6b';
+                boxInactive.style.background  = 'rgba(255,107,107,0.12)';
+                boxInactive.style.color       = '#ff6b6b';
+                boxActive.style.borderColor   = 'rgba(255,255,255,0.1)';
+                boxActive.style.background    = 'rgba(255,255,255,0.04)';
+                boxActive.style.color         = '#888';
+            }
+        }
+
+        // Make the whole label box clickable
+        document.querySelectorAll('.status-option').forEach(label => {
+            label.addEventListener('click', () => {
+                const radio = label.querySelector('input[type="radio"]');
+                radio.checked = true;
+                highlightStatus();
+            });
+        });
+    </script>
+}

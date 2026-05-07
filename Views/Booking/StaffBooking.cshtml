@@ -1,0 +1,951 @@
+@{
+    ViewData["Title"] = "Staff Slot Booking";
+}
+
+<div class="booking-wizard-container animate-fade-in">
+    <!-- Progress Header -->
+    <div class="wizard-header text-center mb-5">
+        <h1 class="wizard-title">SLOT <span>RESERVATION</span></h1>
+        <div class="step-indicator">
+            <div class="step active" id="step1-indicator"><span>1</span><p>Details</p></div>
+            <div class="step-line"></div>
+            <div class="step" id="step2-indicator"><span>2</span><p>Lane</p></div>
+            <div class="step-line"></div>
+            <div class="step" id="step3-indicator"><span>3</span><p>Slot Pay</p></div>
+        </div>
+    </div>
+
+    <!-- Step 1: Customer Info & Session -->
+    <div class="wizard-step active" id="wizard-step-1">
+        <div class="glass-card main-booking-card p-0">
+            <div class="wizard-grid-layout">
+                <!-- Column 1 -->
+                <div class="wizard-column">
+                    <div class="p-4 mb-3 rounded-3" style="background: #8A9A5B; border-bottom: 1px solid rgba(0,0,0,0.2); margin: 0rem 0rem 1rem 0rem; color: #000000;">
+                         <p class="mb-1" style="font-size: 0.75rem; color: #000000; letter-spacing: 1px; font-weight: 600;">STAFF OPERATOR</p>
+                         <h5 class="text-dark mb-2 font-weight-bold" style="letter-spacing: 0.5px;">@(ViewBag.StaffName ?? "Staff")</h5>
+                         
+                         <div class="mt-4 pt-3" style="border-top: 1px solid rgba(0,0,0,0.2);">
+                             <label class="form-label-premium" style="color: #000000;">Customer Name</label>
+                             <input type="text" id="customerName" class="form-control-premium mb-3" placeholder="Enter Full Name">
+                             
+                             <label class="form-label-premium" style="color: #000000;">Customer Email</label>
+                             <input type="email" id="customerEmail" class="form-control-premium" placeholder="customer@example.com">
+                         </div>
+                    </div>
+
+                    <div class="session-group px-4 pb-4">
+                        <h5 class="session-label">&#9728; Morning Session</h5>
+                        <div id="morning-slots" class="slots-grid"></div>
+                    </div>
+                </div>
+
+                <!-- Column 2 -->
+                <div class="wizard-column">
+                    <div class="form-group p-4 pb-0">
+                        <label class="form-label-premium">Booking Date</label>
+                        <input type="date" id="bookingDate" class="form-control-premium" value="@DateTime.Today.ToString("yyyy-MM-dd")">
+                    </div>
+
+                    <div class="form-group p-4 pt-0">
+                        <label class="form-label-premium">Duration</label>
+                        <select id="duration" class="form-control-premium">
+                            <option value="1">1 Hour</option>
+                            <option value="2">2 Hours</option>
+                            <option value="3">3 Hours</option>
+                            <option value="4">4 Hours</option>
+                        </select>
+                    </div>
+
+                    <div class="session-group px-4 pb-4">
+                        <h5 class="session-label">&#127769; Night Session</h5>
+                        <div id="night-slots" class="slots-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wizard-actions px-5 pb-5">
+                <div id="slot-hint" class="text-center mb-3 fw-bold" style="color: var(--active-blue); display:none;"></div>
+                <button class="btn-premium w-100" onclick="goToStep2()">Next: Select Target <i class="bi bi-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: Lane & Range Selection -->
+    <div class="wizard-step" id="wizard-step-2">
+        <div class="glass-card">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h3 class="step-title">Select Target Lane</h3>
+                    <div class="pax-group form-group mb-4 p-4 glass-card text-center" style="border: 1px solid var(--active-blue);">
+                        <label class="form-label-premium mb-3">How many archers? (Max 4 pax per lane)</label>
+                        <div class="counter-input-container mx-auto">
+                            <button type="button" class="counter-btn" onclick="updatePax(-1)"><i class="bi bi-dash-lg"></i></button>
+                            <input type="number" id="paxCount" class="counter-input" value="1" min="1" max="20" onchange="calculateTargetsNeeded()">
+                            <button type="button" class="counter-btn" onclick="updatePax(1)"><i class="bi bi-plus-lg"></i></button>
+                        </div>
+                        <div id="target-hint" class="mt-3 fw-bold" style="color: var(--active-blue);">Please select 1 lane.</div>
+                    </div>
+                    
+                    <div id="targetsGrid" class="targets-grid">
+                        <!-- 20 Targets will be generated here -->
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="info-sidebar">
+                        <h3 class="step-title" style="margin-bottom: 5px;">Lane Configurations</h3>
+                        <p class="text-muted small mb-4" style="font-style: italic;">Choose your preference range.</p>
+                        <div id="lane-config-container">
+                            <p class="text-muted small">Select lanes to configure their target distances.</p>
+                        </div>
+                        
+                        <div class="price-summary-card mt-4">
+                             <p>Total Charge</p>
+                             <h2 id="summaryPrice">RM 0.00</h2>
+                             <small id="priceTypeHint" class="text-info"></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wizard-actions mt-5">
+                <button class="btn-premium-outline" onclick="goToStep1()">Back</button>
+                <button class="btn-premium" onclick="goToStep3()">Review Slot Summary</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 3: Slot Confirmation -->
+    <div class="wizard-step" id="wizard-step-3">
+        <div class="glass-card">
+            <h3 class="step-title">Slot Review & Confirmation</h3>
+            <div class="row">
+                <div class="col-md-7">
+                    <div class="review-details">
+                        <div class="review-item">
+                            <span>Customer Name</span>
+                            <strong id="revName"></strong>
+                        </div>
+                        <div class="review-item">
+                            <span>Customer Email</span>
+                            <strong id="revEmail"></strong>
+                        </div>
+                        <div class="review-item">
+                            <span>Date</span>
+                            <strong id="revDate"></strong>
+                        </div>
+                        <div class="review-item">
+                            <span>Session/Time</span>
+                            <strong id="revTime"></strong>
+                        </div>
+                        <div class="review-item">
+                            <span>Lanes</span>
+                            <strong id="revLanes"></strong>
+                        </div>
+                        <div class="review-item">
+                            <span>Archers</span>
+                            <strong id="revPax"></strong>
+                        </div>
+                        <div class="review-item">
+                            <span>Voucher Applied</span>
+                            <strong id="revRate" style="color: #f9c74f">—</strong>
+                        </div>
+                        <div class="review-item highlight mt-3">
+                            <span>Total Due</span>
+                            <strong id="revPrice"></strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="p-4 glass-card" style="border: 1px solid rgba(138, 154, 91,0.2);">
+                        <h5 class="mb-3 text-info">Rate Selection</h5>
+                        <div class="mb-4">
+                            <label class="form-label-premium">Promo Code</label>
+                            <select id="rateSelect" class="form-control-premium" onchange="onRateChanged()">
+                                <option value="">Loading rates...</option>
+                            </select>
+                            <div id="rateDescription" style="color:#888; font-size:0.78rem; margin-top:8px"></div>
+                        </div>
+
+                        <h5 class="mb-3 text-info">Payment Method</h5>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="posPayment" id="payCash" value="Cash" checked>
+                            <label class="form-check-label text-dark" for="payCash">Cash Payment</label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="posPayment" id="payCard" value="Card">
+                            <label class="form-check-label text-dark" for="payCard">Terminal Card (Manual)</label>
+                        </div>
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="radio" name="posPayment" id="payQR" value="QR">
+                            <label class="form-check-label text-dark" for="payQR">QR / E-Wallet</label>
+                        </div>
+                        
+                        <button class="btn-premium w-100" id="confirmPosBtn" onclick="finalizeStaffBooking()">Confirm & Complete Booking</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wizard-actions mt-5">
+                <button class="btn-premium-outline" onclick="goBackToStep2()">Back to Lane Selection</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="custom-modal-overlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 1000;">
+    <div class="custom-modal" style="background: rgba(20,22,35,0.9); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 50px; text-align: center; color: #2b3a2a;">
+        <div class="success-icon" style="width: 80px; height: 80px; border-radius: 50%; background: #8A9A5B; color: black; font-size: 40px; line-height: 80px; margin: 0 auto 20px;">✓</div>
+        <h3 class="mb-2">Booking Completed!</h3>
+        <p class="text-muted">The reservation has been added to the system.</p>
+    </div>
+</div>
+
+<style>
+    :root {
+        --active-blue: #8A9A5B;
+        --deep-blue: #6D7B48;
+        --glass: #A9BA9D;
+        --glass-border: rgba(255, 255, 255, 0.08);
+        --text-muted: #8e92a6;
+    }
+
+    body {
+        background: #ECE7CA !important;
+        font-family: 'Outfit', sans-serif;
+        color: #2b3a2a;
+    }
+
+    .booking-wizard-container {
+        max-width: 1300px;
+        margin: 50px auto;
+        padding: 0 20px;
+    }
+
+    .wizard-title {
+        font-weight: 800;
+        font-size: 3rem;
+        letter-spacing: -1px;
+        margin-bottom: 2rem;
+    }
+
+    .wizard-title span {
+        background: linear-gradient(to right, var(--active-blue), var(--deep-blue));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* Progress Indicator */
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 40px;
+    }
+
+    .step {
+        text-align: center;
+        opacity: 0.4;
+        transition: 0.3s;
+    }
+
+    .step.active { opacity: 1; }
+
+    .step span {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 50%;
+        margin: 0 auto 8px;
+        font-weight: bold;
+    }
+
+    .step.active span {
+        background: linear-gradient(45deg, var(--active-blue), var(--deep-blue));
+        color: black;
+        border: none;
+        box-shadow: 0 0 20px rgba(138, 154, 91, 0.3);
+    }
+
+    .step p { font-size: 0.8rem; text-transform: uppercase; margin: 0; letter-spacing: 1px; }
+
+    .step-line {
+        width: 60px;
+        height: 1px;
+        background: var(--glass-border);
+        margin-top: -20px;
+    }
+
+    /* Cards */
+    .glass-card {
+        background: var(--glass);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 30px;
+        padding: 3rem;
+    }
+
+    .wizard-step { display: none; }
+    .wizard-step.active { display: block; animation: slideIn 0.5s ease; }
+
+    /* Forms */
+    .form-label-premium {
+        display: block;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+
+    .form-control-premium {
+        background: #ffffff !important;
+        border: 1px solid var(--glass-border) !important;
+        color: #2b3a2a !important;
+        border-radius: 12px !important;
+        padding: 12px 20px !important;
+        width: 100%;
+        transition: 0.3s;
+    }
+
+    .form-control-premium option {
+        background: #ECE7CA;
+        color: #2b3a2afff;
+    }
+
+    .form-control-premium:focus {
+        border-color: var(--active-blue) !important;
+        box-shadow: 0 0 15px rgba(138, 154, 91, 0.1) !important;
+        outline: none;
+    }
+
+    /* Unified Grid Layout */
+    .wizard-grid-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        padding: 40px;
+    }
+
+    .wizard-column {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    .session-group {
+        margin-top: 20px;
+    }
+
+    .session-label {
+        font-size: 0.8rem;
+        color: var(--active-blue);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 20px;
+        font-weight: 700;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(138, 154, 91, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .slots-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .slot-card {
+        background: #ddead1;
+        border: 1px solid var(--glass-border);
+        border-radius: 18px;
+        padding: 22px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .slot-card:hover { 
+        border-color: var(--active-blue); 
+        background: rgba(138, 154, 91, 0.1);
+        transform: scale(1.02);
+    }
+
+    .slot-card.selected {
+        background: linear-gradient(135deg, var(--active-blue), var(--deep-blue)) !important;
+        color: black !important;
+        border: none;
+        box-shadow: 0 10px 25px rgba(138, 154, 91, 0.4);
+    }
+
+    .slot-number { 
+        display: block; 
+        font-size: 0.8rem; 
+        text-transform: uppercase; 
+        font-weight: 800;
+        opacity: 0.7;
+        margin-bottom: 8px;
+    }
+
+    .slot-time { 
+        display: block; 
+        font-size: 1.3rem; 
+        font-weight: 800;
+        letter-spacing: 0.5px;
+    }
+
+    /* Targets Grid */
+    .targets-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .target-box {
+        aspect-ratio: 1;
+        background: #ddead1;
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .target-box:hover:not(.disabled) { border-color: var(--active-blue); scale: 1.05; }
+    .target-box.selected { background: var(--active-blue); color: black; border: none; font-weight: 800; }
+    .target-box.disabled { opacity: 0.2; cursor: not-allowed; background: transparent; filter: grayscale(1); }
+
+    .target-num { font-size: 1.5rem; }
+    .target-label { font-size: 0.6rem; text-transform: uppercase; }
+
+    /* Price Summary Card */
+    .price-summary-card {
+        background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(138, 154, 91, 0.1) 100%);
+        border-radius: 20px;
+        padding: 20px;
+        border: 1px solid rgba(138, 154, 91, 0.2);
+    }
+
+    .price-summary-card p { margin: 0; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; }
+    .price-summary-card h2 { margin: 5px 0; font-weight: 800; color: var(--active-blue); }
+
+    /* Buttons */
+    .btn-premium {
+        background: linear-gradient(to right, var(--active-blue), var(--deep-blue));
+        border: none;
+        color: black;
+        padding: 14px 30px;
+        border-radius: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: 0.3s;
+    }
+
+    .btn-premium:hover { scale: 1.03; box-shadow: 0 10px 30px rgba(138, 154, 91, 0.3); }
+
+    .btn-premium-outline {
+        background: transparent;
+        border: 1px solid var(--glass-border);
+        color: #2b3a2a;
+        padding: 14px 30px;
+        border-radius: 12px;
+        font-weight: bold;
+        margin-right: 15px;
+    }
+
+    /* Review details */
+    .review-details {
+        background: rgba(255,255,255,0.02);
+        border-radius: 20px;
+        padding: 20px;
+    }
+
+    .review-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .review-item:last-child { border: none; }
+    .review-item span { color: var(--text-muted); text-transform: uppercase; font-size: 0.8rem; }
+    .review-item strong { color: #2b3a2a; }
+    .review-item.highlight strong { color: var(--active-blue); font-size: 1.5rem; }
+
+    /* Animations */
+    @@keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+    .animate-fade-in { animation: fadeIn 0.8s ease-out; }
+    @@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* Counter Input */
+    .counter-input-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--active-blue);
+        border-radius: 15px;
+        width: 180px;
+        padding: 5px;
+        box-shadow: 0 0 15px rgba(138, 154, 91, 0.1);
+    }
+
+    .counter-btn {
+        background: transparent;
+        border: none;
+        color: #2b3a2a;
+        font-size: 1.5rem;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        transition: 0.2s;
+    }
+
+    .counter-btn:hover {
+        background: rgba(138, 154, 91, 0.2);
+        color: var(--active-blue);
+    }
+
+    .counter-input {
+        background: transparent;
+        border: none;
+        color: #2b3a2a;
+        font-size: 1.3rem;
+        font-weight: bold;
+        text-align: center;
+        width: 60px;
+        outline: none;
+    }
+</style>
+
+<script>
+    let bookingData = {
+        name: "",
+        email: "",
+        date: "@DateTime.Today.ToString("yyyy-MM-dd")",
+        duration: 1,
+        selectedSlotIds: [],
+        slotId: null,
+        slotTime: "",
+        isNightSlot: false,
+        paxCount: 1,
+        targetsNeeded: 1,
+        selectedTargetIds: [],
+        laneRanges: {},
+        totalPrice: 0,
+        allAvailableSlots: [],
+        allRates: [],
+        selectedRate: null
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadSlots();
+        loadAllRates();
+
+        document.getElementById("bookingDate").addEventListener("change", (e) => {
+            bookingData.date = e.target.value;
+            bookingData.selectedSlotIds = [];
+            loadSlots();
+        });
+
+        document.getElementById("duration").addEventListener("change", (e) => {
+            bookingData.duration = parseInt(e.target.value);
+            bookingData.selectedSlotIds = [];
+            document.querySelectorAll(".slot-card").forEach(c => c.classList.remove("selected"));
+            calculatePrice();
+        });
+    });
+
+    // ── RATE LOADING ─────────────────────────────────────
+    async function loadAllRates() {
+        try {
+            const resp = await fetch('/Rate/GetActiveRates');
+            bookingData.allRates = await resp.json();
+        } catch (e) {
+            console.error('Failed to load rates', e);
+        }
+    }
+
+    function populateRateDropdown() {
+        const sel = document.getElementById('rateSelect');
+        if (!sel) return;
+
+        // sessionType: 1=Siang, 2=Malam, 0=All
+        const sessionType = bookingData.isNightSlot ? 2 : 1;
+        const relevant = bookingData.allRates.filter(r => r.sessionType === sessionType || r.sessionType === 0);
+
+        sel.innerHTML = '';
+        if (relevant.length === 0) {
+            sel.innerHTML = '<option value="">No active rates available</option>';
+            return;
+        }
+
+        relevant.forEach(r => {
+            const opt = document.createElement('option');
+            opt.value = r.rateId;
+            opt.dataset.price    = r.finalPrice;
+            opt.dataset.code     = r.rateCode;
+            opt.dataset.name     = r.rateName;
+            opt.dataset.discount = r.discountPct ?? '';
+            opt.textContent = `[${r.rateCode}] ${r.rateName} — RM ${parseFloat(r.finalPrice).toFixed(2)}/hr`;
+            sel.appendChild(opt);
+        });
+
+        // Auto-select first option and trigger calculation
+        onRateChanged();
+    }
+
+    function onRateChanged() {
+        const sel = document.getElementById('rateSelect');
+        if (!sel || sel.options.length === 0 || !sel.value) return;
+
+        const opt = sel.options[sel.selectedIndex];
+        const pricePerHour = parseFloat(opt.dataset.price);
+        const discount     = opt.dataset.discount ? parseFloat(opt.dataset.discount) : null;
+
+        bookingData.selectedRate = {
+            id:       parseInt(sel.value),
+            code:     opt.dataset.code,
+            name:     opt.dataset.name,
+            price:    pricePerHour,
+            discount: discount
+        };
+
+        // Update description hint
+        const desc = document.getElementById('rateDescription');
+        if (desc) {
+            let txt = `RM ${pricePerHour.toFixed(2)} per hour`;
+            if (discount !== null && discount > 0) txt += ` · ${discount}% discount applied`;
+            if (pricePerHour === 0) txt = 'Free of Charge (FOC) — RM 0.00';
+            desc.textContent = txt;
+        }
+
+        applyRateToPrice();
+    }
+
+    // ── SLOTS ─────────────────────────────────────────────
+    async function loadSlots() {
+        const morningGrid = document.getElementById("morning-slots");
+        const nightGrid = document.getElementById("night-slots");
+        
+        morningGrid.innerHTML = "Loading...";
+        nightGrid.innerHTML = "Loading...";
+        
+        try {
+            const response = await fetch(`/Booking/GetAvailableSlotsAjax?date=${bookingData.date}`);
+            const slots = await response.json();
+            
+            morningGrid.innerHTML = "";
+            nightGrid.innerHTML = "";
+            bookingData.allAvailableSlots = slots;
+
+            slots.forEach(slot => {
+                const card = document.createElement("div");
+                card.className = "slot-card";
+                card.id = `slot-${slot.slotId}`;
+                card.onclick = () => selectSlot(slot);
+                
+                card.innerHTML = `
+                    <span class="slot-number">${slot.label}</span>
+                    <span class="slot-time">${slot.slotStartTime} - ${slot.slotEndTime}</span>
+                `;
+
+                if (slot.isNight) nightGrid.appendChild(card);
+                else morningGrid.appendChild(card);
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    function selectSlot(slot) {
+        const duration = bookingData.duration;
+        const index = bookingData.selectedSlotIds.indexOf(slot.slotId);
+
+        if (index > -1) {
+            bookingData.selectedSlotIds.splice(index, 1);
+        } else {
+            if (bookingData.selectedSlotIds.length >= duration) {
+                alert(`Limit reached for ${duration} hours.`);
+                return;
+            }
+            bookingData.selectedSlotIds.push(slot.slotId);
+        }
+
+        document.querySelectorAll(".slot-card").forEach(c => c.classList.remove("selected"));
+        bookingData.selectedSlotIds.forEach(id => {
+            const el = document.getElementById(`slot-${id}`);
+            if (el) el.classList.add("selected");
+        });
+
+        if (bookingData.selectedSlotIds.length > 0) {
+            bookingData.selectedSlotIds.sort((a, b) => a - b);
+            const startId  = bookingData.selectedSlotIds[0];
+            const startObj = bookingData.allAvailableSlots.find(s => s.slotId === startId);
+            bookingData.slotId       = startId;
+            bookingData.slotTime     = startObj.slotStartTime;
+            bookingData.isNightSlot  = startObj.isNight;
+        } else {
+            bookingData.slotId      = null;
+            bookingData.slotTime    = "";
+            bookingData.isNightSlot = false;
+        }
+
+        calculatePrice();
+    }
+
+    // ── PRICE CALCULATION ────────────────────────────────
+    function calculatePrice() {
+        if (!bookingData.slotTime) {
+            document.getElementById("summaryPrice").innerText = "RM 0.00";
+            document.getElementById("priceTypeHint").innerText = "";
+            return;
+        }
+
+        // Fallback hardcoded rate if rates not loaded yet
+        const hour      = parseInt(bookingData.slotTime.split(":")[0]);
+        const isNight   = bookingData.isNightSlot;
+        const fallback  = isNight ? 12 : 10;
+
+        // Use selectedRate if available, else fallback
+        const pricePerHour = (bookingData.selectedRate) ? bookingData.selectedRate.price : fallback;
+        bookingData.totalPrice = pricePerHour * bookingData.duration;
+
+        document.getElementById("summaryPrice").innerText = `RM ${bookingData.totalPrice.toFixed(2)}`;
+        document.getElementById("priceTypeHint").innerText = isNight ? "Night Session" : "Morning Session";
+    }
+
+    function applyRateToPrice() {
+        if (!bookingData.slotTime || !bookingData.selectedRate) return;
+        const pricePerHour    = bookingData.selectedRate.price;
+        bookingData.totalPrice = pricePerHour * bookingData.duration;
+
+        document.getElementById("summaryPrice").innerText = `RM ${bookingData.totalPrice.toFixed(2)}`;
+        document.getElementById("revPrice").innerText     = `RM ${bookingData.totalPrice.toFixed(2)}`;
+        const revRate = document.getElementById('revRate');
+        if (revRate) revRate.innerText = `[${bookingData.selectedRate.code}] ${bookingData.selectedRate.name}`;
+    }
+
+    async function goToStep2() {
+        bookingData.name = document.getElementById("customerName").value;
+        bookingData.email = document.getElementById("customerEmail").value;
+
+        if (!bookingData.name || !bookingData.email || bookingData.selectedSlotIds.length < bookingData.duration) {
+            alert("Please complete customer details and select slots.");
+            return;
+        }
+
+        const grid = document.getElementById("targetsGrid");
+        grid.innerHTML = "Loading lanes...";
+
+        document.getElementById("wizard-step-1").classList.remove("active");
+        document.getElementById("wizard-step-2").classList.add("active");
+        document.getElementById("step2-indicator").classList.add("active");
+
+        try {
+            const resp = await fetch(`/Booking/GetAvailableTargetsAjax?slotId=${bookingData.slotId}&date=${bookingData.date}&duration=${bookingData.duration}`);
+            const availableTargets = await resp.json();
+            
+            grid.innerHTML = "";
+            for(let i=1; i<=20; i++) {
+                const box = document.createElement("div");
+                const isTaken = !availableTargets.includes(i);
+                box.className = `target-box ${isTaken ? 'disabled' : ''}`;
+                box.id = `target-${i}`;
+                if(!isTaken) box.onclick = () => selectTarget(i);
+
+                box.innerHTML = `
+                    <span class="target-num">${i}</span>
+                    <span class="target-label">${isTaken ? 'Occupied' : 'Open'}</span>
+                `;
+                grid.appendChild(box);
+            }
+            calculateTargetsNeeded();
+        } catch (e) {
+            grid.innerHTML = "Error loading lanes.";
+        }
+    }
+
+    function updatePax(change) {
+        const input = document.getElementById("paxCount");
+        let val = parseInt(input.value) || 1;
+        val += change;
+        if (val < 1) val = 1;
+        if (val > 20) val = 20;
+        input.value = val;
+        calculateTargetsNeeded();
+    }
+
+    function calculateTargetsNeeded() {
+        const pax = parseInt(document.getElementById("paxCount").value);
+        bookingData.paxCount = pax;
+        bookingData.targetsNeeded = Math.ceil(pax / 4);
+        
+        bookingData.selectedTargetIds = [];
+        bookingData.laneRanges = {};
+        document.querySelectorAll(".target-box").forEach(b => b.classList.remove("selected"));
+
+        const hint = document.getElementById("target-hint");
+        hint.innerText = `Need ${bookingData.targetsNeeded} lane(s) for ${pax} archers.`;
+        renderLaneConfigs();
+    }
+
+    function selectTarget(num) {
+        const needed = bookingData.targetsNeeded;
+        const index = bookingData.selectedTargetIds.indexOf(num);
+
+        if (index > -1) {
+            bookingData.selectedTargetIds.splice(index, 1);
+            delete bookingData.laneRanges[num];
+        } else {
+            if (bookingData.selectedTargetIds.length >= needed) {
+                alert(`You only need ${needed} lane(s).`);
+                return;
+            }
+            bookingData.selectedTargetIds.push(num);
+            bookingData.laneRanges[num] = 1;
+        }
+
+        document.querySelectorAll(".target-box").forEach(b => b.classList.remove("selected"));
+        bookingData.selectedTargetIds.forEach(id => {
+            document.getElementById(`target-${id}`).classList.add("selected");
+        });
+        
+        renderLaneConfigs();
+    }
+
+    function renderLaneConfigs() {
+        const container = document.getElementById("lane-config-container");
+        if (bookingData.selectedTargetIds.length === 0) {
+            container.innerHTML = "<p class='text-muted small'>Select lanes to configure.</p>";
+            return;
+        }
+
+        let html = "";
+        bookingData.selectedTargetIds.forEach(id => {
+            const currentRange = bookingData.laneRanges[id] || 1;
+            html += `
+                <div class="mb-3 p-3 glass-card" style="border: 1px solid var(--active-blue);">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Lane #${id}</span>
+                        <span>${currentRange * 5}m</span>
+                    </div>
+                    <select class="form-control-premium" onchange="updateLaneRange(${id}, this.value)">
+                        ${[1,2,3,4,5,6,7,8].map(r => `<option value="${r}" ${currentRange == r ? 'selected' : ''}>Range ${r} (${r*5}m)</option>`).join('')}
+                    </select>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    function updateLaneRange(laneId, rangeId) {
+        bookingData.laneRanges[laneId] = parseInt(rangeId);
+    }
+
+    function goToStep1() {
+        document.getElementById("wizard-step-2").classList.remove("active");
+        document.getElementById("wizard-step-1").classList.add("active");
+        document.getElementById("step2-indicator").classList.remove("active");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Dedicated back function: Step 3 → Step 2
+    function goBackToStep2() {
+        document.getElementById("wizard-step-3").classList.remove("active");
+        document.getElementById("wizard-step-2").classList.add("active");
+        document.getElementById("step3-indicator").classList.remove("active");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function goToStep3() {
+        if (bookingData.selectedTargetIds.length < bookingData.targetsNeeded) {
+            alert("Please select enough lanes.");
+            return;
+        }
+
+        document.getElementById("wizard-step-2").classList.remove("active");
+        document.getElementById("wizard-step-3").classList.add("active");
+        document.getElementById("step3-indicator").classList.add("active");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Fill review
+        const formattedDate = new Date(bookingData.date + 'T00:00:00').toLocaleDateString('en-US', {
+            weekday: 'long', year: 'numeric', month: 'long', day: '2-digit'
+        });
+        document.getElementById("revName").innerText  = bookingData.name;
+        document.getElementById("revEmail").innerText = bookingData.email;
+        document.getElementById("revDate").innerText  = formattedDate;
+        document.getElementById("revTime").innerText  = `${bookingData.slotTime} (${bookingData.duration} hrs)`;
+        document.getElementById("revLanes").innerText = bookingData.selectedTargetIds.join(", ");
+        document.getElementById("revPax").innerText   = `${bookingData.paxCount} Archers`;
+
+        // Always re-fetch rates fresh (server checks DateTime.Today for Special rates)
+        await loadAllRates();
+        populateRateDropdown();
+    }
+
+    async function finalizeStaffBooking() {
+        const btn = document.getElementById("confirmPosBtn");
+        btn.disabled = true;
+        btn.innerText = "Processing Reservation...";
+
+        // Validate rate selection
+        if (!bookingData.selectedRate) {
+            alert("Please select a rate before confirming.");
+            btn.disabled = false;
+            btn.innerText = "Confirm & Complete Booking";
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("SlotId", bookingData.slotId);
+        formData.append("CustomerName", bookingData.name);
+        formData.append("CustomerEmail", bookingData.email);
+        formData.append("TargetNo", bookingData.selectedTargetIds[0]);
+        formData.append("RangeNo", "1");
+        formData.append("Duration", bookingData.duration);
+        formData.append("TotalPrice", bookingData.totalPrice);
+        formData.append("SelectedLanes", bookingData.selectedTargetIds.join(", "));
+        formData.append("RateCode", bookingData.selectedRate.code);
+        
+        const laneRangesStr = bookingData.selectedTargetIds.map(id => `${id}:${bookingData.laneRanges[id]}`).join(",");
+        formData.append("SelectedLaneRanges", laneRangesStr);
+        formData.append("NumberOfPax", bookingData.paxCount);
+
+        try {
+            const response = await fetch('/Booking/CreateCustomerBooking', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                document.getElementById('successModal').style.display = 'flex';
+                setTimeout(() => {
+                    window.location.href = "/Booking/BookingHistory";
+                }, 2000);
+            } else {
+                alert("Booking failed: " + result.message);
+                btn.disabled = false;
+                btn.innerText = "Confirm & Complete Booking";
+            }
+        } catch (err) {
+            alert("Error connecting to server.");
+            btn.disabled = false;
+        }
+    }
+</script>
+

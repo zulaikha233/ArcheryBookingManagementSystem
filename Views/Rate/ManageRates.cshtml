@@ -1,0 +1,295 @@
+@model List<ArcheryAlley.Models.Rates>
+@{
+    ViewBag.Title = "Manage Rates";
+
+    string CategoryLabel(int cat) => cat switch
+    {
+        1 => "Normal",
+        2 => "Discount",
+        3 => "Special",
+        4 => "FOC",
+        _ => "–"
+    };
+
+    string CategoryColor(int cat) => cat switch
+    {
+        1 => "#27ae60", // Bold Green
+        2 => "#f39c12", // Bold Orange/Yellow
+        3 => "#8e44ad", // Bold Purple
+        4 => "#16a085", // Bold Teal
+        _ => "#7f8c8d"
+    };
+
+    string SessionLabel(int s) => s switch
+    {
+        1 => "Siang",
+        2 => "Malam",
+        0 => "All",
+        _ => "–"
+    };
+
+    string SessionColor(int s) => s switch
+    {
+        1 => "#e67e22", // Bold Orange
+        2 => "#2980b9", // Bold Blue
+        0 => "#27ae60", // Bold Green
+        _ => "#7f8c8d"
+    };
+}
+
+<div class="container animate-in">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="hero-title" style="font-size: 2.5rem; margin: 0">
+                RATE <span style="color: #f9c74f">MANAGEMENT</span>
+            </h1>
+            <p style="color: #b0b0b0">Configure pricing rates for archery session bookings.</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <a asp-action="AddRate"
+               class="btn-premium text-decoration-none d-inline-flex align-items-center justify-content-center"
+               style="height: 45px; padding: 0 25px; border-radius: 50px; font-size: 0.85rem">
+                <i class="bi bi-plus-lg me-2"></i> ADD RATE
+            </a>
+            <a asp-action="ManageSlots"
+               class="btn text-decoration-none d-inline-flex align-items-center justify-content-center"
+               style="border-radius: 50px; font-weight: 600; border: 1px solid #8A9A5B; color: #8A9A5B; height: 45px; padding: 0 25px">
+                <i class="bi bi-arrow-left me-2"></i> BACK TO DASHBOARD
+            </a>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="d-flex flex-wrap gap-3 mb-4">
+        @foreach (var (label, color) in new[] { ("Normal", "#27ae60"), ("Discount", "#f39c12"), ("Special", "#8e44ad"), ("FOC", "#16a085") })
+        {
+            <span style="background: rgba(255,255,255,0.05); border: 1px solid @color; border-radius: 50px;
+                         padding: 5px 18px; font-size: 0.78rem; font-weight: 700; color: @color; letter-spacing: 0.5px">
+                @label
+            </span>
+        }
+    </div>
+
+    <!-- Rate Cards Grid -->
+    <div class="row g-5">
+        @foreach (var rate in Model)
+        {
+            string catColor = CategoryColor(rate.RateCategory);
+            string sesColor = SessionColor(rate.SessionType);
+            string catLabel = CategoryLabel(rate.RateCategory);
+            string sesLabel = SessionLabel(rate.SessionType);
+            bool isFoc = rate.RateCategory == 4;
+            bool isDiscount = rate.RateCategory == 2;
+
+            <div class="col-md-6 col-xl-4" id="rate-card-@rate.RateId">
+                <div class="premium-card h-100"
+                     style="border: 1px solid rgba(255,255,255,0.06); transition: border-color 0.3s; opacity: @(rate.IsActive ? "1" : "0.5")"
+                     onmouseover="this.style.borderColor='@catColor'"
+                     onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">
+
+                    <!-- Rate Code + Status Row -->
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span style="font-family: 'Courier New', monospace; font-size: 0.75rem;
+                                     font-weight: 800; letter-spacing: 2px; color: @catColor;
+                                     background: rgba(255,255,255,0.04); padding: 4px 14px;
+                                     border-radius: 6px; border: 1px solid @catColor">
+                            @rate.RateCode
+                        </span>
+                        <span id="status-badge-@rate.RateId"
+                              style="font-size: 0.68rem; font-weight: 700; letter-spacing: 1px;
+                                     padding: 5px 10px; border-radius: 50px;
+                                     background: @(rate.IsActive ? "rgba(85,239,196,0.15)" : "rgba(255,107,107,0.12)");
+                                     color: @(rate.IsActive ? "#55efc4" : "#ff6b6b");
+                                     border: 1px solid @(rate.IsActive ? "#55efc4" : "#ff6b6b")">
+                            @(rate.IsActive ? "ACTIVE" : "INACTIVE")
+                        </span>
+                    </div>
+
+                    <!-- Rate Name -->
+                    <h5 style="color: #2b3a2a; font-weight: 700; font-size: 1.15rem; margin-bottom: 6px">
+                        @rate.RateName
+                    </h5>
+
+                    <!-- Tags -->
+                    <div class="d-flex gap-2 mb-4">
+                        <span style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px;
+                                     padding: 3px 12px; border-radius: 50px;
+                                     background: rgba(255,255,255,0.06); color: @catColor;
+                                     border: 1px solid @catColor">
+                            @catLabel
+                        </span>
+                    </div>
+
+                    <!-- Pricing -->
+                    <div class="mb-4">
+                        @if (isFoc)
+                        {
+                            <div style="font-size: 2rem; font-weight: 800; color: #55efc4; line-height: 1">
+                                FREE
+                            </div>
+                            <div style="color: #888; font-size: 0.82rem; margin-top: 4px">Free of Charge</div>
+                        }
+                        else if (isDiscount && rate.DiscountPercentage.HasValue && rate.DiscountPercentage > 0)
+                        {
+                            <div class="d-flex align-items-end gap-2">
+                                <div style="font-size: 2rem; font-weight: 800; color: #f9c74f; line-height: 1">
+                                    RM @rate.FinalPrice.ToString("F2")
+                                </div>
+                                <div style="color: #888; font-size: 0.85rem; text-decoration: line-through; margin-bottom: 6px">
+                                    RM @rate.BasePrice.ToString("F2")
+                                </div>
+                            </div>
+                            <div style="color: #888; font-size: 0.82rem; margin-top: 4px">
+                                <span style="color: #f9c74f; font-weight: 700">@rate.DiscountPercentage%</span> discount applied
+                            </div>
+                        }
+                        else
+                        {
+                            <div style="font-size: 2rem; font-weight: 800; color: @catColor; line-height: 1">
+                                RM @rate.FinalPrice.ToString("F2")
+                            </div>
+                            <div style="color: #888; font-size: 0.82rem; margin-top: 4px">per session / pax</div>
+                        }
+                    </div>
+
+                    <!-- Last Updated -->
+                    <div style="color: #555; font-size: 0.75rem; margin-bottom: 16px">
+                        <i class="bi bi-clock me-1"></i>
+                        Updated: @rate.UpdatedOn.ToString("dd MMM yyyy, hh:mm tt")
+                        @if (!string.IsNullOrEmpty(rate.UpdatedBy))
+                        {
+                            <span>· @rate.UpdatedBy</span>
+                        }
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex gap-2">
+                        <a asp-action="EditRate" asp-route-id="@rate.RateId"
+                           class="btn-premium text-decoration-none d-flex align-items-center justify-content-center flex-grow-1"
+                           style="height: 38px; font-size: 0.82rem; border-radius: 10px">
+                            <i class="bi bi-pencil-square me-1"></i> EDIT
+                        </a>
+                        @if (!isFoc)
+                        {
+                            <button type="button"
+                                    id="toggle-btn-@rate.RateId"
+                                    onclick="toggleRate(@rate.RateId)"
+                                    style="height: 38px; width: 38px; border-radius: 10px; border: 1px solid @(rate.IsActive ? "rgba(255,107,107,0.4)" : "rgba(85,239,196,0.4)");
+                                           background: @(rate.IsActive ? "rgba(255,107,107,0.1)" : "rgba(85,239,196,0.1)");
+                                           color: @(rate.IsActive ? "#ff6b6b" : "#55efc4");
+                                           cursor: pointer; transition: all 0.2s; flex-shrink: 0"
+                                    title="@(rate.IsActive ? "Deactivate" : "Activate")">
+                                <i class="bi @(rate.IsActive ? "bi-toggle-on" : "bi-toggle-off")" id="toggle-icon-@rate.RateId"></i>
+                            </button>
+                        }
+                        <button type="button"
+                                onclick="deleteRate(@rate.RateId, '@rate.RateName')"
+                                style="height: 38px; width: 38px; border-radius: 10px;
+                                       border: 1px solid rgba(255,107,107,0.35);
+                                       background: rgba(255,107,107,0.08);
+                                       color: #ff6b6b; cursor: pointer; transition: all 0.2s; flex-shrink: 0"
+                                title="Delete Rate">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function toggleRate(rateId) {
+            Swal.fire({
+                title: 'TOGGLE RATE STATUS?',
+                text: 'This will activate or deactivate the selected rate.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#8A9A5B',
+                cancelButtonColor: '#2a2a2a',
+                confirmButtonText: 'YES, PROCEED',
+                cancelButtonText: 'CANCEL',
+                background: '#1a1a1a',
+                color: '#fff',
+                iconColor: '#8A9A5B'
+            }).then((result) => {
+                if (!result.isConfirmed) return;
+
+                fetch('@Url.Action("ToggleRate", "Rate")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'id=' + rateId
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        const card = document.getElementById('rate-card-' + rateId);
+                        const badge = document.getElementById('status-badge-' + rateId);
+                        const btn   = document.getElementById('toggle-btn-' + rateId);
+                        const icon  = document.getElementById('toggle-icon-' + rateId);
+
+                        const active = data.isActive;
+                        card.style.opacity = active ? '1' : '0.5';
+
+                        badge.textContent = active ? 'ACTIVE' : 'INACTIVE';
+                        badge.style.background    = active ? 'rgba(85,239,196,0.15)' : 'rgba(255,107,107,0.12)';
+                        badge.style.color         = active ? '#55efc4' : '#ff6b6b';
+                        badge.style.borderColor   = active ? '#55efc4' : '#ff6b6b';
+
+                        btn.style.borderColor   = active ? 'rgba(255,107,107,0.4)' : 'rgba(85,239,196,0.4)';
+                        btn.style.background    = active ? 'rgba(255,107,107,0.1)' : 'rgba(85,239,196,0.1)';
+                        btn.style.color         = active ? '#ff6b6b' : '#55efc4';
+                        icon.className          = 'bi ' + (active ? 'bi-toggle-on' : 'bi-toggle-off');
+                    }
+                });
+            });
+        }
+
+        function deleteRate(rateId, rateName) {
+            Swal.fire({
+                title: 'DELETE RATE?',
+                html: `Are you sure you want to permanently delete<br><strong style="color:#ff6b6b">${rateName}</strong>?<br><small style="color:#888">This action cannot be undone.</small>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff6b6b',
+                cancelButtonColor: '#2a2a2a',
+                confirmButtonText: 'YES, DELETE',
+                cancelButtonText: 'CANCEL',
+                background: '#1a1a1a',
+                color: '#fff',
+                iconColor: '#ff6b6b'
+            }).then((result) => {
+                if (!result.isConfirmed) return;
+
+                fetch('@Url.Action("DeleteRate", "Rate")', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'id=' + rateId
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        const col = document.getElementById('rate-card-' + rateId);
+                        if (col) {
+                            col.style.transition = 'opacity 0.4s, transform 0.4s';
+                            col.style.opacity    = '0';
+                            col.style.transform  = 'scale(0.85)';
+                            setTimeout(() => col.remove(), 420);
+                        }
+                        Swal.fire({
+                            toast: true, position: 'top-end', showConfirmButton: false,
+                            timer: 2500, timerProgressBar: true,
+                            icon: 'success', title: 'Rate deleted successfully',
+                            background: '#1a1a1a', color: '#55efc4'
+                        });
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Error', text: data.message, background: '#1a1a1a', color: '#fff' });
+                    }
+                });
+            });
+        }
+    </script>
+}

@@ -1,0 +1,36 @@
+@using Microsoft.AspNetCore.Http
+<div class="container animate-in">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="mb-5 mt-5">
+                <div style="font-size: 6rem; color: #8A9A5B">✨</div>
+                <h1 class="hero-title" style="font-size: 3rem;">@(TempData["SuccessTitle"] ?? "RESERVATION SUCCESS")</h1>
+            </div>
+
+            <div class="premium-card mb-5">
+                <p style="color: #f1f1f1; font-size: 1.1rem">@(TempData["SuccessMessage"] ?? "Your action has been verified and processed by the Archery Arena system.")</p>
+                @if (TempData["Message"] != null)
+                {
+                    <div class="mt-5 text-start">
+                        <label class="form-label fw-bold" style="color: #8A9A5B; letter-spacing: 1px; font-size: 0.85rem; text-transform: uppercase;">✨ INI ADALAH NO ID ANDA</label>
+                        <div class="p-4 rounded-3 d-flex align-items-center mb-2" style="background: rgba(0,0,0,0.4); border: 2px solid #8A9A5B; box-shadow: 0 0 15px rgba(138, 154, 91, 0.2);">
+                            <span style="color: #8A9A5B; font-size: 1.8rem; font-weight: 800; margin-right: 15px;">🆔</span>
+                            <span style="color: #2b3a2a; font-size: 2.2rem; font-weight: 900; letter-spacing: 4px;">@TempData["Message"].ToString().Split(':').Last().Trim()</span>
+                        </div>
+                        <small style="color: #adb5bd;">Here are your ID Employee</small>
+                    </div>
+                }
+            </div>
+
+            <div class="d-flex flex-column align-items-center">
+                @{
+                    var returnUrl = Context.Session.GetString("UserRole") == "Admin" ? Url.Action("ManageSlots", "Slot") : Url.Action("Index", "Home");
+                    var returnText = Context.Session.GetString("UserRole") == "Admin" ? "Return to Dashboard" : "Return to Arena";
+                }
+                <a href="@returnUrl" class="btn-premium text-decoration-none shadow-lg mb-3">@returnText</a>
+
+            </div>
+        </div>
+    </div>
+</div>
+

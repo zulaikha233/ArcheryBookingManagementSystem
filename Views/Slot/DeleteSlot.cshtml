@@ -1,0 +1,17 @@
+@model ArcheryAlley.Models.BookingSlots
+
+<h2>Delete a Slot</h2>
+
+@if (ViewBag.ErrorMessage != null)
+{
+    <p style="color: red;">@ViewBag.ErrorMessage</p>
+}
+
+<form asp-action="DeleteSlot" method="post">
+    <div>
+        <label>Slot ID</label>
+        <input type="number" name="SlotId" required />
+    </div>
+
+    <button type="submit">Delete Slot</button>
+</form>

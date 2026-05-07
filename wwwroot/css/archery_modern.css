@@ -1,0 +1,255 @@
+:root {
+    --primary: #8A9A5B; /* Sage Green */
+    --secondary: #ECE7CA; /* Beige */
+    --dark: #ECE7CA; /* Main background */
+    --card-bg: #ddead1; /* Solid background for cards */
+    --border-color: #c8d8be; /* Subtle border for cards */
+    --text-color: #2b3a2a; /* Dark text for readability */
+    --text-muted: #5a6650; /* Muted text */
+    --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+    background-color: var(--dark);
+    background-image: linear-gradient(180deg, var(--secondary) 0%, var(--dark) 100%);
+    background-attachment: fixed;
+    color: var(--text-color);
+    font-family: var(--font-family);
+    margin: 0;
+    min-height: 100vh;
+}
+
+.glass-nav {
+    background: var(--dark);
+    border-bottom: 2px solid var(--primary);
+    padding: 0.75rem 0;
+}
+
+.hero-section {
+    position: relative;
+    height: 450px;
+    background: url('/images/hero.png') center/cover;
+    border-radius: 20px;
+    margin: 2rem 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(18, 18, 18, 0.2), rgba(18, 18, 18, 0.8));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+}
+
+.hero-title {
+    font-size: 4rem;
+    font-weight: 800;
+    color: var(--primary);
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    margin-bottom: 0.5rem;
+    letter-spacing: -1px;
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    color: var(--text-color);
+    font-weight: 300;
+}
+
+.premium-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.premium-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    border-color: var(--primary);
+}
+
+.btn-premium {
+    background: var(--primary);
+    color: var(--dark);
+    font-weight: 600;
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: none;
+    transition: 0.3s;
+}
+
+.btn-premium:hover {
+    background: #738249;
+    box-shadow: 0 0 20px rgba(138, 154, 91, 0.4);
+    transform: scale(1.05);
+    color: #ffffff;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: var(--text-muted) !important;
+    margin: 0 0.5rem;
+    transition: 0.3s;
+}
+
+.nav-link:hover {
+    color: var(--primary) !important;
+}
+
+.navbar-brand {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--primary) !important;
+    letter-spacing: -0.5px;
+}
+
+.table {
+    color: var(--text-color);
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+
+.table thead th {
+    border: none;
+    color: var(--primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+.table tbody tr {
+    background: #ffffff;
+    transition: 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.table tbody tr td {
+    padding: 1rem;
+    border: none;
+    vertical-align: middle;
+}
+
+.table tbody tr td:first-child { border-radius: 8px 0 0 8px; }
+.table tbody tr td:last-child { border-radius: 0 8px 8px 0; }
+
+.table tbody tr:hover {
+    background: #fdfbf7;
+}
+
+/* Form Styles */
+.form-control {
+    background: #ffffff !important;
+    border: 1px solid #dee2e6 !important;
+    color: #000000 !important;
+    border-radius: 12px;
+    height: 55px;
+    font-size: 1rem !important;
+    padding: 0.8rem 1.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.form-control:focus {
+    background: #ffffff !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 20px rgba(138, 154, 91, 0.2) !important;
+}
+
+.form-control::placeholder {
+    color: #adb5bd !important;
+    letter-spacing: 1px;
+}
+
+.input-group-text {
+    background: #e9e5d9 !important;
+    color: var(--primary) !important;
+    border: 1px solid #c8d8be !important;
+}
+
+/* Modern Absolute Password Toggle */
+.password-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-input-wrapper .form-control {
+    padding-right: 60px !important; /* Make room for the eye */
+    border-radius: 12px !important; /* Back to full rounded */
+}
+
+.password-input-wrapper .password-toggle-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent !important;
+    color: var(--primary) !important;
+    border: none !important;
+    padding: 10px !important;
+    z-index: 10;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.password-input-wrapper .password-toggle-btn:focus,
+.password-input-wrapper .password-toggle-btn:active {
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
+
+.password-input-wrapper .password-toggle-btn:hover {
+    color: #2b3a2a !important;
+}
+
+.password-input-wrapper .password-toggle-btn i {
+    font-size: 1.25rem;
+}
+
+.alert-danger-custom {
+    background: #fde8e8;
+    border-left: 4px solid #ff4d4d;
+    color: #c92a2a;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+
+
+/* Override Chrome Autofill styling */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+    -webkit-text-fill-color: #2b3a2a !important;
+}

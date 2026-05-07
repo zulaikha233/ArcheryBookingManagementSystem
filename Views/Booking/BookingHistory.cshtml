@@ -1,0 +1,153 @@
+@model List<ArcheryAlley.Models.BookingHistoryViewModel>
+
+<style>
+    /* Break out of parent .container to fill full viewport width */
+    .booking-history-fullbleed {
+        width: 100vw;
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        padding: 0 2rem;
+        box-sizing: border-box;
+    }
+</style>
+
+<div class="animate-in">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="hero-title" style="font-size: 2.5rem; margin: 0">BOOKING <span style="color: #2b3a2a">HISTORY</span></h1>
+            <p style="color: #b0b0b0">View all successful arena slot reservations.</p>
+        </div>
+    </div>
+
+    <div class="booking-history-fullbleed">
+    <div class="premium-card">
+        <div class="table-responsive">
+            <table class="table table-sm" style="font-size: 0.82rem;">
+                <thead>
+                    <tr>
+                        <th>REF ID</th>
+                        <th>CUSTOMER</th>
+                        <th>DATE</th>
+                        <th>SLOT TIME</th>
+                        <th>TARGETS</th>
+                        <th>PAX</th>
+                        <th>TOTAL</th>
+                        <th>SOURCE</th>
+                        <th class="text-end">STATUS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var grp in Model)
+                        {
+                            <tr style="vertical-align: middle;">
+                                <!-- REF ID -->
+                                <td class="fw-bold" style="color: #8A9A5B">
+                                    #@grp.GroupId.ToString("D4")
+                                </td>
+
+                                <!-- CUSTOMER -->
+                                <td>
+                                    <span class="text-dark fw-bold">@grp.CustomerName</span>
+                                    @if (!string.IsNullOrEmpty(grp.CustomerEmail))
+                                    {
+                                        <br />
+                                        <small style="color: #adb5bd; font-size: 0.72rem;">@grp.CustomerEmail</small>
+                                    }
+                                </td>
+
+                                <!-- DATE -->
+                                <td style="color: #adb5bd; white-space: nowrap;">
+                                    @grp.ReservedOn.ToString("dd MMM yy")
+                                </td>
+
+                                <!-- SLOT TIME -->
+                                <td style="white-space: nowrap;">
+                                    @if (grp.Slot != null)
+                                    {
+                                        <span style="color: #2b3a2a;">
+                                            @grp.Slot.SlotStartTime.ToString(@"hh\:mm")–@grp.Slot.SlotEndTime.ToString(@"hh\:mm")
+                                        </span>
+                                        <br />
+                                        <small style="color: #adb5bd; font-size: 0.72rem;">@grp.DurationHours hr(s)</small>
+                                    }
+                                    else
+                                    {
+                                        <span style="color: #666">N/A</span>
+                                    }
+                                </td>
+
+                                <!-- TARGETS / LANES -->
+                                <td style="max-width: 140px;">
+                                    @foreach (var lane in grp.TargetNos)
+                                    {
+                                        <span class="badge me-1 mb-1" style="background: rgba(138, 154, 91,0.12); color: #8A9A5B; border: 1px solid rgba(138, 154, 91,0.3); border-radius: 30px; padding: 3px 8px; font-size: 0.72rem;">
+                                            L@(lane)
+                                        </span>
+                                    }
+                                </td>
+
+                                <!-- PAX -->
+                                <td style="color: #adb5bd; text-align: center; white-space: nowrap;">
+                                    @grp.NumberOfPax
+                                </td>
+
+                                <!-- TOTAL PRICE -->
+                                <td class="fw-bold" style="color: #4ade80; white-space: nowrap;">
+                                    @if (grp.TotalPrice == 0)
+                                    {
+                                        <span style="color: #facc15;">FOC</span>
+                                    }
+                                    else
+                                    {
+                                        <span>RM @grp.TotalPrice.ToString("0.00")</span>
+                                    }
+                                </td>
+
+                                <!-- SOURCE -->
+                                <td style="font-size: 0.75rem; color: #adb5bd; white-space: nowrap;">
+                                    @if (grp.IsOnline)
+                                    {
+                                        <span class="badge" style="background: rgba(255,255,255,0.1); color: #2b3a2a; border-radius: 30px; padding: 3px 8px; font-size: 0.72rem;">ONLINE</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge" style="background: #8A9A5B; color: #000; border-radius: 30px; padding: 3px 8px; font-size: 0.72rem;">@grp.ReservedBy</span>
+                                    }
+                                </td>
+
+                                <!-- STATUS -->
+                                <td class="text-end" style="white-space: nowrap;">
+                                    @{
+                                        var statusLabel = grp.Status switch
+                                        {
+                                            1 => ("CONFIRMED", "#8A9A5B", "rgba(138, 154, 91,0.1)", "rgba(138, 154, 91,0.3)"),
+                                            2 => ("CANCELLED", "#f87171", "rgba(248,113,113,0.1)", "rgba(248,113,113,0.3)"),
+                                            _ => ("PENDING", "#facc15", "rgba(250,204,21,0.1)", "rgba(250,204,21,0.3)")
+                                        };
+                                    }
+                                    <span class="badge" style="background: @statusLabel.Item3; color: @statusLabel.Item2; border: 1px solid @statusLabel.Item4; border-radius: 50px; font-weight: 600; padding: 4px 12px; font-size: 0.72rem;">
+                                        @statusLabel.Item1
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center py-5">
+                                <p style="color: #666; font-style: italic;">No booking records found.</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </div><!-- /.booking-history-fullbleed -->
+</div>
