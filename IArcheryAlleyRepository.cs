@@ -50,6 +50,15 @@ namespace ArcheryAlley
         public void DeleteRate(int rateId);
         public void SeedDefaultRates();
         public void ToggleRateActive(int rateId, string updatedByEmpId);
+        
+        // Lane & Target Management
+        public List<Lanes> GetAllLanes();
+        public List<Targets> GetAllTargets();
+        public void ToggleLaneStatus(int laneId);
+        public void ToggleTargetStatus(int targetId);
+        public void SeedDefaultLanesAndTargets();
 
+        // Payment Management
+        public void AddPayment(Payments payment);
     }
 }

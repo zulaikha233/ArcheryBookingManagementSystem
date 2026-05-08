@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArcheryAlley
 {
@@ -65,8 +66,17 @@ namespace ArcheryAlley
                 }
             }
 
-            var allTargets = Enumerable.Range(1, 20).ToList();
-            return allTargets.Where(t => !occupiedTargets.Contains(t)).ToList();
+            // Seed if empty (ensures we have targets in DB)
+            SeedDefaultLanesAndTargets();
+
+            // Only get targets where both lane and target are active/available
+            var activeTargets = _context.Targets
+                .Include(t => t.Lane)
+                .Where(t => t.Status == "Available" && t.Lane.Status == "Active")
+                .Select(t => t.TargetNumber)
+                .ToList();
+
+            return activeTargets.Where(t => !occupiedTargets.Contains(t)).ToList();
         }
 
         public int BookSlots(int SlotId, string EmpId, string CustomerName)
@@ -84,7 +94,20 @@ namespace ArcheryAlley
                 TotalPrice = 10 // Default
             };
 
-            return CreateReservation(reservation);
+            int resId = CreateReservation(reservation);
+            
+            var payment = new Payments
+            {
+                ReservationId = resId,
+                Amount = reservation.TotalPrice,
+                PaymentMethod = "Cash/Counter",
+                PaymentDate = DateTime.Now,
+                Status = "Success",
+                TransactionId = "POS-" + Guid.NewGuid().ToString().Substring(0, 5).ToUpper()
+            };
+            AddPayment(payment);
+
+            return resId;
         }
 
 
@@ -487,6 +510,72 @@ namespace ArcheryAlley
             };
 
             _context.Rates.AddRange(defaults);
+            _context.SaveChanges();
+        }
+
+        // ──────────────────────────────────────────────
+        // LANE & TARGET MANAGEMENT
+        // ──────────────────────────────────────────────
+
+        public List<Lanes> GetAllLanes()
+        {
+            return _context.Lanes.OrderBy(l => l.LaneNumber).ToList();
+        }
+
+        public List<Targets> GetAllTargets()
+        {
+            return _context.Targets.Include(t => t.Lane).OrderBy(t => t.TargetNumber).ToList();
+        }
+
+        public void ToggleLaneStatus(int laneId)
+        {
+            var lane = _context.Lanes.FirstOrDefault(l => l.LaneId == laneId);
+            if (lane != null)
+            {
+                lane.Status = (lane.Status == "Active") ? "Maintenance" : "Active";
+                _context.SaveChanges();
+            }
+        }
+
+        public void ToggleTargetStatus(int targetId)
+        {
+            var target = _context.Targets.FirstOrDefault(t => t.TargetId == targetId);
+            if (target != null)
+            {
+                target.Status = (target.Status == "Available") ? "Maintenance" : "Available";
+                _context.SaveChanges();
+            }
+        }
+
+        public void SeedDefaultLanesAndTargets()
+        {
+            if (_context.Lanes.Any()) return;
+
+            for (int i = 1; i <= 20; i++)
+            {
+                var lane = new Lanes
+                {
+                    LaneNumber = i,
+                    Status = "Active"
+                };
+                _context.Lanes.Add(lane);
+                _context.SaveChanges(); // Save to get LaneId
+
+                var target = new Targets
+                {
+                    TargetNumber = i,
+                    LaneId = lane.LaneId,
+                    MaxCapacity = 4,
+                    Status = "Available"
+                };
+                _context.Targets.Add(target);
+            }
+            _context.SaveChanges();
+        }
+
+        public void AddPayment(Payments payment)
+        {
+            _context.Payments.Add(payment);
             _context.SaveChanges();
         }
     }

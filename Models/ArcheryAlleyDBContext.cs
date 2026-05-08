@@ -19,10 +19,10 @@ namespace ArcheryAlley.Models
         public  DbSet<Reservations> Reservations { get; set; }
         public  DbSet<Roles> Roles { get; set; }
         public  DbSet<Customers> Customers { get; set; }
-
-
-
-        public DbSet<Rates> Rates { get; set; }
+        public  DbSet<Rates> Rates { get; set; }
+        public  DbSet<Payments> Payments { get; set; }
+        public  DbSet<Lanes> Lanes { get; set; }
+        public  DbSet<Targets> Targets { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -122,6 +122,22 @@ namespace ArcheryAlley.Models
 
                 entity.Property(e => e.UpdatedOn)
                     .HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<Payments>(entity =>
+            {
+                entity.HasKey(e => e.PaymentId);
+                entity.Property(e => e.PaymentDate).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<Lanes>(entity =>
+            {
+                entity.HasKey(e => e.LaneId);
+            });
+
+            modelBuilder.Entity<Targets>(entity =>
+            {
+                entity.HasKey(e => e.TargetId);
             });
         }
 

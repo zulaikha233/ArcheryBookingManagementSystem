@@ -113,6 +113,33 @@
         background: white !important;
         border-radius: 25px;
     }
+
+    /* Payment Method Styles */
+    .payment-option-card {
+        display: block;
+        background: white;
+        border: 2px solid transparent;
+        border-radius: 15px;
+        padding: 15px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: 0.3s;
+        text-align: left;
+    }
+    .payment-option-card input { display: none; }
+    .payment-option-card:has(input:checked) {
+        border-color: #8A9A5B;
+        background: #f1f8e9;
+    }
+    .option-content {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .option-icon { font-size: 1.5rem; }
+    .option-text { display: flex; flex-direction: column; }
+    .option-title { font-weight: 700; color: #2b3a2a; font-size: 0.95rem; }
+    .option-text small { font-size: 0.75rem; color: #666; }
 </style>
 
 <div class="kiosk-wrap animate-fade-in">
@@ -139,8 +166,42 @@
         </div>
     </div>
 
-    <div class="price-tag">
+    <div class="price-tag" style="margin-top: 10px;">
         RM @Model.TotalPrice.ToString("0.00")
+    </div>
+
+    <div style="text-align: left; margin-bottom: 30px;">
+        <label class="fw-bold mb-3 d-block" style="color: #2b3a2a; text-transform: uppercase; letter-spacing: 1.2px; font-size: 0.8rem;">Select Payment Method</label>
+        <label class="payment-option-card">
+            <input type="radio" name="paymentMethod" value="fpx" checked>
+            <div class="option-content">
+                <span class="option-icon">🌐</span>
+                <div class="option-text">
+                    <span class="option-title">Online Banking (FPX)</span>
+                    <small>Pay instantly via online bank</small>
+                </div>
+            </div>
+        </label>
+        <label class="payment-option-card">
+            <input type="radio" name="paymentMethod" value="card">
+            <div class="option-content">
+                <span class="option-icon">💳</span>
+                <div class="option-text">
+                    <span class="option-title">Credit / Debit Card</span>
+                    <small>Visa, Mastercard, etc.</small>
+                </div>
+            </div>
+        </label>
+        <label class="payment-option-card">
+            <input type="radio" name="paymentMethod" value="counter">
+            <div class="option-content">
+                <span class="option-icon">💵</span>
+                <div class="option-text">
+                    <span class="option-title">Pay at Counter</span>
+                    <small>Pay at the arena counter</small>
+                </div>
+            </div>
+        </label>
     </div>
 
     <button class="btn-generate" id="confirmBtn" onclick="generateKioskCode()">CONFIRM & PROCEED</button>
@@ -182,6 +243,8 @@
         formData.append("SelectedLaneRanges", "@Model.SelectedLaneRanges");
         formData.append("NumberOfPax", "@Model.NumberOfPax");
         formData.append("RateCode", ""); // No promo for guests
+        const method = document.querySelector('input[name="paymentMethod"]:checked').value;
+        formData.append("PaymentMethod", method);
 
         try {
             const response = await fetch('/Booking/CreateCustomerBooking', {

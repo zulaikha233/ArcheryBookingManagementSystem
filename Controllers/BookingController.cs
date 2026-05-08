@@ -78,8 +78,19 @@ namespace ArcheryAlley.Controllers
         [HttpGet]
         public JsonResult GetAvailableTargetsAjax(int slotId, DateTime date, int duration = 1)
         {
-            var targets = _repository.GetAvailableTargets(slotId, date, duration);
-            return Json(targets);
+            // Get targets that are physically available (Active & Available)
+            var availableTargetNumbers = _repository.GetAvailableTargets(slotId, date, duration);
+            
+            // Get ALL targets to check their maintenance status
+            var allTargets = _repository.GetAllTargets();
+            
+            var result = allTargets.Select(t => new {
+                targetNumber = t.TargetNumber,
+                status = t.Status == "Maintenance" || t.Lane.Status == "Maintenance" ? "Maintenance" : 
+                         (availableTargetNumbers.Contains(t.TargetNumber) ? "Available" : "Taken")
+            }).ToList();
+
+            return Json(result);
         }
 
         [HttpGet]
@@ -167,7 +178,7 @@ namespace ArcheryAlley.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateCustomerBooking(int SlotId, string CustomerName, string CustomerEmail, int TargetNo, int RangeNo, int Duration, decimal TotalPrice, string SelectedLanes, string SelectedLaneRanges, int NumberOfPax, string RateCode)
+        public IActionResult CreateCustomerBooking(int SlotId, string CustomerName, string CustomerEmail, int TargetNo, int RangeNo, int Duration, decimal TotalPrice, string SelectedLanes, string SelectedLaneRanges, int NumberOfPax, string RateCode, string PaymentMethod)
         {
             try
             {
@@ -213,6 +224,27 @@ namespace ArcheryAlley.Controllers
                     };
                     _repository.CreateReservation(reservation);
                     if (firstId == null) firstId = reservation.ReservationId;
+
+                    // Create Payment record for each reservation
+                    string actualMethod = PaymentMethod switch {
+                        "fpx" => "Online (FPX)",
+                        "card" => "Credit/Debit Card",
+                        "counter" => "Cash/Counter",
+                        _ => "Cash/Counter"
+                    };
+
+                    string paymentStatus = (PaymentMethod == "counter") ? "Pending" : "Success";
+
+                    var payment = new Payments
+                    {
+                        ReservationId = reservation.ReservationId,
+                        Amount = splitPrice,
+                        PaymentMethod = actualMethod,
+                        PaymentDate = DateTime.Now,
+                        Status = paymentStatus,
+                        TransactionId = (PaymentMethod == "counter") ? null : Guid.NewGuid().ToString().Substring(0, 8).ToUpper()
+                    };
+                    _repository.AddPayment(payment);
                 }
 
                 return Json(new { success = true, bookingCode = firstId });

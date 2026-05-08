@@ -188,7 +188,7 @@
     .custom-modal-overlay {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.8);
+        background: rgba(236, 231, 202, 0.8);
         backdrop-filter: blur(10px);
         display: none;
         align-items: center;
@@ -388,13 +388,8 @@
 
     function togglePaymentUI() {
         const method = document.querySelector('input[name="paymentOption"]:checked').value;
-        if (method === "fpx") {
-            document.getElementById("fpxUI").style.display = "block";
-            document.getElementById("cardUI").style.display = "none";
-        } else {
-            document.getElementById("fpxUI").style.display = "none";
-            document.getElementById("cardUI").style.display = "block";
-        }
+        document.getElementById("fpxUI").style.display = (method === "fpx") ? "block" : "none";
+        document.getElementById("cardUI").style.display = (method === "card") ? "block" : "none";
     }
 
     async function applyPromo() {
@@ -486,6 +481,7 @@
         formData.append("SelectedLaneRanges", "@Model.SelectedLaneRanges");
         formData.append("NumberOfPax", "@Model.NumberOfPax");
         formData.append("RateCode", appliedRateCode);
+        formData.append("PaymentMethod", method);
 
         try {
             const response = await fetch('/Booking/CreateCustomerBooking', {

@@ -1,0 +1,79 @@
+@model List<ArcheryAlley.Models.Lanes>
+@{
+    ViewBag.Title = "Manage Lanes & Targets";
+    var targets = ViewBag.Targets as List<ArcheryAlley.Models.Targets>;
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark">RESOURCE MANAGEMENT</h2>
+        <a href="/Home/AdminDashboard" class="btn btn-outline-secondary btn-sm">BACK TO DASHBOARD</a>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold">LANES & TARGETS STATUS</h5>
+                    <p class="text-muted small mb-0">Toggle status to enable/disable lanes for booking.</p>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Lane No</th>
+                                    <th>Capacity</th>
+                                    <th>Lane Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var lane in Model)
+                                {
+                                    var target = targets?.FirstOrDefault(t => t.LaneId == lane.LaneId);
+                                    <tr>
+                                        <td><span class="fw-bold">LANE @lane.LaneNumber</span></td>
+                                        <td>@(target?.MaxCapacity ?? 0) Pax</td>
+                                        <td>
+                                            @if (lane.Status == "Active")
+                                            {
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">ACTIVE</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill">MAINTENANCE</span>
+                                            }
+                                        </td>
+                                        <td class="text-end">
+                                            <button class="btn btn-sm btn-dark rounded-pill px-4" onclick="toggleLane(@lane.LaneId)">TOGGLE STATUS</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleLane(id) {
+        if (!confirm("Are you sure you want to toggle this lane's status?")) return;
+        $.post('/Management/ToggleLane', { laneId: id }, function(res) {
+            if (res.success) location.reload();
+            else alert("Error toggling lane status.");
+        });
+    }
+
+    function toggleTarget(id) {
+        if (!id) return;
+        if (!confirm("Are you sure you want to toggle this target's status?")) return;
+        $.post('/Management/ToggleTarget', { targetId: id }, function(res) {
+            if (res.success) location.reload();
+            else alert("Error toggling target status.");
+        });
+    }
+</script>

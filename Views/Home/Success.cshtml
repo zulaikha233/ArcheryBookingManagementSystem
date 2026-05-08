@@ -10,7 +10,7 @@
             <div class="premium-card mb-5">
                 <p style="color: #2b3a2a; font-size: 1.1rem; font-weight: 500;">@(TempData["SuccessMessage"] ?? "Your reservation has been verified and processed. Please show your code at the counter.")</p>
                 
-                @if (Context.Request.Query.ContainsKey("bookingCode"))
+                @if (Context.Session.GetString("IsGuest") == "true" && Context.Request.Query.ContainsKey("bookingCode"))
                 {
                     <div class="mt-5 text-center">
                         <label class="form-label fw-bold" style="color: #8A9A5B; letter-spacing: 2px; font-size: 0.9rem; text-transform: uppercase;">🎟️ YOUR BOOKING CODE</label>

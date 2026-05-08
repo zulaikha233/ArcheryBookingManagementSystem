@@ -202,8 +202,9 @@
         right: 5px;
     }
 
+    .wizard-actions { display: flex; justify-content: space-between; align-items: center; }
     .btn-premium { background: linear-gradient(to right, var(--active-blue), var(--deep-blue)); border: none; color: black; padding: 12px 25px; border-radius: 10px; font-weight: bold; text-transform: uppercase; }
-    .btn-premium-outline { background: transparent; border: 1px solid rgba(0,0,0,0.1); color: #2b3a2a; padding: 12px 25px; border-radius: 10px; font-weight: bold; margin-right: 10px; }
+    .btn-premium-outline { background: transparent; border: 1px solid rgba(0,0,0,0.1); color: #2b3a2a; padding: 12px 25px; border-radius: 10px; font-weight: bold; }
 
     /* Modern Counter Styles */
     .modern-counter {
@@ -339,26 +340,33 @@
             grid.innerHTML = "";
             const isAdult = (bookingData.ageGroup === "Adult");
 
-            for(let i=1; i<=20; i++) {
+            for(let item of availableTargets) {
+                const i = item.targetNumber;
+                const status = item.status;
                 const box = document.createElement("div");
-                const isTaken = !availableTargets.includes(i);
                 
-                // Logic: Adults 11-20, Kids 1-10
+                const isTaken = (status === 'Taken');
+                const isMaintenance = (status === 'Maintenance');
+                const isAdult = (bookingData.ageGroup === "Adult");
                 const isRestricted = isAdult ? (i <= 10) : (i >= 11);
                 
-                box.className = `target-box ${isTaken ? 'disabled' : ''} ${isRestricted ? 'restricted' : ''}`;
+                box.className = `target-box ${isTaken || isMaintenance ? 'disabled' : ''} ${isRestricted ? 'restricted' : ''}`;
                 
-                let statusText = isTaken ? 'Taken' : (isRestricted ? 'Restricted' : 'Open');
+                let statusText = isMaintenance ? 'MAINTENANCE' : (isTaken ? 'Taken' : (isRestricted ? 'Restricted' : 'Open'));
                 
                 box.innerHTML = `
                     <span style="font-size: 1.2rem; font-weight: 800;">${i}</span>
-                    <small style="font-size:0.65rem; text-transform: uppercase; opacity: 0.8;">${statusText}</small>
+                    <small style="font-size:0.5rem; text-transform: uppercase; opacity: 0.9; font-weight:800; letter-spacing: -0.2px;">${statusText}</small>
                 `;
 
-                if(!isTaken && !isRestricted) {
+                if(!isTaken && !isRestricted && !isMaintenance) {
                     box.onclick = () => selectTarget(i);
                 } else if (isRestricted) {
                     box.title = isAdult ? "Lanes 1-10 are for Kids/Juniors" : "Lanes 11-20 are for Adults";
+                } else if (isMaintenance) {
+                    box.style.background = "#ff6b6b";
+                    box.style.color = "white";
+                    box.title = "This lane is currently under maintenance.";
                 }
 
                 grid.appendChild(box);
