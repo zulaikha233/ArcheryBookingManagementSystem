@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Book Your Session";
+    ViewData["Title"] = "Guest Booking";
 }
 
 <div class="booking-wizard-container animate-fade-in">
@@ -9,31 +9,13 @@
     <!-- Step 1: Customer Info & Session -->
     <div class="wizard-step active" id="wizard-step-1">
         <div class="glass-card main-booking-card p-0">
-            <div class="wizard-grid-layout">
-                <!-- Column 1 -->
-                <div class="wizard-column">
-                    <div class="p-4 mb-3 rounded-3" style="background: linear-gradient(to right, var(--active-blue), var(--deep-blue)); border: none; margin: 0rem 0rem 1rem 0rem; box-shadow: 0 5px 15px rgba(138, 154, 91, 0.2);">
-                         <p class="mb-1" style="font-size: 0.75rem; color: rgba(0,0,0,0.6); letter-spacing: 1px; font-weight: bold;">Member Mode</p>
-                         <h5 class="mb-0 font-weight-bold" style="letter-spacing: 0.5px; color: black;">@(ViewBag.CustomerName)</h5>
-                         <small style="color: rgba(0,0,0,0.8); font-weight: 500;">@(ViewBag.CustomerEmail)</small>
-                         <input type="hidden" id="customerName" value="@ViewBag.CustomerName">
-                         <input type="hidden" id="customerEmail" value="@ViewBag.CustomerEmail">
-                    </div>
-
-                    <div class="session-group px-4 pb-4">
-                        <h5 class="session-label">&#9728; Morning Session</h5>
-                        <div id="morning-slots" class="slots-grid"></div>
-                    </div>
-                </div>
-
-                <!-- Column 2 -->
-                <div class="wizard-column">
-                    <div class="form-group p-4 pb-0">
+            <div class="p-4 border-bottom" style="background: rgba(0,0,0,0.02); border-radius: 30px 30px 0 0;">
+                <div class="row g-4">
+                    <div class="col-md-4">
                         <label class="form-label-premium">Booking Date</label>
                         <input type="date" id="bookingDate" class="form-control-premium" value="@DateTime.Today.ToString("yyyy-MM-dd")">
                     </div>
-
-                    <div class="form-group p-4 pt-0 pb-2">
+                    <div class="col-md-4">
                         <label class="form-label-premium">Duration</label>
                         <select id="duration" class="form-control-premium">
                             <option value="1">1 Hour</option>
@@ -42,8 +24,7 @@
                             <option value="4">4 Hours</option>
                         </select>
                     </div>
-
-                    <div class="form-group p-4 py-0">
+                    <div class="col-md-4">
                         <label class="form-label-premium">Age Group</label>
                         <select id="ageGroup" class="form-control-premium">
                             <option value="Adult">Adult (18+)</option>
@@ -51,17 +32,29 @@
                             <option value="Child">Child (Under 12)</option>
                         </select>
                     </div>
+                </div>
+                <input type="hidden" id="customerName" value="Guest User">
+                <input type="hidden" id="customerEmail" value="guest@archery.com">
+            </div>
 
-                    <div class="session-group px-4 pb-4">
-                        <h5 class="session-label">&#127769; Night Session</h5>
-                        <div id="night-slots" class="slots-grid"></div>
-                    </div>
+            <div class="p-4">
+                <div class="session-group mb-5 px-3">
+                    <h5 class="session-label">&#9728; Morning Session</h5>
+                    <div id="morning-slots" class="slots-grid-vertical"></div>
+                </div>
+
+                <div class="session-group px-3">
+                    <h5 class="session-label">&#127769; Night Session</h5>
+                    <div id="night-slots" class="slots-grid-vertical"></div>
                 </div>
             </div>
 
-            <div class="wizard-actions px-4 pb-4 d-flex justify-content-end align-items-center">
-                <div id="slot-hint" class="me-3 fw-bold" style="color: var(--active-blue); display:none; font-size: 0.9rem;"></div>
-                <button class="btn-premium" onclick="proceedToConfigure()">NEXT</button>
+            <div class="wizard-actions px-4 pb-4 d-flex justify-content-between align-items-center">
+                <a href="@Url.Action("CustomerLogin", "Account")" class="btn-premium-outline text-decoration-none">Back</a>
+                <div class="d-flex align-items-center">
+                    <div id="slot-hint" class="me-3 fw-bold" style="color: var(--active-blue); display:none; font-size: 0.9rem;"></div>
+                    <button class="btn-premium" onclick="proceedToConfigure()">NEXT</button>
+                </div>
             </div>
         </div>
     </div>
@@ -144,21 +137,6 @@
         width: auto;
     }
 
-
-
-    .wizard-grid-layout {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 40px;
-        padding: 40px;
-    }
-
-    .wizard-column {
-        display: flex;
-        flex-direction: column;
-        gap: 25px;
-    }
-
     .session-label {
         font-size: 0.8rem;
         color: #000000;
@@ -174,10 +152,10 @@
         gap: 10px;
     }
 
-    .slots-grid {
+    .slots-grid-vertical {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 15px;
     }
 
     .slot-card {
@@ -234,12 +212,17 @@
         letter-spacing: 1px;
         transition: 0.3s;
     }
+
+    .btn-premium-outline:hover {
+        background: rgba(43, 58, 42, 0.05);
+        border-color: #2b3a2a;
+    }
 </style>
 
 <script>
     let bookingData = {
-        name: "@(ViewBag.CustomerName)",
-        email: "@(ViewBag.CustomerEmail)",
+        name: "Guest User",
+        email: "guest@archery.com",
         date: "@DateTime.Today.ToString("yyyy-MM-dd")",
         duration: 1,
         selectedSlotIds: [],

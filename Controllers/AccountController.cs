@@ -81,10 +81,16 @@ namespace ArcheryAlley.Controllers
         }
 
         [HttpPost]
-        public IActionResult CustomerRegister(string FullName, string Email, string Password)
+        public IActionResult CustomerRegister(string FullName, string Username, string Email, string PhoneNumber, string Password, string ConfirmPassword)
         {
-            if (!string.IsNullOrEmpty(FullName) && !string.IsNullOrEmpty(Email) && !string.IsNullOrEmpty(Password))
+            if (!string.IsNullOrEmpty(FullName) && !string.IsNullOrEmpty(Username) && !string.IsNullOrEmpty(Email) && !string.IsNullOrEmpty(PhoneNumber) && !string.IsNullOrEmpty(Password) && !string.IsNullOrEmpty(ConfirmPassword))
             {
+                if (Password != ConfirmPassword)
+                {
+                    ViewBag.ErrorMessage = "Passwords do not match.";
+                    return View();
+                }
+
                 var existingCustomer = _repository.GetCustomerByEmail(Email);
                 if (existingCustomer != null)
                 {
@@ -95,7 +101,9 @@ namespace ArcheryAlley.Controllers
                 var newCustomer = new Customers
                 {
                     FullName = FullName,
+                    Username = Username,
                     Email = Email,
+                    PhoneNumber = PhoneNumber,
                     Password = Password
                 };
 

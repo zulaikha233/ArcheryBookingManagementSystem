@@ -129,9 +129,10 @@
         color: #000;
         border: none;
         padding: 12px 25px;
-        border-radius: 25px;
+        border-radius: 10px;
         font-weight: 700;
         font-size: 0.85rem;
+        text-transform: uppercase;
         cursor: pointer;
         transition: 0.3s;
         margin-top: 25px;
@@ -371,10 +372,10 @@
                             </div>
                         </div>
 
-                        <button class="btn-proceed w-100 mt-4" id="payConfirmBtn" onclick="finalizeBooking()">Confirm Payment</button>
+                        <button class="btn-proceed w-100 mt-4" id="payConfirmBtn" onclick="finalizeBooking()">CONFIRM PAYMENT</button>
                     </div>
                 </div>  
-            <button class="btn btn-link text-decoration-none p-0 mt-4" onclick="window.history.back()" style="color: #6c757d; transition: 0.3s; box-shadow: none; border: none;"><i class="bi bi-arrow-left me-1"></i> Back to Details</button>
+            <button class="btn btn-link text-decoration-none p-0 mt-4" onclick="window.history.back()" style="color: #6c757d; transition: 0.3s; box-shadow: none; border: none; font-weight: 700; text-transform: uppercase; font-size: 0.75rem;"><i class="bi bi-arrow-left me-1"></i> BACK TO DETAILS</button>
         </div>
     </div>
 </div>
@@ -498,7 +499,7 @@
                 modal.style.display = 'flex';
                 setTimeout(() => modal.classList.add('show'), 10);
                 setTimeout(() => {
-                    window.location.href = "@Url.Action("Success", "Home")";
+                    window.location.href = "@Url.Action("Success", "Home")?bookingCode=" + result.bookingCode;
                 }, 2000);
             } else {
                 showNotif("Booking failed: " + result.message, 'error');

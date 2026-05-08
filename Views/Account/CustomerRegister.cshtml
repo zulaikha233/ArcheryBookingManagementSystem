@@ -1,0 +1,141 @@
+@{
+    ViewBag.Title = "Customer Register";
+}
+
+<style>
+    :root {
+        --customer-primary: #8A9A5B;
+        --customer-dark-bg: #ECE7CA;
+        --customer-glass: rgba(255, 255, 255, 0.05);
+        --customer-glass-border: rgba(255, 255, 255, 0.1);
+    }
+    .landing-container {
+        min-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+    .premium-card {
+        background: #ddead1;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(0,0,0,0.05);
+        border-radius: 24px;
+        padding: 3rem;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        width: 100%;
+    }
+    .btn-customer {
+        background: linear-gradient(135deg, #8A9A5B 0%, #6D7B48 100%);
+        color: #000;
+        border: none;
+        border-radius: 25px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        transition: 0.3s;
+        text-transform: uppercase;
+    }
+    .btn-customer:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(138, 154, 91, 0.3);
+        color: #000;
+    }
+    .customer-input {
+        display: block !important;
+        width: 100% !important;
+        background: #ffffff !important;
+        border: 1px solid #dee2e6 !important;
+        color: #2b3a2a !important;
+        padding: 12px 20px !important;
+        border-radius: 12px !important;
+        transition: all 0.3s ease;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .customer-input::placeholder {
+        color: #adb5bd;
+    }
+    .customer-input:focus {
+        border-color: #8A9A5B !important;
+        box-shadow: 0 0 0 0.25rem rgba(138, 154, 91, 0.25) !important;
+        background: #ffffff !important;
+        color: #2b3a2a !important;
+    }
+    /* WebKit Autofill fix */
+    .customer-input:-webkit-autofill,
+    .customer-input:-webkit-autofill:hover, 
+    .customer-input:-webkit-autofill:focus, 
+    .customer-input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+        -webkit-text-fill-color: #2b3a2a !important;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+</style>
+
+<div class="landing-container animate-fade-in">
+    <div class="row justify-content-center w-100">
+        <div class="col-11">
+            <div class="text-center mb-4">
+                <div style="font-size: 3.5rem; color: #8A9A5B">🎯</div>
+                <h1 class="hero-title" style="font-size: 2rem;">JOIN <span style="color: #2b3a2a">THE ARENA</span></h1>
+                <p style="color: #6c757d; font-size: 0.85rem;">Create an account for faster bookings and history.</p>
+            </div>
+
+            <div class="premium-card">
+                @if (ViewBag.ErrorMessage != null)
+                {
+                    <div class="alert mb-4" style="background: rgba(220, 53, 69, 0.2); border: 1px solid rgba(220, 53, 69, 0.5); color: #ff6b6b; border-radius: 12px;">
+                        <i class="bi bi-exclamation-circle me-2"></i> @ViewBag.ErrorMessage
+                    </div>
+                }
+
+                <form asp-action="CustomerRegister" method="post">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-bold" style="color: var(--customer-primary); letter-spacing: 1px; font-size: 0.85rem">FULL NAME</label>
+                            <input type="text" name="FullName" class="customer-input" placeholder="e.g. Ali Abu" required />
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-bold" style="color: var(--customer-primary); letter-spacing: 1px; font-size: 0.85rem">USERNAME</label>
+                            <input type="text" name="Username" class="customer-input" placeholder="e.g. ali88" required />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-bold" style="color: var(--customer-primary); letter-spacing: 1px; font-size: 0.85rem">EMAIL ADDRESS</label>
+                            <input type="email" name="Email" class="customer-input" placeholder="ali@gmail.com" required />
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-bold" style="color: var(--customer-primary); letter-spacing: 1px; font-size: 0.85rem">PHONE NUMBER</label>
+                            <input type="text" name="PhoneNumber" class="customer-input" placeholder="e.g. 0123456789" required />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-bold" style="color: var(--customer-primary); letter-spacing: 1px; font-size: 0.85rem">PASSWORD</label>
+                            <input type="password" name="Password" class="customer-input" placeholder="••••••••" required />
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-bold" style="color: var(--customer-primary); letter-spacing: 1px; font-size: 0.85rem">CONFIRM PASSWORD</label>
+                            <input type="password" name="ConfirmPassword" class="customer-input" placeholder="••••••••" required />
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-customer py-3 px-5 w-100">REGISTER ACCOUNT</button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-4 pt-3 border-top" style="border-color: rgba(255,255,255,0.1) !important;">
+                    <p class="text-muted" style="font-size: 0.85rem;">Already have an account? <a href="@Url.Action("CustomerLogin", "Account")" class="text-decoration-none" style="color: #8A9A5B">Login here</a></p>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="@Url.Action("Index", "Home")" class="text-decoration-none" style="color: #6c757d; transition: 0.3s;"><i class="bi bi-arrow-left me-1"></i> Back to Home</a>
+            </div>
+        </div>
+    </div>
+</div>

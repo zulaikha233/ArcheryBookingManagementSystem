@@ -8,16 +8,28 @@
             </div>
 
             <div class="premium-card mb-5">
-                <p style="color: #f1f1f1; font-size: 1.1rem">@(TempData["SuccessMessage"] ?? "Your action has been verified and processed by the Archery Arena system.")</p>
+                <p style="color: #2b3a2a; font-size: 1.1rem; font-weight: 500;">@(TempData["SuccessMessage"] ?? "Your reservation has been verified and processed. Please show your code at the counter.")</p>
+                
+                @if (Context.Request.Query.ContainsKey("bookingCode"))
+                {
+                    <div class="mt-5 text-center">
+                        <label class="form-label fw-bold" style="color: #8A9A5B; letter-spacing: 2px; font-size: 0.9rem; text-transform: uppercase;">🎟️ YOUR BOOKING CODE</label>
+                        <div class="p-4 rounded-3 d-flex flex-column align-items-center justify-content-center mt-2" style="background: rgba(255,255,255,0.9); border: 3px solid #8A9A5B; box-shadow: 0 15px 35px rgba(138, 154, 91, 0.2);">
+                            <span style="color: #2b3a2a; font-size: 3.5rem; font-weight: 900; letter-spacing: 5px;">#@Context.Request.Query["bookingCode"]</span>
+                            <small style="color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Please screenshot this code</small>
+                        </div>
+                    </div>
+                }
+
                 @if (TempData["Message"] != null)
                 {
                     <div class="mt-5 text-start">
-                        <label class="form-label fw-bold" style="color: #8A9A5B; letter-spacing: 1px; font-size: 0.85rem; text-transform: uppercase;">✨ INI ADALAH NO ID ANDA</label>
-                        <div class="p-4 rounded-3 d-flex align-items-center mb-2" style="background: rgba(0,0,0,0.4); border: 2px solid #8A9A5B; box-shadow: 0 0 15px rgba(138, 154, 91, 0.2);">
+                        <label class="form-label fw-bold" style="color: #8A9A5B; letter-spacing: 1px; font-size: 0.85rem; text-transform: uppercase;">✨ STAFF ID CREATED</label>
+                        <div class="p-4 rounded-3 d-flex align-items-center mb-2" style="background: rgba(255,255,255,0.9); border: 2px solid #8A9A5B;">
                             <span style="color: #8A9A5B; font-size: 1.8rem; font-weight: 800; margin-right: 15px;">🆔</span>
                             <span style="color: #2b3a2a; font-size: 2.2rem; font-weight: 900; letter-spacing: 4px;">@TempData["Message"].ToString().Split(':').Last().Trim()</span>
                         </div>
-                        <small style="color: #adb5bd;">Here are your ID Employee</small>
+                        <small style="color: #666;">Use this ID to login to the staff portal</small>
                     </div>
                 }
             </div>

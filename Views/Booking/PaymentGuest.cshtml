@@ -1,0 +1,207 @@
+@model ArcheryAlley.Models.PaymentViewModel
+
+@{
+    ViewData["Title"] = "PAYMENT";
+}
+
+<style>
+    :root {
+        --glass-bg: #A9BA9D;
+        --glass-border: rgba(255, 255, 255, 0.08);
+    }
+    body {
+        background-color: #ECE7CA;
+        color: #2b3a2a;
+        font-family: 'Outfit', sans-serif;
+    }
+    .kiosk-wrap {
+        background: #ddead1;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        max-width: 700px;
+        margin: 50px auto;
+        padding: 50px;
+        border-radius: 40px;
+        text-align: center;
+    }
+
+    .kiosk-title {
+        font-weight: 800;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        color: #2b3a2a;
+    }
+
+    .summary-box {
+        background: #ffffff !important;
+        border: 1px solid rgba(0,0,0,0.1);
+        border-radius: 20px;
+        padding: 30px;
+        margin: 30px 0;
+        text-align: left;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .summary-item:last-child { border: none; }
+
+    .summary-label { font-weight: 600; color: #555; }
+    .summary-value { font-weight: 800; color: #000000; }
+
+    .price-tag {
+        font-size: 3.5rem;
+        font-weight: 900;
+        color: #2b3a2a;
+        margin: 30px 0;
+    }
+
+    .btn-generate {
+        background: #ffffff;
+        color: #2b3a2a;
+        border: 1px solid rgba(0,0,0,0.05);
+        padding: 22px 40px;
+        border-radius: 25px;
+        font-weight: 800;
+        font-size: 1.3rem;
+        text-transform: uppercase;
+        width: 100%;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    }
+    .btn-generate:hover {
+        transform: translateY(-3px);
+        background: #f8f9fa;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Success Modal / Kiosk Code */
+    .kiosk-modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(236, 231, 202, 0.8);
+        backdrop-filter: blur(10px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+    }
+    .kiosk-modal {
+        background: #ddead1;
+        border: 1px solid rgba(0,0,0,0.1);
+        border-radius: 40px;
+        padding: 60px;
+        text-align: center;
+        max-width: 550px;
+        width: 90%;
+        box-shadow: 0 30px 60px rgba(0,0,0,0.1);
+    }
+    .booking-code {
+        font-size: 5rem;
+        font-weight: 900;
+        color: #8A9A5B;
+        letter-spacing: 8px;
+        margin: 30px 0;
+        padding: 30px;
+        border: 5px dashed #8A9A5B;
+        background: white !important;
+        border-radius: 25px;
+    }
+</style>
+
+<div class="kiosk-wrap animate-fade-in">
+    <div class="mb-4" style="font-size: 4rem;">🛍️</div>
+    <h1 class="kiosk-title">CHECKOUT</h1>
+    <p class="text-muted">Review your selection and confirm to get your booking code.</p>
+
+    <div class="summary-box">
+        <div class="summary-item">
+            <span class="summary-label">Date</span>
+            <span class="summary-value">@Model.Date</span>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Time</span>
+            <span class="summary-value">@Model.Time</span>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Lanes</span>
+            <span class="summary-value">@Model.SelectedLanes</span>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Pax</span>
+            <span class="summary-value">@Model.NumberOfPax Archers</span>
+        </div>
+    </div>
+
+    <div class="price-tag">
+        RM @Model.TotalPrice.ToString("0.00")
+    </div>
+
+    <button class="btn-generate" id="confirmBtn" onclick="generateKioskCode()">CONFIRM & PROCEED</button>
+    
+    <div class="mt-4">
+        <a href="javascript:history.back()" style="color: #6c757d; text-decoration: none; font-weight: 700; text-transform: uppercase; font-size: 0.8rem;">
+            <i class="bi bi-arrow-left me-1"></i> Back to selection
+        </a>
+    </div>
+</div>
+
+<!-- Kiosk Success Modal -->
+<div id="kioskModal" class="kiosk-modal-overlay">
+    <div class="kiosk-modal">
+        <div style="font-size: 3rem; margin-bottom: 20px;">✅</div>
+        <h2 style="font-weight: 800;">BOOKING CONFIRMED!</h2>
+        <p class="text-muted">Please show this code at the counter for payment.</p>
+        <div id="displayCode" class="booking-code">------</div>
+        <button class="btn-generate mt-4" onclick="window.location.href='/'">DONE</button>
+    </div>
+</div>
+
+<script>
+    async function generateKioskCode() {
+        const btn = document.getElementById("confirmBtn");
+        btn.disabled = true;
+        btn.innerText = "GENERATING CODE...";
+
+        const formData = new FormData();
+        formData.append("SlotId", "@Model.SlotId");
+        formData.append("CustomerName", "@Model.CustomerName");
+        formData.append("CustomerEmail", "@Model.CustomerEmail");
+        const firstLane = "@Model.SelectedLanes".split(',')[0].trim();
+        formData.append("TargetNo", firstLane);
+        formData.append("RangeNo", "1");
+        formData.append("Duration", "@Model.Duration");
+        formData.append("TotalPrice", "@Model.TotalPrice");
+        formData.append("SelectedLanes", "@Model.SelectedLanes");
+        formData.append("SelectedLaneRanges", "@Model.SelectedLaneRanges");
+        formData.append("NumberOfPax", "@Model.NumberOfPax");
+        formData.append("RateCode", ""); // No promo for guests
+
+        try {
+            const response = await fetch('/Booking/CreateCustomerBooking', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                document.getElementById("displayCode").innerText = result.bookingCode;
+                document.getElementById("kioskModal").style.display = "flex";
+            } else {
+                alert("Error: " + result.message);
+                btn.disabled = false;
+                btn.innerText = "CONFIRM & GENERATE CODE";
+            }
+        } catch (err) {
+            alert("Connection error. Please try again.");
+            btn.disabled = false;
+            btn.innerText = "CONFIRM & GENERATE CODE";
+        }
+    }
+</script>

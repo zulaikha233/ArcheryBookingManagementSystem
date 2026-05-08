@@ -18,14 +18,22 @@ namespace ArcheryAlley.Controllers
 
         public IActionResult GetFreeSlots()
         {
+            HttpContext.Session.SetString("IsGuest", "false");
             ViewBag.CustomerEmail = HttpContext.Session.GetString("CustomerEmail");
             ViewBag.CustomerName = HttpContext.Session.GetString("CustomerName");
+            return View();
+        }
+
+        public IActionResult GuestBooking()
+        {
+            HttpContext.Session.SetString("IsGuest", "true");
             return View();
         }
 
         [HttpGet]
         public IActionResult SelectionLane(int slotId, string name, string email, string date, int duration, string ageGroup)
         {
+            ViewBag.IsGuest = HttpContext.Session.GetString("IsGuest") == "true";
             ViewBag.SlotId = slotId;
             ViewBag.Name = name;
             ViewBag.Email = email;
@@ -130,6 +138,34 @@ namespace ArcheryAlley.Controllers
             return View(model);
         }
 
+        public IActionResult PaymentGuest(int SlotId, string CustomerName, string CustomerEmail, string Date, int Duration, decimal TotalPrice, string SelectedLanes, string TargetSize, int TargetAmount, int NumberOfPax)
+        {
+            var model = new ArcheryAlley.Models.PaymentViewModel
+            {
+                SlotId = SlotId,
+                CustomerName = CustomerName,
+                CustomerEmail = CustomerEmail,
+                Date = Date,
+                Duration = Duration,
+                TotalPrice = TotalPrice,
+                SelectedLanes = SelectedLanes,
+                TargetSize = TargetSize,
+                TargetAmount = TargetAmount,
+                NumberOfPax = NumberOfPax
+            };
+
+            if (model.SlotId > 0)
+            {
+                var slot = _repository.GetBookingSlots().FirstOrDefault(s => s.SlotId == model.SlotId);
+                if (slot != null)
+                {
+                    model.Time = $"{slot.SlotStartTime.ToString(@"hh\:mm")} - {slot.SlotEndTime.ToString(@"hh\:mm")}";
+                }
+            }
+
+            return View(model);
+        }
+
         [HttpPost]
         public IActionResult CreateCustomerBooking(int SlotId, string CustomerName, string CustomerEmail, int TargetNo, int RangeNo, int Duration, decimal TotalPrice, string SelectedLanes, string SelectedLaneRanges, int NumberOfPax, string RateCode)
         {
@@ -155,6 +191,7 @@ namespace ArcheryAlley.Controllers
 
                 string reservedBy = HttpContext.Session.GetString("EmpId") ?? CustomerEmail;
 
+                int? firstId = null;
                 foreach (var lane in laneNumbers)
                 {
                     int specificRange = laneRangeMap.ContainsKey(lane) ? laneRangeMap[lane] : RangeNo;
@@ -175,9 +212,10 @@ namespace ArcheryAlley.Controllers
                         Status        = 1
                     };
                     _repository.CreateReservation(reservation);
+                    if (firstId == null) firstId = reservation.ReservationId;
                 }
 
-                return Json(new { success = true });
+                return Json(new { success = true, bookingCode = firstId });
             }
             catch (Exception ex)
             {
