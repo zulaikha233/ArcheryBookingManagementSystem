@@ -7,16 +7,7 @@
             <p style="color: #b0b0b0">Manage Arena availability and lane configurations.</p>
         </div>
         <div class="d-flex gap-2 align-items-center">
-            <a asp-action="ManageRates" asp-controller="Rate"
-               class="btn text-decoration-none d-inline-flex align-items-center justify-content-center"
-               style="border-radius: 50px; font-weight: 600; border: 1px solid #f9c74f; color: #f9c74f; height: 45px; padding: 0 25px">
-                MANAGE RATES
-            </a>
-            <a asp-action="Register" asp-controller="Account"
-               class="btn text-decoration-none d-inline-flex align-items-center justify-content-center"
-               style="border-radius: 50px; font-weight: 600; border: 1px solid #8A9A5B; color: #8A9A5B; height: 45px; padding: 0 25px">
-                REGISTER STAFF
-            </a>
+
             <button type="button" onclick="openAddModal()"
                     class="btn-premium d-inline-flex align-items-center justify-content-center"
                     style="height: 45px; padding: 0 25px; border-radius: 50px; border: none; cursor: pointer">
@@ -29,7 +20,7 @@
         <table class="table mb-0" id="slotsTable">
             <thead>
                 <tr>
-                    <th style="color: #8A9A5B; font-size: 0.78rem; letter-spacing: 1px">LANE ID</th>
+                    <th style="color: #8A9A5B; font-size: 0.78rem; letter-spacing: 1px">SLOT ID</th>
                     <th style="color: #8A9A5B; font-size: 0.78rem; letter-spacing: 1px">START TIME</th>
                     <th style="color: #8A9A5B; font-size: 0.78rem; letter-spacing: 1px">END TIME</th>
                     <th class="text-end" style="color: #8A9A5B; font-size: 0.78rem; letter-spacing: 1px">MANAGEMENT</th>
