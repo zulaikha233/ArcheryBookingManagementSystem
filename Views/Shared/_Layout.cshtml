@@ -12,32 +12,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewBag.Title - Archery Arena</title>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;800;900&display=swap" rel="stylesheet">
     <!-- Bootstrap -->
     <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- AOS Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <!-- Custom Premium Styles -->
     <link href="~/css/archery_modern.css" rel="stylesheet" />
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Flatpickr (Modern Calendar) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
     <nav class="navbar navbar-expand-lg glass-nav sticky-top">
         <div class="container">
             <a class="navbar-brand" href="~/">
-                <span style="color: #8A9A5B">ARCHERY</span> ARENA
+                <span>ARCHERY</span> ARENA
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" style="border-color: var(--card-border);">
+                <i class="bi bi-list" style="color: var(--primary); font-size: 1.5rem;"></i>
             </button>
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav ms-auto align-items-center">
                     @if (userRole == "Staff")
                     {
                         <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("StaffBooking", "Booking")"><i class="bi bi-cpu"></i> Slot Reservation</a>
+                            <a class="nav-link" href="@Url.Action("StaffBooking", "Booking")"><i class="bi bi-cpu me-1"></i> Slot Reservation</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("BookingHistory", "Booking")">Booking History</a>
+                            <a class="nav-link" href="@Url.Action("BookingHistory", "Booking")"><i class="bi bi-clock-history me-1"></i> Booking History</a>
                         </li>
                     }
 
@@ -45,115 +49,120 @@
                     @if (userRole == "Admin")
                     {
                         <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("ManageSlots", "Slot")">Admin Dashboard</a>
+                            <a class="nav-link" href="@Url.Action("ManageSlots", "Slot")"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("ManageRates", "Rate")">Manage Rates</a>
+                            <a class="nav-link" href="@Url.Action("ManageRates", "Rate")"><i class="bi bi-tags me-1"></i> Rates</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("ManageLanes", "Management")">Manage Lanes</a>
+                            <a class="nav-link" href="@Url.Action("ManageLanes", "Management")"><i class="bi bi-layers me-1"></i> Lanes</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Register", "Account")">Register Staff</a>
+                            <a class="nav-link" href="@Url.Action("Register", "Account")"><i class="bi bi-person-plus me-1"></i> Add Staff</a>
                         </li>
                     }
                     
 
+                    @if (!string.IsNullOrEmpty(userName) || !string.IsNullOrEmpty(customerName))
+                    {
+                        <li class="nav-item ms-lg-3">
+                            <a class="nav-link text-danger" href="@Url.Action("Logout", "Account")" style="color: #ff6b6b !important;">
+                                <i class="bi bi-box-arrow-right me-1"></i> Logout
+                            </a>
+                        </li>
+                    }
                 </ul>
                 
-                @if (!string.IsNullOrEmpty(userName) || !string.IsNullOrEmpty(customerName))
-                {
-                    <div style="position: absolute; right: 25px; top: 50%; transform: translateY(-50%);">
-                        <a class="nav-link p-0" href="@Url.Action("Logout", "Account")" title="Logout">
-                            <div class="logout-icon-wrapper">
-                                <i class="bi bi-box-arrow-right" style="font-size: 1.5rem; color: #ff6b6b; transition: 0.3s;"></i>
-                            </div>
-                        </a>
-                    </div>
-                }
             </div>
         </div>
     </nav>
 
-    <div class="container mt-4 animate-in">
-        @if (!string.IsNullOrEmpty(userName) || !string.IsNullOrEmpty(customerName))
-        {
-            <div class="user-greeting mb-3" style="color: #8A9A5B; font-size: 0.9rem; font-weight: 500; letter-spacing: 0.5px;">
-                <i class="bi bi-person-circle me-2" style="font-size: 1.1rem; vertical-align: middle;"></i>Hello, @(userName ?? customerName)
-            </div>
-        }
+    <main role="main">
         @RenderBody()
-    </div>
+    </main>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     @await RenderSectionAsync("Scripts", required: false)
 
     <!-- Global Custom Notification Modal -->
     <div id="globalNotifOverlay" style="
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+        background: rgba(0,0,0,0.85); backdrop-filter: blur(15px);
         display: none; align-items: center; justify-content: center;
-        z-index: 9999; opacity: 0; transition: opacity 0.25s ease;">
+        z-index: 9999; opacity: 0; transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);">
         <div id="globalNotifBox" style="
-            background: rgba(18, 20, 35, 0.95);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px; padding: 40px 36px;
-            text-align: center; max-width: 420px; width: 90%;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
-            transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            background: #0f172a;
+            border: 1px solid var(--card-border);
+            border-radius: 32px; padding: 50px 40px;
+            text-align: center; max-width: 450px; width: 90%;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            transform: translateY(30px); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
             <div id="globalNotifIcon" style="
-                width: 70px; height: 70px; border-radius: 50%;
+                width: 80px; height: 80px; border-radius: 24px;
                 display: flex; align-items: center; justify-content: center;
-                font-size: 2rem; margin: 0 auto 20px;"></div>
+                font-size: 2.5rem; margin: 0 auto 25px;
+                box-shadow: 0 15px 30px rgba(0,0,0,0.2);"></div>
+            <h3 id="globalNotifTitle" style="color: #fff; font-weight: 800; margin-bottom: 10px; font-size: 1.5rem;">System Message</h3>
             <p id="globalNotifMsg" style="
-                color: #ddd; font-size: 0.95rem; line-height: 1.6;
-                margin: 0 0 28px; font-family: 'Inter', sans-serif;"></p>
-            <button onclick="closeNotif()" style="
-                background: linear-gradient(135deg, #8A9A5B, #6D7B48);
-                color: #000; border: none; padding: 11px 36px;
-                border-radius: 25px; font-weight: 700; font-size: 0.85rem;
-                cursor: pointer; letter-spacing: 0.5px;
-                transition: transform 0.2s, box-shadow 0.2s;">OK</button>
+                color: var(--text-dim); font-size: 1rem; line-height: 1.6;
+                margin: 0 0 35px; font-family: 'Inter', sans-serif;"></p>
+            <button onclick="closeNotif()" class="btn-premium w-100" style="justify-content: center;">
+                CONTINUE
+            </button>
         </div>
     </div>
 
     <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 1000,
+            once: true,
+            easing: 'ease-out-cubic'
+        });
+
         function showNotif(message, type = 'info') {
             const overlay = document.getElementById('globalNotifOverlay');
             const icon    = document.getElementById('globalNotifIcon');
             const msg     = document.getElementById('globalNotifMsg');
+            const box     = document.getElementById('globalNotifBox');
+            const title   = document.getElementById('globalNotifTitle');
 
             const config = {
-                error:   { bg: 'rgba(255,80,80,0.15)',  border: '#ff5050', symbol: '✕', color: '#ff6b6b' },
-                warning: { bg: 'rgba(255,190,50,0.15)', border: '#ffbe32', symbol: '!', color: '#ffbe32' },
-                info:    { bg: 'rgba(138,154,91,0.12)',   border: '#8A9A5B', symbol: 'i', color: '#8A9A5B' }
+                error:   { bg: 'rgba(239, 68, 68, 0.1)',  border: '#ef4444', icon: 'bi-x-lg', color: '#ef4444', title: 'Action Failed' },
+                warning: { bg: 'rgba(245, 158, 11, 0.1)', border: '#f59e0b', icon: 'bi-exclamation-triangle', color: '#f59e0b', title: 'Attention' },
+                info:    { bg: 'rgba(249, 115, 22, 0.1)',   border: '#f97316', icon: 'bi-info-circle', color: '#f97316', title: 'System Info' }
             };
 
             const c = config[type] || config.info;
             icon.style.background = c.bg;
-            icon.style.border     = `2px solid ${c.border}`;
+            icon.style.border     = `1px solid ${c.border}`;
             icon.style.color      = c.color;
-            icon.style.fontWeight = 'bold';
-            icon.textContent      = c.symbol;
+            icon.innerHTML        = `<i class="bi ${c.icon}"></i>`;
             msg.textContent       = message;
+            title.textContent     = c.title;
+            title.style.color     = c.color;
 
             overlay.style.display = 'flex';
             setTimeout(() => {
                 overlay.style.opacity = '1';
-                document.getElementById('globalNotifBox').style.transform = 'scale(1)';
+                box.style.transform = 'translateY(0)';
             }, 10);
         }
 
         function closeNotif() {
             const overlay = document.getElementById('globalNotifOverlay');
+            const box     = document.getElementById('globalNotifBox');
             overlay.style.opacity = '0';
-            document.getElementById('globalNotifBox').style.transform = 'scale(0.9)';
-            setTimeout(() => { overlay.style.display = 'none'; }, 280);
+            box.style.transform = 'translateY(30px)';
+            setTimeout(() => { overlay.style.display = 'none'; }, 400);
         }
     </script>
 </body>
 </html>
+
 
 
 

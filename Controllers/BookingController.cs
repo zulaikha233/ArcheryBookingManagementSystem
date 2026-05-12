@@ -21,6 +21,7 @@ namespace ArcheryAlley.Controllers
             HttpContext.Session.SetString("IsGuest", "false");
             ViewBag.CustomerEmail = HttpContext.Session.GetString("CustomerEmail");
             ViewBag.CustomerName = HttpContext.Session.GetString("CustomerName");
+            ViewBag.CustomerPhone = HttpContext.Session.GetString("CustomerPhone");
             return View();
         }
 
@@ -31,12 +32,13 @@ namespace ArcheryAlley.Controllers
         }
 
         [HttpGet]
-        public IActionResult SelectionLane(int slotId, string name, string email, string date, int duration, string ageGroup)
+        public IActionResult SelectionLane(int slotId, string name, string email, string phone, string date, int duration, string ageGroup)
         {
             ViewBag.IsGuest = HttpContext.Session.GetString("IsGuest") == "true";
             ViewBag.SlotId = slotId;
             ViewBag.Name = name;
             ViewBag.Email = email;
+            ViewBag.Phone = phone;
             ViewBag.Date = date;
             ViewBag.Duration = duration;
             ViewBag.AgeGroup = ageGroup;

@@ -8,7 +8,14 @@
             </div>
 
             <div class="premium-card mb-5">
-                <p style="color: #2b3a2a; font-size: 1.1rem; font-weight: 500;">@(TempData["SuccessMessage"] ?? "Your reservation has been verified and processed. Please show your code at the counter.")</p>
+                @{
+                    var isGuest = Context.Session.GetString("IsGuest") == "true";
+                    var defaultMessage = isGuest 
+                        ? "Your reservation has been verified and processed. Please show your code at the counter." 
+                        : "Your reservation has been verified and processed. You may check your booking history for details.";
+                    var displayMessage = TempData["SuccessMessage"] ?? defaultMessage;
+                }
+                <p style="color: #2b3a2a; font-size: 1.1rem; font-weight: 500;">@displayMessage</p>
                 
                 @if (Context.Session.GetString("IsGuest") == "true" && Context.Request.Query.ContainsKey("bookingCode"))
                 {

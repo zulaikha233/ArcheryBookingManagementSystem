@@ -2,26 +2,26 @@
     ViewBag.Title = "Add New Rate";
 }
 
-<div class="container animate-in" style="max-width: 640px">
+<div class="container py-5" data-aos="fade-up" style="max-width: 640px">
 
     <!-- Back link -->
     <a asp-action="ManageRates" class="text-decoration-none d-inline-flex align-items-center gap-2 mb-4"
-       style="color: #888; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.5px; transition: color 0.2s"
-       onmouseover="this.style.color='#8A9A5B'" onmouseout="this.style.color='#888'">
+       style="color: var(--text-dim); font-size: 0.85rem; font-weight: 600; letter-spacing: 0.5px; transition: var(--transition-smooth);"
+       onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-dim)'">
         <i class="bi bi-arrow-left"></i> BACK TO MANAGE RATES
     </a>
 
     <!-- Header -->
     <div class="mb-4">
         <span id="headerCodeBadge" style="font-family: 'Courier New', monospace; font-size: 0.75rem; font-weight: 800;
-                     letter-spacing: 2px; color: #8A9A5B; background: rgba(255,255,255,0.04);
-                     padding: 4px 14px; border-radius: 6px; border: 1px solid #8A9A5B">
+                     letter-spacing: 2px; color: var(--primary); background: rgba(163, 230, 53, 0.05);
+                     padding: 4px 14px; border-radius: 6px; border: 1px solid var(--primary)">
             NEW RATE
         </span>
         <h1 class="hero-title mt-3" style="font-size: 2rem; margin: 0">
-            ADD <span style="color: #8A9A5B">NEW RATE</span>
+            ADD <span style="color: var(--primary)">NEW RATE</span>
         </h1>
-        <p style="color: #888; margin-top: 6px">Create a new custom pricing rate for archery bookings.</p>
+        <p class="text-dim mt-2">Create a new custom pricing rate for archery bookings.</p>
     </div>
 
     <!-- Form Card -->
@@ -30,171 +30,173 @@
 
             <!-- Rate Code -->
             <div class="mb-4">
-                <label for="rateCodeInput" style="color: #b0b0b0; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 8px">
+                <label for="rateCodeInput" class="form-label-premium">
                     RATE CODE
                 </label>
-                <div style="position: relative">
+                <div class="position-relative">
                     <input type="text" id="rateCodeInput" name="RateCode"
                            maxlength="20" required
                            placeholder="e.g. DJOF23X"
-                           oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9\-]/g,''); document.getElementById('headerCodeBadge').textContent = this.value || 'NEW RATE'"
-                           style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.15);
-                                  color: #2b3a2a; border-radius: 12px; padding: 12px 16px 12px 48px;
-                                  width: 100%; font-family: 'Courier New', monospace; font-size: 1rem;
-                                  font-weight: 700; letter-spacing: 2px; outline: none; transition: border-color 0.2s"
-                           onfocus="this.style.borderColor='#8A9A5B'"
-                           onblur="this.style.borderColor='rgba(255,255,255,0.15)'" />
-                    <i class="bi bi-hash" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #8A9A5B; font-size: 1rem"></i>
+                           class="form-control ps-5"
+                           style="font-family: 'Courier New', monospace; font-size: 1rem; font-weight: 700; letter-spacing: 2px;"
+                           oninput="this.value = this.value.toUpperCase().replace(/[^A-Z0-9\-]/g,''); document.getElementById('headerCodeBadge').textContent = this.value || 'NEW RATE'" />
+                    <i class="bi bi-hash position-absolute start-0 top-50 translate-middle-y ms-3" style="color: var(--primary); font-size: 1.2rem"></i>
                 </div>
-                <div style="color: #555; font-size: 0.78rem; margin-top: 6px">
+                <div class="text-dim mt-2" style="font-size: 0.78rem;">
                     Letters, numbers and hyphens only. Max 20 characters.
                 </div>
             </div>
 
             <!-- Rate Name -->
             <div class="mb-4">
-                <label for="rateNameInput" style="color: #b0b0b0; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 8px">
+                <label for="rateNameInput" class="form-label-premium">
                     RATE NAME
                 </label>
-                <div style="position: relative">
+                <div class="position-relative">
                     <input type="text" id="rateNameInput" name="RateName"
                            maxlength="100" required
                            placeholder="e.g. Raya Promo"
-                           style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.15);
-                                  color: #2b3a2a; border-radius: 12px; padding: 12px 16px 12px 48px;
-                                  width: 100%; font-size: 1rem; outline: none; transition: border-color 0.2s"
-                           onfocus="this.style.borderColor='#8A9A5B'"
-                           onblur="this.style.borderColor='rgba(255,255,255,0.15)'" />
-                    <i class="bi bi-tag" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #8A9A5B; font-size: 1rem"></i>
+                           class="form-control ps-5" />
+                    <i class="bi bi-tag position-absolute start-0 top-50 translate-middle-y ms-3" style="color: var(--primary); font-size: 1.2rem"></i>
                 </div>
             </div>
 
             <!-- Category + Session Row -->
             <div class="row g-3 mb-4">
                 <div class="col-6">
-                    <label style="color: #b0b0b0; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 8px">
-                        CATEGORY
-                    </label>
-                    <select id="catSelect" name="RateCategory" required onchange="onCatChanged()"
-                            style="background: #ECE7CA; border: 1px solid rgba(255,255,255,0.15); color: #2b3a2a;
-                                   border-radius: 12px; padding: 12px 16px; width: 100%; outline: none; cursor: pointer">
-                        <option value="1" style="background:#ECE7CA">Normal</option>
-                        <option value="2" style="background:#ECE7CA">Discount</option>
-                        <option value="3" style="background:#ECE7CA">Special</option>
-                        <option value="4" style="background:#ECE7CA">FOC</option>
+                    <label class="form-label-premium">CATEGORY</label>
+                    <select id="catSelect" name="RateCategory" required onchange="onCatChanged()" class="form-control">
+                        <option value="1">Normal</option>
+                        <option value="2">Discount</option>
+                        <option value="3">Special</option>
+                        <option value="4">FOC</option>
                     </select>
                 </div>
                 <div class="col-6">
-                    <label style="color: #b0b0b0; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 8px">
-                        SESSION
-                    </label>
-                    <select id="sesSelect" name="SessionType" required
-                            style="background: #ECE7CA; border: 1px solid rgba(255,255,255,0.15); color: #2b3a2a;
-                                   border-radius: 12px; padding: 12px 16px; width: 100%; outline: none; cursor: pointer">
-                        <option value="1" style="background:#ECE7CA">Siang</option>
-                        <option value="2" style="background:#ECE7CA">Malam</option>
-                        <option value="0" style="background:#ECE7CA">All Sessions</option>
+                    <label class="form-label-premium">SESSION</label>
+                    <select id="sesSelect" name="SessionType" required class="form-control">
+                        <option value="1">Siang</option>
+                        <option value="2">Malam</option>
+                        <option value="0">All Sessions</option>
                     </select>
                 </div>
             </div>
 
             <!-- Base Price -->
             <div class="mb-4" id="priceSection">
-                <label for="basePrice" style="color: #b0b0b0; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 8px">
+                <label for="basePrice" class="form-label-premium">
                     BASE PRICE (RM)
                 </label>
-                <div class="input-group" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; overflow: hidden">
-                    <span style="background: transparent; border: none; color: #8A9A5B; padding: 12px 16px; font-weight: 700; font-size: 1rem">RM</span>
+                <div class="input-group">
+                    <span class="input-group-text" style="background: transparent; border: 1px solid var(--card-border); border-right: none; border-radius: 16px 0 0 16px; color: var(--primary); font-weight: 700;">RM</span>
                     <input type="number" id="basePrice" name="BasePrice"
                            value="10.00" step="0.50" min="0" required
                            oninput="updatePreview()"
-                           style="background: transparent; border: none; color: #2b3a2a; font-size: 1rem; font-weight: 600; padding: 12px 16px; outline: none; width: 100%" />
+                           class="form-control" style="border-left: none; border-radius: 0 16px 16px 0;" />
                 </div>
-                <div style="color: #555; font-size: 0.78rem; margin-top: 6px">
+                <div class="text-dim mt-2" style="font-size: 0.78rem;">
                     Default: Siang = RM 10.00 &nbsp;|&nbsp; Malam = RM 12.00
                 </div>
             </div>
 
-            <!-- Discount Percentage (all categories except FOC) -->
+            <!-- Discount Percentage -->
             <div class="mb-4" id="discountSection">
-                <label for="discountPct" style="color: #b0b0b0; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 8px">
+                <label for="discountPct" class="form-label-premium">
                     DISCOUNT (%)
                 </label>
-                <div style="display: flex; align-items: center; gap: 16px">
+                <div class="d-flex align-items-center gap-3">
                     <input type="range" id="discountSlider" min="0" max="100" step="1" value="0"
                            oninput="syncDiscount(this.value)"
-                           style="flex: 1; accent-color: #f9c74f; height: 6px; cursor: pointer" />
-                    <div class="input-group" style="width: 100px; background: rgba(255,255,255,0.04); border: 1px solid rgba(249,199,79,0.3); border-radius: 10px; overflow: hidden; flex-shrink: 0">
+                           style="flex: 1; accent-color: var(--secondary); height: 6px; cursor: pointer" />
+                    <div class="input-group" style="width: 110px;">
                         <input type="number" id="discountPct" name="DiscountPercentage"
                                value="0" min="0" max="100" step="1"
                                oninput="syncSlider(this.value)"
-                               style="background: transparent; border: none; color: #f9c74f; font-size: 1rem; font-weight: 700; padding: 10px 8px; outline: none; width: 70%; text-align: right" />
-                        <span style="background: transparent; border: none; color: #f9c74f; font-weight: 700; padding: 10px 8px">%</span>
+                               class="form-control text-center" style="color: var(--secondary); font-weight: 700;" />
+                        <span class="input-group-text" style="background: transparent; border: 1px solid var(--card-border); border-left: none; border-radius: 0 16px 16px 0; color: var(--secondary); font-weight: 700;">%</span>
                     </div>
                 </div>
-                <div style="color: #555; font-size: 0.78rem; margin-top: 6px">Set to 0 for no discount.</div>
             </div>
 
             <!-- Promo Date Range (Special only) -->
             <div class="mb-4" id="promoDateSection" style="display:none">
-                <label style="color: #a29bfe; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 8px">
+                <label class="form-label-premium" style="color: var(--secondary)">
                     <i class="bi bi-calendar-event me-1"></i> PROMO VALIDITY PERIOD
                 </label>
-                <div style="background: rgba(162,155,254,0.05); border: 1px solid rgba(162,155,254,0.2); border-radius: 14px; padding: 16px;">
+                <div style="background: rgba(251, 191, 36, 0.05); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 16px; padding: 20px;">
                     <div class="row g-3">
                         <div class="col-6">
-                            <label style="color: #888; font-size: 0.75rem; letter-spacing: 1px; display: block; margin-bottom: 6px">VALID FROM</label>
-                            <input type="date" id="validFrom" name="ValidFrom"
-                                   style="background: rgba(255,255,255,0.04); border: 1px solid rgba(162,155,254,0.3);
-                                          color: #2b3a2a; border-radius: 10px; padding: 10px 14px; width: 100%; outline: none;"
-                                   onfocus="this.style.borderColor='#a29bfe'" onblur="this.style.borderColor='rgba(162,155,254,0.3)'" />
+                            <label class="form-label-premium" style="font-size: 0.65rem;">VALID FROM</label>
+                            <input type="date" id="validFrom" name="ValidFrom" class="form-control" />
                         </div>
                         <div class="col-6">
-                            <label style="color: #888; font-size: 0.75rem; letter-spacing: 1px; display: block; margin-bottom: 6px">VALID TO</label>
-                            <input type="date" id="validTo" name="ValidTo"
-                                   style="background: rgba(255,255,255,0.04); border: 1px solid rgba(162,155,254,0.3);
-                                          color: #2b3a2a; border-radius: 10px; padding: 10px 14px; width: 100%; outline: none;"
-                                   onfocus="this.style.borderColor='#a29bfe'" onblur="this.style.borderColor='rgba(162,155,254,0.3)'" />
+                            <label class="form-label-premium" style="font-size: 0.65rem;">VALID TO</label>
+                            <input type="date" id="validTo" name="ValidTo" class="form-control" />
                         </div>
-                    </div>
-                    <div style="color: #666; font-size: 0.75rem; margin-top: 10px">
-                        <i class="bi bi-info-circle me-1"></i> Customer can enter the Rate Code as promo during this period only. Leave blank for no expiry.
                     </div>
                 </div>
             </div>
 
             <!-- FOC notice -->
             <div id="focNotice" style="display:none" class="mb-4 p-4 text-center"
-                 style="background: rgba(85,239,196,0.05); border-radius: 14px; border: 1px dashed rgba(85,239,196,0.2)">
-                <div style="font-size: 2.5rem; font-weight: 900; color: #55efc4">FREE</div>
-                <p style="color: #888; margin: 4px 0 0">FOC rate is always RM 0.00. No price configuration needed.</p>
+                 style="background: rgba(163, 230, 53, 0.05); border-radius: 16px; border: 1px dashed var(--primary)">
+                <div style="font-size: 2.5rem; font-weight: 900; color: var(--primary)">FREE</div>
+                <p class="text-dim mt-2">FOC rate is always RM 0.00. No price configuration needed.</p>
             </div>
 
             <!-- Live Preview -->
-            <div class="mb-5 p-4" id="previewBox" style="background: rgba(255,255,255,0.03); border-radius: 14px; border: 1px dashed rgba(255,255,255,0.12)">
-                <div style="color: #666; font-size: 0.78rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px">PRICE PREVIEW</div>
-                <div id="pricePreview" style="font-size: 1.8rem; font-weight: 900; color: #8A9A5B">RM 10.00</div>
-                <div id="discountNote" style="color: #888; font-size: 0.82rem; margin-top: 4px"></div>
+            <div class="mb-5 p-4" id="previewBox" style="background: rgba(255, 255, 255, 0.03); border-radius: 16px; border: 1px dashed var(--card-border)">
+                <div class="text-dim mb-2" style="font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;">PRICE PREVIEW</div>
+                <div id="pricePreview" style="font-size: 2rem; font-weight: 900; color: var(--primary)">RM 10.00</div>
+                <div id="discountNote" class="text-dim" style="font-size: 0.85rem; margin-top: 5px"></div>
             </div>
 
             <!-- Action Buttons -->
             <div class="d-flex gap-3">
-                <button type="submit" class="btn-premium flex-grow-1"
-                        style="height: 48px; font-size: 0.9rem; border-radius: 14px">
+                <button type="submit" class="btn-premium flex-grow-1 justify-content-center">
                     <i class="bi bi-plus-circle me-2"></i> CREATE RATE
                 </button>
-                <a asp-action="ManageRates"
-                   style="height: 48px; padding: 0 24px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.15);
-                          background: transparent; color: #888; font-weight: 700; font-size: 0.9rem;
-                          display: flex; align-items: center; text-decoration: none; transition: all 0.2s"
-                   onmouseover="this.style.borderColor='#8A9A5B'; this.style.color='#8A9A5B'"
-                   onmouseout="this.style.borderColor='rgba(255,255,255,0.15)'; this.style.color='#888'">
+                <a asp-action="ManageRates" class="btn-premium-outline">
                     CANCEL
                 </a>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+    .form-label-premium {
+        font-size: 0.75rem;
+        color: var(--text-dim);
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .btn-premium-outline {
+        padding: 1rem 2rem;
+        border: 1px solid var(--card-border);
+        background: transparent;
+        color: var(--text-dim);
+        border-radius: 16px;
+        text-decoration: none;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: var(--transition-smooth);
+        display: inline-flex;
+        align-items: center;
+    }
+    .btn-premium-outline:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+    select.form-control option {
+        background: #0f172a;
+        color: #fff;
+    }
+</style>
 
 @section Scripts {
     <script>
@@ -210,8 +212,8 @@
             document.getElementById('promoDateSection').style.display = isSpec ? 'block' : 'none';
 
             // Update preview color
-            const catColors = { '1': '#8A9A5B', '2': '#f9c74f', '3': '#a29bfe', '4': '#55efc4' };
-            document.getElementById('pricePreview').style.color = catColors[cat] || '#8A9A5B';
+            const catColors = { '1': 'var(--primary)', '2': 'var(--secondary)', '3': '#a29bfe', '4': 'var(--primary)' };
+            document.getElementById('pricePreview').style.color = catColors[cat] || 'var(--primary)';
 
             updatePreview();
         }

@@ -67,6 +67,7 @@ namespace ArcheryAlley.Controllers
                 {
                     HttpContext.Session.SetString("CustomerEmail", customer.Email);
                     HttpContext.Session.SetString("CustomerName", customer.FullName);
+                    HttpContext.Session.SetString("CustomerPhone", customer.PhoneNumber ?? "");
                     return RedirectToAction("GetFreeSlots", "Booking");
                 }
             }

@@ -3,21 +3,24 @@
     var slotId = ViewBag.SlotId;
     var name = ViewBag.Name;
     var email = ViewBag.Email;
+    var phone = ViewBag.Phone;
     var date = ViewBag.Date;
     var duration = ViewBag.Duration;
     var ageGroup = ViewBag.AgeGroup;
 }
 
-<div class="booking-wizard-container animate-fade-in">
+<div class="booking-wizard-container py-5">
     <!-- Progress Header -->
-    <partial name="~/Views/Home/_BookingProgress.cshtml" model="2" />
+    <div data-aos="fade-down">
+        <partial name="~/Views/Home/_BookingProgress.cshtml" model="2" />
+    </div>
 
     <!-- Step 2: Target Size -->
-    <div class="wizard-step active" id="wizard-step-2">
-        <div class="glass-card">
-            <h3 class="step-title">Choose Your Target Size</h3>
+    <div class="wizard-step active" id="wizard-step-2" data-aos="fade-up">
+        <div class="premium-card">
+            <h3 class="fw-bold mb-4" style="color: var(--primary);">Choose Your Target Size</h3>
             
-            <div class="row g-3 mb-4">
+            <div class="row g-4 mb-5">
                 <div class="col-md-3">
                     <div class="target-size-card" id="size-Large" onclick="selectTargetSize('Large')">
                         <div class="size-img-wrapper">
@@ -31,7 +34,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="target-size-card" id="size-Medium" onclick="selectTargetSize('Medium')">
-                        <div class="size-img-wrapper" style="padding: 8px;">
+                        <div class="size-img-wrapper" style="padding: 12px;">
                             <img src="/images/target.png" alt="Medium">
                         </div>
                         <div class="size-info">
@@ -42,7 +45,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="target-size-card" id="size-Inter" onclick="selectTargetSize('Inter')">
-                        <div class="size-img-wrapper" style="padding: 15px;">
+                        <div class="size-img-wrapper" style="padding: 20px;">
                             <img src="/images/target.png" alt="Intermediate">
                         </div>
                         <div class="size-info">
@@ -53,7 +56,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="target-size-card" id="size-Small" onclick="selectTargetSize('Small')">
-                        <div class="size-img-wrapper" style="padding: 22px;">
+                        <div class="size-img-wrapper" style="padding: 28px;">
                             <img src="/images/target.png" alt="Small">
                         </div>
                         <div class="size-info">
@@ -64,199 +67,190 @@
                 </div>
             </div>
 
-            <div class="glass-card mb-4 p-4 text-center" style="background: rgba(0,0,0,0.05); border-radius: 20px; max-width: 500px; margin: 0 auto 30px;">
-                <label class="form-label-premium mb-3 d-block">Select Amount</label>
-                <div id="targetAmountContainer" class="d-flex justify-content-center" style="gap: 20px;">
-                    <p class="text-muted small">Please select a size first.</p>
+            <div class="premium-card mb-5 p-4 text-center" style="background: rgba(249, 115, 22, 0.05); max-width: 500px; margin: 0 auto;">
+                <label class="form-label-premium mb-3 d-block">Target Face Amount</label>
+                <div id="targetAmountContainer" class="d-flex justify-content-center gap-4">
+                    <p class="text-dim">Please select a size first.</p>
                 </div>
-                <p id="amountHint" class="mt-3 small mb-0" style="color: var(--active-blue); font-weight: 600;"></p>
+                <p id="amountHint" class="mt-3 small mb-0 fw-bold" style="color: var(--primary);"></p>
             </div>
 
-            <div class="wizard-actions mt-4">
-                <button class="btn-premium-outline" onclick="history.back()">Back</button>
-                <button class="btn-premium" onclick="goToStep3()">Next</button>
+            <div class="wizard-actions d-flex justify-content-between mt-5">
+                <button class="btn-premium-outline" onclick="history.back()">BACK</button>
+                <button class="btn-premium" onclick="goToStep3()">NEXT</button>
             </div>
         </div>
     </div>
 
     <!-- Step 3: Lane Selection -->
     <div class="wizard-step" id="wizard-step-3">
-        <div class="glass-card">
-            <h3 class="step-title">Select Target Lane</h3>
+        <div class="premium-card">
+            <h3 class="fw-bold mb-4" style="color: var(--primary);">Select Target Lane</h3>
 
-            <div class="mb-4 p-3 rounded-4 text-center animate-fade-in" style="background: rgba(138, 154, 91, 0.1); border: 1px solid rgba(138, 154, 91, 0.3);">
-                <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; color: var(--deep-blue); margin-bottom: 5px;">Selected Category</div>
-                <div class="d-flex align-items-center justify-content-center">
-                    <span style="font-size: 1.2rem; font-weight: 800; color: #2b3a2a;">@ageGroup</span>
-                </div>
-                <div class="mt-2" style="font-size: 0.75rem; font-weight: 600; color: var(--active-blue);">
-                    <i class="bi bi-info-circle me-1"></i> Here are the lanes available for you :<b>Lanes @(ageGroup == "Adult" ? "11 - 20" : "1 - 10")</b>
+            <div class="mb-4 p-4 rounded-4 text-center" style="background: rgba(249, 115, 22, 0.08); border: 1px solid var(--primary-glow);">
+                <div class="text-dim fw-bold mb-2" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px;">Target Category</div>
+                <div class="h3 fw-900 mb-2" style="color: #fff;">@ageGroup</div>
+                <div class="text-dim small">
+                    <i class="bi bi-info-circle me-1"></i> Dedicated lanes for your category: <b class="text-primary">Lanes @(ageGroup == "Adult" ? "11 - 20" : "1 - 10")</b>
                 </div>
             </div>
             
-            <div class="glass-card mb-4 p-4" style="background: rgba(0,0,0,0.05); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div class="premium-card mb-4 p-4" style="background: rgba(255,255,255,0.02);">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-4">
                     <div>
-                        <label class="form-label-premium mb-1" style="font-size: 0.9rem;">Number of Archers (Pax)</label>
-                        <p class="mb-0" style="color: var(--deep-blue); font-weight: 700; font-size: 0.85rem;" id="laneRequiredHint">
-                            <i class="fas fa-info-circle me-1"></i> Min 1 Lane Required
+                        <label class="form-label-premium mb-1">Number of Archers</label>
+                        <p class="mb-0 text-dim small" id="laneRequiredHint">
+                            <i class="bi bi-info-square me-1"></i> Minimum 1 lane recommended per 4 archers.
                         </p>
                     </div>
                     
-                    <div class="modern-counter">
-                        <button class="counter-btn" onclick="updatePax(-1)">-</button>
-                        <div class="counter-value" id="paxDisplay">1</div>
-                        <button class="counter-btn" onclick="updatePax(1)">+</button>
+                    <div class="counter-input-container">
+                        <button class="counter-btn" onclick="updatePax(-1)"><i class="bi bi-dash"></i></button>
+                        <div class="counter-input" id="paxDisplay" style="width: 60px;">1</div>
+                        <button class="counter-btn" onclick="updatePax(1)"><i class="bi bi-plus"></i></button>
                         <input type="hidden" id="numberOfPax" value="1">
                     </div>
                 </div>
             </div>
 
-            <div id="target-hint" class="mt-3 mb-3 fw-bold text-center" style="color: var(--active-blue);">Select your preferred lane(s).</div>
+            <div id="target-hint" class="mb-4 fw-bold text-center text-dim" style="font-size: 0.9rem;">Select your preferred lane(s) on the grid.</div>
             
             <div id="targetsGrid" class="targets-grid"></div>
 
-            <div class="wizard-actions mt-5">
-                <button class="btn-premium-outline" onclick="goToStep2()">Back</button>
-                <button class="btn-premium" onclick="goToStep4()">Next</button>
+            <div class="wizard-actions d-flex justify-content-between mt-5">
+                <button class="btn-premium-outline" onclick="goToStep2()">BACK</button>
+                <button class="btn-premium" onclick="goToStep4()">CONFIRM BOOKING</button>
             </div>
         </div>
     </div>
 </div>
 
+
 <style>
     :root {
-        --active-blue: #8A9A5B;
-        --deep-blue: #6D7B48;
-        --glass: #A9BA9D;
-        --glass-border: rgba(255, 255, 255, 0.08);
-    }
+    --active-blue: var(--primary);
+    --text-muted: #94a3b8;
+}
 
-    body { background: #ECE7CA !important; font-family: 'Outfit', sans-serif; }
-    .booking-wizard-container { max-width: 1100px; margin: 50px auto; padding: 0 20px; }
+.booking-wizard-container { max-width: 1100px; margin: 40px auto; }
 
-    .glass-card { background: var(--glass); border-radius: 25px; padding: 2.5rem; border: 1px solid var(--glass-border); }
-    .wizard-step { display: none; }
-    .wizard-step.active { display: block; }
-    
-    .target-size-card { background: #ddead1; border-radius: 15px; padding: 15px; cursor: pointer; transition: 0.3s; text-align: center; border: 1px solid transparent; }
-    .target-size-card:hover { border-color: var(--active-blue); }
-    .target-size-card.selected { background: var(--active-blue); border-color: var(--active-blue); }
-    .size-img-wrapper { 
-        width: 100px; 
-        height: 100px; 
-        border-radius: 50%; 
-        overflow: hidden; 
-        margin: 0 auto 15px; 
-        background: white; 
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 2px solid var(--deep-blue);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    .size-img-wrapper img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-    }
-    .size-info {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2px;
-    }
-    .size-name { 
-        display: block; 
-        font-weight: 800; 
-        font-size: 0.85rem; 
-        color: #2b3a2a;
-    }
-    .size-info small {
-        display: block;
-        font-size: 0.65rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        opacity: 0.7;
-        font-weight: 600;
-    }
-    
-    .amount-btn { width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--glass-border); background: #ddead1; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
-    .amount-btn.selected { background: var(--active-blue); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+.wizard-step { display: none; }
+.wizard-step.active { display: block; }
 
-    .targets-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 20px; }
-    .target-box { aspect-ratio: 1; background: #ddead1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
-    .target-box.selected { background: var(--active-blue); font-weight: 800; border: 2px solid var(--deep-blue); scale: 1.05; }
-    .target-box.disabled { opacity: 0.15; cursor: not-allowed; filter: grayscale(1); border: 1px dashed rgba(0,0,0,0.2); }
-    .target-box.restricted { 
-        opacity: 0.3; 
-        cursor: not-allowed; 
-        background: rgba(0,0,0,0.05); 
-        position: relative;
-    }
-    .target-box.restricted::after {
-        content: "🚫";
-        position: absolute;
-        font-size: 0.8rem;
-        top: 5px;
-        right: 5px;
-    }
+.target-size-card { 
+    background: rgba(255, 255, 255, 0.03); 
+    border: 1px solid var(--card-border); 
+    border-radius: 24px; 
+    padding: 25px 15px; 
+    cursor: pointer; 
+    transition: var(--transition-smooth); 
+    text-align: center; 
+}
 
-    .wizard-actions { display: flex; justify-content: space-between; align-items: center; }
-    .btn-premium { background: linear-gradient(to right, var(--active-blue), var(--deep-blue)); border: none; color: black; padding: 12px 25px; border-radius: 10px; font-weight: bold; text-transform: uppercase; }
-    .btn-premium-outline { background: transparent; border: 1px solid rgba(0,0,0,0.1); color: #2b3a2a; padding: 12px 25px; border-radius: 10px; font-weight: bold; }
+.target-size-card:hover { border-color: var(--primary); transform: translateY(-5px); }
+.target-size-card.selected { background: var(--primary); border-color: var(--primary); }
 
-    /* Modern Counter Styles */
-    .modern-counter {
-        display: flex;
-        align-items: center;
-        background: rgba(138, 154, 91, 0.15);
-        border-radius: 12px;
-        padding: 5px 15px;
-        border: 1px solid rgba(138, 154, 91, 0.2);
-        gap: 15px;
-    }
-    .counter-btn {
-        width: 30px;
-        height: 30px;
-        border: none;
-        background: transparent;
-        color: var(--deep-blue);
-        font-size: 1.8rem;
-        font-weight: 300;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: 0.2s;
-        line-height: 1;
-    }
-    .counter-btn:hover {
-        color: var(--active-blue);
-        transform: scale(1.2);
-    }
-    .counter-value {
-        width: 50px;
-        height: 50px;
-        background: white;
-        border: 1px solid rgba(138, 154, 91, 0.3);
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: #2b3a2a;
-        user-select: none;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
+.size-img-wrapper { 
+    width: 90px; 
+    height: 90px; 
+    border-radius: 50%; 
+    overflow: hidden; 
+    margin: 0 auto 15px; 
+    background: #fff; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.size-img-wrapper img { width: 85%; height: 85%; object-fit: contain; }
+
+.size-name { display: block; font-weight: 800; font-size: 0.9rem; color: #fff; transition: var(--transition-smooth); }
+.target-size-card.selected .size-name { color: #000; }
+
+.size-info small { display: block; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; font-weight: 700; color: var(--text-dim); }
+.target-size-card.selected small { color: #000; opacity: 0.8; }
+
+.amount-btn { 
+    width: 48px; 
+    height: 48px; 
+    border-radius: 50%; 
+    border: 1px solid var(--card-border); 
+    background: rgba(255, 255, 255, 0.05); 
+    color: #fff;
+    font-weight: 800; 
+    cursor: pointer; 
+    transition: var(--transition-smooth); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 5px;
+}
+
+
+
+.amount-btn.selected { background: var(--primary); color: #000; border: none; box-shadow: 0 5px 15px var(--primary-glow); }
+
+.targets-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 20px; }
+
+.target-box { 
+    aspect-ratio: 1; 
+    background: rgba(255, 255, 255, 0.03); 
+    border: 1px solid var(--card-border); 
+    border-radius: 16px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    cursor: pointer; 
+    transition: var(--transition-smooth); 
+}
+
+.target-box:hover:not(.disabled) { border-color: var(--primary); transform: scale(1.05); }
+.target-box.selected { background: var(--primary); color: #000; border: none; font-weight: 900; box-shadow: 0 10px 20px var(--primary-glow); }
+.target-box.disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); background: rgba(255,255,255,0.01); border-color: rgba(255,255,255,0.05); }
+.target-box.restricted { opacity: 0.5; cursor: not-allowed; position: relative; border-style: dashed; border-color: rgba(255,255,255,0.2); }
+
+
+.fw-900 { font-weight: 900; }
+
+.counter-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--card-border);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-smooth);
+}
+
+.counter-btn:hover {
+    background: var(--primary);
+    color: #000;
+    border-color: var(--primary);
+}
+
+.counter-input-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 10px 20px;
+    border-radius: 100px;
+    border: 1px solid var(--card-border);
+}
 </style>
+
 
 <script>
     let bookingData = {
         slotId: "@slotId",
         name: "@name",
         email: "@email",
+        phone: "@phone",
         date: "@date",
         duration: "@duration",
         ageGroup: "@ageGroup",
@@ -415,6 +409,7 @@
             SlotId: bookingData.slotId,
             CustomerName: bookingData.name,
             CustomerEmail: bookingData.email,
+            PhoneNumber: bookingData.phone,
             Date: bookingData.date,
             Duration: bookingData.duration,
             TotalPrice: bookingData.totalPrice,

@@ -1,47 +1,108 @@
 :root {
-    --primary: #8A9A5B; /* Sage Green */
-    --secondary: #ECE7CA; /* Beige */
-    --dark: #ECE7CA; /* Main background */
-    --card-bg: #ddead1; /* Solid background for cards */
-    --border-color: #c8d8be; /* Subtle border for cards */
-    --text-color: #2b3a2a; /* Dark text for readability */
-    --text-muted: #5a6650; /* Muted text */
-    --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    --primary: #f97316; /* Neon Orange */
+    --primary-glow: rgba(249, 115, 22, 0.4);
+    --secondary: #fbbf24; /* Amber/Gold */
+    --dark-bg: #060a0f; /* Deep Charcoal/Black */
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(15, 23, 42, 0.7);
+    --text-main: #f8fafc;
+    --text-dim: #94a3b8;
+    --font-family: 'Inter', sans-serif;
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-    background-color: var(--dark);
-    background-image: linear-gradient(180deg, var(--secondary) 0%, var(--dark) 100%);
+    background-color: #000000;
+    background-image: 
+        radial-gradient(circle at 0% 0%, rgba(249, 115, 22, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(251, 191, 36, 0.05) 0%, transparent 50%);
     background-attachment: fixed;
-    color: var(--text-color);
+    color: var(--text-main);
     font-family: var(--font-family);
-    margin: 0;
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
+
+
+/* Glass Navbar */
 .glass-nav {
-    background: var(--dark);
-    border-bottom: 2px solid var(--primary);
-    padding: 0.75rem 0;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--card-border);
+    padding: 1rem 0;
+    transition: var(--transition-smooth);
 }
 
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--text-main) !important;
+    text-transform: uppercase;
+}
+
+.navbar-brand span {
+    color: var(--primary);
+    text-shadow: 0 0 15px var(--primary-glow);
+}
+
+.nav-link {
+    color: var(--text-dim) !important;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.5rem 1.2rem !important;
+    transition: var(--transition-smooth);
+    position: relative;
+}
+
+.nav-link:hover {
+    color: var(--primary) !important;
+    transform: translateY(-2px);
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--primary);
+    transition: var(--transition-smooth);
+    transform: translateX(-50%);
+}
+
+.nav-link:hover::after {
+    width: 20px;
+}
+
+/* Hero Section */
 .hero-section {
     position: relative;
-    height: 450px;
-    background: url('/images/hero.png') center/cover;
-    border-radius: 20px;
+    height: 500px;
+    background: url('/modern_archery_hero.png') center/cover;
+    border-radius: 30px;
     margin: 2rem 0;
     overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--card-border);
 }
 
 .hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, rgba(18, 18, 18, 0.2), rgba(18, 18, 18, 0.8));
+    background: linear-gradient(to top, var(--dark-bg) 10%, rgba(6, 10, 15, 0.4) 100%);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -51,205 +112,330 @@ body {
 }
 
 .hero-title {
-    font-size: 4rem;
-    font-weight: 800;
-    color: var(--primary);
-    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-    margin-bottom: 0.5rem;
-    letter-spacing: -1px;
+    font-size: 4.5rem;
+    font-weight: 900;
+    background: linear-gradient(to right, #fff, var(--primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+    animation: slideUp 1s ease-out;
 }
+
 
 .hero-subtitle {
-    font-size: 1.5rem;
-    color: var(--text-color);
-    font-weight: 300;
+    font-size: 1.2rem;
+    color: var(--text-dim);
+    max-width: 600px;
+    animation: fadeIn 1.5s ease-out;
 }
 
+/* Premium Motion Cards */
 .premium-card {
     background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 2rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 2.5rem;
+    transition: var(--transition-smooth);
+    height: 100%;
+    position: relative;
+    overflow: hidden;
 }
+
+.premium-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.05) 0%, transparent 70%);
+    opacity: 0;
+    transition: var(--transition-smooth);
+    pointer-events: none;
+}
+
 
 .premium-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    transform: translateY(-10px) scale(1.02);
     border-color: var(--primary);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(249, 115, 22, 0.1);
 }
 
+
+.premium-card:hover::before {
+    opacity: 1;
+}
+
+/* Buttons with Motion */
 .btn-premium {
     background: var(--primary);
-    color: var(--dark);
-    font-weight: 600;
-    padding: 0.8rem 2rem;
-    border-radius: 50px;
+    color: #000;
+    font-weight: 700;
+    padding: 1rem 2.5rem;
+    border-radius: 16px;
     text-transform: uppercase;
     letter-spacing: 1px;
     border: none;
-    transition: 0.3s;
+    transition: var(--transition-smooth);
+    box-shadow: 0 10px 20px var(--primary-glow);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .btn-premium:hover {
-    background: #738249;
-    box-shadow: 0 0 20px rgba(138, 154, 91, 0.4);
-    transform: scale(1.05);
-    color: #ffffff;
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 15px 30px var(--primary-glow);
+    background: #fb923c;
 }
 
-.nav-link {
+.btn-premium-outline {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--text-dim);
+    padding: 1rem 2.5rem;
+    border-radius: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: var(--transition-smooth);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.btn-premium-outline:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px);
+}
+
+
+
+/* Forms & Inputs */
+.form-control, .form-select {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 14px;
+    padding: 0 20px;
+    height: 55px; /* Standardized height */
+    color: #000000 !important;
     font-weight: 500;
-    color: var(--text-muted) !important;
-    margin: 0 0.5rem;
-    transition: 0.3s;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
 }
 
-.nav-link:hover {
-    color: var(--primary) !important;
+/* Modern Date Picker UI */
+#bookingDate {
+    background-color: #ffffff !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23f97316' class='bi bi-calendar-event' viewBox='0 0 16 16'%3E%3Cpath d='M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z'/%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 15px center !important;
+    background-size: 20px !important;
+    width: 100% !important;
+    padding-right: 45px !important;
 }
 
-.navbar-brand {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: var(--primary) !important;
-    letter-spacing: -0.5px;
+/* Ensure Flatpickr wrapper doesn't shrink the input */
+.flatpickr {
+    width: 100% !important;
+    display: block !important;
 }
 
+
+
+.form-control::placeholder {
+    color: #9ca3af;
+    font-weight: 400;
+}
+
+.form-control:focus, .form-select:focus {
+    background: #ffffff !important;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.15);
+    color: #000 !important;
+    outline: none;
+}
+
+/* Override Browser Autofill Styles */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px white inset !important;
+    -webkit-text-fill-color: black !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+
+/* Tables */
 .table {
-    color: var(--text-color);
+    color: var(--text-main);
     border-collapse: separate;
-    border-spacing: 0 10px;
+    border-spacing: 0 12px;
 }
 
 .table thead th {
     border: none;
-    color: var(--primary);
+    color: var(--text-dim);
     font-weight: 600;
     text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 1px;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    padding: 1rem;
 }
 
 .table tbody tr {
-    background: #ffffff;
-    transition: 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    background: var(--card-bg);
+    transition: var(--transition-smooth);
+    border-radius: 16px;
 }
 
 .table tbody tr td {
-    padding: 1rem;
+    padding: 1.5rem;
     border: none;
     vertical-align: middle;
 }
 
-.table tbody tr td:first-child { border-radius: 8px 0 0 8px; }
-.table tbody tr td:last-child { border-radius: 0 8px 8px 0; }
+.table tbody tr td:first-child { border-radius: 16px 0 0 16px; border-left: 1px solid var(--card-border); }
+.table tbody tr td:last-child { border-radius: 0 16px 16px 0; border-right: 1px solid var(--card-border); }
 
 .table tbody tr:hover {
-    background: #fdfbf7;
-}
-
-/* Form Styles */
-.form-control {
-    background: #ffffff !important;
-    border: 1px solid #dee2e6 !important;
-    color: #000000 !important;
-    border-radius: 12px;
-    height: 55px;
-    font-size: 1rem !important;
-    padding: 0.8rem 1.5rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-.form-control:focus {
-    background: #ffffff !important;
-    border-color: var(--primary) !important;
-    box-shadow: 0 0 20px rgba(138, 154, 91, 0.2) !important;
-}
-
-.form-control::placeholder {
-    color: #adb5bd !important;
-    letter-spacing: 1px;
-}
-
-.input-group-text {
-    background: #e9e5d9 !important;
-    color: var(--primary) !important;
-    border: 1px solid #c8d8be !important;
-}
-
-/* Modern Absolute Password Toggle */
-.password-input-wrapper {
-    position: relative;
-    width: 100%;
-}
-
-.password-input-wrapper .form-control {
-    padding-right: 60px !important; /* Make room for the eye */
-    border-radius: 12px !important; /* Back to full rounded */
-}
-
-.password-input-wrapper .password-toggle-btn {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: transparent !important;
-    color: var(--primary) !important;
-    border: none !important;
-    padding: 10px !important;
-    z-index: 10;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-.password-input-wrapper .password-toggle-btn:focus,
-.password-input-wrapper .password-toggle-btn:active {
-    outline: none !important;
-    box-shadow: none !important;
-    background: transparent !important;
-}
-
-.password-input-wrapper .password-toggle-btn:hover {
-    color: #2b3a2a !important;
-}
-
-.password-input-wrapper .password-toggle-btn i {
-    font-size: 1.25rem;
-}
-
-.alert-danger-custom {
-    background: #fde8e8;
-    border-left: 4px solid #ff4d4d;
-    color: #c92a2a;
-    padding: 1rem;
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    transform: scale(1.01);
 }
 
 /* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(40px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 .animate-in {
-    animation: fadeIn 0.8s ease-out forwards;
+    animation: slideUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--dark-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+
+/* Logout Icon Wrapper */
+.logout-icon-wrapper {
+    background: rgba(255, 107, 107, 0.1);
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 107, 107, 0.2);
+    transition: var(--transition-smooth);
+}
+
+.logout-icon-wrapper:hover {
+    background: rgba(255, 107, 107, 0.25);
+    transform: rotate(10deg);
+}
+
+
+/* Flatpickr Solar Amber Custom Theme (White Version) */
+.flatpickr-calendar {
+    background: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+    border-radius: 16px !important;
+    padding: 10px;
+    color: #000 !important;
+    min-width: 310px !important; /* Ensure enough space for month/year */
+}
+
+.flatpickr-current-month {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 0 !important;
+}
+
+.flatpickr-month {
+    height: 50px !important;
 }
 
 
 
-/* Override Chrome Autofill styling */
-input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
-input:-webkit-autofill:active{
-    -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
-    -webkit-text-fill-color: #2b3a2a !important;
+.flatpickr-day {
+    color: #374151 !important;
+    border-radius: 50% !important; /* Circular days */
+}
+
+.flatpickr-day.selected, .flatpickr-day.selected:hover {
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: #000 !important;
+    box-shadow: 0 5px 15px var(--primary-glow) !important;
+}
+
+.flatpickr-day.today {
+    border-color: #d1d5db !important;
+    background: #f3f4f6 !important;
+}
+
+.flatpickr-months .flatpickr-month {
+    background: #ffffff !important;
+    color: #111827 !important;
+    fill: #111827 !important;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+    font-weight: 700 !important;
+    color: #111827 !important; /* High contrast dark color */
+    background: transparent !important;
+}
+
+.flatpickr-current-month .numInputWrapper span.arrowUp::after {
+    border-bottom-color: #111827 !important;
+}
+
+.flatpickr-current-month .numInputWrapper span.arrowDown::after {
+    border-top-color: #111827 !important;
+}
+
+
+.flatpickr-weekday {
+    color: #6b7280 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+}
+
+.flatpickr-day:hover {
+    background: #f3f4f6 !important;
+}
+
+.flatpickr-prev-month, .flatpickr-next-month {
+    color: #111827 !important;
+    fill: #111827 !important;
 }

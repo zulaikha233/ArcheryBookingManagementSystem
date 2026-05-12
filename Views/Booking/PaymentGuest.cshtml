@@ -4,231 +4,256 @@
     ViewData["Title"] = "PAYMENT";
 }
 
-<style>
-    :root {
-        --glass-bg: #A9BA9D;
-        --glass-border: rgba(255, 255, 255, 0.08);
-    }
-    body {
-        background-color: #ECE7CA;
-        color: #2b3a2a;
-        font-family: 'Outfit', sans-serif;
-    }
-    .kiosk-wrap {
-        background: #ddead1;
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(0,0,0,0.05);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        max-width: 700px;
-        margin: 50px auto;
-        padding: 50px;
-        border-radius: 40px;
-        text-align: center;
-    }
+<div class="booking-wizard-container py-5" data-aos="fade-up">
+    <div class="premium-card p-0 overflow-hidden">
+                <div class="row g-0">
+                    <!-- Left Column: Summary -->
+                    <div class="col-lg-5 p-5" style="background: rgba(249, 115, 22, 0.03); border-right: 1px solid var(--card-border);">
+                        <div class="mb-4 text-center">
+                             <div class="mb-3">
+                                 <i class="bi bi-receipt" style="font-size: 3rem; color: var(--primary);"></i>
+                             </div>
+                             <h2 class="hero-title" style="font-size: 1.8rem;">BOOKING <span>SUMMARY</span></h2>
+                        </div>
 
-    .kiosk-title {
-        font-weight: 800;
-        font-size: 2.5rem;
-        margin-bottom: 10px;
-        color: #2b3a2a;
-    }
+                        <div class="summary-list">
+                            <div class="summary-item">
+                                <span class="label">Date</span>
+                                <span class="value">@Model.Date</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Time</span>
+                                <span class="value">@Model.Time</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Lanes</span>
+                                <span class="value">@Model.SelectedLanes</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">Pax</span>
+                                <span class="value">@Model.NumberOfPax Archers</span>
+                            </div>
+                        </div>
 
-    .summary-box {
-        background: #ffffff !important;
-        border: 1px solid rgba(0,0,0,0.1);
-        border-radius: 20px;
-        padding: 30px;
-        margin: 30px 0;
-        text-align: left;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    }
+                        <div class="total-box mt-5 text-center">
+                            <p class="text-dim mb-1" style="font-size: 0.7rem; letter-spacing: 2px;">TOTAL AMOUNT</p>
+                            <h1 style="color: var(--primary); font-weight: 900; font-size: 3rem;">RM @Model.TotalPrice.ToString("0.00")</h1>
+                        </div>
+                    </div>
 
-    .summary-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 12px 0;
-        border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-    .summary-item:last-child { border: none; }
+                    <!-- Right Column: Payment Options -->
+                    <div class="col-lg-7 p-5">
+                        <h4 class="mb-4 text-dim fw-bold" style="font-size: 0.8rem; letter-spacing: 2px;">SELECT PAYMENT METHOD</h4>
+                        
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-4">
+                                <label class="payment-method-card">
+                                    <input type="radio" name="paymentMethod" value="fpx" checked onchange="togglePaymentUI()">
+                                    <div class="method-card-content">
+                                        <div class="icon-box"><i class="bi bi-bank"></i></div>
+                                        <div class="title mt-2">Online Banking</div>
+                                        <small class="text-dim">FPX</small>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="payment-method-card">
+                                    <input type="radio" name="paymentMethod" value="card" onchange="togglePaymentUI()">
+                                    <div class="method-card-content">
+                                        <div class="icon-box"><i class="bi bi-credit-card"></i></div>
+                                        <div class="title mt-2">Credit / Card</div>
+                                        <small class="text-dim">Visa/Master</small>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="payment-method-card">
+                                    <input type="radio" name="paymentMethod" value="counter" onchange="togglePaymentUI()">
+                                    <div class="method-card-content">
+                                        <div class="icon-box"><i class="bi bi-cash-stack"></i></div>
+                                        <div class="title mt-2">At Counter</div>
+                                        <small class="text-dim">Cash/QR</small>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
 
-    .summary-label { font-weight: 600; color: #555; }
-    .summary-value { font-weight: 800; color: #000000; }
+                        <!-- Payment Detail Boxes -->
+                        <div id="fpxUI" class="payment-detail-box p-4 mb-4">
+                            <label class="form-label-premium mb-2">Select Your Bank</label>
+                            <select id="bankSelection" class="form-select">
+                                <option value="">-- Choose Retail Bank --</option>
+                                <option value="Maybank2U">Maybank2U</option>
+                                <option value="CIMB Clicks">CIMB Clicks</option>
+                                <option value="Public Bank">Public Bank</option>
+                                <option value="RHB Now">RHB Now</option>
+                                <option value="Bank Islam">Bank Islam</option>
+                                <option value="AmBank">AmBank</option>
+                            </select>
+                            <p class="text-dim small mt-3 mb-0"><i class="bi bi-shield-lock me-1"></i> Redirecting to secure bank portal.</p>
+                        </div>
 
-    .price-tag {
-        font-size: 3.5rem;
-        font-weight: 900;
-        color: #2b3a2a;
-        margin: 30px 0;
-    }
+                        <div id="cardUI" class="payment-detail-box p-4 mb-4" style="display: none;">
+                            <label class="form-label-premium mb-2">Card Details</label>
+                            <input type="text" class="form-control mb-3" placeholder="Card Number (0000 0000 0000 0000)">
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <input type="text" class="form-control" placeholder="MM/YY">
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" class="form-control" placeholder="CVV">
+                                </div>
+                            </div>
+                        </div>
 
-    .btn-generate {
-        background: #ffffff;
-        color: #2b3a2a;
-        border: 1px solid rgba(0,0,0,0.05);
-        padding: 22px 40px;
-        border-radius: 25px;
-        font-weight: 800;
-        font-size: 1.3rem;
-        text-transform: uppercase;
-        width: 100%;
-        cursor: pointer;
-        transition: 0.3s;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-    }
-    .btn-generate:hover {
-        transform: translateY(-3px);
-        background: #f8f9fa;
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-    }
+                        <div class="price-breakdown mb-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-dim">Original Price</span>
+                                <span class="fw-bold">RM @Model.TotalPrice.ToString("0.00")</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-dim">Taxes & Fees</span>
+                                <span class="fw-bold" style="color: #22c55e;">INCLUDED</span>
+                            </div>
+                        </div>
 
-    /* Success Modal / Kiosk Code */
-    .kiosk-modal-overlay {
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(236, 231, 202, 0.8);
-        backdrop-filter: blur(10px);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 2000;
-    }
-    .kiosk-modal {
-        background: #ddead1;
-        border: 1px solid rgba(0,0,0,0.1);
-        border-radius: 40px;
-        padding: 60px;
-        text-align: center;
-        max-width: 550px;
-        width: 90%;
-        box-shadow: 0 30px 60px rgba(0,0,0,0.1);
-    }
-    .booking-code {
-        font-size: 5rem;
-        font-weight: 900;
-        color: #8A9A5B;
-        letter-spacing: 8px;
-        margin: 30px 0;
-        padding: 30px;
-        border: 5px dashed #8A9A5B;
-        background: white !important;
-        border-radius: 25px;
-    }
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top" style="border-color: rgba(255,255,255,0.1) !important;">
+                            <span class="fw-bold text-uppercase" style="letter-spacing: 1px;">Total Due</span>
+                            <h2 class="m-0" style="color: var(--primary); font-weight: 800;">RM @Model.TotalPrice.ToString("0.00")</h2>
+                        </div>
 
-    /* Payment Method Styles */
-    .payment-option-card {
-        display: block;
-        background: white;
-        border: 2px solid transparent;
-        border-radius: 15px;
-        padding: 15px;
-        margin-bottom: 10px;
-        cursor: pointer;
-        transition: 0.3s;
-        text-align: left;
-    }
-    .payment-option-card input { display: none; }
-    .payment-option-card:has(input:checked) {
-        border-color: #8A9A5B;
-        background: #f1f8e9;
-    }
-    .option-content {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-    .option-icon { font-size: 1.5rem; }
-    .option-text { display: flex; flex-direction: column; }
-    .option-title { font-weight: 700; color: #2b3a2a; font-size: 0.95rem; }
-    .option-text small { font-size: 0.75rem; color: #666; }
-</style>
-
-<div class="kiosk-wrap animate-fade-in">
-    <div class="mb-4" style="font-size: 4rem;">🛍️</div>
-    <h1 class="kiosk-title">CHECKOUT</h1>
-    <p class="text-muted">Review your selection and confirm to get your booking code.</p>
-
-    <div class="summary-box">
-        <div class="summary-item">
-            <span class="summary-label">Date</span>
-            <span class="summary-value">@Model.Date</span>
-        </div>
-        <div class="summary-item">
-            <span class="summary-label">Time</span>
-            <span class="summary-value">@Model.Time</span>
-        </div>
-        <div class="summary-item">
-            <span class="summary-label">Lanes</span>
-            <span class="summary-value">@Model.SelectedLanes</span>
-        </div>
-        <div class="summary-item">
-            <span class="summary-label">Pax</span>
-            <span class="summary-value">@Model.NumberOfPax Archers</span>
-        </div>
-    </div>
-
-    <div class="price-tag" style="margin-top: 10px;">
-        RM @Model.TotalPrice.ToString("0.00")
-    </div>
-
-    <div style="text-align: left; margin-bottom: 30px;">
-        <label class="fw-bold mb-3 d-block" style="color: #2b3a2a; text-transform: uppercase; letter-spacing: 1.2px; font-size: 0.8rem;">Select Payment Method</label>
-        <label class="payment-option-card">
-            <input type="radio" name="paymentMethod" value="fpx" checked>
-            <div class="option-content">
-                <span class="option-icon">🌐</span>
-                <div class="option-text">
-                    <span class="option-title">Online Banking (FPX)</span>
-                    <small>Pay instantly via online bank</small>
+                        <button class="btn-premium w-100 mt-4 justify-content-center" id="confirmBtn" onclick="generateKioskCode()">
+                            CONFIRM & PAY
+                        </button>
+                    </div>
                 </div>
-            </div>
-        </label>
-        <label class="payment-option-card">
-            <input type="radio" name="paymentMethod" value="card">
-            <div class="option-content">
-                <span class="option-icon">💳</span>
-                <div class="option-text">
-                    <span class="option-title">Credit / Debit Card</span>
-                    <small>Visa, Mastercard, etc.</small>
-                </div>
-            </div>
-        </label>
-        <label class="payment-option-card">
-            <input type="radio" name="paymentMethod" value="counter">
-            <div class="option-content">
-                <span class="option-icon">💵</span>
-                <div class="option-text">
-                    <span class="option-title">Pay at Counter</span>
-                    <small>Pay at the arena counter</small>
-                </div>
-            </div>
-        </label>
-    </div>
-
-    <button class="btn-generate" id="confirmBtn" onclick="generateKioskCode()">CONFIRM & PROCEED</button>
-    
-    <div class="mt-4">
-        <a href="javascript:history.back()" style="color: #6c757d; text-decoration: none; font-weight: 700; text-transform: uppercase; font-size: 0.8rem;">
-            <i class="bi bi-arrow-left me-1"></i> Back to selection
-        </a>
     </div>
 </div>
 
 <!-- Kiosk Success Modal -->
-<div id="kioskModal" class="kiosk-modal-overlay">
-    <div class="kiosk-modal">
-        <div style="font-size: 3rem; margin-bottom: 20px;">✅</div>
-        <h2 style="font-weight: 800;">BOOKING CONFIRMED!</h2>
-        <p class="text-muted">Please show this code at the counter for payment.</p>
-        <div id="displayCode" class="booking-code">------</div>
-        <button class="btn-generate mt-4" onclick="window.location.href='/'">DONE</button>
+<div id="kioskModal" class="global-notif-overlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(15px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px;">
+    <div class="premium-card text-center" style="max-width: 500px; padding: 40px; height: auto; border-color: var(--primary);">
+        <div class="mb-4">
+            <i class="bi bi-check-circle-fill" style="font-size: 3.5rem; color: var(--primary);"></i>
+        </div>
+        <h2 class="fw-900 mb-2" style="font-size: 1.8rem;">BOOKING CONFIRMED!</h2>
+        <p class="text-dim mb-4" style="font-size: 0.9rem;">Please show this code at the counter for payment and entry.</p>
+        
+        <div id="displayCode" style="font-size: 3.5rem; font-weight: 900; color: var(--primary); letter-spacing: 8px; border: 2px dashed var(--card-border); padding: 25px; border-radius: 20px; background: rgba(249, 115, 22, 0.05);">------</div>
+        
+        <button class="btn-premium w-100 justify-content-center mt-4" onclick="window.location.href='/'">
+            DONE <i class="bi bi-house-door ms-2"></i>
+        </button>
     </div>
 </div>
 
+<style>
+    .booking-wizard-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 0;
+        border-bottom: 1px solid var(--card-border);
+    }
+    .summary-item .label { color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase; font-weight: 600; }
+    .summary-item .value { color: #fff; font-weight: 700; }
+
+    .payment-method-card { cursor: pointer; display: block; height: 100%; }
+    .payment-method-card input { display: none; }
+    
+    .method-card-content {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--card-border);
+        border-radius: 24px;
+        padding: 25px 15px;
+        text-align: center;
+        transition: var(--transition-smooth);
+        height: 100%;
+        display: flex;
+        flex-column: column;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .payment-method-card:hover .method-card-content { border-color: var(--primary); transform: translateY(-5px); background: rgba(255, 255, 255, 0.05); }
+    
+    .payment-method-card input:checked + .method-card-content {
+        border-color: var(--primary);
+        background: var(--primary);
+        box-shadow: 0 10px 20px var(--primary-glow);
+    }
+
+    .payment-method-card input:checked + .method-card-content .icon-box,
+    .payment-method-card input:checked + .method-card-content .title,
+    .payment-method-card input:checked + .method-card-content .text-dim {
+        color: #000 !important;
+        opacity: 1;
+    }
+    
+    .icon-box {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        color: var(--primary);
+        transition: var(--transition-smooth);
+    }
+    
+    .method-card-content .title { display: block; font-weight: 800; color: #fff; font-size: 0.85rem; letter-spacing: 0.5px; transition: var(--transition-smooth); }
+    .method-card-content small { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; transition: var(--transition-smooth); }
+    
+    .payment-detail-box {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        animation: fadeInDown 0.3s ease;
+    }
+
+    .form-label-premium {
+        font-size: 0.7rem;
+        color: var(--text-dim);
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        display: block;
+    }
+
+    @@keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
 <script>
+    function togglePaymentUI() {
+        const method = document.querySelector('input[name="paymentMethod"]:checked').value;
+        document.getElementById("fpxUI").style.display = (method === "fpx") ? "block" : "none";
+        document.getElementById("cardUI").style.display = (method === "card") ? "block" : "none";
+    }
+
     async function generateKioskCode() {
         const btn = document.getElementById("confirmBtn");
+        const method = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+        // Validation for online payments
+        if (method === 'fpx') {
+            const bank = document.getElementById('bankSelection').value;
+            if (!bank) {
+                showNotif("Please select a bank to proceed with FPX payment.", 'warning');
+                return;
+            }
+        }
+
         btn.disabled = true;
-        btn.innerText = "GENERATING CODE...";
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> PROCESSING...';
 
         const formData = new FormData();
         formData.append("SlotId", "@Model.SlotId");
@@ -242,8 +267,7 @@
         formData.append("SelectedLanes", "@Model.SelectedLanes");
         formData.append("SelectedLaneRanges", "@Model.SelectedLaneRanges");
         formData.append("NumberOfPax", "@Model.NumberOfPax");
-        formData.append("RateCode", ""); // No promo for guests
-        const method = document.querySelector('input[name="paymentMethod"]:checked').value;
+        formData.append("RateCode", ""); 
         formData.append("PaymentMethod", method);
 
         try {
@@ -257,14 +281,14 @@
                 document.getElementById("displayCode").innerText = result.bookingCode;
                 document.getElementById("kioskModal").style.display = "flex";
             } else {
-                alert("Error: " + result.message);
+                showNotif("Error: " + result.message, 'error');
                 btn.disabled = false;
-                btn.innerText = "CONFIRM & GENERATE CODE";
+                btn.innerHTML = 'CONFIRM & PAY <i class="bi bi-shield-check ms-2"></i>';
             }
         } catch (err) {
-            alert("Connection error. Please try again.");
+            showNotif("Connection error. Please try again.", 'error');
             btn.disabled = false;
-            btn.innerText = "CONFIRM & GENERATE CODE";
+            btn.innerHTML = 'CONFIRM & PAY <i class="bi bi-shield-check ms-2"></i>';
         }
     }
 </script>

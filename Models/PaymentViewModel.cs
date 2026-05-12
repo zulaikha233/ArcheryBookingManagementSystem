@@ -11,6 +11,7 @@ namespace ArcheryAlley.Models
         
         public string CustomerName { get; set; }
         public string CustomerEmail { get; set; }
+        public string PhoneNumber { get; set; }
         public int SlotId { get; set; }
         public string SelectedLanes { get; set; }
         public string SelectedLaneRanges { get; set; }

@@ -4,33 +4,43 @@
 
 <div class="booking-wizard-container animate-fade-in">
     <!-- Progress Header -->
-    <div class="wizard-header text-center mb-5">
-        <h1 class="wizard-title">SLOT <span>RESERVATION</span></h1>
+    <div class="wizard-header text-center mb-5" data-aos="fade-down">
+        <h1 class="hero-title">SLOT <span>RESERVATION</span></h1>
         <div class="step-indicator">
-            <div class="step active" id="step1-indicator"><span>1</span><p>Details</p></div>
+            <div class="step active" id="step1-indicator">
+                <div class="step-circle">1</div>
+                <p>Details</p>
+            </div>
             <div class="step-line"></div>
-            <div class="step" id="step2-indicator"><span>2</span><p>Lane</p></div>
+            <div class="step" id="step2-indicator">
+                <div class="step-circle">2</div>
+                <p>Lane</p>
+            </div>
             <div class="step-line"></div>
-            <div class="step" id="step3-indicator"><span>3</span><p>Slot Pay</p></div>
+            <div class="step" id="step3-indicator">
+                <div class="step-circle">3</div>
+                <p>Confirm</p>
+            </div>
         </div>
     </div>
 
     <!-- Step 1: Customer Info & Session -->
     <div class="wizard-step active" id="wizard-step-1">
-        <div class="glass-card main-booking-card p-0">
+        <div class="premium-card p-0 overflow-hidden">
             <div class="wizard-grid-layout">
                 <!-- Column 1 -->
                 <div class="wizard-column">
-                    <div class="p-4 mb-3 rounded-3" style="background: #8A9A5B; border-bottom: 1px solid rgba(0,0,0,0.2); margin: 0rem 0rem 1rem 0rem; color: #000000;">
-                         <p class="mb-1" style="font-size: 0.75rem; color: #000000; letter-spacing: 1px; font-weight: 600;">STAFF OPERATOR</p>
-                         <h5 class="text-dark mb-2 font-weight-bold" style="letter-spacing: 0.5px;">@(ViewBag.StaffName ?? "Staff")</h5>
+                    <div class="p-5" style="background: rgba(249, 115, 22, 0.08); border-bottom: 1px solid var(--card-border); box-shadow: inset 0 0 40px rgba(249, 115, 22, 0.05);">
+
+                         <p class="mb-2 text-dim" style="font-size: 0.7rem; letter-spacing: 2px; font-weight: 700; text-transform: uppercase;">STAFF OPERATOR</p>
+                         <h4 class="fw-bold mb-4" style="color: var(--primary);">@(ViewBag.StaffName ?? "Staff")</h4>
                          
-                         <div class="mt-4 pt-3" style="border-top: 1px solid rgba(0,0,0,0.2);">
-                             <label class="form-label-premium" style="color: #000000;">Customer Name</label>
-                             <input type="text" id="customerName" class="form-control-premium mb-3" placeholder="Enter Full Name">
+                         <div class="mt-4">
+                             <label class="form-label-premium">Customer Name</label>
+                             <input type="text" id="customerName" class="form-control mb-3" placeholder="Enter Full Name" style="background: #fff !important; color: #000 !important;">
                              
-                             <label class="form-label-premium" style="color: #000000;">Customer Email</label>
-                             <input type="email" id="customerEmail" class="form-control-premium" placeholder="customer@example.com">
+                             <label class="form-label-premium">Customer Email</label>
+                             <input type="email" id="customerEmail" class="form-control" placeholder="customer@example.com" style="background: #fff !important; color: #000 !important;">
                          </div>
                     </div>
 
@@ -41,20 +51,21 @@
                 </div>
 
                 <!-- Column 2 -->
-                <div class="wizard-column">
-                    <div class="form-group p-4 pb-0">
-                        <label class="form-label-premium">Booking Date</label>
-                        <input type="date" id="bookingDate" class="form-control-premium" value="@DateTime.Today.ToString("yyyy-MM-dd")">
-                    </div>
-
-                    <div class="form-group p-4 pt-0">
-                        <label class="form-label-premium">Duration</label>
-                        <select id="duration" class="form-control-premium">
-                            <option value="1">1 Hour</option>
-                            <option value="2">2 Hours</option>
-                            <option value="3">3 Hours</option>
-                            <option value="4">4 Hours</option>
-                        </select>
+                <div class="wizard-column p-5">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label-premium">Booking Date</label>
+                            <input type="date" id="bookingDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-premium">Duration</label>
+                            <select id="duration" class="form-control">
+                                <option value="1">1 Hour</option>
+                                <option value="2">2 Hours</option>
+                                <option value="3">3 Hours</option>
+                                <option value="4">4 Hours</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="session-group px-4 pb-4">
@@ -170,16 +181,17 @@
                         <h5 class="mb-3 text-info">Payment Method</h5>
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="radio" name="posPayment" id="payCash" value="Cash" checked>
-                            <label class="form-check-label text-dark" for="payCash">Cash Payment</label>
+                            <label class="form-check-label" style="color: var(--text-main);" for="payCash">Cash Payment</label>
                         </div>
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="radio" name="posPayment" id="payCard" value="Card">
-                            <label class="form-check-label text-dark" for="payCard">Terminal Card (Manual)</label>
+                            <label class="form-check-label" style="color: var(--text-main);" for="payCard">Terminal Card (Manual)</label>
                         </div>
                         <div class="form-check mb-4">
                             <input class="form-check-input" type="radio" name="posPayment" id="payQR" value="QR">
-                            <label class="form-check-label text-dark" for="payQR">QR / E-Wallet</label>
+                            <label class="form-check-label" style="color: var(--text-main);" for="payQR">QR / E-Wallet</label>
                         </div>
+
                         
                         <button class="btn-premium w-100" id="confirmPosBtn" onclick="finalizeStaffBooking()">Confirm & Complete Booking</button>
                     </div>
@@ -194,291 +206,276 @@
 </div>
 
 <!-- Success Modal -->
-<div id="successModal" class="custom-modal-overlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 1000;">
-    <div class="custom-modal" style="background: rgba(20,22,35,0.9); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 50px; text-align: center; color: #2b3a2a;">
-        <div class="success-icon" style="width: 80px; height: 80px; border-radius: 50%; background: #8A9A5B; color: black; font-size: 40px; line-height: 80px; margin: 0 auto 20px;">✓</div>
-        <h3 class="mb-2">Booking Completed!</h3>
-        <p class="text-muted">The reservation has been added to the system.</p>
+<div id="successModal" class="global-notif-overlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(15px); display: none; align-items: center; justify-content: center; z-index: 2000;">
+    <div class="premium-card text-center" style="max-width: 450px; padding: 60px;">
+        <div class="mb-4">
+            <i class="bi bi-check-circle-fill" style="font-size: 4rem; color: var(--primary);"></i>
+        </div>
+        <h2 class="fw-900 mb-2" style="color: #fff;">BOOKING COMPLETED!</h2>
+        <p class="text-dim mb-4">The reservation has been added to the system successfully.</p>
+        <button class="btn-premium w-100 justify-content-center" onclick="window.location.href='/Booking/StaffBooking'">OKAY</button>
     </div>
 </div>
 
+
 <style>
     :root {
-        --active-blue: #8A9A5B;
-        --deep-blue: #6D7B48;
-        --glass: #A9BA9D;
-        --glass-border: rgba(255, 255, 255, 0.08);
-        --text-muted: #8e92a6;
-    }
+    --active-blue: var(--primary);
+    --deep-blue: #65a30d;
+    --text-muted: #94a3b8;
+}
 
-    body {
-        background: #ECE7CA !important;
-        font-family: 'Outfit', sans-serif;
-        color: #2b3a2a;
-    }
+.booking-wizard-container {
+    max-width: 1200px;
+    margin: 40px auto;
+}
 
-    .booking-wizard-container {
-        max-width: 1300px;
-        margin: 50px auto;
-        padding: 0 20px;
-    }
+/* Progress Indicator */
+.step-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 50px;
+}
 
-    .wizard-title {
-        font-weight: 800;
-        font-size: 3rem;
-        letter-spacing: -1px;
-        margin-bottom: 2rem;
-    }
+.step {
+    text-align: center;
+    opacity: 0.3;
+    transition: var(--transition-smooth);
+}
 
-    .wizard-title span {
-        background: linear-gradient(to right, var(--active-blue), var(--deep-blue));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
+.step.active { opacity: 1; }
 
-    /* Progress Indicator */
-    .step-indicator {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 15px;
-        margin-bottom: 40px;
-    }
+.step-circle {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    margin: 0 auto 10px;
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: #fff;
+    transition: var(--transition-smooth);
+}
 
-    .step {
-        text-align: center;
-        opacity: 0.4;
-        transition: 0.3s;
-    }
+.step.active .step-circle {
+    background: var(--primary);
+    color: #000;
+    border: none;
+    box-shadow: 0 0 20px var(--primary-glow);
+    transform: scale(1.1);
+}
 
-    .step.active { opacity: 1; }
+.step p { 
+    font-size: 0.7rem; 
+    text-transform: uppercase; 
+    margin: 0; 
+    letter-spacing: 2px; 
+    font-weight: 700;
+    color: var(--text-dim);
+}
 
-    .step span {
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--glass);
-        border: 1px solid var(--glass-border);
-        border-radius: 50%;
-        margin: 0 auto 8px;
-        font-weight: bold;
-    }
+.step.active p { color: var(--primary); }
 
-    .step.active span {
-        background: linear-gradient(45deg, var(--active-blue), var(--deep-blue));
-        color: black;
-        border: none;
-        box-shadow: 0 0 20px rgba(138, 154, 91, 0.3);
-    }
+.step-line {
+    width: 80px;
+    height: 1px;
+    background: var(--card-border);
+    margin-bottom: 25px;
+}
 
-    .step p { font-size: 0.8rem; text-transform: uppercase; margin: 0; letter-spacing: 1px; }
+/* Wizard Steps */
+.wizard-step { display: none; }
+.wizard-step.active { display: block; }
 
-    .step-line {
-        width: 60px;
-        height: 1px;
-        background: var(--glass-border);
-        margin-top: -20px;
-    }
+.form-label-premium {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    font-weight: 700;
+    display: block;
+}
 
-    /* Cards */
-    .glass-card {
-        background: var(--glass);
-        backdrop-filter: blur(20px);
-        border: 1px solid var(--glass-border);
-        border-radius: 30px;
-        padding: 3rem;
-    }
+/* Slots Grid */
+.slots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+}
 
-    .wizard-step { display: none; }
-    .wizard-step.active { display: block; animation: slideIn 0.5s ease; }
+.slot-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
 
-    /* Forms */
-    .form-label-premium {
-        display: block;
-        font-size: 0.85rem;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        margin-bottom: 10px;
-        font-weight: 600;
-    }
+.slot-card:hover {
+    border-color: var(--primary);
+    background: rgba(249, 115, 22, 0.05);
+}
 
-    .form-control-premium {
-        background: #ffffff !important;
-        border: 1px solid var(--glass-border) !important;
-        color: #2b3a2a !important;
-        border-radius: 12px !important;
-        padding: 12px 20px !important;
-        width: 100%;
-        transition: 0.3s;
-    }
+.slot-card.selected {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #000;
+    box-shadow: 0 10px 20px var(--primary-glow);
+}
 
-    .form-control-premium option {
-        background: #ECE7CA;
-        color: #2b3a2afff;
-    }
+.slot-number {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 800;
+    opacity: 0.6;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
 
-    .form-control-premium:focus {
-        border-color: var(--active-blue) !important;
-        box-shadow: 0 0 15px rgba(138, 154, 91, 0.1) !important;
-        outline: none;
-    }
+.slot-time {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 800;
+}
 
-    /* Unified Grid Layout */
-    .wizard-grid-layout {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 40px;
-        padding: 40px;
-    }
+/* Targets Grid */
+.targets-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+}
 
-    .wizard-column {
-        display: flex;
-        flex-direction: column;
-        gap: 25px;
-    }
+.target-box {
+    aspect-ratio: 1;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
 
-    .session-group {
-        margin-top: 20px;
-    }
+.target-box:hover:not(.disabled) {
+    border-color: var(--primary);
+    transform: scale(1.05);
+}
 
-    .session-label {
-        font-size: 0.8rem;
-        color: var(--active-blue);
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        margin-bottom: 20px;
-        font-weight: 700;
-        padding-bottom: 15px;
-        border-bottom: 1px solid rgba(138, 154, 91, 0.1);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
+.target-box.selected {
+    background: var(--primary);
+    color: #000;
+    border: none;
+    font-weight: 900;
+}
 
-    .slots-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-    }
+.target-box.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.01);
+    filter: grayscale(1);
+}
 
-    .slot-card {
-        background: #ddead1;
-        border: 1px solid var(--glass-border);
-        border-radius: 18px;
-        padding: 22px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
 
-    .slot-card:hover { 
-        border-color: var(--active-blue); 
-        background: rgba(138, 154, 91, 0.1);
-        transform: scale(1.02);
-    }
+.target-num { font-size: 1.5rem; font-weight: 900; }
+.target-label { font-size: 0.6rem; text-transform: uppercase; font-weight: 700; opacity: 0.7; }
 
-    .slot-card.selected {
-        background: linear-gradient(135deg, var(--active-blue), var(--deep-blue)) !important;
-        color: black !important;
-        border: none;
-        box-shadow: 0 10px 25px rgba(138, 154, 91, 0.4);
-    }
+/* Price Summary */
+.price-summary-card {
+    background: rgba(249, 115, 22, 0.05);
+    border: 1px solid var(--primary);
+    border-radius: 20px;
+    padding: 25px;
+    text-align: center;
+}
 
-    .slot-number { 
-        display: block; 
-        font-size: 0.8rem; 
-        text-transform: uppercase; 
-        font-weight: 800;
-        opacity: 0.7;
-        margin-bottom: 8px;
-    }
+.price-summary-card p { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+.price-summary-card h2 { font-weight: 900; color: var(--primary); font-size: 2.2rem; margin: 0; }
 
-    .slot-time { 
-        display: block; 
-        font-size: 1.3rem; 
-        font-weight: 800;
-        letter-spacing: 0.5px;
-    }
+/* Counter */
+.counter-input-container {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 5px;
+}
 
-    /* Targets Grid */
-    .targets-grid {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 15px;
-        margin-top: 20px;
-    }
+.counter-btn {
+    background: transparent;
+    border: none;
+    color: #fff;
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    transition: var(--transition-smooth);
+}
 
-    .target-box {
-        aspect-ratio: 1;
-        background: #ddead1;
-        border: 1px solid var(--glass-border);
-        border-radius: 12px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: 0.2s;
-    }
+.counter-btn:hover { background: rgba(255, 255, 255, 0.1); color: var(--primary); }
 
-    .target-box:hover:not(.disabled) { border-color: var(--active-blue); scale: 1.05; }
-    .target-box.selected { background: var(--active-blue); color: black; border: none; font-weight: 800; }
-    .target-box.disabled { opacity: 0.2; cursor: not-allowed; background: transparent; filter: grayscale(1); }
+.counter-input {
+    background: transparent;
+    border: none;
+    color: #fff;
+    width: 50px;
+    text-align: center;
+    font-weight: 800;
+}
 
-    .target-num { font-size: 1.5rem; }
-    .target-label { font-size: 0.6rem; text-transform: uppercase; }
+/* Wizard Grid */
+.wizard-grid-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 0;
+}
 
-    /* Price Summary Card */
-    .price-summary-card {
-        background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(138, 154, 91, 0.1) 100%);
-        border-radius: 20px;
-        padding: 20px;
-        border: 1px solid rgba(138, 154, 91, 0.2);
-    }
+.wizard-column {
+    border-right: 1px solid var(--card-border);
+}
 
-    .price-summary-card p { margin: 0; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; }
-    .price-summary-card h2 { margin: 5px 0; font-weight: 800; color: var(--active-blue); }
+.wizard-column:last-child { border-right: none; }
 
-    /* Buttons */
-    .btn-premium {
-        background: linear-gradient(to right, var(--active-blue), var(--deep-blue));
-        border: none;
-        color: black;
-        padding: 14px 30px;
-        border-radius: 12px;
-        font-weight: bold;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: 0.3s;
-    }
+.session-label {
+    font-size: 0.7rem;
+    color: var(--primary);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
 
-    .btn-premium:hover { scale: 1.03; box-shadow: 0 10px 30px rgba(138, 154, 91, 0.3); }
+.session-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(249, 115, 22, 0.1);
+}
 
-    .btn-premium-outline {
-        background: transparent;
-        border: 1px solid var(--glass-border);
-        color: #2b3a2a;
-        padding: 14px 30px;
-        border-radius: 12px;
-        font-weight: bold;
-        margin-right: 15px;
-    }
+/* Review Details */
+.review-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--card-border);
+}
 
-    /* Review details */
-    .review-details {
-        background: rgba(255,255,255,0.02);
-        border-radius: 20px;
-        padding: 20px;
-    }
-
-    .review-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .review-item:last-child { border: none; }
-    .review-item span { color: var(--text-muted); text-transform: uppercase; font-size: 0.8rem; }
-    .review-item strong { color: #2b3a2a; }
-    .review-item.highlight strong { color: var(--active-blue); font-size: 1.5rem; }
+.review-item span { font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; font-weight: 600; }
+.review-item strong { color: #fff; font-weight: 700; }
+.review-item.highlight strong { color: var(--primary); font-size: 1.8rem; }
 
     /* Animations */
     @@keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
@@ -501,7 +498,7 @@
     .counter-btn {
         background: transparent;
         border: none;
-        color: #2b3a2a;
+        color: #fff;
         font-size: 1.5rem;
         cursor: pointer;
         width: 40px;
@@ -514,19 +511,26 @@
     }
 
     .counter-btn:hover {
-        background: rgba(138, 154, 91, 0.2);
-        color: var(--active-blue);
+        background: rgba(249, 115, 22, 0.1);
+        color: var(--primary);
     }
 
     .counter-input {
         background: transparent;
         border: none;
-        color: #2b3a2a;
+        color: #fff;
         font-size: 1.3rem;
         font-weight: bold;
         text-align: center;
         width: 60px;
         outline: none;
+    }
+
+    /* Dropdown visibility fix */
+    select.form-control option {
+        background-color: #1a1f26 !important;
+        color: #fff !important;
+        padding: 10px !important;
     }
 </style>
 

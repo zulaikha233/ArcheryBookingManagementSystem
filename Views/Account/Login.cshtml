@@ -1,65 +1,89 @@
 @{
-    ViewBag.Title = "Login";
+    ViewBag.Title = "Staff Login";
 }
 
-<div class="container animate-in">
+<div class="container py-5" data-aos="fade-up">
     <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="text-center mb-5">
-                <div style="font-size: 4rem; color: #8A9A5B">🛡️</div>
-                <h1 class="hero-title" style="font-size: 2.5rem;">ARENA <span style="color: #2b3a2a">ACCESS</span></h1>
-                <p style="color: #adb5bd">Enter your credentials to manage the range.</p>
-            </div>
-
-            <div class="premium-card">
-                @if (ViewBag.ErrorMessage != null)
-                {
-                    <div class="alert alert-danger-custom mb-4">
-                        <i class="bi bi-shield-lock-fill me-2"></i> @ViewBag.ErrorMessage
-                    </div>
-                }
-
-                <form asp-action="Login" method="post">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold text-uppercase" style="color: var(--primary); letter-spacing: 1px; font-size: 0.8rem">EMPLOYEE ID</label>
-                        <div class="input-group">
-                            <input type="text" name="EmpId" class="form-control border-0 shadow-none fw-bold" placeholder="Enter ID" required />
+        <div class="col-lg-10">
+            <div class="premium-card p-0 overflow-hidden" data-aos="fade-up" data-aos-delay="200">
+                <div class="row g-0" style="min-height: 550px;">
+                    <!-- Visual Column -->
+                    <div class="col-lg-6 d-none d-lg-flex flex-column justify-content-center p-5 text-center" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(6, 10, 15, 0.9) 100%), url('/modern_archery_hero.png'); background-size: cover; background-position: center; border-right: 1px solid var(--card-border);">
+                        <div class="mb-4">
+                            <i class="bi bi-shield-lock" style="font-size: 5rem; color: var(--secondary); text-shadow: 0 0 30px rgba(251, 191, 36, 0.3);"></i>
                         </div>
+                        <h1 class="hero-title mb-3">STAFF <span>PORTAL</span></h1>
+                        <p class="text-dim px-4">Authorized administrative access. Please authenticate using your employee credentials to manage range operations.</p>
                     </div>
 
-                    <div class="mb-4 text-start">
-                        <label class="form-label fw-bold" style="color: var(--primary); letter-spacing: 1px; font-size: 0.85rem">PASSWORD</label>
-                        <div class="password-input-wrapper">
-                            <input type="password" name="Password" id="passwordField" class="form-control border-0 shadow-none fw-bold" 
-                                   placeholder="••••••••" required />
-                            <button class="password-toggle-btn" type="button" id="togglePassword">
-                                <i class="bi bi-eye" id="eyeIcon"></i>
+                    <!-- Form Column -->
+                    <div class="col-lg-6 p-5 d-flex flex-column justify-content-center" style="position: relative; z-index: 10;">
+                        <div class="mb-4 d-lg-none text-center">
+                             <h1 class="hero-title" style="font-size: 2rem;">STAFF <span>PORTAL</span></h1>
+                        </div>
+
+                        @if (ViewBag.ErrorMessage != null)
+                        {
+                            <div class="alert mb-4" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; border-radius: 16px;">
+                                <i class="bi bi-shield-exclamation me-2"></i> @ViewBag.ErrorMessage
+                            </div>
+                        }
+
+                        <form asp-action="Login" method="post">
+                            <div class="mb-4">
+                                <label class="form-label text-dim fw-600 mb-2" style="font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase;">EMPLOYEE ID</label>
+                                <input type="text" name="EmpId" class="form-control" placeholder="Enter ID" required />
+                            </div>
+
+                            <div class="mb-5">
+                                <label class="form-label text-dim fw-600 mb-2" style="font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase;">PASSWORD</label>
+                                <div class="password-input-wrapper position-relative">
+                                    <input type="password" name="Password" id="passwordField" class="form-control" placeholder="••••••••" required />
+                                    <button class="password-toggle-btn position-absolute end-0 top-50 translate-middle-y me-3" type="button" id="togglePassword">
+                                        <i class="bi bi-eye text-dim" id="eyeIcon"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-premium w-100 justify-content-center" style="background: var(--secondary); box-shadow: 0 10px 20px rgba(251, 191, 36, 0.2);">
+                                AUTHENTICATE <i class="bi bi-key ms-2"></i>
                             </button>
-                        </div>
+                        </form>
                     </div>
-
-                    @section Scripts {
-                        <script>
-                            document.querySelector('#togglePassword').addEventListener('click', function () {
-                                const passwordField = document.querySelector('#passwordField');
-                                const eyeIcon = document.querySelector('#eyeIcon');
-                                const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
-                                passwordField.setAttribute('type', type);
-                                eyeIcon.classList.toggle('bi-eye');
-                                eyeIcon.classList.toggle('bi-eye-slash');
-                            });
-                        </script>
-                    }
-
-                    <div class="text-center mt-5">
-                        <button type="submit" class="btn-premium py-3 px-5 shadow-lg">LOGIN</button>
-                    </div>
-                </form>
+                </div>
             </div>
 
             <div class="text-center mt-4">
-                <a href="@Url.Action("Index", "Home")" class="text-decoration-none" style="color: #6c757d; transition: 0.3s;"><i class="bi bi-arrow-left me-1"></i> Back to Home</a>
+                <a href="@Url.Action("Index", "Home")" class="text-decoration-none text-dim" style="transition: var(--transition-smooth); font-size: 0.9rem;">
+                    <i class="bi bi-arrow-left me-2"></i> Back to Home
+                </a>
             </div>
         </div>
     </div>
 </div>
+
+
+@section Scripts {
+    <script>
+        document.querySelector('#togglePassword').addEventListener('click', function () {
+            const passwordField = document.querySelector('#passwordField');
+            const eyeIcon = document.querySelector('#eyeIcon');
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            eyeIcon.classList.toggle('bi-eye');
+            eyeIcon.classList.toggle('bi-eye-slash');
+        });
+    </script>
+}
+
+<style>
+    .fw-600 { font-weight: 600; }
+    .password-toggle-btn {
+        background: none;
+        border: none;
+        padding: 5px;
+        cursor: pointer;
+        z-index: 5;
+    }
+</style>
+

@@ -2,35 +2,68 @@
     ViewData["Title"] = "Archery Arena | Precision & Power";
 }
 
-<div class="landing-container">
-    <div class="glass-header animate-fade-in">
-        <h1 class="brand-title">ARCHERY<span>ARENA</span></h1>
-        <p class="brand-tagline">Master your focus. Release your potential.</p>
-    </div>
+@{
+    ViewData["Title"] = "Archery Arena | Precision & Power";
+}
 
-    <div class="user-selection-grid">
-        <!-- Customer Card -->
-        <div class="user-card customer-card animate-slide-up" onclick="location.href='@Url.Action("CustomerLogin", "Account")'">
-            
-            <div class="card-content">
-                <h2>I'm a Customer</h2>
-                <p>Ready to hit the bullseye? Let's booking your lane now!</p>
-                <div class="card-action">
-                    <span>Book Now</span>
-                    <i class="arrow-right"></i>
+<div class="home-hero-container">
+    <div class="home-hero-bg"></div>
+    <div class="home-hero-overlay"></div>
+    
+    <div class="container py-5 home-content">
+        <div class="text-center mb-5" data-aos="zoom-out" data-aos-duration="1500">
+            <h1 class="hero-title" style="font-size: 5.5rem;">ARCHERY <span>ARENA</span></h1>
+            <p class="hero-subtitle mx-auto" style="font-size: 1.4rem; color: #fff; text-shadow: 0 2px 15px rgba(0,0,0,0.8);">Elevate your game at the city's most premium outdoor archery facility. Precision, Focus, and Power in every shot.</p>
+        </div>
+
+        <div class="row justify-content-center g-4 mt-2">
+            <!-- Customer Card -->
+            <div class="col-md-5" data-aos="fade-right" data-aos-delay="200">
+                <div class="premium-card text-center" onclick="location.href='@Url.Action("CustomerLogin", "Account")'" style="cursor: pointer; background: rgba(6, 10, 15, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1);">
+                    <div class="mb-4">
+                        <i class="bi bi-person-bounding-box" style="font-size: 3.5rem; color: var(--primary);"></i>
+                    </div>
+                    <h2 class="fw-bold mb-3">I'm a Customer</h2>
+                    <p class="text-dim mb-4">Ready to hit the bullseye? Secure your lane in seconds and experience world-class archery.</p>
+                    <div class="btn-premium w-100 justify-content-center">
+                        BOOK A SESSION <i class="bi bi-arrow-right-short ms-2"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Staff Card -->
+            <div class="col-md-5" data-aos="fade-left" data-aos-delay="400">
+                <div class="premium-card text-center" onclick="location.href='@Url.Action("Login", "Account")'" style="cursor: pointer; background: rgba(6, 10, 15, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1);">
+                    <div class="mb-4">
+                        <i class="bi bi-shield-check" style="font-size: 3.5rem; color: var(--secondary);"></i>
+                    </div>
+                    <h2 class="fw-bold mb-3">I'm a Staff</h2>
+                    <p class="text-dim mb-4">Access the management portal to handle bookings, lanes, and administrative tasks.</p>
+                    <div class="btn-premium w-100 justify-content-center" style="background: var(--secondary); color: #000; box-shadow: 0 10px 20px rgba(251, 191, 36, 0.2);">
+                        STAFF PORTAL <i class="bi bi-lock ms-2"></i>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Staff Card -->
-        <div class="user-card staff-card animate-slide-up" style="animation-delay: 0.1s;" onclick="location.href='@Url.Action("Login", "Account")'">
-           
-            <div class="card-content">
-                <h2>I'm a Staff</h2>
-                <p>Manage bookings and lanes efficiently.</p>
-                <div class="card-action">
-                    <span>Staff Portal</span>
-                    <i class="arrow-right"></i>
+        <!-- Stats / Trust Section -->
+        <div class="row mt-5 pt-5 text-center g-4" data-aos="fade-up" data-aos-offset="0">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <h3 class="fw-800" style="color: var(--primary);">20+</h3>
+                    <p class="text-dim">Premium Lanes</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <h3 class="fw-800" style="color: var(--primary);">15k+</h3>
+                    <p class="text-dim">Happy Archers</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <h3 class="fw-800" style="color: var(--primary);">4.9/5</h3>
+                    <p class="text-dim">User Rating</p>
                 </div>
             </div>
         </div>
@@ -38,119 +71,55 @@
 </div>
 
 <style>
-    :root {
-        --primary: #8A9A5B;
-        --secondary: #6D7B48;
-        --dark-bg: #ECE7CA;
-        --glass: #A9BA9D;
-        --glass-border: rgba(255, 255, 255, 0.1);
-    }
-
-    body {
-        background: linear-gradient(rgba(236, 231, 202, 0.3), rgba(236, 231, 202, 0.45)), url('/images/archery_hero.png') center/cover no-repeat fixed !important;
-        color: #2b3a2a;
-        overflow-x: hidden;
-        font-family: 'Inter', sans-serif;
-    }
-
-    .landing-container {
-        min-height: 80vh;
+    .home-hero-container {
+        position: relative;
+        min-height: 100vh;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 2rem;
+        padding: 100px 0;
+        margin-top: -80px; /* Offset for navbar if needed */
     }
 
-    .glass-header {
-        text-align: center;
-        margin-bottom: 3rem;
-        width: 100%;
+    .home-hero-bg {
+        position: fixed;
+        inset: 0;
+        background: url('/modern_archery_hero.png') center/cover no-repeat;
+        z-index: -2;
     }
-
-    .brand-title {
-        font-size: 4rem;
-        font-weight: 800;
-        letter-spacing: -2px;
-        margin-bottom: 0.5rem;
+    
+    .home-hero-overlay {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(6, 10, 15, 0.3), rgba(6, 10, 15, 0.9));
+        z-index: -1;
     }
-
-    .brand-title span {
-        background: linear-gradient(to right, var(--primary), var(--secondary));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .brand-tagline {
-        font-size: 1.1rem;
-        color: #888;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-    }
-
-
-    .user-selection-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        width: 100%;
-        max-width: 800px;
-    }
-
-    .user-card {
-        background: var(--glass);
-        backdrop-filter: blur(20px);
-        border: 1px solid var(--glass-border);
-        border-radius: 30px;
-        padding: 3rem 2rem;
-        cursor: pointer;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    .home-content {
         position: relative;
-        overflow: hidden;
+        z-index: 10;
+    }
+    
+    .fw-800 { font-weight: 800; font-size: 2.5rem; }
+    
+    .stat-card {
+        background: rgba(6, 10, 15, 0.6);
+        backdrop-filter: blur(10px);
+        padding: 30px;
+        border-radius: 24px;
+        border: 1px solid rgba(255,255,255,0.08);
+        transition: var(--transition-smooth);
     }
 
-    .user-card:hover {
-        transform: translateY(-10px);
+    .stat-card:hover {
+        transform: translateY(-5px);
+        background: rgba(6, 10, 15, 0.8);
         border-color: var(--primary);
-        box-shadow: 0 20px 40px rgba(138, 154, 91, 0.2); 
-        background: #9dad92; /* slightly darker/different green for hover */
     }
-
-    .card-icon {
-        font-size: 3.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .card-content h2 {
-        font-size: 1.8rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-        color: #2b3a2a;
-    }
-
-    .card-content p {
-        color: #2b3a2a; 
-        line-height: 1.6;
-        margin-bottom: 2rem;
-    }
-
-    .card-action {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-weight: 600;
-        color: var(--primary);
-        text-transform: uppercase;
-        font-size: 0.9rem;
-        letter-spacing: 1px;
-    }
-
-    .animate-fade-in { animation: fadeIn 1s ease-out; }
-    .animate-slide-up { animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
-
-    @@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 </style>
+
+
+
 
 
 

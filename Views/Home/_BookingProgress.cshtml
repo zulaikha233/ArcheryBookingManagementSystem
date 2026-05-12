@@ -37,7 +37,7 @@
     }
 
     .wizard-title span {
-        background: linear-gradient(to right, #8A9A5B, #6D7B48);
+        background: linear-gradient(to right, var(--primary), var(--secondary));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
@@ -59,31 +59,39 @@
     .step.active { opacity: 1; }
 
     .step span {
-        width: 40px;
-        height: 40px;
+        width: 45px;
+        height: 45px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #A9BA9D;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 50%;
-        margin: 0 auto 8px;
-        font-weight: bold;
+        margin: 0 auto 10px;
+        font-weight: 800;
+        color: var(--text-dim);
     }
 
     .step.active span {
-        background: linear-gradient(45deg, #8A9A5B, #6D7B48);
-        color: black;
+        background: var(--primary);
+        color: #000;
         border: none;
-        box-shadow: 0 0 20px rgba(138, 154, 91, 0.3);
+        box-shadow: 0 0 25px var(--primary-glow);
     }
 
-    .step p { font-size: 0.8rem; text-transform: uppercase; margin: 0; letter-spacing: 1px; color: #2b3a2a; }
+    .step p { font-size: 0.7rem; text-transform: uppercase; margin: 0; letter-spacing: 2px; color: var(--text-dim); font-weight: 700; }
+    .step.active p { color: var(--primary); }
 
     .step-line {
-        width: 60px;
-        height: 1px;
-        background: rgba(0,0,0,0.1);
-        margin-top: -20px;
+        width: 80px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.08);
+        margin-top: -25px;
+        border-radius: 2px;
+    }
+    
+    .step.active + .step-line {
+        background: var(--primary);
+        box-shadow: 0 0 10px var(--primary-glow);
     }
 </style>
