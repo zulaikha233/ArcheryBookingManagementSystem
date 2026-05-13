@@ -1,8 +1,11 @@
 :root {
-    --primary: #f97316; /* Neon Orange */
+    --primary: #f97316;
+    /* Neon Orange */
     --primary-glow: rgba(249, 115, 22, 0.4);
-    --secondary: #fbbf24; /* Amber/Gold */
-    --dark-bg: #060a0f; /* Deep Charcoal/Black */
+    --secondary: #fbbf24;
+    /* Amber/Gold */
+    --dark-bg: #060a0f;
+    /* Deep Charcoal/Black */
     --card-bg: rgba(255, 255, 255, 0.03);
     --card-border: rgba(255, 255, 255, 0.08);
     --glass-bg: rgba(15, 23, 42, 0.7);
@@ -13,7 +16,8 @@
 }
 
 
-html, body {
+html,
+body {
     width: 100%;
     height: 100%;
     margin: 0;
@@ -22,7 +26,7 @@ html, body {
 
 body {
     background-color: #000000;
-    background-image: 
+    background-image:
         radial-gradient(circle at 0% 0%, rgba(249, 115, 22, 0.08) 0%, transparent 50%),
         radial-gradient(circle at 100% 100%, rgba(251, 191, 36, 0.05) 0%, transparent 50%);
     background-attachment: fixed;
@@ -215,12 +219,14 @@ body {
 
 
 /* Forms & Inputs */
-.form-control, .form-select {
+.form-control,
+.form-select {
     background: #ffffff !important;
     border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 14px;
     padding: 0 20px;
-    height: 55px; /* Standardized height */
+    height: 55px;
+    /* Standardized height */
     color: #000000 !important;
     font-weight: 500;
     transition: var(--transition-smooth);
@@ -252,7 +258,8 @@ body {
     font-weight: 400;
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus,
+.form-select:focus {
     background: #ffffff !important;
     border-color: var(--primary);
     box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.15);
@@ -262,8 +269,8 @@ body {
 
 /* Override Browser Autofill Styles */
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 1000px white inset !important;
     -webkit-text-fill-color: black !important;
@@ -300,8 +307,15 @@ input:-webkit-autofill:active {
     vertical-align: middle;
 }
 
-.table tbody tr td:first-child { border-radius: 16px 0 0 16px; border-left: 1px solid var(--card-border); }
-.table tbody tr td:last-child { border-radius: 0 16px 16px 0; border-right: 1px solid var(--card-border); }
+.table tbody tr td:first-child {
+    border-radius: 16px 0 0 16px;
+    border-left: 1px solid var(--card-border);
+}
+
+.table tbody tr td:last-child {
+    border-radius: 0 16px 16px 0;
+    border-right: 1px solid var(--card-border);
+}
 
 .table tbody tr:hover {
     background: rgba(255, 255, 255, 0.08);
@@ -310,13 +324,25 @@ input:-webkit-autofill:active {
 
 /* Animations */
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(40px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .animate-in {
@@ -364,11 +390,12 @@ input:-webkit-autofill:active {
 .flatpickr-calendar {
     background: #ffffff !important;
     border: 1px solid #d1d5db !important;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
     border-radius: 16px !important;
     padding: 10px;
     color: #000 !important;
-    min-width: 310px !important; /* Ensure enough space for month/year */
+    min-width: 310px !important;
+    /* Ensure enough space for month/year */
 }
 
 .flatpickr-current-month {
@@ -387,10 +414,12 @@ input:-webkit-autofill:active {
 
 .flatpickr-day {
     color: #374151 !important;
-    border-radius: 50% !important; /* Circular days */
+    border-radius: 50% !important;
+    /* Circular days */
 }
 
-.flatpickr-day.selected, .flatpickr-day.selected:hover {
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover {
     background: var(--primary) !important;
     border-color: var(--primary) !important;
     color: #000 !important;
@@ -411,7 +440,8 @@ input:-webkit-autofill:active {
 .flatpickr-current-month .flatpickr-monthDropdown-months,
 .flatpickr-current-month input.cur-year {
     font-weight: 700 !important;
-    color: #111827 !important; /* High contrast dark color */
+    color: #111827 !important;
+    /* High contrast dark color */
     background: transparent !important;
 }
 
@@ -435,7 +465,8 @@ input:-webkit-autofill:active {
     background: #f3f4f6 !important;
 }
 
-.flatpickr-prev-month, .flatpickr-next-month {
+.flatpickr-prev-month,
+.flatpickr-next-month {
     color: #111827 !important;
     fill: #111827 !important;
 }

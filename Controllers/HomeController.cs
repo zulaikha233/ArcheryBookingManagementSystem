@@ -43,5 +43,20 @@ namespace ArcheryAlley.Controllers
         {
             return View();
         }
+
+        public IActionResult About()
+        {
+            return View();
+        }
+
+        public IActionResult Equipment()
+        {
+            return View();
+        }
+
+        public IActionResult Gallery()
+        {
+            return View();
+        }
     }
 }
