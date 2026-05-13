@@ -1,135 +1,80 @@
+@*
 @{
-    ViewData["Title"] = "Gallery - Akma Archery Club";
+    ViewData["Title"] = "Gallery";
 }
 
-<div class="page-header" data-aos="fade-down">
-    <div class="container">
-        <h1 class="display-3 fw-900">THE <span class="text-primary-glow">GALLERY</span></h1>
-        <p class="lead text-dim">Moments of focus and triumph at Archery Arena.</p>
-    </div>
-</div>
-
 <div class="container py-5">
-    <div class="gallery-grid">
-        <!-- Gallery Item 1 -->
-        <div class="gallery-item" data-aos="zoom-in" data-aos-delay="100">
-            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=2076&auto=format&fit=crop" alt="Gallery Image">
-            <div class="gallery-overlay">
-                <span class="fw-700">The Perfect Shot</span>
+    <!-- Header -->
+    <div class="text-center mb-5" data-aos="fade-down">
+        <h1 class="hero-title" style="font-size: 3.5rem;">OUR <span style="color: var(--primary);">GALLERY</span></h1>
+        <p class="hero-subtitle mx-auto">Moments of focus, precision, and community captured at Akma Archery.</p>
+    </div>
+
+    <!-- Gallery Grid -->
+    <div class="row g-4">
+        <!-- Item 1 -->
+        <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="100">
+            <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 300px; border: 1px solid var(--card-border);">
+                <img src="https://images.unsplash.com/photo-1544253139-44473336785e?q=80&w=2070&auto=format&fit=crop" alt="Archery Focus" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
+                <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(249, 115, 22, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-search" style="font-size: 2rem; color: #000;"></i>
+                </div>
             </div>
         </div>
-        <!-- Gallery Item 2 -->
-        <div class="gallery-item large" data-aos="zoom-in" data-aos-delay="200">
-            <img src="https://images.unsplash.com/photo-1511033036817-e6d0ad9b25b5?q=80&w=2070&auto=format&fit=crop" alt="Gallery Image">
-            <div class="gallery-overlay">
-                <span class="fw-700">Our Premium Lanes</span>
+        <!-- Item 2 -->
+        <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="200">
+            <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 300px; border: 1px solid var(--card-border);">
+                <img src="https://images.unsplash.com/photo-1593121925328-369ec8459c08?q=80&w=2070&auto=format&fit=crop" alt="Bullseye" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
+                <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(249, 115, 22, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-search" style="font-size: 2rem; color: #000;"></i>
+                </div>
             </div>
         </div>
-        <!-- Gallery Item 3 -->
-        <div class="gallery-item" data-aos="zoom-in" data-aos-delay="300">
-            <img src="https://images.unsplash.com/photo-1580048215399-2461d624c62b?q=80&w=2070&auto=format&fit=crop" alt="Gallery Image">
-            <div class="gallery-overlay">
-                <span class="fw-700">Member Sessions</span>
+        <!-- Item 3 -->
+        <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="300">
+            <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 300px; border: 1px solid var(--card-border);">
+                <img src="https://images.unsplash.com/photo-1495555687398-3f50d6e79e1e?q=80&w=2070&auto=format&fit=crop" alt="Equipment Close-up" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
+                <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(249, 115, 22, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-search" style="font-size: 2rem; color: #000;"></i>
+                </div>
             </div>
         </div>
-        <!-- Gallery Item 4 -->
-        <div class="gallery-item" data-aos="zoom-in" data-aos-delay="400">
-            <img src="https://images.unsplash.com/photo-1612043063863-8d93370b33ec?q=80&w=2071&auto=format&fit=crop" alt="Gallery Image">
-            <div class="gallery-overlay">
-                <span class="fw-700">Precision Gear</span>
+        <!-- Item 4 -->
+        <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="400">
+            <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 300px; border: 1px solid var(--card-border);">
+                <img src="https://images.unsplash.com/photo-1511306361225-d1955ecd3927?q=80&w=2070&auto=format&fit=crop" alt="Training Session" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
+                <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(249, 115, 22, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-search" style="font-size: 2rem; color: #000;"></i>
+                </div>
             </div>
         </div>
-        <!-- Gallery Item 5 -->
-        <div class="gallery-item" data-aos="zoom-in" data-aos-delay="500">
-            <img src="https://images.unsplash.com/photo-1541535881105-02bc45097893?q=80&w=2070&auto=format&fit=crop" alt="Gallery Image">
-            <div class="gallery-overlay">
-                <span class="fw-700">Night Shooting</span>
+        <!-- Item 5 -->
+        <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="500">
+            <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 300px; border: 1px solid var(--card-border);">
+                <img src="https://images.unsplash.com/photo-1563299796-17596ed6b017?q=80&w=2070&auto=format&fit=crop" alt="Arrows in Quiver" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
+                <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(249, 115, 22, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-search" style="font-size: 2rem; color: #000;"></i>
+                </div>
             </div>
         </div>
-        <!-- Gallery Item 6 -->
-        <div class="gallery-item" data-aos="zoom-in" data-aos-delay="600">
-            <img src="https://images.unsplash.com/photo-1511140593138-03875880757a?q=80&w=2070&auto=format&fit=crop" alt="Gallery Image">
-            <div class="gallery-overlay">
-                <span class="fw-700">Tournament Finals</span>
+        <!-- Item 6 -->
+        <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="600">
+            <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 300px; border: 1px solid var(--card-border);">
+                <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=2070&auto=format&fit=crop" alt="Professional Archer" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
+                <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(249, 115, 22, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-search" style="font-size: 2rem; color: #000;"></i>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <style>
-    .page-header {
-        padding: 120px 0 60px;
-        background: linear-gradient(to bottom, rgba(249, 115, 22, 0.05), transparent);
-        text-align: center;
+    .gallery-item:hover .gallery-img {
+        transform: scale(1.1);
     }
-
-    .fw-900 { font-weight: 900; }
-    .text-primary-glow {
-        color: var(--primary);
-        text-shadow: 0 0 20px var(--primary-glow);
-    }
-
-    .gallery-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        grid-auto-rows: 250px;
-        grid-gap: 20px;
-        grid-auto-flow: dense;
-    }
-
-    .gallery-item {
-        position: relative;
-        overflow: hidden;
-        border-radius: 20px;
-        border: 1px solid var(--card-border);
-    }
-
-    .gallery-item.large {
-        grid-row: span 2;
-        grid-column: span 2;
-    }
-
-    @@media (max-width: 768px) {
-        .gallery-item.large {
-            grid-row: span 1;
-            grid-column: span 1;
-        }
-    }
-
-    .gallery-item img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .gallery-overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-        display: flex;
-        align-items: flex-end;
-        padding: 20px;
-        opacity: 0;
-        transition: opacity 0.4s ease;
-    }
-
-    .gallery-item:hover img {
-        transform: scale(1.15);
-    }
-
     .gallery-item:hover .gallery-overlay {
         opacity: 1;
     }
-
-    .gallery-overlay span {
-        color: #fff;
-        font-size: 1.1rem;
-        transform: translateY(10px);
-        transition: transform 0.4s ease;
-    }
-
-    .gallery-item:hover .gallery-overlay span {
-        transform: translateY(0);
-    }
 </style>
+*@

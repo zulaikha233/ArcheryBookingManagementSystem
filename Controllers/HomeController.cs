@@ -44,12 +44,12 @@ namespace ArcheryAlley.Controllers
             return View();
         }
 
-        public IActionResult About()
+        public IActionResult AboutUs()
         {
             return View();
         }
 
-        public IActionResult Equipment()
+        public IActionResult GearSupport()
         {
             return View();
         }

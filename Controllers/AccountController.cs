@@ -47,8 +47,19 @@ namespace ArcheryAlley.Controllers
 
         public IActionResult Logout()
         {
+            // Determine where to redirect based on current session
+            bool isCustomer = !string.IsNullOrEmpty(HttpContext.Session.GetString("CustomerEmail"));
+            
             HttpContext.Session.Clear();
-            return RedirectToAction("Login");
+
+            if (isCustomer)
+            {
+                return RedirectToAction("CustomerLogin");
+            }
+            else
+            {
+                return RedirectToAction("Login");
+            }
         }
 
         [HttpGet]
