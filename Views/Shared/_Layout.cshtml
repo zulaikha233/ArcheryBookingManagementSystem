@@ -10,7 +10,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewBag.Title - Akma Archery Club</title>
+    <title>@ViewBag.Title - Akma Archery Booking System</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;800;900&display=swap" rel="stylesheet">
     <!-- Bootstrap -->
@@ -70,77 +70,88 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg glass-nav sticky-top">
-        <div class="container-fluid d-flex align-items-center position-relative px-0">
-            <div class="container d-flex align-items-center">
-            <a class="navbar-brand d-flex align-items-center" href="~/">
-                <span class="text-primary">AKMA</span>&nbsp;ARCHERY CLUB
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" style="border-color: var(--card-border);">
-                <i class="bi bi-list" style="color: var(--primary); font-size: 1.5rem;"></i>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav mx-auto align-items-center">
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index", "Home")"><i class="bi bi-house-door me-1"></i> Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("About", "Home")"><i class="bi bi-info-circle me-1"></i> About Us</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Equipment", "Home")"><i class="bi bi-gear me-1"></i> Equipment</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Gallery", "Home")"><i class="bi bi-images me-1"></i> Gallery</a>
-                    </li>
-
-                    @if (userRole == "Staff")
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("StaffBooking", "Booking")"><i class="bi bi-cpu me-1"></i> Slot Reservation</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("BookingHistory", "Booking")"><i class="bi bi-clock-history me-1"></i> Booking History</a>
-                        </li>
-                    }
-
-
-                    @if (userRole == "Admin")
-                    {
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("ManageSlots", "Slot")"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("ManageRates", "Rate")"><i class="bi bi-tags me-1"></i> Rates</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("ManageLanes", "Management")"><i class="bi bi-layers me-1"></i> Lanes</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="@Url.Action("Register", "Account")"><i class="bi bi-person-plus me-1"></i> Add Staff</a>
-                        </li>
-                    }
-                </ul>
-                
-            </div>
-        </div>
-
         @{
             var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
             var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+            
             bool isLoginPage = currentAction == "Login" || currentAction == "CustomerLogin" || currentAction == "CustomerRegister";
             bool isHomePage = currentController == "Home" && currentAction == "Index";
+            
+            // Define booking process actions
+            var bookingActions = new[] { "StaffBooking", "GetFreeSlots", "SelectionLane", "Payment", "PaymentGuest", "GuestBooking", "BookSlots" };
+            bool isBookingProcess = currentController == "Booking" && bookingActions.Contains(currentAction);
+            
+            bool hideNavbar = isBookingProcess;
         }
 
-        @if ((!string.IsNullOrEmpty(userName) || !string.IsNullOrEmpty(customerName)) && !isLoginPage && !isHomePage)
+        @if (!hideNavbar)
         {
-            <div style="position: absolute; right: 30px; top: 50%; transform: translateY(-50%); z-index: 100;">
-                <a class="logout-btn-premium" href="@Url.Action("Logout", "Account")" title="Logout">
-                    <i class="bi bi-box-arrow-right"></i>
-                </a>
-            </div>
+            <nav class="navbar navbar-expand-lg glass-nav sticky-top">
+                <div class="container-fluid d-flex align-items-center position-relative px-0">
+                    <div class="container d-flex align-items-center">
+                    <a class="navbar-brand d-flex align-items-center" href="~/">
+                        <img src="~/images/Archery_Logo.png" alt="Logo" class="navbar-logo" />
+                        <span>AKMA</span>&nbsp;ARCHERY BOOKING SYSTEM
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" style="border-color: var(--card-border);">
+                        <i class="bi bi-list" style="color: var(--primary); font-size: 1.5rem;"></i>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarContent">
+                        <ul class="navbar-nav mx-auto align-items-center">
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Index", "Home")"><i class="bi bi-house-door me-1"></i> Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("About", "Home")"><i class="bi bi-info-circle me-1"></i> About Us</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Equipment", "Home")"><i class="bi bi-gear me-1"></i> Equipment</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Gallery", "Home")"><i class="bi bi-images me-1"></i> Gallery</a>
+                            </li>
+
+                            @if (userRole == "Staff")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" href="@Url.Action("StaffBooking", "Booking")"><i class="bi bi-cpu me-1"></i> Slot Reservation</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="@Url.Action("BookingHistory", "Booking")"><i class="bi bi-clock-history me-1"></i> Booking History</a>
+                                </li>
+                            }
+
+
+                            @if (userRole == "Admin")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" href="@Url.Action("ManageSlots", "Slot")"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="@Url.Action("ManageRates", "Rate")"><i class="bi bi-tags me-1"></i> Rates</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="@Url.Action("ManageLanes", "Management")"><i class="bi bi-layers me-1"></i> Lanes</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="@Url.Action("Register", "Account")"><i class="bi bi-person-plus me-1"></i> Add Staff</a>
+                                </li>
+                            }
+                        </ul>
+                        
+                    </div>
+                </div>
+
+                @if ((!string.IsNullOrEmpty(userName) || !string.IsNullOrEmpty(customerName)) && !isLoginPage && !isHomePage)
+                {
+                    <div style="position: absolute; right: 30px; top: 50%; transform: translateY(-50%); z-index: 100;">
+                        <a class="logout-btn-premium" href="@Url.Action("Logout", "Account")" title="Logout">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </a>
+                    </div>
+                }
+            </nav>
         }
-    </nav>
 
     <main role="main">
         @RenderBody()
