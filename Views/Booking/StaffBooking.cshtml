@@ -759,20 +759,26 @@
         document.getElementById("step2-indicator").classList.add("active");
 
         try {
-            const resp = await fetch(`/Booking/GetAvailableTargetsAjax?slotId=${bookingData.slotId}&date=${bookingData.date}&duration=${bookingData.duration}`);
-            const availableTargets = await resp.json();
+           const resp = await fetch(`/Booking/GetAvailableTargetsAjax?slotId=${bookingData.slotId}&date=${bookingData.date}&duration=${bookingData.duration}`);
+            const targetData = await resp.json();
             
             grid.innerHTML = "";
             for(let i=1; i<=20; i++) {
                 const box = document.createElement("div");
-                const isTaken = !availableTargets.includes(i);
-                box.className = `target-box ${isTaken ? 'disabled' : ''}`;
+                const targetInfo = targetData.find(t => t.targetNumber === i);
+                const status = targetInfo ? targetInfo.status : "Taken";
+                
+                const isTaken = status === "Taken";
+                const isMaintenance = status === "Maintenance";
+                const isDisabled = isTaken || isMaintenance;
+
+                box.className = `target-box ${isDisabled ? 'disabled' : ''}`;
                 box.id = `target-${i}`;
-                if(!isTaken) box.onclick = () => selectTarget(i);
+                if(!isDisabled) box.onclick = () => selectTarget(i);
 
                 box.innerHTML = `
                     <span class="target-num">${i}</span>
-                    <span class="target-label">${isTaken ? 'Occupied' : 'Open'}</span>
+                    <span class="target-label">${isMaintenance ? '🔧 Maint.' : isTaken ? 'Occupied' : 'Open'}</span>
                 `;
                 grid.appendChild(box);
             }
