@@ -46,7 +46,7 @@
                         {
                             <tr style="vertical-align: middle;">
                                 <!-- REF ID -->
-                                <td class="fw-bold" style="color: #8A9A5B">
+                                <td class="fw-bold" style="color: #ff4d4d">
                                     #@grp.GroupId.ToString("D4")
                                 </td>
 
@@ -85,7 +85,7 @@
                                 <td style="max-width: 140px;">
                                     @foreach (var lane in grp.TargetNos)
                                     {
-                                        <span class="badge me-1 mb-1" style="background: rgba(138, 154, 91,0.12); color: #8A9A5B; border: 1px solid rgba(138, 154, 91,0.3); border-radius: 30px; padding: 3px 8px; font-size: 0.72rem;">
+                                        <span class="badge me-1 mb-1" style="background: rgba(255, 77, 77,0.12); color: #ff4d4d; border: 1px solid rgba(255, 77, 77,0.3); border-radius: 30px; padding: 3px 8px; font-size: 0.72rem;">
                                             L@(lane)
                                         </span>
                                     }
@@ -116,7 +116,7 @@
                                     }
                                     else
                                     {
-                                        <span class="badge" style="background: #8A9A5B; color: #000; border-radius: 30px; padding: 3px 8px; font-size: 0.72rem;">@grp.ReservedBy</span>
+                                        <span class="badge" style="background: #ff4d4d; color: #000; border-radius: 30px; padding: 3px 8px; font-size: 0.72rem;">@grp.ReservedBy</span>
                                     }
                                 </td>
 
@@ -125,7 +125,7 @@
                                     @{
                                         var statusLabel = grp.Status switch
                                         {
-                                            1 => ("CONFIRMED", "#8A9A5B", "rgba(138, 154, 91,0.1)", "rgba(138, 154, 91,0.3)"),
+                                            1 => ("CONFIRMED", "#ff4d4d", "rgba(255, 77, 77,0.1)", "rgba(255, 77, 77,0.3)"),
                                             2 => ("CANCELLED", "#f87171", "rgba(248,113,113,0.1)", "rgba(248,113,113,0.3)"),
                                             _ => ("PENDING", "#facc15", "rgba(250,204,21,0.1)", "rgba(250,204,21,0.3)")
                                         };

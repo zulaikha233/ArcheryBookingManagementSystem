@@ -54,7 +54,7 @@
             </a>
             <a asp-action="ManageSlots"
                class="btn text-decoration-none d-inline-flex align-items-center justify-content-center"
-               style="border-radius: 50px; font-weight: 600; border: 1px solid #8A9A5B; color: #8A9A5B; height: 45px; padding: 0 25px">
+               style="border-radius: 50px; font-weight: 600; border: 1px solid #ff4d4d; color: #ff4d4d; height: 45px; padding: 0 25px">
                 <i class="bi bi-arrow-left me-2"></i> BACK TO DASHBOARD
             </a>
         </div>
@@ -208,13 +208,13 @@
                 text: 'This will activate or deactivate the selected rate.',
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonColor: '#8A9A5B',
+                confirmButtonColor: '#ff4d4d',
                 cancelButtonColor: '#2a2a2a',
                 confirmButtonText: 'YES, PROCEED',
                 cancelButtonText: 'CANCEL',
                 background: '#1a1a1a',
                 color: '#fff',
-                iconColor: '#8A9A5B'
+                iconColor: '#ff4d4d'
             }).then((result) => {
                 if (!result.isConfirmed) return;
 

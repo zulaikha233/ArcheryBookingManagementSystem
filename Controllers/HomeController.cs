@@ -58,5 +58,15 @@ namespace ArcheryAlley.Controllers
         {
             return View();
         }
+
+        public IActionResult ContactUs()
+        {
+            return View();
+        }
+
+        public IActionResult ArcheryLevels()
+        {
+            return View();
+        }
     }
 }

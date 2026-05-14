@@ -1,78 +1,350 @@
 @{
-    ViewData["Title"] = "About Us";
+    ViewData["Title"] = "About Us | Our Legacy";
 }
 
-<div class="container py-5">
-    <!-- Header Section -->
-    <div class="text-center mb-5" data-aos="fade-down">
-        <h1 class="hero-title" style="font-size: 3.5rem;">ABOUT <span style="color: var(--primary);">AKMA</span></h1>
-        <p class="hero-subtitle mx-auto">Discover the legacy of precision and the passion for archery that drives us.</p>
+<div class="about-container">
+    <!-- Premium Hero Section -->
+    <div class="about-hero" data-aos="zoom-out">
+        <div class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        <div class="container text-center position-relative" style="z-index: 10;">
+            <div class="mb-4 animate-in">
+                <i class="bi bi-bullseye" style="font-size: 5rem; color: var(--primary); filter: drop-shadow(0 0 20px var(--primary-glow));"></i>
+            </div>
+            <h1 class="hero-title animate-in" style="font-size: 4.5rem; letter-spacing: -2px;">THE LEGACY OF <span style="color: var(--primary);">AKMA</span></h1>
+            <p class="hero-subtitle mx-auto animate-in" style="max-width: 700px;">Precision, Focus, and the Passion for Excellence. Discover the story behind the city's premier archery destination.</p>
+        </div>
     </div>
 
-    <!-- Content Section -->
-    <div class="row g-4 align-items-center">
-        <div class="col-lg-6" data-aos="fade-right">
-            <div class="premium-card">
-                <h2 class="mb-4" style="color: var(--primary); font-weight: 800;">Our Vision</h2>
-                <p style="color: var(--text-dim); line-height: 1.8;">
-                    At Akma Archery, we believe that archery is more than just a sport—it's a discipline of the mind, body, and spirit. Founded by enthusiasts for enthusiasts, our mission is to provide a world-class environment where archers of all levels can hone their skills and find their focus.
-                </p>
-                <p style="color: var(--text-dim); line-height: 1.8;">
-                    Whether you're a first-timer picking up a bow or a seasoned professional preparing for competition, we offer the facilities, equipment, and community to support your journey.
-                </p>
-                <div class="mt-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <div style="width: 40px; height: 40px; background: rgba(249, 115, 22, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
-                            <i class="bi bi-check-lg" style="color: var(--primary);"></i>
+    <div class="container pb-5" style="margin-top: -100px;">
+        <!-- Mission & Vision Cards -->
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-10">
+                <div class="premium-card p-5" data-aos="fade-up" style="background: rgba(6, 10, 15, 0.85); backdrop-filter: blur(20px);">
+                    <div class="row align-items-center">
+                        <div class="col-md-7">
+                            <h2 class="mb-4 fw-900" style="color: var(--primary); font-size: 2.5rem;">OUR VISION</h2>
+                            <p class="text-dim fs-5 leading-relaxed">
+                                At Akma Archery, we believe that archery is more than just a sport—it's a discipline of the mind, body, and spirit. We provide a world-class environment where archers of all levels can find their focus and hone their skills.
+                            </p>
+                            <div class="mt-4 pt-3">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-box-small me-3">
+                                        <i class="bi bi-check2-all" style="color: var(--primary);"></i>
+                                    </div>
+                                    <span class="fw-600">Olympic-Standard Training Facility</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="icon-box-small me-3">
+                                        <i class="bi bi-check2-all" style="color: var(--primary);"></i>
+                                    </div>
+                                    <span class="fw-600">Professional Coaching Programs</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-box-small me-3">
+                                        <i class="bi bi-check2-all" style="color: var(--primary);"></i>
+                                    </div>
+                                    <span class="fw-600">State-of-the-art Equipment Support</span>
+                                </div>
+                            </div>
                         </div>
-                        <span>Professional Coaching</span>
-                    </div>
-                    <div class="d-flex align-items-center mb-3">
-                        <div style="width: 40px; height: 40px; background: rgba(249, 115, 22, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
-                            <i class="bi bi-check-lg" style="color: var(--primary);"></i>
+                        <div class="col-md-5 d-none d-md-block">
+                            <div class="position-relative">
+                                <img src="https://images.unsplash.com/photo-1511306361225-d1955ecd3927?q=80&w=2070&auto=format&fit=crop" 
+                                     class="img-fluid rounded-4 shadow-lg" alt="Archery" style="border: 1px solid var(--card-border); opacity: 0.9;">
+                                <div class="position-absolute bottom-0 end-0 p-3">
+                                    <div class="glass-tag">EST. 2014</div>
+                                </div>
+                            </div>
                         </div>
-                        <span>Olympic-Standard Lanes</span>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <div style="width: 40px; height: 40px; background: rgba(249, 115, 22, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
-                            <i class="bi bi-check-lg" style="color: var(--primary);"></i>
-                        </div>
-                        <span>Premium Gear Support</span>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg-6" data-aos="fade-left">
-            <div style="position: relative; border-radius: 24px; overflow: hidden; border: 1px solid var(--card-border); box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
-                <img src="https://images.unsplash.com/photo-1511306361225-d1955ecd3927?q=80&w=2070&auto=format&fit=crop" alt="Archery Range" style="width: 100%; height: 450px; object-fit: cover; opacity: 0.8;">
-                <div style="position: absolute; inset: 0; background: linear-gradient(to top, var(--dark-bg), transparent);"></div>
-                <div style="position: absolute; bottom: 30px; left: 30px;">
-                    <h4 style="font-weight: 800; margin-bottom: 5px;">Modern Facilities</h4>
-                    <p style="color: var(--text-dim); margin: 0; font-size: 0.9rem;">State-of-the-art range designed for excellence.</p>
+        <!-- Elite Coaching Team Section -->
+        <div class="row mt-5 pt-4">
+            <div class="col-12 text-center mb-5" data-aos="fade-up">
+                <h6 class="text-uppercase tracking-widest mb-2" style="color: var(--primary); font-weight: 700; letter-spacing: 4px;">Meet Our Experts</h6>
+                <h2 class="fw-900" style="font-size: 3rem;">ELITE COACHING TEAM</h2>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="coach-card">
+                    <div class="coach-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=600&auto=format&fit=crop" alt="Coach">
+                        <div class="coach-overlay">
+                            <div class="social-links">
+                                <i class="bi bi-instagram"></i>
+                                <i class="bi bi-twitter-x"></i>
+                                <i class="bi bi-linkedin"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="coach-info">
+                        <h5>Azan</h5>
+                        <p>Head Coach</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="coach-card">
+                    <div class="coach-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=600&auto=format&fit=crop" alt="Coach">
+                        <div class="coach-overlay">
+                            <div class="social-links">
+                                <i class="bi bi-instagram"></i>
+                                <i class="bi bi-twitter-x"></i>
+                                <i class="bi bi-linkedin"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="coach-info">
+                        <h5>Sarah Wilson</h5>
+                        <p>Olympic Recurve Coach</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="coach-card">
+                    <div class="coach-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=600&auto=format&fit=crop" alt="Coach">
+                        <div class="coach-overlay">
+                            <div class="social-links">
+                                <i class="bi bi-instagram"></i>
+                                <i class="bi bi-twitter-x"></i>
+                                <i class="bi bi-linkedin"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="coach-info">
+                        <h5>Bone</h5>
+                        <p>Coach</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="400">
+                <div class="coach-card">
+                    <div class="coach-img-wrapper">
+                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop" alt="Coach">
+                        <div class="coach-overlay">
+                            <div class="social-links">
+                                <i class="bi bi-instagram"></i>
+                                <i class="bi bi-twitter-x"></i>
+                                <i class="bi bi-linkedin"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="coach-info">
+                        <h5>Maya Rossi</h5>
+                        <p>Youth Program Director</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Stats Section -->
-    <div class="row g-4 mt-5">
-        <div class="col-md-4" data-aos="zoom-in" data-aos-delay="100">
-            <div class="premium-card text-center">
-                <h1 style="color: var(--primary); font-weight: 900; font-size: 3rem;">10+</h1>
-                <p style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; color: var(--text-dim);">Years Experience</p>
+        <!-- Stats Section -->
+        <div class="row g-4 mt-4">
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="stat-card-modern">
+                    <div class="stat-number">10+</div>
+                    <div class="stat-label">YEARS OF EXCELLENCE</div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-4" data-aos="zoom-in" data-aos-delay="200">
-            <div class="premium-card text-center">
-                <h1 style="color: var(--primary); font-weight: 900; font-size: 3rem;">24</h1>
-                <p style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; color: var(--text-dim);">Active Lanes</p>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="stat-card-modern">
+                    <div class="stat-number">24</div>
+                    <div class="stat-label">ACTIVE SHOOTING LANES</div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-4" data-aos="zoom-in" data-aos-delay="300">
-            <div class="premium-card text-center">
-                <h1 style="color: var(--primary); font-weight: 900; font-size: 3rem;">5k+</h1>
-                <p style="text-transform: uppercase; letter-spacing: 2px; font-size: 0.8rem; color: var(--text-dim);">Happy Archers</p>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="stat-card-modern">
+                    <div class="stat-number">5K+</div>
+                    <div class="stat-label">REGISTERED ARCHERS</div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .about-container {
+        background-color: #000;
+        min-height: 100vh;
+    }
+
+    .about-hero {
+        position: relative;
+        height: 70vh;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+    }
+
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        background: url('/modern_archery_hero.png') center/cover;
+        transform: scale(1.1);
+        z-index: 1;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, rgba(0,0,0,0.4) 0%, #000 90%);
+        z-index: 2;
+    }
+
+    .fw-900 { font-weight: 900; }
+    .fw-600 { font-weight: 600; }
+    
+    .icon-box-small {
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 77, 77, 0.1);
+        border: 1px solid rgba(255, 77, 77, 0.2);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .glass-tag {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 5px 15px;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .stat-card-modern {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--card-border);
+        border-radius: 24px;
+        padding: 40px;
+        text-align: center;
+        transition: var(--transition-smooth);
+    }
+
+    .stat-card-modern:hover {
+        background: rgba(255, 77, 77, 0.05);
+        border-color: var(--primary);
+        transform: translateY(-10px);
+    }
+
+    .stat-number {
+        font-size: 3.5rem;
+        font-weight: 900;
+        color: var(--primary);
+        margin-bottom: 5px;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        letter-spacing: 2px;
+        color: var(--text-dim);
+        font-weight: 700;
+    }
+
+    .leading-relaxed { line-height: 1.8; }
+
+    /* Coach Cards CSS */
+    .coach-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--card-border);
+        border-radius: 24px;
+        overflow: hidden;
+        transition: var(--transition-smooth);
+        height: 100%;
+    }
+
+    .coach-card:hover {
+        border-color: var(--primary);
+        transform: translateY(-10px);
+        background: rgba(255, 77, 77, 0.03);
+    }
+
+    .coach-img-wrapper {
+        position: relative;
+        height: 320px;
+        overflow: hidden;
+    }
+
+    .coach-img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .coach-card:hover .coach-img-wrapper img {
+        transform: scale(1.1);
+    }
+
+    .coach-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding-bottom: 20px;
+        opacity: 0;
+        transition: var(--transition-smooth);
+    }
+
+    .coach-card:hover .coach-overlay {
+        opacity: 1;
+    }
+
+    .social-links {
+        display: flex;
+        gap: 15px;
+        transform: translateY(20px);
+        transition: transform 0.4s ease;
+    }
+
+    .coach-card:hover .social-links {
+        transform: translateY(0);
+    }
+
+    .social-links i {
+        color: #fff;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+    }
+
+    .social-links i:hover {
+        color: var(--primary);
+    }
+
+    .coach-info {
+        padding: 25px;
+        text-align: center;
+    }
+
+    .coach-info h5 {
+        font-weight: 800;
+        margin-bottom: 5px;
+        color: #fff;
+    }
+
+    .coach-info p {
+        color: var(--primary);
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin: 0;
+    }
+
+    .tracking-widest { letter-spacing: 0.2em; }
+</style>

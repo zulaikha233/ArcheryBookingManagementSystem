@@ -1,16 +1,16 @@
 :root {
-    --primary: #f97316;
-    /* Neon Orange */
-    --primary-glow: rgba(249, 115, 22, 0.4);
-    --secondary: #fbbf24;
-    /* Amber/Gold */
-    --dark-bg: #060a0f;
-    /* Deep Charcoal/Black */
+    --primary: #ff4d4d;
+    /* Neon Red */
+    --primary-glow: rgba(255, 77, 77, 0.4);
+    --secondary: #ffffff;
+    /* Pure White */
+    --dark-bg: #000000;
+    /* Deep Black */
     --card-bg: rgba(255, 255, 255, 0.03);
-    --card-border: rgba(255, 255, 255, 0.08);
-    --glass-bg: rgba(15, 23, 42, 0.7);
-    --text-main: #f8fafc;
-    --text-dim: #94a3b8;
+    --card-border: rgba(255, 255, 255, 0.1);
+    --glass-bg: rgba(0, 0, 0, 0.8);
+    --text-main: #ffffff;
+    --text-dim: #a1a1aa;
     --font-family: 'Inter', sans-serif;
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -27,8 +27,8 @@ body {
 body {
     background-color: #000000;
     background-image:
-        radial-gradient(circle at 0% 0%, rgba(249, 115, 22, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 100% 100%, rgba(251, 191, 36, 0.05) 0%, transparent 50%);
+        radial-gradient(circle at 0% 0%, rgba(255, 77, 77, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
     background-attachment: fixed;
     color: var(--text-main);
     font-family: var(--font-family);
@@ -166,7 +166,7 @@ body {
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(249, 115, 22, 0.05) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 77, 77, 0.05) 0%, transparent 70%);
     opacity: 0;
     transition: var(--transition-smooth);
     pointer-events: none;
@@ -176,7 +176,7 @@ body {
 .premium-card:hover {
     transform: translateY(-10px) scale(1.02);
     border-color: var(--primary);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(249, 115, 22, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 77, 77, 0.1);
 }
 
 
@@ -204,7 +204,7 @@ body {
 .btn-premium:hover {
     transform: scale(1.05) translateY(-2px);
     box-shadow: 0 15px 30px var(--primary-glow);
-    background: #fb923c;
+    background: #ff3333;
 }
 
 .btn-premium-outline {
@@ -250,7 +250,7 @@ body {
 /* Modern Date Picker UI */
 #bookingDate {
     background-color: #ffffff !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23f97316' class='bi bi-calendar-event' viewBox='0 0 16 16'%3E%3Cpath d='M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z'/%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E") !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ff4d4d' class='bi bi-calendar-event' viewBox='0 0 16 16'%3E%3Cpath d='M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z'/%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
     background-position: right 15px center !important;
     background-size: 20px !important;
@@ -275,7 +275,7 @@ body {
 .form-select:focus {
     background: #ffffff !important;
     border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.15);
+    box-shadow: 0 0 0 4px rgba(255, 77, 77, 0.15);
     color: #000 !important;
     outline: none;
 }

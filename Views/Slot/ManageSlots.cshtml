@@ -20,10 +20,10 @@
         <table class="table mb-0" id="slotsTable">
             <thead>
                 <tr>
-                    <th style="color: #8A9A5B; font-size: 0.78rem; letter-spacing: 1px">SLOT ID</th>
-                    <th style="color: #8A9A5B; font-size: 0.78rem; letter-spacing: 1px">START TIME</th>
-                    <th style="color: #8A9A5B; font-size: 0.78rem; letter-spacing: 1px">END TIME</th>
-                    <th class="text-end" style="color: #8A9A5B; font-size: 0.78rem; letter-spacing: 1px">MANAGEMENT</th>
+                    <th style="color: #ff4d4d; font-size: 0.78rem; letter-spacing: 1px">SLOT ID</th>
+                    <th style="color: #ff4d4d; font-size: 0.78rem; letter-spacing: 1px">START TIME</th>
+                    <th style="color: #ff4d4d; font-size: 0.78rem; letter-spacing: 1px">END TIME</th>
+                    <th class="text-end" style="color: #ff4d4d; font-size: 0.78rem; letter-spacing: 1px">MANAGEMENT</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,7 +31,7 @@
                 {
                     <tr id="row-@slot.SlotId" style="transition: background 0.2s">
                         <!-- View Mode -->
-                        <td class="fw-bold view-mode" style="color: #8A9A5B; vertical-align: middle">
+                        <td class="fw-bold view-mode" style="color: #ff4d4d; vertical-align: middle">
                             @slot.SlotId.ToString("D2")
                         </td>
                         <td class="view-mode" style="vertical-align: middle" id="start-display-@slot.SlotId">
@@ -44,11 +44,11 @@
                             <div class="d-flex gap-2 justify-content-end">
                                 <button type="button" onclick="openEditRow(@slot.SlotId)"
                                         style="height: 34px; padding: 0 16px; border-radius: 50px;
-                                               background: rgba(138, 154, 91,0.08); color: #8A9A5B;
-                                               border: 1px solid rgba(138, 154, 91,0.3); font-size: 0.78rem;
+                                               background: rgba(255, 77, 77,0.08); color: #ff4d4d;
+                                               border: 1px solid rgba(255, 77, 77,0.3); font-size: 0.78rem;
                                                font-weight: 700; cursor: pointer; transition: all 0.2s"
-                                        onmouseover="this.style.background='rgba(138, 154, 91,0.18)'"
-                                        onmouseout="this.style.background='rgba(138, 154, 91,0.08)'">
+                                        onmouseover="this.style.background='rgba(255, 77, 77,0.18)'"
+                                        onmouseout="this.style.background='rgba(255, 77, 77,0.08)'">
                                     <i class="bi bi-pencil me-1"></i> EDIT
                                 </button>
                                 <button type="button" onclick="confirmDelete(@slot.SlotId)"
@@ -64,20 +64,20 @@
                         </td>
 
                         <!-- Edit Mode (hidden by default — same row, different cells shown) -->
-                        <td class="edit-mode" style="display:none; vertical-align: middle; color: #8A9A5B; font-weight: 700">
+                        <td class="edit-mode" style="display:none; vertical-align: middle; color: #ff4d4d; font-weight: 700">
                             @slot.SlotId.ToString("D2")
                         </td>
                         <td class="edit-mode" style="display:none; vertical-align: middle">
                             <input type="time" id="edit-start-@slot.SlotId"
                                    value="@slot.SlotStartTime.ToString(@"hh\:mm")"
-                                   style="background: rgba(255,255,255,0.06); border: 1px solid rgba(138, 154, 91,0.4);
+                                   style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255, 77, 77,0.4);
                                           color: #2b3a2a; border-radius: 8px; padding: 6px 12px; outline: none;
                                           font-size: 0.9rem; width: 110px" />
                         </td>
                         <td class="edit-mode" style="display:none; vertical-align: middle">
                             <input type="time" id="edit-end-@slot.SlotId"
                                    value="@slot.SlotEndTime.ToString(@"hh\:mm")"
-                                   style="background: rgba(255,255,255,0.06); border: 1px solid rgba(138, 154, 91,0.4);
+                                   style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255, 77, 77,0.4);
                                           color: #2b3a2a; border-radius: 8px; padding: 6px 12px; outline: none;
                                           font-size: 0.9rem; width: 110px" />
                         </td>
@@ -112,7 +112,7 @@
     <div class="premium-card" style="width:100%; max-width:420px; margin:0 16px; animation: fadeInUp 0.3s ease">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 style="color: #2b3a2a; font-weight:800; margin:0; font-size:1.1rem">
-                <i class="bi bi-plus-circle me-2" style="color:#8A9A5B"></i>ADD NEW SLOT
+                <i class="bi bi-plus-circle me-2" style="color:#ff4d4d"></i>ADD NEW SLOT
             </h5>
             <button onclick="closeAddModal()" style="background:none; border:none; color:#888; font-size:1.2rem; cursor:pointer">
                 <i class="bi bi-x-lg"></i>
@@ -127,7 +127,7 @@
                    style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.15);
                           color: #2b3a2a; border-radius:12px; padding:12px 16px; width:100%; outline:none;
                           font-size:1rem; transition:border-color 0.2s"
-                   onfocus="this.style.borderColor='#8A9A5B'"
+                   onfocus="this.style.borderColor='#ff4d4d'"
                    onblur="this.style.borderColor='rgba(255,255,255,0.15)'" />
         </div>
         <div class="mb-5">
@@ -138,7 +138,7 @@
                    style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.15);
                           color: #2b3a2a; border-radius:12px; padding:12px 16px; width:100%; outline:none;
                           font-size:1rem; transition:border-color 0.2s"
-                   onfocus="this.style.borderColor='#8A9A5B'"
+                   onfocus="this.style.borderColor='#ff4d4d'"
                    onblur="this.style.borderColor='rgba(255,255,255,0.15)'" />
         </div>
         <div class="d-flex gap-3">
@@ -163,7 +163,7 @@
             const row = document.getElementById('row-' + slotId);
             row.querySelectorAll('.view-mode').forEach(el => el.style.display = 'none');
             row.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'table-cell');
-            row.style.background = 'rgba(138, 154, 91,0.04)';
+            row.style.background = 'rgba(255, 77, 77,0.04)';
         }
 
         function cancelEdit(slotId) {

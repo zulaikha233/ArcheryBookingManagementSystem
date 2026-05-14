@@ -1,68 +1,76 @@
-@*
 @{
     ViewData["Title"] = "Gallery";
 }
 
-<div class="container py-5">
-    <!-- Header -->
-    <div class="text-center mb-5" data-aos="fade-down">
-        <h1 class="hero-title" style="font-size: 3.5rem;">OUR <span style="color: var(--primary);">GALLERY</span></h1>
-        <p class="hero-subtitle mx-auto">Moments of focus, precision, and community captured at Akma Archery.</p>
+<div class="gallery-container">
+    <!-- Premium Hero Section -->
+    <div class="gallery-hero" data-aos="zoom-out">
+        <div class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        <div class="container text-center position-relative" style="z-index: 10;">
+            <div class="mb-4 animate-in">
+                <i class="bi bi-images" style="font-size: 5rem; color: var(--primary); filter: drop-shadow(0 0 20px var(--primary-glow));"></i>
+            </div>
+            <h1 class="hero-title animate-in" style="font-size: 4.5rem; letter-spacing: -2px;">OUR <span style="color: var(--primary);">GALLERY</span></h1>
+            <p class="hero-subtitle mx-auto animate-in" style="max-width: 700px;">Moments of focus, precision, and community captured at Akma Archery.</p>
+        </div>
     </div>
 
-    <!-- Gallery Grid -->
-    <div class="row g-4">
-        <!-- Item 1 -->
-        <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="100">
-            <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 300px; border: 1px solid var(--card-border);">
-                <img src="https://images.unsplash.com/photo-1544253139-44473336785e?q=80&w=2070&auto=format&fit=crop" alt="Archery Focus" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
-                <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(249, 115, 22, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-search" style="font-size: 2rem; color: #000;"></i>
+    <div class="container pb-5" style="margin-top: -100px;">
+        <!-- Gallery Grid -->
+        <div class="row g-4">
+            <!-- Item 1 -->
+            <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="100">
+                <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 350px; border: 1px solid var(--card-border);">
+                    <img src="https://images.unsplash.com/photo-1544253139-44473336785e?q=80&w=2070&auto=format&fit=crop" alt="Archery Focus" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
+                    <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(255, 77, 77, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-search" style="font-size: 2.5rem; color: #fff;"></i>
+                    </div>
                 </div>
             </div>
-        </div>
-        <!-- Item 2 -->
-        <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="200">
-            <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 300px; border: 1px solid var(--card-border);">
-                <img src="https://images.unsplash.com/photo-1593121925328-369ec8459c08?q=80&w=2070&auto=format&fit=crop" alt="Bullseye" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
-                <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(249, 115, 22, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-search" style="font-size: 2rem; color: #000;"></i>
+            <!-- Item 2 -->
+            <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="200">
+                <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 350px; border: 1px solid var(--card-border);">
+                    <img src="https://images.unsplash.com/photo-1593121925328-369ec8459c08?q=80&w=2070&auto=format&fit=crop" alt="Bullseye" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
+                    <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(255, 77, 77, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-search" style="font-size: 2.5rem; color: #fff;"></i>
+                    </div>
                 </div>
             </div>
-        </div>
-        <!-- Item 3 -->
-        <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="300">
-            <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 300px; border: 1px solid var(--card-border);">
-                <img src="https://images.unsplash.com/photo-1495555687398-3f50d6e79e1e?q=80&w=2070&auto=format&fit=crop" alt="Equipment Close-up" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
-                <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(249, 115, 22, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-search" style="font-size: 2rem; color: #000;"></i>
+            <!-- Item 3 -->
+            <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="300">
+                <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 350px; border: 1px solid var(--card-border);">
+                    <img src="https://images.unsplash.com/photo-1495555687398-3f50d6e79e1e?q=80&w=2070&auto=format&fit=crop" alt="Equipment Close-up" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
+                    <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(255, 77, 77, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-search" style="font-size: 2.5rem; color: #fff;"></i>
+                    </div>
                 </div>
             </div>
-        </div>
-        <!-- Item 4 -->
-        <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="400">
-            <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 300px; border: 1px solid var(--card-border);">
-                <img src="https://images.unsplash.com/photo-1511306361225-d1955ecd3927?q=80&w=2070&auto=format&fit=crop" alt="Training Session" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
-                <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(249, 115, 22, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-search" style="font-size: 2rem; color: #000;"></i>
+            <!-- Item 4 -->
+            <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="400">
+                <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 350px; border: 1px solid var(--card-border);">
+                    <img src="https://images.unsplash.com/photo-1511306361225-d1955ecd3927?q=80&w=2070&auto=format&fit=crop" alt="Training Session" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
+                    <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(255, 77, 77, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-search" style="font-size: 2.5rem; color: #fff;"></i>
+                    </div>
                 </div>
             </div>
-        </div>
-        <!-- Item 5 -->
-        <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="500">
-            <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 300px; border: 1px solid var(--card-border);">
-                <img src="https://images.unsplash.com/photo-1563299796-17596ed6b017?q=80&w=2070&auto=format&fit=crop" alt="Arrows in Quiver" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
-                <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(249, 115, 22, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-search" style="font-size: 2rem; color: #000;"></i>
+            <!-- Item 5 -->
+            <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="500">
+                <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 350px; border: 1px solid var(--card-border);">
+                    <img src="https://images.unsplash.com/photo-1563299796-17596ed6b017?q=80&w=2070&auto=format&fit=crop" alt="Arrows in Quiver" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
+                    <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(255, 77, 77, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-search" style="font-size: 2.5rem; color: #fff;"></i>
+                    </div>
                 </div>
             </div>
-        </div>
-        <!-- Item 6 -->
-        <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="600">
-            <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 300px; border: 1px solid var(--card-border);">
-                <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=2070&auto=format&fit=crop" alt="Professional Archer" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
-                <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(249, 115, 22, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
-                    <i class="bi bi-search" style="font-size: 2rem; color: #000;"></i>
+            <!-- Item 6 -->
+            <div class="col-md-4 col-sm-6" data-aos="zoom-in" data-aos-delay="600">
+                <div class="gallery-item" style="position: relative; border-radius: 20px; overflow: hidden; height: 350px; border: 1px solid var(--card-border);">
+                    <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=2070&auto=format&fit=crop" alt="Professional Archer" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition-smooth);" class="gallery-img">
+                    <div class="gallery-overlay" style="position: absolute; inset: 0; background: rgba(255, 77, 77, 0.4); opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-search" style="font-size: 2.5rem; color: #fff;"></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -70,11 +78,59 @@
 </div>
 
 <style>
-    .gallery-item:hover .gallery-img {
-        transform: scale(1.1);
+    .gallery-container {
+        background-color: #000;
+        min-height: 100vh;
     }
+
+    .gallery-hero {
+        position: relative;
+        height: 60vh;
+        min-height: 500px;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        background: #000;
+    }
+
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        background: url('/modern_archery_hero.png') center/cover;
+        transform: scale(1.1);
+        z-index: 1;
+        opacity: 0.6;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, rgba(0,0,0,0.4) 0%, #000 90%);
+        z-index: 2;
+    }
+
+    .hero-title {
+        font-weight: 900;
+        text-transform: uppercase;
+        margin-bottom: 1.5rem;
+        color: #fff;
+    }
+
+    .hero-subtitle {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 1.2rem;
+        font-weight: 300;
+    }
+
+    .gallery-item:hover .gallery-img {
+        transform: scale(1.1) rotate(2deg);
+    }
+
     .gallery-item:hover .gallery-overlay {
         opacity: 1;
     }
+
+    .gallery-img {
+        transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
 </style>
-*@
