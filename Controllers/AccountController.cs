@@ -37,7 +37,7 @@ namespace ArcheryAlley.Controllers
                 }
                 else
                 {
-                    return RedirectToAction("StaffBooking", "Booking");
+                    return RedirectToAction("StaffDashBoard", "Booking");
                 }
             }
 

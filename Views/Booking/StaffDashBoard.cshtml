@@ -1,0 +1,468 @@
+@{
+    ViewData["Title"] = "Staff Dashboard";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard — Archery Alley</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --green: #8A9A5B;
+            --green-dark: #6D7B48;
+            --green-light: #ddead1;
+            --bg: #ECE7CA;
+            --sidebar-bg: #2b3a2a;
+            --sidebar-width: 260px;
+            --text-dark: #2b3a2a;
+            --text-muted: #7a8a6a;
+            --card-bg: #A9BA9D;
+            --white: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text-dark);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            position: fixed;
+            top: 0; left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transition: 0.3s;
+        }
+
+        .sidebar-header {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid rgba(138,154,91,0.2);
+        }
+
+        .sidebar-logo {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--green);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-logo span {
+            display: block;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.4);
+            font-weight: 400;
+            letter-spacing: 2px;
+            margin-top: 2px;
+        }
+
+        .staff-badge {
+            margin: 16px 24px;
+            padding: 12px 16px;
+            background: rgba(138,154,91,0.15);
+            border: 1px solid rgba(138,154,91,0.3);
+            border-radius: 12px;
+        }
+
+        .staff-badge p {
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 4px;
+        }
+
+        .staff-badge h6 {
+            font-size: 0.95rem;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 16px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-label {
+            font-size: 0.62rem;
+            color: rgba(255,255,255,0.25);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 12px 8px 6px;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: 0.2s;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-item:hover {
+            background: rgba(138,154,91,0.15);
+            color: var(--green);
+        }
+
+        .nav-item.active {
+            background: rgba(138,154,91,0.2);
+            color: var(--green);
+            border-left: 3px solid var(--green);
+        }
+
+        .nav-item i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid rgba(138,154,91,0.2);
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            color: rgba(255,100,100,0.7);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: 0.2s;
+            width: 100%;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,100,100,0.1);
+            color: #ff6464;
+        }
+
+        /* ── MAIN CONTENT ── */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            margin-bottom: 40px;
+        }
+
+        .page-header p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+        }
+
+        .page-header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .page-header h1 span {
+            color: var(--green);
+        }
+
+        /* ── 2x2 DASHBOARD CARDS ── */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            max-width: 860px;
+        }
+
+        .dash-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 36px 32px;
+            text-decoration: none;
+            color: var(--text-dark);
+            border: 1px solid rgba(255,255,255,0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .dash-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 120px; height: 120px;
+            background: rgba(138,154,91,0.08);
+            border-radius: 50%;
+            transform: translate(30px, -30px);
+            transition: 0.3s;
+        }
+
+        .dash-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px rgba(43,58,42,0.15);
+            border-color: var(--green);
+            color: var(--text-dark);
+        }
+
+        .dash-card:hover::before {
+            background: rgba(138,154,91,0.18);
+            transform: translate(20px, -20px) scale(1.2);
+        }
+
+        .card-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--green), var(--green-dark));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(138,154,91,0.35);
+        }
+
+        .card-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .card-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .card-arrow {
+            margin-top: auto;
+            font-size: 1.2rem;
+            color: var(--green);
+            align-self: flex-end;
+            transition: 0.2s;
+        }
+
+        .dash-card:hover .card-arrow {
+            transform: translateX(4px);
+        }
+
+        /* ── QUICK STATUS BAR ── */
+        .status-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .status-chip {
+            background: var(--card-bg);
+            border: 1px solid rgba(138,154,91,0.3);
+            border-radius: 50px;
+            padding: 8px 18px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: pulse 2s infinite;
+        }
+
+        @@keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        @@keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .dash-card:nth-child(1) { animation: fadeUp 0.4s ease both; }
+        .dash-card:nth-child(2) { animation: fadeUp 0.5s ease both; }
+        .dash-card:nth-child(3) { animation: fadeUp 0.6s ease both; }
+        .dash-card:nth-child(4) { animation: fadeUp 0.7s ease both; }
+    </style>
+</head>
+<body>
+
+    <!-- ── SIDEBAR ── -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                Archery Alley
+                <span>Staff Portal</span>
+            </div>
+        </div>
+
+        <div class="staff-badge">
+            <p>Logged in as</p>
+            <h6>@(ViewBag.StaffName ?? "Staff")</h6>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-label">Menu</div>
+
+            <a href="/Booking/StaffDashboard" class="nav-item active">
+                <i class="bi bi-grid-fill"></i>
+                Dashboard
+            </a>
+
+            <a href="/Account/Profile" class="nav-item">
+                <i class="bi bi-person-circle"></i>
+                Profile
+            </a>
+
+            <a href="/Attendance/Index" class="nav-item">
+                <i class="bi bi-calendar-check"></i>
+                Student Attendance
+            </a>
+
+            <a href="/Report/StudentPerformance" class="nav-item">
+                <i class="bi bi-bar-chart-line"></i>
+                Performance Report
+            </a>
+
+            <a href="/Booking/StaffBooking" class="nav-item">
+                <i class="bi bi-bullseye"></i>
+                Slot Booking
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="/Account/Logout" class="logout-btn">
+                <i class="bi bi-box-arrow-left"></i>
+                Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- ── MAIN CONTENT ── -->
+    <main class="main-content">
+
+        <div class="page-header">
+            <p>Welcome back</p>
+            <h1>Hello, <span>@(ViewBag.StaffName ?? "Staff")</span> 👋</h1>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-chip">
+                <div class="status-dot"></div>
+                System Online
+            </div>
+            <div class="status-chip">
+                <i class="bi bi-calendar3"></i>
+                @DateTime.Today.ToString("dddd, dd MMMM yyyy")
+            </div>
+        </div>
+
+        <!-- 2x2 Dashboard Grid -->
+        <div class="dashboard-grid">
+
+            <!-- Profile -->
+            <a href="/Account/Profile" class="dash-card">
+                <div class="card-icon">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <div>
+                    <div class="card-label">Account</div>
+                    <div class="card-title">My Profile</div>
+                    <div class="card-desc">View and update your staff profile and account details.</div>
+                </div>
+                <i class="bi bi-arrow-right card-arrow"></i>
+            </a>
+
+            <!-- Student Attendance -->
+            <a href="/Attendance/Index" class="dash-card">
+                <div class="card-icon">
+                    <i class="bi bi-calendar-check-fill"></i>
+                </div>
+                <div>
+                    <div class="card-label">Records</div>
+                    <div class="card-title">Student Attendance</div>
+                    <div class="card-desc">Track and manage daily student attendance records.</div>
+                </div>
+                <i class="bi bi-arrow-right card-arrow"></i>
+            </a>
+
+            <!-- Performance Report -->
+            <a href="/Report/StudentPerformance" class="dash-card">
+                <div class="card-icon">
+                    <i class="bi bi-bar-chart-fill"></i>
+                </div>
+                <div>
+                    <div class="card-label">Analytics</div>
+                    <div class="card-title">Performance Report</div>
+                    <div class="card-desc">Review student performance scores and progress over time.</div>
+                </div>
+                <i class="bi bi-arrow-right card-arrow"></i>
+            </a>
+
+            <!-- Staff Booking -->
+            <a href="/Booking/StaffBooking" class="dash-card">
+                <div class="card-icon">
+                    <i class="bi bi-bullseye"></i>
+                </div>
+                <div>
+                    <div class="card-label">Reservations</div>
+                    <div class="card-title">Slot Booking</div>
+                    <div class="card-desc">Create and manage archery lane slot reservations for customers.</div>
+                </div>
+                <i class="bi bi-arrow-right card-arrow"></i>
+            </a>
+
+        </div>
+    </main>
+
+</body>
+</html>

@@ -317,5 +317,20 @@ namespace ArcheryAlley.Controllers
             ViewBag.StaffName = HttpContext.Session.GetString("UserName");
             return View();
         }
+
+        [HttpGet]
+        public IActionResult StaffDashBoard()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+
+            if (string.IsNullOrEmpty(role))
+                return RedirectToAction("Login", "Account");
+
+            if (role == "Admin")
+                return RedirectToAction("ManageSlots", "Slot");
+
+            ViewBag.StaffName = HttpContext.Session.GetString("UserName");
+            return View();
+        }
     }
 }
