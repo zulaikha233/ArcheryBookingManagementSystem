@@ -1,0 +1,210 @@
+@{
+    ViewData["Title"] = "Membership";
+}
+
+<div class="membership-container">
+    <!-- Premium Hero Section -->
+    <div class="membership-hero" data-aos="zoom-out">
+        <div class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        <div class="container text-center position-relative" style="z-index: 10;">
+            <div class="mb-4 animate-in">
+                <i class="bi bi-patch-check-fill" style="font-size: 5rem; color: var(--primary); filter: drop-shadow(0 0 20px var(--primary-glow));"></i>
+            </div>
+            <h1 class="hero-title animate-in" style="font-size: 4.5rem; letter-spacing: -2px;">CHOOSE YOUR <span style="color: var(--primary);">PLAN</span></h1>
+            <p class="hero-subtitle mx-auto animate-in" style="max-width: 700px;">Unlock exclusive benefits and elevate your archery experience with our membership programs.</p>
+        </div>
+    </div>
+
+    <div class="container pb-5" style="margin-top: -100px;">
+        <div class="row g-4 justify-content-center">
+            
+            <!-- GUEST / NON-MEMBER -->
+            <div class="col-lg-5" data-aos="fade-right" data-aos-delay="100">
+                <div class="premium-card pricing-card h-100">
+                    <!--<div class="card-badge">PUBLIC</div>-->
+                    <div class="text-center mb-5">
+                        <h2 class="fw-900 mb-2">Non-Member</h2>
+                        <div class="price-display">
+                            <span class="currency">RM</span>
+                            <span class="amount">50</span>
+                            <span class="period">/2 Hours</span>
+                        </div>
+                        <p class="text-dim mt-3">Perfect for casual archers and first-timers.</p>
+                    </div>
+                    
+                    <ul class="benefit-list mb-5">
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> Pay-per-session access</li>
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> Standard lane rates</li>
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> Equipment rental available</li>
+                        <li><i class="bi bi-dash-circle text-muted"></i> No priority of night self-training</li>
+                        <li><i class="bi bi-dash-circle text-muted"></i> No discounts on events</li>
+                    </ul>
+
+                    <div class="mt-auto">
+                        <a href="@Url.Action("GuestBooking", "Booking")" class="btn-premium w-100 justify-content-center" style="background: #fff; border-color: #fff; color: #000;">START SHOOTING</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MEMBER -->
+            <div class="col-lg-5" data-aos="fade-left" data-aos-delay="200">
+                <div class="premium-card pricing-card h-100">
+                    <!--<div class="card-badge">MEMBER</div>-->
+                    <div class="text-center mb-5">
+                        <h2 class="fw-900 mb-2" style="color: var(--primary);">MEMBER</h2>
+                        <div class="price-display">
+                            <span class="currency">RM</span>
+                            <span class="amount" style="color: var(--primary); text-shadow: 0 0 15px rgba(255, 77, 77, 0.4);">80</span>
+                            <span class="period">/Year</span>
+                        </div>
+                        <p class="text-dim mt-3">Included for Equipment Package.</p>
+                    </div>
+                    
+                    <ul class="benefit-list mb-5">
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> Class session every weekend</li>
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> Priority slot reservation</li>
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> Can have night self-training with own equipment</li>
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> Member-only tournaments</li>
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> Discounts on events</li>
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> Discounts on equipment rental</li>
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> Archery level and progress tracking</li>
+                    </ul>
+
+                    <div class="mt-auto">
+                        <a href="@Url.Action("CustomerRegister", "Account")" class="btn-premium w-100 justify-content-center" style="background: var(--primary); color: #000;">JOIN THE CLUB</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .membership-container {
+        background-color: #000;
+        min-height: 100vh;
+        overflow-y: auto;
+        padding-bottom: 100px;
+    }
+
+    .membership-hero {
+        position: relative;
+        height: 60vh;
+        min-height: 500px;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        background: #000;
+    }
+
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        background: url('/modern_archery_hero.png') center/cover;
+        transform: scale(1.1);
+        z-index: 1;
+        opacity: 0.6;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, rgba(0,0,0,0.4) 0%, #000 90%);
+        z-index: 2;
+    }
+
+    .pricing-card {
+        padding: 50px 40px;
+        position: relative;
+        overflow: hidden;
+        transition: var(--transition-smooth);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .pricing-card.featured {
+        border: 2px solid var(--primary);
+        background: rgba(255, 77, 77, 0.05);
+        transform: scale(1.05);
+        z-index: 5;
+    }
+
+    .card-badge {
+        position: absolute;
+        top: 20px;
+        right: -30px;
+        background: #334155;
+        color: #fff;
+        padding: 5px 40px;
+        transform: rotate(45deg);
+        font-size: 0.7rem;
+        font-weight: 900;
+        letter-spacing: 1px;
+    }
+
+    .featured-badge {
+        background: var(--primary);
+        color: #000;
+    }
+
+    .price-display {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+
+    .currency {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dim);
+    }
+
+    .amount {
+        font-size: 4rem;
+        font-weight: 900;
+        line-height: 1;
+        margin: 0 5px;
+    }
+
+    .period {
+        color: var(--text-dim);
+        font-size: 1rem;
+    }
+
+    .benefit-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .benefit-list li {
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.95rem;
+        color: var(--text-dim);
+    }
+
+    .benefit-list i {
+        font-size: 1.2rem;
+    }
+
+    .fw-900 { font-weight: 900; }
+
+    .hero-title {
+        font-weight: 900;
+        text-transform: uppercase;
+        margin-bottom: 1.5rem;
+        color: #fff;
+    }
+
+    .hero-subtitle {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 1.2rem;
+        font-weight: 300;
+    }
+</style>

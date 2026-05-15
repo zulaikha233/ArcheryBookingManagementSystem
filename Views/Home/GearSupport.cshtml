@@ -11,7 +11,7 @@
             <div class="mb-4 animate-in">
                 <i class="bi bi-shield-shaded" style="font-size: 5rem; color: var(--primary); filter: drop-shadow(0 0 20px var(--primary-glow));"></i>
             </div>
-            <h1 class="hero-title animate-in" style="font-size: 4.5rem; letter-spacing: -2px;">GEAR <span style="color: var(--primary);">GUIDE</span></h1>
+            <h1 class="hero-title animate-in" style="font-size: 4.5rem; letter-spacing: -2px;">GEAR <span style="color: var(--primary);">Support</span></h1>
             <p class="hero-subtitle mx-auto animate-in" style="max-width: 700px;">Know your equipment. From safety essentials to professional performance gear.</p>
         </div>
     </div>
@@ -49,7 +49,7 @@
                 <div class="gear-card premium-card">
                     <div class="gear-tag mandatory">CORE GEAR</div>
                     <div class="gear-img-wrapper">
-                        <img src="/images/bow.jpg" alt="Bow" class="img-fluid">
+                        <img src="/images/bow.png?v=2" alt="Bow" class="img-fluid">
                     </div>
                     <div class="gear-info text-center mt-4">
                         <h3 class="fw-800">RECURVE BOW</h3>
@@ -62,7 +62,7 @@
                 <div class="gear-card premium-card">
                     <div class="gear-tag mandatory">CORE GEAR</div>
                     <div class="gear-img-wrapper">
-                        <img src="/images/bow%20stand.png" alt="Bow Stand" class="img-fluid">
+                        <img src="/images/bow%20stand.png?v=2" alt="Bow Stand" class="img-fluid">
                     </div>
                     <div class="gear-info text-center mt-4">
                         <h3 class="fw-800">BOW STAND</h3>
@@ -75,7 +75,7 @@
                 <div class="gear-card premium-card">
                     <div class="gear-tag mandatory">CORE GEAR</div>
                     <div class="gear-img-wrapper">
-                        <img src="/images/target.png" alt="Target" class="img-fluid">
+                        <img src="/images/target.png?v=2" alt="Target" class="img-fluid">
                     </div>
                     <div class="gear-info text-center mt-4">
                         <h3 class="fw-800">TARGET FACE</h3>
@@ -88,7 +88,7 @@
                 <div class="gear-card premium-card">
                     <div class="gear-tag mandatory">CORE GEAR</div>
                     <div class="gear-img-wrapper">
-                        <img src="/images/arrow.png" alt="Arrows" class="img-fluid">
+                        <img src="/images/arrow.png?v=2" alt="Arrows" class="img-fluid">
                     </div>
                     <div class="gear-info text-center mt-4">
                         <h3 class="fw-800">ARROWS</h3>
@@ -122,7 +122,7 @@
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
                 <div class="gear-card-small premium-card">
                     <div class="gear-img-wrapper-sm">
-                        <img src="/images/chest%20guard.jpg" alt="Chest Guard">
+                        <img src="/images/chest%20guard.png" alt="Chest Guard">
                     </div>
                     <div class="gear-info-sm mt-3 text-center">
                         <h5 class="fw-800">CHEST GUARD</h5>
@@ -214,14 +214,15 @@
         padding: 40px;
         transition: var(--transition-smooth);
         position: relative;
-        border: 1px solid rgba(255, 77, 77, 0.4) !important; /* Static colored border */
-        background: rgba(15, 23, 42, 0.8) !important; /* Solid static fill */
+        border: 1px solid rgba(255, 77, 77, 0.4) !important;
+        background: rgba(255, 255, 255, 0.02) !important; /* Subtle/No fill */
         backdrop-filter: blur(10px);
     }
 
     .gear-card:hover {
         transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        background: rgba(255, 77, 77, 0.05) !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
     }
 
     .gear-tag {
@@ -238,18 +239,21 @@
     }
 
     .gear-img-wrapper {
-        height: 250px; /* Adjusted for 4-column layout */
+        height: 250px;
+        width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
         overflow: hidden;
-        border-radius: 16px;
+        border-radius: 12px;
         background: rgba(255,255,255,0.02);
+        padding: 20px; /* Space from frame edges */
     }
 
     .gear-img-wrapper img {
+        max-width: 100%;
         max-height: 100%;
-        width: auto;
+        object-fit: contain; /* Fit without cropping */
         transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -260,28 +264,32 @@
     .gear-card-small {
         padding: 25px;
         height: 100%;
-        border: 1px solid rgba(255, 77, 77, 0.3) !important; /* Static colored border */
-        background: rgba(15, 23, 42, 0.6) !important; /* Static fill */
+        border: 1px solid rgba(255, 77, 77, 0.3) !important;
+        background: rgba(255, 255, 255, 0.02) !important;
     }
 
     .gear-card-small:hover {
         transform: translateY(-8px);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+        background: rgba(255, 77, 77, 0.03) !important;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
     }
 
     .gear-img-wrapper-sm {
-        height: 200px;
+        height: 180px;
+        width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
         background: rgba(255,255,255,0.02);
-        border-radius: 12px;
+        border-radius: 10px;
         overflow: hidden;
+        padding: 15px;
     }
 
     .gear-img-wrapper-sm img {
-        max-height: 80%;
-        width: auto;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
         transition: var(--transition-smooth);
     }
 

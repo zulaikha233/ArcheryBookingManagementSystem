@@ -68,5 +68,10 @@ namespace ArcheryAlley.Controllers
         {
             return View();
         }
+
+        public IActionResult Membership()
+        {
+            return View();
+        }
     }
 }
