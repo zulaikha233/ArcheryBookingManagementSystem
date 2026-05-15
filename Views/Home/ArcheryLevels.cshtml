@@ -29,6 +29,9 @@
                     </div>
                     <div class="level-content text-center px-4 pb-4">
                         <p class="level-desc">Introduction to the world of archery. Focus on safety and basic range rules.</p>
+                        <div class="equipment-tag mt-3">
+                            <i class="bi bi-check-circle-fill me-1"></i> Equipment Provided 
+                        </div>
                     </div>
                 </div>
             </div>
@@ -44,6 +47,9 @@
                     </div>
                     <div class="level-content text-center px-4 pb-4">
                         <p class="level-desc">Building the foundation of a consistent shot process and proper stance.</p>
+                        <div class="equipment-tag mt-3">
+                            <i class="bi bi-check-circle-fill me-1"></i> Equipment Provided
+                        </div>
                     </div>
                 </div>
             </div>
@@ -206,6 +212,9 @@
         font-weight: 800;
         font-size: 0.85rem;
         letter-spacing: 1px;
+        text-align: center;
+        padding: 0 10px;
+        line-height: 1.2;
     }
 
     .hero-title {
@@ -221,12 +230,17 @@
         font-weight: 300;
     }
 
+    .levels-container .row {
+        row-gap: 100px; /* Increased vertical distance between rows */
+    }
+
     .level-content {
         padding-top: 110px; /* Increased gap from the badge */
         min-height: 200px;
         display: flex;
         flex-direction: column;
         justify-content: center;
+        align-items: center; /* This will make children fit their own width */
     }
 
     .level-desc {
@@ -241,5 +255,23 @@
     .level-card-premium:hover .level-desc {
         color: rgba(255, 255, 255, 1);
         transform: translateY(-5px);
+    }
+
+    .equipment-tag {
+        display: inline-block;
+        background: rgba(0, 255, 135, 0.05);
+        border: 0.5px solid #00ff87;
+        color: #00ff87;
+        padding: 2px 10px; /* Small padding for the curves */
+        border-radius: 50px; /* Perfect pill shape */
+        font-size: 0.55rem;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        text-transform: uppercase;
+        box-shadow: 0 0 5px rgba(0, 255, 135, 0.1);
+    }
+
+    .equipment-tag i {
+        font-size: 0.55rem; /* Match icon size to text */
     }
 </style>
