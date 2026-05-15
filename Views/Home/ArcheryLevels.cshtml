@@ -11,12 +11,12 @@
             <div class="mb-4 animate-in">
                 <i class="bi bi-trophy-fill" style="font-size: 5rem; color: var(--primary); filter: drop-shadow(0 0 20px var(--primary-glow));"></i>
             </div>
-            <h1 class="hero-title animate-in" style="font-size: 4.5rem; letter-spacing: -2px;">ARCHERY <span style="color: var(--primary);">PROGRESSION</span></h1>
+            <h1 class="hero-title animate-in" style="font-size: 4.5rem; letter-spacing: -2px;">ARCHERY <span style="color: var(--primary);">LEVELS</span></h1>
             <p class="hero-subtitle mx-auto animate-in" style="max-width: 700px;">Track your journey from a Rookie to a Master Archer. Our 6-tier progression system ensures you master every aspect of the sport.</p>
         </div>
     </div>
 
-    <div class="container pb-5" style="margin-top: -80px;">
+    <div class="container pb-5 mb-5" style="margin-top: -80px;">
         <div class="row g-5 justify-content-center">
             <!-- Level 1: Rookie -->
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
@@ -24,12 +24,11 @@
                     <div class="pennant-wrapper">
                         <div class="pennant" style="background-color: #26C6DA;">
                             <i class="bi bi-star"></i>
-                            <span class="pennant-text">ROOKIE</span>
+                            <span class="pennant-text">GRASS ROOT</span>
                         </div>
                     </div>
-                    <div class="level-content text-center pt-5 px-4 pb-4">
-                        <h4 class="fw-800 mb-2">LEVEL 01</h4>
-                        <p class="text-dim small mb-0">Introduction to the world of archery. Focus on safety and basic range rules.</p>
+                    <div class="level-content text-center px-4 pb-4">
+                        <p class="level-desc">Introduction to the world of archery. Focus on safety and basic range rules.</p>
                     </div>
                 </div>
             </div>
@@ -40,12 +39,11 @@
                     <div class="pennant-wrapper">
                         <div class="pennant" style="background-color: #66BB6A;">
                             <i class="bi bi-bullseye"></i>
-                            <span class="pennant-text">BEGINNER</span>
+                            <span class="pennant-text">BEGINNER (1)</span>
                         </div>
                     </div>
-                    <div class="level-content text-center pt-5 px-4 pb-4">
-                        <h4 class="fw-800 mb-2">LEVEL 02</h4>
-                        <p class="text-dim small mb-0">Building the foundation of a consistent shot process and proper stance.</p>
+                    <div class="level-content text-center px-4 pb-4">
+                        <p class="level-desc">Building the foundation of a consistent shot process and proper stance.</p>
                     </div>
                 </div>
             </div>
@@ -56,12 +54,11 @@
                     <div class="pennant-wrapper">
                         <div class="pennant" style="background-color: #FFCA28;">
                             <i class="bi bi-lightning-fill"></i>
-                            <span class="pennant-text">INTERMEDIATE</span>
+                            <span class="pennant-text">BEGINNER (2)</span>
                         </div>
                     </div>
-                    <div class="level-content text-center pt-5 px-4 pb-4">
-                        <h4 class="fw-800 mb-2">LEVEL 03</h4>
-                        <p class="text-dim small mb-0">Refining technical form and increasing distance to 30 meters.</p>
+                    <div class="level-content text-center px-4 pb-4">
+                        <p class="level-desc">Refining technical form and increasing distance to 30 meters.</p>
                     </div>
                 </div>
             </div>
@@ -72,12 +69,11 @@
                     <div class="pennant-wrapper">
                         <div class="pennant" style="background-color: #FF7043;">
                             <i class="bi bi-fire"></i>
-                            <span class="pennant-text">ADVANCED</span>
+                            <span class="pennant-text">INTERMEDIATE (1)</span>
                         </div>
                     </div>
-                    <div class="level-content text-center pt-5 px-4 pb-4">
-                        <h4 class="fw-800 mb-2">LEVEL 04</h4>
-                        <p class="text-dim small mb-0">Mastering equipment tuning and achieving high consistency at 50 meters.</p>
+                    <div class="level-content text-center px-4 pb-4">
+                        <p class="level-desc">Mastering equipment tuning and achieving high consistency at 50 meters.</p>
                     </div>
                 </div>
             </div>
@@ -88,12 +84,11 @@
                     <div class="pennant-wrapper">
                         <div class="pennant" style="background-color: #EF5350;">
                             <i class="bi bi-shield-shaded"></i>
-                            <span class="pennant-text">ELITE</span>
+                            <span class="pennant-text">INTERMEDIATE (2)</span>
                         </div>
                     </div>
-                    <div class="level-content text-center pt-5 px-4 pb-4">
-                        <h4 class="fw-800 mb-2">LEVEL 05</h4>
-                        <p class="text-dim small mb-0">Competition-ready training. Focus on mental game and extreme precision.</p>
+                    <div class="level-content text-center px-4 pb-4">
+                        <p class="level-desc">Competition-ready training. Focus on mental game and extreme precision.</p>
                     </div>
                 </div>
             </div>
@@ -104,12 +99,11 @@
                     <div class="pennant-wrapper">
                         <div class="pennant" style="background-color: #AB47BC;">
                             <i class="bi bi-award-fill"></i>
-                            <span class="pennant-text">MASTER</span>
+                            <span class="pennant-text">EXPERTS</span>
                         </div>
                     </div>
-                    <div class="level-content text-center pt-5 px-4 pb-4">
-                        <h4 class="fw-800 mb-2">LEVEL 06</h4>
-                        <p class="text-dim small mb-0">The pinnacle of archery. Perfect form, absolute focus, and podium potential.</p>
+                    <div class="level-content text-center px-4 pb-4">
+                        <p class="level-desc">The pinnacle of archery. Perfect form, absolute focus, and podium potential.</p>
                     </div>
                 </div>
             </div>
@@ -121,6 +115,9 @@
     .levels-container {
         background-color: #000;
         min-height: 100vh;
+        overflow-y: auto;
+        display: block;
+        padding-bottom: 100px;
     }
 
     .levels-hero {
@@ -222,5 +219,27 @@
         color: rgba(255, 255, 255, 0.6);
         font-size: 1.2rem;
         font-weight: 300;
+    }
+
+    .level-content {
+        padding-top: 110px; /* Increased gap from the badge */
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .level-desc {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 1rem;
+        line-height: 1.6;
+        font-weight: 400;
+        margin-bottom: 0;
+        transition: var(--transition-smooth);
+    }
+
+    .level-card-premium:hover .level-desc {
+        color: rgba(255, 255, 255, 1);
+        transform: translateY(-5px);
     }
 </style>
