@@ -17,7 +17,7 @@ namespace ArcheryAlley.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            return View();
+            return View("~/Views/Account/StaffLogin.cshtml");
         }
 
         [HttpPost]
@@ -42,7 +42,7 @@ namespace ArcheryAlley.Controllers
             }
 
             ViewBag.ErrorMessage = "Invalid Employee ID or Password. Try again!";
-            return View();
+            return View("~/Views/Account/StaffLogin.cshtml");
         }
 
         public IActionResult Logout()
@@ -65,7 +65,7 @@ namespace ArcheryAlley.Controllers
         [HttpGet]
         public IActionResult CustomerLogin()
         {
-            return View();
+            return View("~/Views/Account/MemberLogin.cshtml");
         }
 
         [HttpPost]
@@ -79,17 +79,18 @@ namespace ArcheryAlley.Controllers
                     HttpContext.Session.SetString("CustomerEmail", customer.Email);
                     HttpContext.Session.SetString("CustomerName", customer.FullName);
                     HttpContext.Session.SetString("CustomerPhone", customer.PhoneNumber ?? "");
-                    return RedirectToAction("GetFreeSlots", "Booking");
+                    HttpContext.Session.SetString("UserRole", "Member"); // Assign Member role
+                    return RedirectToAction("MemberDashboard", "Account");
                 }
             }
             ViewBag.ErrorMessage = "Please enter valid credentials.";
-            return View();
+            return View("~/Views/Account/MemberLogin.cshtml");
         }
 
         [HttpGet]
         public IActionResult CustomerRegister()
         {
-            return View();
+            return View("~/Views/Account/MemberRegister.cshtml");
         }
 
         [HttpPost]
@@ -100,14 +101,14 @@ namespace ArcheryAlley.Controllers
                 if (Password != ConfirmPassword)
                 {
                     ViewBag.ErrorMessage = "Passwords do not match.";
-                    return View();
+                    return View("~/Views/Account/MemberRegister.cshtml");
                 }
 
                 var existingCustomer = _repository.GetCustomerByEmail(Email);
                 if (existingCustomer != null)
                 {
                     ViewBag.ErrorMessage = "This email address is already registered. Please login instead.";
-                    return View();
+                    return View("~/Views/Account/MemberRegister.cshtml");
                 }
 
                 var newCustomer = new Customers
@@ -123,16 +124,16 @@ namespace ArcheryAlley.Controllers
                 {
                     _repository.RegisterCustomer(newCustomer);
                     ViewBag.SuccessMessage = "Account created successfully! Please login.";
-                    return View("CustomerLogin");
+                    return View("~/Views/Account/MemberLogin.cshtml");
                 }
                 catch (Exception)
                 {
                     ViewBag.ErrorMessage = "An error occurred during registration. Please try again.";
-                    return View();
+                    return View("~/Views/Account/MemberRegister.cshtml");
                 }
             }
             ViewBag.ErrorMessage = "Please fill in all fields to create an account.";
-            return View();
+            return View("~/Views/Account/MemberRegister.cshtml");
         }
 
         [HttpGet]
@@ -171,6 +172,16 @@ namespace ArcheryAlley.Controllers
                 ViewBag.ErrorMessage = "Registration failed. Please try again or contact support.";
                 return View();
             }
+        }
+
+        [HttpGet]
+        public IActionResult MemberDashboard()
+        {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("CustomerEmail")))
+                return RedirectToAction("CustomerLogin");
+
+            ViewBag.CustomerName = HttpContext.Session.GetString("CustomerName");
+            return View("~/Views/Dashboard/MemberDashboard.cshtml");
         }
     }
 }

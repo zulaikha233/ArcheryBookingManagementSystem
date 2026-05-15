@@ -1,0 +1,193 @@
+@{
+    ViewData["Title"] = "Choose Target Size";
+    var slotId   = ViewBag.SlotId;
+    var name     = ViewBag.Name;
+    var email    = ViewBag.Email;
+    var phone    = ViewBag.Phone;
+    var date     = ViewBag.Date;
+    var duration = ViewBag.Duration;
+    var ageGroup = ViewBag.AgeGroup;
+}
+
+<div class="booking-wizard-container py-5">
+    <div data-aos="fade-down">
+        <partial name="~/Views/Home/_BookingProgress.cshtml" model="2" />
+    </div>
+
+    <div class="premium-card" data-aos="fade-up">
+        <h3 class="fw-bold mb-4" style="color: var(--primary);">Choose Your Target Size</h3>
+
+        <form id="targetForm" method="POST" action="/Booking/SelectLane">
+            <!-- Hidden: carry booking data to next page -->
+            <input type="hidden" name="SlotId"   value="@slotId">
+            <input type="hidden" name="Name"     value="@name">
+            <input type="hidden" name="Email"    value="@email">
+            <input type="hidden" name="Phone"    value="@phone">
+            <input type="hidden" name="Date"     value="@date">
+            <input type="hidden" name="Duration" value="@duration">
+            <input type="hidden" name="AgeGroup" value="@ageGroup">
+            <input type="hidden" name="TargetSize"   id="hiddenTargetSize">
+            <input type="hidden" name="TargetAmount" id="hiddenTargetAmount" value="1">
+
+            <!-- Target Size Cards -->
+            <div class="row g-4 mb-5">
+                <div class="col-md-3">
+                    <div class="target-size-card" id="size-Large" onclick="selectTargetSize('Large')">
+                        <div class="size-img-wrapper">
+                            <img src="/target_122cm.png" alt="Large">
+                        </div>
+                        <div class="size-info">
+                            <span class="size-name">Large (122cm)</span>
+                            <small>Professional</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="target-size-card" id="size-Medium" onclick="selectTargetSize('Medium')">
+                        <div class="size-img-wrapper" style="padding: 12px;">
+                            <img src="/target_122cm.png" alt="Medium">
+                        </div>
+                        <div class="size-info">
+                            <span class="size-name">Medium (80cm)</span>
+                            <small>Intermediate</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="target-size-card" id="size-Inter" onclick="selectTargetSize('Inter')">
+                        <div class="size-img-wrapper" style="padding: 20px;">
+                            <img src="/target_122cm.png" alt="Intermediate">
+                        </div>
+                        <div class="size-info">
+                            <span class="size-name">Intermediate (60cm)</span>
+                            <small>Club</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="target-size-card" id="size-Small" onclick="selectTargetSize('Small')">
+                        <div class="size-img-wrapper" style="padding: 28px;">
+                            <img src="/target_122cm.png" alt="Small">
+                        </div>
+                        <div class="size-info">
+                            <span class="size-name">Small (40cm)</span>
+                            <small>Precision</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Target Amount -->
+            <div class="premium-card mb-5 p-4 text-center" style="background: rgba(255, 77, 77, 0.05); max-width: 500px; margin: 0 auto;">
+                <label class="form-label-premium mb-3 d-block">Target Face Amount</label>
+                <div id="targetAmountContainer" class="d-flex justify-content-center gap-4">
+                    <p class="text-dim">Please select a size first.</p>
+                </div>
+                <p id="amountHint" class="mt-3 small mb-0 fw-bold" style="color: var(--primary);"></p>
+            </div>
+
+            <div class="wizard-actions d-flex justify-content-between mt-5">
+                <button type="button" class="btn-premium-outline" onclick="history.back()">BACK</button>
+                <button type="button" class="btn-premium" onclick="submitTargetForm()">NEXT</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .booking-wizard-container { max-width: 1100px; margin: 40px auto; }
+
+    .target-size-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--card-border);
+        border-radius: 24px;
+        padding: 25px 15px;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        text-align: center;
+    }
+    .target-size-card:hover  { border-color: var(--primary); transform: translateY(-5px); }
+    .target-size-card.selected { background: var(--primary); border-color: var(--primary); }
+
+    .size-img-wrapper {
+        width: 90px; height: 90px;
+        border-radius: 50%; overflow: hidden;
+        margin: 0 auto 15px;
+        background: #fff;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+    .size-img-wrapper img { width: 85%; height: 85%; object-fit: contain; }
+
+    .size-name { display: block; font-weight: 800; font-size: 0.9rem; color: #fff; transition: var(--transition-smooth); }
+    .target-size-card.selected .size-name { color: #000; }
+
+    .size-info small { display: block; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; font-weight: 700; color: var(--text-dim); }
+    .target-size-card.selected small { color: #000; opacity: 0.8; }
+
+    .amount-btn {
+        width: 48px; height: 48px;
+        border-radius: 50%;
+        border: 1px solid var(--card-border);
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff; font-weight: 800;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 5px;
+    }
+    .amount-btn.selected { background: var(--primary); color: #000; border: none; box-shadow: 0 5px 15px var(--primary-glow); }
+
+    .form-label-premium {
+        font-size: 0.7rem; color: var(--text-dim);
+        font-weight: 700; letter-spacing: 1.5px;
+        text-transform: uppercase;
+    }
+</style>
+
+<script>
+    let selectedSize   = null;
+    let selectedAmount = 1;
+
+    function selectTargetSize(size) {
+        selectedSize   = size;
+        selectedAmount = 1;
+        document.querySelectorAll(".target-size-card").forEach(c => c.classList.remove("selected"));
+        document.getElementById(`size-${size}`).classList.add("selected");
+        document.getElementById("hiddenTargetSize").value = size;
+        renderTargetAmounts();
+    }
+
+    function renderTargetAmounts() {
+        const container = document.getElementById("targetAmountContainer");
+        const hint      = document.getElementById("amountHint");
+        let max = 1;
+        if (selectedSize === "Medium") max = 2;
+        if (selectedSize === "Inter")  max = 3;
+        if (selectedSize === "Small")  max = 4;
+
+        container.innerHTML = "";
+        for (let i = 1; i <= max; i++) {
+            const btn = document.createElement("button");
+            btn.type      = "button";
+            btn.className = `amount-btn ${selectedAmount === i ? 'selected' : ''}`;
+            btn.innerText = i;
+            btn.onclick   = () => {
+                selectedAmount = i;
+                document.getElementById("hiddenTargetAmount").value = i;
+                renderTargetAmounts();
+            };
+            container.appendChild(btn);
+        }
+        hint.innerText = selectedSize === "Large" ? "1 per lane limit." : `Up to ${max} per lane.`;
+        document.getElementById("hiddenTargetAmount").value = selectedAmount;
+    }
+
+    function submitTargetForm() {
+        if (!selectedSize) {
+            alert("Please select a target size.");
+            return;
+        }
+        document.getElementById("targetForm").submit();
+    }
+</script>

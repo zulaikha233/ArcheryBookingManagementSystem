@@ -1,0 +1,289 @@
+@{
+    ViewData["Title"] = "Member Dashboard";
+    Layout = "_Layout";
+    var customerName = ViewBag.CustomerName;
+}
+
+<div class="dashboard-container">
+    <div class="container py-5">
+        <!-- Welcome Hero -->
+        <div class="welcome-section mb-5" data-aos="fade-down">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-4">
+                <div>
+                    <h6 class="text-uppercase tracking-widest mb-2" style="color: var(--primary); font-weight: 700; letter-spacing: 4px;">Member Portal</h6>
+                    <h1 class="fw-900 mb-0" style="font-size: 3.5rem;">WELCOME BACK, <span style="color: var(--primary);">@customerName.ToUpper()</span></h1>
+                    <p class="text-dim mt-2 fs-5">Ready for your next bullseye? Manage your sessions and track your journey here.</p>
+                </div>
+                <div class="d-flex gap-3">
+                    <a href="@Url.Action("GetFreeSlots", "Booking")" class="btn-premium">
+                        <i class="bi bi-plus-lg me-2"></i> NEW BOOKING
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <!-- Stat Cards -->
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="bi bi-calendar-check"></i></div>
+                    <div class="stat-content">
+                        <h3>12</h3>
+                        <p>Total Sessions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="bi bi-trophy"></i></div>
+                    <div class="stat-content">
+                        <h3>LEVEL 2</h3>
+                        <p>Archer Status</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="bi bi-star"></i></div>
+                    <div class="stat-content">
+                        <h3>ACTIVE</h3>
+                        <p>Membership Status</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="stat-card featured-stat">
+                    <div class="stat-icon"><i class="bi bi-lightning-charge"></i></div>
+                    <div class="stat-content">
+                        <h3>85%</h3>
+                        <p>Accuracy Rate</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Main Content Area -->
+            <div class="col-lg-8" data-aos="fade-right">
+                <div class="premium-card p-4 h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h4 class="fw-800 mb-0">RECENT ACTIVITY</h4>
+                        <a href="#" class="btn-link text-primary text-decoration-none small fw-700">VIEW ALL HISTORY</a>
+                    </div>
+                    
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-date">15 MAY</div>
+                            <div class="activity-desc">
+                                <h6 class="mb-0 fw-700">Lane 04 - Standard Session</h6>
+                                <p class="text-dim small mb-0">Bangi Branch • 2:00 PM - 4:00 PM</p>
+                            </div>
+                            <div class="activity-status status-completed">Completed</div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-date">10 MAY</div>
+                            <div class="activity-desc">
+                                <h6 class="mb-0 fw-700">Lane 02 - Practice Session</h6>
+                                <p class="text-dim small mb-0">Bangi Branch • 10:00 AM - 12:00 PM</p>
+                            </div>
+                            <div class="activity-status status-completed">Completed</div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-date">05 MAY</div>
+                            <div class="activity-desc">
+                                <h6 class="mb-0 fw-700">Equipment Maintenance</h6>
+                                <p class="text-dim small mb-0">Complimentary Member Service</p>
+                            </div>
+                            <div class="activity-status status-info">Service</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Content -->
+            <div class="col-lg-4" data-aos="fade-left">
+                <div class="premium-card p-4 mb-4">
+                    <h4 class="fw-800 mb-4">ARCHERY PROGRESS</h4>
+                    <div class="progress-preview text-center py-3">
+                        <div class="level-badge mb-3">
+                            <i class="bi bi-shield-shaded"></i>
+                        </div>
+                        <h5 class="fw-700 mb-1">GREEN PIN</h5>
+                        <p class="text-dim small">Next Milestone: Yellow Pin</p>
+                        <div class="progress-bar-custom mt-4">
+                            <div class="progress-fill" style="width: 65%;"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2 small">
+                            <span class="text-dim">65% Progress</span>
+                            <span class="text-primary">12/20 Points</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="premium-card p-4">
+                    <h4 class="fw-800 mb-3">MEMBER PERKS</h4>
+                    <ul class="list-unstyled mb-0 perk-list">
+                        <li class="mb-3 d-flex align-items-center gap-3">
+                            <i class="bi bi-gift text-primary"></i>
+                            <div>
+                                <h6 class="mb-0 fw-700">Birthday Month</h6>
+                                <p class="text-dim small mb-0">Free 1-hour session available</p>
+                            </div>
+                        </li>
+                        <li class="d-flex align-items-center gap-3">
+                            <i class="bi bi-tag text-primary"></i>
+                            <div>
+                                <h6 class="mb-0 fw-700">Store Discount</h6>
+                                <p class="text-dim small mb-0">15% off all archery equipment</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard-container {
+        background: #000;
+        min-height: 100vh;
+        color: #fff;
+    }
+
+    .welcome-section {
+        padding-top: 40px;
+    }
+
+    /* Stat Cards */
+    .stat-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--card-border);
+        border-radius: 24px;
+        padding: 30px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        transition: var(--transition-smooth);
+    }
+
+    .stat-card:hover {
+        background: rgba(255, 77, 77, 0.05);
+        border-color: var(--primary);
+        transform: translateY(-5px);
+    }
+
+    .featured-stat {
+        background: linear-gradient(145deg, rgba(255, 77, 77, 0.1) 0%, transparent 100%);
+        border-color: rgba(255, 77, 77, 0.3);
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 77, 77, 0.1);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--primary);
+    }
+
+    .stat-content h3 {
+        font-weight: 900;
+        margin-bottom: 0;
+        line-height: 1.1;
+    }
+
+    .stat-content p {
+        margin-bottom: 0;
+        font-size: 0.75rem;
+        color: var(--text-dim);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Activity List */
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 20px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-date {
+        min-width: 70px;
+        text-align: center;
+        padding: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 0.75rem;
+        color: var(--text-dim);
+    }
+
+    .activity-desc {
+        flex-grow: 1;
+    }
+
+    .activity-status {
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 4px 12px;
+        border-radius: 30px;
+        text-transform: uppercase;
+    }
+
+    .status-completed {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+    }
+
+    .status-info {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+    }
+
+    /* Progress Preview */
+    .level-badge {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto;
+        background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: #fff;
+        filter: drop-shadow(0 0 10px var(--primary));
+    }
+
+    .progress-bar-custom {
+        height: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--primary);
+        box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    .perk-list i {
+        font-size: 1.5rem;
+    }
+
+    .fw-900 { font-weight: 900; }
+    .fw-800 { font-weight: 800; }
+    .fw-700 { font-weight: 700; }
+    .tracking-widest { letter-spacing: 0.2em; }
+</style>

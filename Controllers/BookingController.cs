@@ -32,16 +32,32 @@ namespace ArcheryAlley.Controllers
         }
 
         [HttpGet]
-        public IActionResult SelectionLane(int slotId, string name, string email, string phone, string date, int duration, string ageGroup)
+        public IActionResult SelectTarget(int slotId, string name, string email, string phone, string date, int duration, string ageGroup)
         {
-            ViewBag.IsGuest = HttpContext.Session.GetString("IsGuest") == "true";
-            ViewBag.SlotId = slotId;
-            ViewBag.Name = name;
-            ViewBag.Email = email;
-            ViewBag.Phone = phone;
-            ViewBag.Date = date;
+            ViewBag.IsGuest  = HttpContext.Session.GetString("IsGuest") == "true";
+            ViewBag.SlotId   = slotId;
+            ViewBag.Name     = name;
+            ViewBag.Email    = email;
+            ViewBag.Phone    = phone;
+            ViewBag.Date     = date;
             ViewBag.Duration = duration;
             ViewBag.AgeGroup = ageGroup;
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult SelectLane(int slotId, string name, string email, string phone, string date, int duration, string ageGroup, string targetSize, int targetAmount)
+        {
+            ViewBag.IsGuest      = HttpContext.Session.GetString("IsGuest") == "true";
+            ViewBag.SlotId       = slotId;
+            ViewBag.Name         = name;
+            ViewBag.Email        = email;
+            ViewBag.Phone        = phone;
+            ViewBag.Date         = date;
+            ViewBag.Duration     = duration;
+            ViewBag.AgeGroup     = ageGroup;
+            ViewBag.TargetSize   = targetSize;
+            ViewBag.TargetAmount = targetAmount;
             return View();
         }
 
@@ -95,37 +111,6 @@ namespace ArcheryAlley.Controllers
             return Json(result);
         }
 
-        [HttpGet]
-        public IActionResult BookSlots(int SlotId)
-        {
-            var slot = _repository.GetBookingSlots().Find(s => s.SlotId == SlotId);
-
-            if (slot == null)
-            {
-                return RedirectToAction("Exception", "Home");
-            }
-
-            return View(slot);
-        }
-
-        [HttpPost]
-        public IActionResult ConfirmBooking(int SlotId, string CustomerName, string EmpId)
-        {
-            var existingReservation = _repository.GetReservations()
-                .FirstOrDefault(r => r.SlotId == SlotId && r.Status == 1 && r.ReservedOn.Date == DateTime.Today.Date);
-
-            if (existingReservation != null)
-            {
-                return RedirectToAction("Exception", "Home");
-            }
-            else
-            {
-                _repository.BookSlots(SlotId, EmpId, CustomerName);
-
-                return RedirectToAction("Success", "Home");
-            }
-        }
-
         [HttpPost]
         public IActionResult Payment(ArcheryAlley.Models.PaymentViewModel model)
         {
@@ -148,7 +133,7 @@ namespace ArcheryAlley.Controllers
             // Default pax to 1 if not provided (since we removed pax selection)
             if (model.NumberOfPax <= 0) model.NumberOfPax = 1;
 
-            return View(model);
+            return View("~/Views/Payment/Payment.cshtml", model);
         }
 
         public IActionResult PaymentGuest(int SlotId, string CustomerName, string CustomerEmail, string Date, int Duration, decimal TotalPrice, string SelectedLanes, string TargetSize, int TargetAmount, int NumberOfPax)
@@ -176,7 +161,7 @@ namespace ArcheryAlley.Controllers
                 }
             }
 
-            return View(model);
+            return View("~/Views/Payment/PaymentGuest.cshtml", model);
         }
 
         [HttpPost]
@@ -330,7 +315,7 @@ namespace ArcheryAlley.Controllers
                 return RedirectToAction("ManageSlots", "Slot");
 
             ViewBag.StaffName = HttpContext.Session.GetString("UserName");
-            return View();
+            return View("~/Views/Dashboard/StaffDashboard.cshtml");
         }
     }
 }

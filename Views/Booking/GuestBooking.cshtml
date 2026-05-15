@@ -261,7 +261,7 @@
         }
         
         const ageGroup = document.getElementById("ageGroup").value;
-        const url = `/Booking/SelectionLane?slotId=${bookingData.slotId}&name=${encodeURIComponent(bookingData.name)}&email=${encodeURIComponent(bookingData.email)}&date=${bookingData.date}&duration=${bookingData.duration}&ageGroup=${ageGroup}`;
+        const url = `/Booking/SelectTarget?slotId=${bookingData.slotId}&name=${encodeURIComponent(bookingData.name)}&email=${encodeURIComponent(bookingData.email)}&date=${bookingData.date}&duration=${bookingData.duration}&ageGroup=${ageGroup}`;
         window.location.href = url;
     }
 </script>

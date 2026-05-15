@@ -1,0 +1,242 @@
+@{
+    ViewData["Title"] = "Select Your Lane";
+    var slotId       = ViewBag.SlotId;
+    var name         = ViewBag.Name;
+    var email        = ViewBag.Email;
+    var phone        = ViewBag.Phone;
+    var date         = ViewBag.Date;
+    var duration     = ViewBag.Duration;
+    var ageGroup     = ViewBag.AgeGroup;
+    var targetSize   = ViewBag.TargetSize;
+    var targetAmount = ViewBag.TargetAmount;
+    var isGuest      = ViewBag.IsGuest;
+}
+
+<div class="booking-wizard-container py-5">
+    <div data-aos="fade-down">
+        <partial name="~/Views/Home/_BookingProgress.cshtml" model="3" />
+    </div>
+
+    <div class="premium-card" data-aos="fade-up">
+        <h3 class="fw-bold mb-4" style="color: var(--primary);">Select Your Lane</h3>
+
+        <!-- Age Group Banner -->
+        <div class="mb-4 p-4 rounded-4 text-center" style="background: rgba(255, 77, 77, 0.08); border: 1px solid var(--primary-glow);">
+            <div class="text-dim fw-bold mb-2" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px;">Target Category</div>
+            <div class="h3 fw-900 mb-2" style="color: #fff;">@ageGroup</div>
+            <div class="text-dim small">
+                <i class="bi bi-info-circle me-1"></i>
+                Dedicated lanes for your category: <b class="text-primary">Lanes @(ageGroup == "Adult" ? "11 - 20" : "1 - 10")</b>
+            </div>
+        </div>
+
+        <!-- Pax Counter -->
+        <div class="premium-card mb-4 p-4" style="background: rgba(255,255,255,0.02);">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-4">
+                <div>
+                    <label class="form-label-premium mb-1">Number of Archers</label>
+                    <p class="mb-0 text-dim small" id="laneRequiredHint">
+                        <i class="bi bi-info-square me-1"></i> Minimum 1 lane recommended per 4 archers.
+                    </p>
+                </div>
+                <div class="counter-input-container">
+                    <button class="counter-btn" type="button" onclick="updatePax(-1)"><i class="bi bi-dash"></i></button>
+                    <div class="counter-input" id="paxDisplay" style="width: 60px;">1</div>
+                    <button class="counter-btn" type="button" onclick="updatePax(1)"><i class="bi bi-plus"></i></button>
+                    <input type="hidden" id="numberOfPax" value="1">
+                </div>
+            </div>
+        </div>
+
+        <div id="target-hint" class="mb-4 fw-bold text-center text-dim" style="font-size: 0.9rem;">Select your preferred lane(s) on the grid.</div>
+        <div id="targetsGrid" class="targets-grid"></div>
+
+        <div class="wizard-actions d-flex justify-content-between mt-5">
+            <a href="/Booking/SelectTarget?slotId=@slotId&name=@Uri.EscapeDataString(name?.ToString() ?? "")&email=@Uri.EscapeDataString(email?.ToString() ?? "")&phone=@Uri.EscapeDataString(phone?.ToString() ?? "")&date=@date&duration=@duration&ageGroup=@ageGroup"
+               class="btn-premium-outline text-decoration-none">BACK</a>
+            <button class="btn-premium" type="button" onclick="goToPayment()">CONFIRM BOOKING</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .booking-wizard-container { max-width: 1100px; margin: 40px auto; }
+
+    .fw-900 { font-weight: 900; }
+
+    .targets-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 20px; }
+
+    .target-box {
+        aspect-ratio: 1;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        cursor: pointer;
+        transition: var(--transition-smooth);
+    }
+    .target-box:hover:not(.disabled) { border-color: var(--primary); transform: scale(1.05); }
+    .target-box.selected  { background: var(--primary); color: #000; border: none; font-weight: 900; box-shadow: 0 10px 20px var(--primary-glow); }
+    .target-box.disabled  { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); background: rgba(255,255,255,0.01); border-color: rgba(255,255,255,0.05); }
+    .target-box.restricted { opacity: 0.5; cursor: not-allowed; border-style: dashed; border-color: rgba(255,255,255,0.2); }
+
+    .counter-btn {
+        width: 40px; height: 40px;
+        border-radius: 50%;
+        border: 1px solid var(--card-border);
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        transition: var(--transition-smooth);
+    }
+    .counter-btn:hover { background: var(--primary); color: #000; border-color: var(--primary); }
+
+    .counter-input-container {
+        display: flex; align-items: center; gap: 15px;
+        background: rgba(255, 255, 255, 0.03);
+        padding: 10px 20px;
+        border-radius: 100px;
+        border: 1px solid var(--card-border);
+    }
+
+    .form-label-premium {
+        font-size: 0.75rem; color: var(--text-dim);
+        font-weight: 700; letter-spacing: 1.5px;
+        text-transform: uppercase; display: block;
+    }
+</style>
+
+<script>
+    const bookingData = {
+        slotId:       "@slotId",
+        name:         "@name",
+        email:        "@email",
+        phone:        "@phone",
+        date:         "@date",
+        duration:     "@duration",
+        ageGroup:     "@ageGroup",
+        targetSize:   "@targetSize",
+        targetAmount: "@targetAmount",
+        isGuest:      "@isGuest".toLowerCase() === "true",
+        pax:          1,
+        selectedTargetIds: [],
+        laneRanges: {}
+    };
+
+    // Load lane grid on page load
+    document.addEventListener("DOMContentLoaded", loadLaneGrid);
+
+    async function loadLaneGrid() {
+        const grid = document.getElementById("targetsGrid");
+        grid.innerHTML = "<div class='text-center w-100 py-4'><div class='spinner-border text-success'></div><p class='mt-2'>Loading available lanes...</p></div>";
+
+        try {
+            const resp = await fetch(`/Booking/GetAvailableTargetsAjax?slotId=${bookingData.slotId}&date=${bookingData.date}&duration=${bookingData.duration}`);
+            const availableTargets = await resp.json();
+
+            grid.innerHTML = "";
+            const isAdult = (bookingData.ageGroup === "Adult");
+
+            for (let item of availableTargets) {
+                const i            = item.targetNumber;
+                const status       = item.status;
+                const isTaken      = (status === 'Taken');
+                const isMaint      = (status === 'Maintenance');
+                const isRestricted = isAdult ? (i <= 10) : (i >= 11);
+
+                const box       = document.createElement("div");
+                box.className   = `target-box ${isTaken || isMaint ? 'disabled' : ''} ${isRestricted ? 'restricted' : ''}`;
+                const statusText = isMaint ? 'MAINTENANCE' : (isTaken ? 'Taken' : (isRestricted ? 'Restricted' : 'Open'));
+
+                box.innerHTML = `
+                    <span style="font-size: 1.2rem; font-weight: 800;">${i}</span>
+                    <small style="font-size:0.5rem; text-transform: uppercase; opacity: 0.9; font-weight:800; letter-spacing: -0.2px;">${statusText}</small>
+                `;
+
+                if (!isTaken && !isRestricted && !isMaint) {
+                    box.onclick = () => selectTarget(i);
+                } else if (isRestricted) {
+                    box.title = isAdult ? "Lanes 1-10 are for Kids/Juniors" : "Lanes 11-20 are for Adults";
+                } else if (isMaint) {
+                    box.style.background = "#ff6b6b";
+                    box.style.color = "white";
+                    box.title = "This lane is currently under maintenance.";
+                }
+                grid.appendChild(box);
+            }
+        } catch (e) {
+            grid.innerHTML = "<div class='text-center w-100 p-4 text-danger'>Error loading lanes. Please try again.</div>";
+        }
+    }
+
+    function selectTarget(num) {
+        const idx = bookingData.selectedTargetIds.indexOf(num);
+        if (idx > -1) {
+            bookingData.selectedTargetIds.splice(idx, 1);
+        } else {
+            bookingData.selectedTargetIds.push(num);
+        }
+        document.querySelectorAll(".target-box").forEach(b => b.classList.remove("selected"));
+        bookingData.selectedTargetIds.forEach(id => {
+            const el = document.querySelectorAll(".target-box")[id - 1];
+            if (el) el.classList.add("selected");
+        });
+    }
+
+    function updatePax(change) {
+        let val = parseInt(document.getElementById("numberOfPax").value);
+        val += change;
+        if (val < 1)  val = 1;
+        if (val > 80) val = 80;
+        document.getElementById("numberOfPax").value  = val;
+        document.getElementById("paxDisplay").innerText = val;
+        bookingData.pax = val;
+
+        const requiredLanes = Math.ceil(val / 4);
+        const hint = document.getElementById("laneRequiredHint");
+        hint.innerHTML = `<i class="bi bi-info-square me-1"></i> Min ${requiredLanes} Lane${requiredLanes > 1 ? 's' : ''} Required`;
+        hint.style.color = (bookingData.selectedTargetIds.length < requiredLanes && bookingData.selectedTargetIds.length > 0)
+            ? "#dc3545" : "var(--text-dim)";
+    }
+
+    function goToPayment() {
+        bookingData.pax = parseInt(document.getElementById("numberOfPax").value);
+
+        if (bookingData.selectedTargetIds.length === 0) { alert("Select a lane."); return; }
+
+        const maxCapacity = bookingData.selectedTargetIds.length * 4;
+        if (bookingData.pax > maxCapacity) {
+            alert(`You have ${bookingData.pax} archers but selected lanes can only hold ${maxCapacity}. Please select more lanes.`);
+            return;
+        }
+
+        const form   = document.createElement("form");
+        form.method  = "POST";
+        form.action  = bookingData.isGuest ? "/Booking/PaymentGuest" : "/Booking/Payment";
+
+        const fields = {
+            SlotId:            bookingData.slotId,
+            CustomerName:      bookingData.name,
+            CustomerEmail:     bookingData.email,
+            PhoneNumber:       bookingData.phone,
+            Date:              bookingData.date,
+            Duration:          bookingData.duration,
+            TotalPrice:        parseInt(bookingData.duration) * 10,
+            SelectedLanes:     bookingData.selectedTargetIds.join(", "),
+            TargetSize:        bookingData.targetSize,
+            TargetAmount:      bookingData.targetAmount,
+            NumberOfPax:       bookingData.pax
+        };
+
+        for (let k in fields) {
+            const input = document.createElement("input");
+            input.type  = "hidden";
+            input.name  = k;
+            input.value = fields[k];
+            form.appendChild(input);
+        }
+        document.body.appendChild(form);
+        form.submit();
+    }
+</script>

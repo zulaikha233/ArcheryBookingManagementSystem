@@ -243,7 +243,6 @@
         const btn = document.getElementById("confirmBtn");
         const method = document.querySelector('input[name="paymentMethod"]:checked').value;
 
-        // Validation for online payments
         if (method === 'fpx') {
             const bank = document.getElementById('bankSelection').value;
             if (!bank) {
