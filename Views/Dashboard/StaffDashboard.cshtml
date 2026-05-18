@@ -12,15 +12,18 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         :root {
-            --green: #8A9A5B;
-            --green-dark: #6D7B48;
-            --green-light: #ddead1;
-            --bg: #ECE7CA;
-            --sidebar-bg: #2b3a2a;
+            --primary: #f97316;
+            --primary-dark: #c2410c;
+            --red: #dc2626;
+            --red-dark: #991b1b;
+            --bg: #0a0a0a;
+            --sidebar-bg: #111111;
+            --card-bg: #1a1a1a;
+            --card-border: rgba(255,255,255,0.07);
             --sidebar-width: 260px;
-            --text-dark: #2b3a2a;
-            --text-muted: #7a8a6a;
-            --card-bg: #A9BA9D;
+            --topbar-height: 60px;
+            --text-light: #f1f5f9;
+            --text-dim: #94a3b8;
             --white: #ffffff;
         }
 
@@ -29,12 +32,15 @@
         body {
             font-family: 'Outfit', sans-serif;
             background: var(--bg);
-            color: var(--text-dark);
+            color: var(--text-light);
             display: flex;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* ── SIDEBAR ── */
+        /* ══════════════════════════════
+           SIDEBAR
+        ══════════════════════════════ */
         .sidebar {
             width: var(--sidebar-width);
             background: var(--sidebar-bg);
@@ -43,306 +49,391 @@
             top: 0; left: 0;
             display: flex;
             flex-direction: column;
-            z-index: 100;
-            transition: 0.3s;
+            z-index: 200;
+            border-right: 1px solid rgba(255,255,255,0.06);
+            transition: transform 0.3s ease, width 0.3s ease;
         }
 
+        /* Collapsed state on desktop */
+        .sidebar.collapsed { width: 68px; }
+
+        .sidebar.collapsed .sidebar-logo span,
+        .sidebar.collapsed .staff-badge,
+        .sidebar.collapsed .nav-label,
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .logout-text { display: none; }
+
+        .sidebar.collapsed .sidebar-logo { font-size: 0; }
+        .sidebar.collapsed .sidebar-logo::before { content: '🏹'; font-size: 1.4rem; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding: 14px; }
+        .sidebar.collapsed .nav-item i { width: auto; font-size: 1.3rem; }
+        .sidebar.collapsed .logout-btn { justify-content: center; padding: 14px; }
+        .sidebar.collapsed .sidebar-header { justify-content: center; padding: 20px 10px; }
+
         .sidebar-header {
-            padding: 28px 24px 20px;
-            border-bottom: 1px solid rgba(138,154,91,0.2);
+            padding: 24px 20px 20px;
+            border-bottom: 1px solid rgba(249,115,22,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .sidebar-logo {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 800;
-            color: var(--green);
+            color: var(--primary);
             letter-spacing: 1px;
             text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
         }
 
         .sidebar-logo span {
             display: block;
-            font-size: 0.7rem;
-            color: rgba(255,255,255,0.4);
+            font-size: 0.68rem;
+            color: rgba(255,255,255,0.35);
             font-weight: 400;
             letter-spacing: 2px;
             margin-top: 2px;
         }
 
+        .sidebar-toggle-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.4);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            transition: 0.2s;
+            flex-shrink: 0;
+        }
+        .sidebar-toggle-btn:hover { color: var(--primary); }
+
         .staff-badge {
-            margin: 16px 24px;
-            padding: 12px 16px;
-            background: rgba(138,154,91,0.15);
-            border: 1px solid rgba(138,154,91,0.3);
+            margin: 14px 16px;
+            padding: 12px 14px;
+            background: rgba(249,115,22,0.1);
+            border: 1px solid rgba(249,115,22,0.25);
             border-radius: 12px;
+            overflow: hidden;
+            white-space: nowrap;
         }
 
         .staff-badge p {
-            font-size: 0.65rem;
-            color: rgba(255,255,255,0.4);
+            font-size: 0.62rem;
+            color: rgba(255,255,255,0.35);
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
-        .staff-badge h6 {
-            font-size: 0.95rem;
-            color: #fff;
-            font-weight: 600;
-        }
+        .staff-badge h6 { font-size: 0.9rem; color: #fff; font-weight: 600; }
 
         .sidebar-nav {
             flex: 1;
-            padding: 16px 16px;
+            padding: 12px 10px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 2px;
         }
 
         .nav-label {
-            font-size: 0.62rem;
-            color: rgba(255,255,255,0.25);
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.2);
             text-transform: uppercase;
             letter-spacing: 2px;
-            padding: 12px 8px 6px;
+            padding: 10px 8px 5px;
             font-weight: 600;
+            white-space: nowrap;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px 16px;
+            padding: 12px 14px;
             border-radius: 10px;
-            color: rgba(255,255,255,0.6);
+            color: rgba(255,255,255,0.5);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 500;
             transition: 0.2s;
-            cursor: pointer;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
         }
 
-        .nav-item:hover {
-            background: rgba(138,154,91,0.15);
-            color: var(--green);
-        }
-
+        .nav-item:hover { background: rgba(249,115,22,0.1); color: var(--primary); }
         .nav-item.active {
-            background: rgba(138,154,91,0.2);
-            color: var(--green);
-            border-left: 3px solid var(--green);
+            background: rgba(249,115,22,0.15);
+            color: var(--primary);
+            border-left: 3px solid var(--primary);
         }
-
-        .nav-item i {
-            font-size: 1.1rem;
-            width: 20px;
-            text-align: center;
-        }
+        .nav-item i { font-size: 1.1rem; width: 20px; text-align: center; flex-shrink: 0; }
 
         .sidebar-footer {
-            padding: 16px;
-            border-top: 1px solid rgba(138,154,91,0.2);
+            padding: 12px 10px;
+            border-top: 1px solid rgba(255,255,255,0.06);
         }
 
         .logout-btn {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 12px 16px;
+            padding: 12px 14px;
             border-radius: 10px;
-            color: rgba(255,100,100,0.7);
+            color: rgba(220,38,38,0.7);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 500;
             transition: 0.2s;
-            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .logout-btn:hover { background: rgba(220,38,38,0.1); color: var(--red); }
+
+        /* ══════════════════════════════
+           OVERLAY (mobile)
+        ══════════════════════════════ */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 199;
+            backdrop-filter: blur(2px);
+        }
+        .sidebar-overlay.active { display: block; }
+
+        /* ══════════════════════════════
+           TOP BAR (mobile only)
+        ══════════════════════════════ */
+        .topbar {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--topbar-height);
+            background: var(--sidebar-bg);
+            border-bottom: 1px solid rgba(249,115,22,0.2);
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 150;
         }
 
-        .logout-btn:hover {
-            background: rgba(255,100,100,0.1);
-            color: #ff6464;
+        .topbar-logo {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        /* ── MAIN CONTENT ── */
+        .topbar-menu-btn {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.7);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+        .topbar-menu-btn:hover { color: var(--primary); }
+
+        /* ══════════════════════════════
+           MAIN CONTENT
+        ══════════════════════════════ */
         .main-content {
             margin-left: var(--sidebar-width);
             flex: 1;
             padding: 40px;
             min-height: 100vh;
+            transition: margin-left 0.3s ease;
         }
 
-        .page-header {
-            margin-bottom: 40px;
-        }
+        .main-content.sidebar-collapsed { margin-left: 68px; }
+
+        .page-header { margin-bottom: 32px; }
 
         .page-header p {
-            font-size: 0.8rem;
-            color: var(--text-muted);
+            font-size: 0.78rem;
+            color: var(--text-dim);
             text-transform: uppercase;
             letter-spacing: 2px;
             margin-bottom: 6px;
         }
 
-        .page-header h1 {
-            font-size: 2.2rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
+        .page-header h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; color: var(--white); }
+        .page-header h1 span { color: var(--primary); }
 
-        .page-header h1 span {
-            color: var(--green);
-        }
-
-        /* ── 2x2 DASHBOARD CARDS ── */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-            max-width: 860px;
-        }
-
-        .dash-card {
-            background: var(--card-bg);
-            border-radius: 24px;
-            padding: 36px 32px;
-            text-decoration: none;
-            color: var(--text-dark);
-            border: 1px solid rgba(255,255,255,0.3);
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            cursor: pointer;
-        }
-
-        .dash-card::before {
-            content: '';
-            position: absolute;
-            top: 0; right: 0;
-            width: 120px; height: 120px;
-            background: rgba(138,154,91,0.08);
-            border-radius: 50%;
-            transform: translate(30px, -30px);
-            transition: 0.3s;
-        }
-
-        .dash-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 16px 40px rgba(43,58,42,0.15);
-            border-color: var(--green);
-            color: var(--text-dark);
-        }
-
-        .dash-card:hover::before {
-            background: rgba(138,154,91,0.18);
-            transform: translate(20px, -20px) scale(1.2);
-        }
-
-        .card-icon {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, var(--green), var(--green-dark));
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: #fff;
-            box-shadow: 0 8px 20px rgba(138,154,91,0.35);
-        }
-
-        .card-label {
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 600;
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            line-height: 1.3;
-        }
-
-        .card-desc {
-            font-size: 0.82rem;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-
-        .card-arrow {
-            margin-top: auto;
-            font-size: 1.2rem;
-            color: var(--green);
-            align-self: flex-end;
-            transition: 0.2s;
-        }
-
-        .dash-card:hover .card-arrow {
-            transform: translateX(4px);
-        }
-
-        /* ── QUICK STATUS BAR ── */
-        .status-bar {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-        }
+        /* ══════════════════════════════
+           STATUS BAR
+        ══════════════════════════════ */
+        .status-bar { display: flex; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
 
         .status-chip {
             background: var(--card-bg);
-            border: 1px solid rgba(138,154,91,0.3);
+            border: 1px solid rgba(249,115,22,0.2);
             border-radius: 50px;
-            padding: 8px 18px;
-            font-size: 0.8rem;
+            padding: 7px 16px;
+            font-size: 0.78rem;
             font-weight: 600;
-            color: var(--text-dark);
+            color: var(--text-dim);
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 7px; height: 7px;
             border-radius: 50%;
-            background: var(--green);
+            background: var(--primary);
             animation: pulse 2s infinite;
         }
 
-        @@keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
+        /* ══════════════════════════════
+           DASHBOARD GRID 2x2
+        ══════════════════════════════ */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 860px;
         }
 
-        @@keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
+        .dash-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 28px 24px;
+            text-decoration: none;
+            color: var(--text-light);
+            border: 1px solid var(--card-border);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .dash-card:nth-child(1) { animation: fadeUp 0.4s ease both; }
-        .dash-card:nth-child(2) { animation: fadeUp 0.5s ease both; }
-        .dash-card:nth-child(3) { animation: fadeUp 0.6s ease both; }
-        .dash-card:nth-child(4) { animation: fadeUp 0.7s ease both; }
+        .dash-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 100px; height: 100px;
+            background: rgba(249,115,22,0.05);
+            border-radius: 50%;
+            transform: translate(30px,-30px);
+            transition: 0.3s;
+        }
+
+        .dash-card:hover { transform: translateY(-4px); color: var(--text-light); }
+        .dash-card:hover::before { transform: translate(20px,-20px) scale(1.2); }
+
+        .card-icon {
+            width: 50px; height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #fff;
+        }
+
+        .card-label { font-size: 0.62rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; }
+        .card-title { font-size: 1.1rem; font-weight: 700; color: var(--white); line-height: 1.3; }
+        .card-desc  { font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; }
+
+        .card-footer-row { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
+
+        .card-tag { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; padding: 3px 9px; border-radius: 20px; }
+        .card-arrow { font-size: 1.1rem; transition: 0.2s; }
+        .dash-card:hover .card-arrow { transform: translateX(4px); }
+
+        /* Colour variants */
+        .dash-card--orange { border-color: rgba(249,115,22,0.2); }
+        .dash-card--orange:hover { border-color: var(--primary); box-shadow: 0 14px 36px rgba(249,115,22,0.18); }
+        .dash-card--red    { border-color: rgba(220,38,38,0.2); }
+        .dash-card--red:hover    { border-color: var(--red);     box-shadow: 0 14px 36px rgba(220,38,38,0.18); }
+        .dash-card--white  { border-color: rgba(255,255,255,0.08); }
+        .dash-card--white:hover  { border-color: rgba(255,255,255,0.35); box-shadow: 0 14px 36px rgba(255,255,255,0.05); }
+
+        .card-icon--orange { background: linear-gradient(135deg,#f97316,#c2410c); box-shadow: 0 6px 18px rgba(249,115,22,0.4); }
+        .card-icon--red    { background: linear-gradient(135deg,#dc2626,#7f1d1d); box-shadow: 0 6px 18px rgba(220,38,38,0.4); }
+        .card-icon--white  { background: linear-gradient(135deg,#e2e8f0,#94a3b8); box-shadow: 0 6px 18px rgba(255,255,255,0.1); }
+        .card-icon--fire   { background: linear-gradient(135deg,#f97316,#dc2626); box-shadow: 0 6px 18px rgba(220,38,38,0.5); }
+        .card-icon--white i { color: #1a1a1a; }
+
+        .card-arrow--orange { color: var(--primary); }
+        .card-arrow--red    { color: var(--red); }
+        .card-arrow--white  { color: rgba(255,255,255,0.55); }
+
+        .card-tag--orange { background: rgba(249,115,22,0.15); color: var(--primary);           border: 1px solid rgba(249,115,22,0.3); }
+        .card-tag--red    { background: rgba(220,38,38,0.15);  color: #f87171;                  border: 1px solid rgba(220,38,38,0.3); }
+        .card-tag--white  { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.45);  border: 1px solid rgba(255,255,255,0.1); }
+
+        /* ══════════════════════════════
+           ANIMATIONS
+        ══════════════════════════════ */
+        @@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        @@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+        .dash-card:nth-child(1){animation:fadeUp 0.4s ease both}
+        .dash-card:nth-child(2){animation:fadeUp 0.5s ease both}
+        .dash-card:nth-child(3){animation:fadeUp 0.6s ease both}
+        .dash-card:nth-child(4){animation:fadeUp 0.7s ease both}
+
+        /* ══════════════════════════════
+           RESPONSIVE — TABLET / MOBILE
+           Honor 200 Lite ≈ 390px wide
+        ══════════════════════════════ */
+        @@media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); width: var(--sidebar-width) !important; }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .sidebar-toggle-btn { display: none; }
+            .topbar { display: flex; }
+            .main-content { margin-left: 0 !important; padding: 76px 14px 24px; }
+            .page-header h1 { font-size: 1.45rem; }
+            .dashboard-grid { grid-template-columns: 1fr 1fr; gap: 12px; max-width: 100%; }
+            .dash-card { padding: 18px 14px; border-radius: 16px; gap: 10px; }
+            .card-icon { width: 42px; height: 42px; font-size: 1.2rem; border-radius: 12px; }
+            .card-title { font-size: 0.92rem; }
+            .card-desc  { font-size: 0.72rem; }
+            .card-tag   { font-size: 0.55rem; padding: 2px 7px; }
+            .status-chip { font-size: 0.7rem; padding: 5px 10px; }
+        }
+
+        /* Very small phones — single column */
+        @@media (max-width: 380px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .card-desc { display: none; }
+        }
     </style>
 </head>
 <body>
 
+    <!-- ── OVERLAY (mobile tap to close) ── -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <!-- ── TOP BAR (mobile only) ── -->
+    <div class="topbar">
+        <div class="topbar-logo">Archery Alley</div>
+        <button class="topbar-menu-btn" onclick="openSidebar()" aria-label="Open menu">
+            <i class="bi bi-list"></i>
+        </button>
+    </div>
+
     <!-- ── SIDEBAR ── -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-logo">
                 Archery Alley
                 <span>Staff Portal</span>
             </div>
+            <button class="sidebar-toggle-btn" id="desktopToggle" onclick="toggleDesktopSidebar()" aria-label="Collapse sidebar">
+                <i class="bi bi-layout-sidebar-reverse" id="toggleIcon"></i>
+            </button>
         </div>
 
         <div class="staff-badge">
@@ -355,40 +446,36 @@
 
             <a href="/Booking/StaffDashboard" class="nav-item active">
                 <i class="bi bi-grid-fill"></i>
-                Dashboard
+                <span class="nav-text">Dashboard</span>
             </a>
-
             <a href="/Account/Profile" class="nav-item">
                 <i class="bi bi-person-circle"></i>
-                Profile
+                <span class="nav-text">Profile</span>
             </a>
-
             <a href="/Attendance/Index" class="nav-item">
                 <i class="bi bi-calendar-check"></i>
-                Student Attendance
+                <span class="nav-text">Student Attendance</span>
             </a>
-
             <a href="/Report/StudentPerformance" class="nav-item">
                 <i class="bi bi-bar-chart-line"></i>
-                Performance Report
+                <span class="nav-text">Performance Report</span>
             </a>
-
             <a href="/Booking/StaffBooking" class="nav-item">
                 <i class="bi bi-bullseye"></i>
-                Slot Booking
+                <span class="nav-text">Slot Booking</span>
             </a>
         </nav>
 
         <div class="sidebar-footer">
             <a href="/Account/Logout" class="logout-btn">
                 <i class="bi bi-box-arrow-left"></i>
-                Logout
+                <span class="logout-text">Logout</span>
             </a>
         </div>
     </aside>
 
     <!-- ── MAIN CONTENT ── -->
-    <main class="main-content">
+    <main class="main-content" id="mainContent">
 
         <div class="page-header">
             <p>Welcome back</p>
@@ -402,7 +489,7 @@
             </div>
             <div class="status-chip">
                 <i class="bi bi-calendar3"></i>
-                @DateTime.Today.ToString("dddd, dd MMMM yyyy")
+                @DateTime.Today.ToString("dddd, dd MMM yyyy")
             </div>
         </div>
 
@@ -410,8 +497,8 @@
         <div class="dashboard-grid">
 
             <!-- Profile -->
-            <a href="/Account/Profile" class="dash-card">
-                <div class="card-icon">
+            <a href="/Account/Profile" class="dash-card dash-card--orange">
+                <div class="card-icon card-icon--orange">
                     <i class="bi bi-person-fill"></i>
                 </div>
                 <div>
@@ -419,12 +506,15 @@
                     <div class="card-title">My Profile</div>
                     <div class="card-desc">View and update your staff profile and account details.</div>
                 </div>
-                <i class="bi bi-arrow-right card-arrow"></i>
+                <div class="card-footer-row">
+                    <span class="card-tag card-tag--orange">Staff Info</span>
+                    <i class="bi bi-arrow-right card-arrow card-arrow--orange"></i>
+                </div>
             </a>
 
             <!-- Student Attendance -->
-            <a href="/Attendance/Index" class="dash-card">
-                <div class="card-icon">
+            <a href="/Attendance/Index" class="dash-card dash-card--red">
+                <div class="card-icon card-icon--red">
                     <i class="bi bi-calendar-check-fill"></i>
                 </div>
                 <div>
@@ -432,12 +522,15 @@
                     <div class="card-title">Student Attendance</div>
                     <div class="card-desc">Track and manage daily student attendance records.</div>
                 </div>
-                <i class="bi bi-arrow-right card-arrow"></i>
+                <div class="card-footer-row">
+                    <span class="card-tag card-tag--red">Daily Tracking</span>
+                    <i class="bi bi-arrow-right card-arrow card-arrow--red"></i>
+                </div>
             </a>
 
             <!-- Performance Report -->
-            <a href="/Report/StudentPerformance" class="dash-card">
-                <div class="card-icon">
+            <a href="/Report/StudentPerformance" class="dash-card dash-card--white">
+                <div class="card-icon card-icon--white">
                     <i class="bi bi-bar-chart-fill"></i>
                 </div>
                 <div>
@@ -445,12 +538,15 @@
                     <div class="card-title">Performance Report</div>
                     <div class="card-desc">Review student performance scores and progress over time.</div>
                 </div>
-                <i class="bi bi-arrow-right card-arrow"></i>
+                <div class="card-footer-row">
+                    <span class="card-tag card-tag--white">Analytics</span>
+                    <i class="bi bi-arrow-right card-arrow card-arrow--white"></i>
+                </div>
             </a>
 
             <!-- Staff Booking -->
-            <a href="/Booking/StaffBooking" class="dash-card">
-                <div class="card-icon">
+            <a href="/Booking/StaffBooking" class="dash-card dash-card--orange">
+                <div class="card-icon card-icon--fire">
                     <i class="bi bi-bullseye"></i>
                 </div>
                 <div>
@@ -458,11 +554,61 @@
                     <div class="card-title">Slot Booking</div>
                     <div class="card-desc">Create and manage archery lane slot reservations for customers.</div>
                 </div>
-                <i class="bi bi-arrow-right card-arrow"></i>
+                <div class="card-footer-row">
+                    <span class="card-tag card-tag--orange">Lane Management</span>
+                    <i class="bi bi-arrow-right card-arrow card-arrow--orange"></i>
+                </div>
             </a>
 
         </div>
     </main>
+
+    <script>
+        const sidebar     = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const overlay     = document.getElementById('sidebarOverlay');
+        const toggleIcon  = document.getElementById('toggleIcon');
+
+        // ── DESKTOP: collapse / expand ──
+        function toggleDesktopSidebar() {
+            const collapsed = sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('sidebar-collapsed', collapsed);
+            toggleIcon.className = collapsed
+                ? 'bi bi-layout-sidebar'
+                : 'bi bi-layout-sidebar-reverse';
+            localStorage.setItem('sidebarCollapsed', collapsed);
+        }
+
+        // ── MOBILE: open ──
+        function openSidebar() {
+            sidebar.classList.add('mobile-open');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // ── MOBILE: close ──
+        function closeSidebar() {
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Restore desktop collapsed state on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.innerWidth > 768) {
+                if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                    sidebar.classList.add('collapsed');
+                    mainContent.classList.add('sidebar-collapsed');
+                    toggleIcon.className = 'bi bi-layout-sidebar';
+                }
+            }
+        });
+
+        // Auto-close mobile sidebar when screen resizes to desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) closeSidebar();
+        });
+    </script>
 
 </body>
 </html>
