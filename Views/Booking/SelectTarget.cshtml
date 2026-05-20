@@ -1,12 +1,13 @@
 @{
     ViewData["Title"] = "Choose Target Size";
-    var slotId   = ViewBag.SlotId;
-    var name     = ViewBag.Name;
-    var email    = ViewBag.Email;
-    var phone    = ViewBag.Phone;
-    var date     = ViewBag.Date;
-    var duration = ViewBag.Duration;
-    var ageGroup = ViewBag.AgeGroup;
+    Layout = ViewBag.IsGuest == true ? "_Layout" : "_MemberLayout";
+    var slotId      = ViewBag.SlotId;
+    var name        = ViewBag.Name;
+    var email       = ViewBag.Email;
+    var phone       = ViewBag.Phone;
+    var date        = ViewBag.Date;
+    var duration    = ViewBag.Duration;
+    var numberOfPax = ViewBag.NumberOfPax ?? 1;
 }
 
 <div class="booking-wizard-container py-5">
@@ -25,49 +26,38 @@
             <input type="hidden" name="Phone"    value="@phone">
             <input type="hidden" name="Date"     value="@date">
             <input type="hidden" name="Duration" value="@duration">
-            <input type="hidden" name="AgeGroup" value="@ageGroup">
+            <input type="hidden" name="NumberOfPax" value="@numberOfPax">
             <input type="hidden" name="TargetSize"   id="hiddenTargetSize">
             <input type="hidden" name="TargetAmount" id="hiddenTargetAmount" value="1">
 
             <!-- Target Size Cards -->
-            <div class="row g-4 mb-5">
-                <div class="col-md-3">
+            <div class="row g-4 mb-5 justify-content-center">
+                <div class="col-md-4">
                     <div class="target-size-card" id="size-Large" onclick="selectTargetSize('Large')">
-                        <div class="size-img-wrapper">
-                            <img src="/target_122cm.png" alt="Large">
+                        <div class="size-img-wrapper" style="padding: 0px;">
+                            <img src="/images/target size.png" alt="Large" style="transform: scale(1.25); transform-origin: center;">
                         </div>
                         <div class="size-info">
-                            <span class="size-name">Large (122cm)</span>
+                            <span class="size-name">Large (120cm)</span>
                             <small>Professional</small>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="target-size-card" id="size-Medium" onclick="selectTargetSize('Medium')">
-                        <div class="size-img-wrapper" style="padding: 12px;">
-                            <img src="/target_122cm.png" alt="Medium">
+                        <div class="size-img-wrapper" style="padding: 9px;">
+                            <img src="/images/target size.png" alt="Medium">
                         </div>
                         <div class="size-info">
-                            <span class="size-name">Medium (80cm)</span>
-                            <small>Intermediate</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="target-size-card" id="size-Inter" onclick="selectTargetSize('Inter')">
-                        <div class="size-img-wrapper" style="padding: 20px;">
-                            <img src="/target_122cm.png" alt="Intermediate">
-                        </div>
-                        <div class="size-info">
-                            <span class="size-name">Intermediate (60cm)</span>
+                            <span class="size-name">Medium (60cm)</span>
                             <small>Club</small>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="target-size-card" id="size-Small" onclick="selectTargetSize('Small')">
-                        <div class="size-img-wrapper" style="padding: 28px;">
-                            <img src="/target_122cm.png" alt="Small">
+                        <div class="size-img-wrapper" style="padding: 14px;">
+                            <img src="/images/target size.png" alt="Small">
                         </div>
                         <div class="size-info">
                             <span class="size-name">Small (40cm)</span>
@@ -75,6 +65,17 @@
                         </div>
                     </div>
                 </div>
+                <!--<div class="col-md-3">
+                    <div class="target-size-card" id="size-Small" onclick="selectTargetSize('Small')">
+                        <div class="size-img-wrapper" style="padding: 28px;">
+                            <img src="/images/target_size.png" alt="Small">
+                        </div>
+                        <div class="size-info">
+                            <span class="size-name">Small (40cm)</span>
+                            <small>Precision</small>
+                        </div>
+                    </div>
+                </div>-->
             </div>
 
             <!-- Target Amount -->
@@ -110,14 +111,14 @@
     .target-size-card.selected { background: var(--primary); border-color: var(--primary); }
 
     .size-img-wrapper {
-        width: 90px; height: 90px;
+        width: 115px; height: 115px;
         border-radius: 50%; overflow: hidden;
         margin: 0 auto 15px;
         background: #fff;
         display: flex; align-items: center; justify-content: center;
         box-shadow: 0 10px 20px rgba(0,0,0,0.2);
     }
-    .size-img-wrapper img { width: 85%; height: 85%; object-fit: contain; }
+    .size-img-wrapper img { width: 100%; height: 100%; object-fit: contain; }
 
     .size-name { display: block; font-weight: 800; font-size: 0.9rem; color: #fff; transition: var(--transition-smooth); }
     .target-size-card.selected .size-name { color: #000; }
@@ -163,8 +164,7 @@
         const hint      = document.getElementById("amountHint");
         let max = 1;
         if (selectedSize === "Medium") max = 2;
-        if (selectedSize === "Inter")  max = 3;
-        if (selectedSize === "Small")  max = 4;
+        if (selectedSize === "Small" || selectedSize === "Inter")  max = 4;
 
         container.innerHTML = "";
         for (let i = 1; i <= max; i++) {

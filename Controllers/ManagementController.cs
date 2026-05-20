@@ -44,5 +44,13 @@ namespace ArcheryAlley.Controllers
             _repository.ToggleTargetStatus(targetId);
             return Json(new { success = true });
         }
+
+        [HttpPost]
+        public IActionResult ToggleLaneSelectionSetting()
+        {
+            if (HttpContext.Session.GetString("UserRole") != "Admin") return Json(new { success = false });
+            SystemSettings.EnableLaneSelection = !SystemSettings.EnableLaneSelection;
+            return Json(new { success = true, enabled = SystemSettings.EnableLaneSelection });
+        }
     }
 }

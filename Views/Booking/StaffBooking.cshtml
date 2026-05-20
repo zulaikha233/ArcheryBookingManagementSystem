@@ -60,7 +60,6 @@
                         <div class="col-md-6">
                             <label class="form-label-premium">Duration</label>
                             <select id="duration" class="form-control">
-                                <option value="1">1 Hour</option>
                                 <option value="2">2 Hours</option>
                                 <option value="3">3 Hours</option>
                                 <option value="4">4 Hours</option>
@@ -539,7 +538,7 @@
         name: "",
         email: "",
         date: "@DateTime.Today.ToString("yyyy-MM-dd")",
-        duration: 1,
+        duration: 2,
         selectedSlotIds: [],
         slotId: null,
         slotTime: "",
@@ -934,6 +933,7 @@
         const laneRangesStr = bookingData.selectedTargetIds.map(id => `${id}:${bookingData.laneRanges[id]}`).join(",");
         formData.append("SelectedLaneRanges", laneRangesStr);
         formData.append("NumberOfPax", bookingData.paxCount);
+        formData.append("Date", bookingData.date);
 
         try {
             const response = await fetch('/Booking/CreateCustomerBooking', {

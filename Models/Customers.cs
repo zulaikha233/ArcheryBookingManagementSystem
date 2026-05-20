@@ -30,6 +30,13 @@ namespace ArcheryAlley.Models
         [StringLength(50)]
         public string Password { get; set; }
 
+        [Required]
+        public DateTime Birthday { get; set; }
+
+        [Required]
+        [StringLength(250)]
+        public string Address { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

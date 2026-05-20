@@ -1,0 +1,382 @@
+@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"] - Archery Alley</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Bootstrap -->
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- AOS Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Custom Premium Styles -->
+    <link href="~/css/archery_modern.css" rel="stylesheet" />
+    <!-- Flatpickr (Modern Calendar) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    
+    <style>
+        :root {
+            --primary: #FF4D4D;
+            --primary-light: rgba(255, 77, 77, 0.1);
+            --bg-app: #181B22;
+            --bg-card: #222630;
+            --text-main: #FFFFFF;
+            --text-dim: #94A3B8;
+            --border-color: #2F3542;
+            --radius-md: 20px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        /* ─── APP WRAPPER ─── */
+        .app-wrapper {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            background-color: var(--bg-app);
+        }
+
+        /* ─── SIDEBAR ─── */
+        .sidebar {
+            width: 280px;
+            background-color: var(--bg-app);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 40px 0;
+        }
+
+        .profile-section {
+            text-align: center;
+            padding: 0 30px 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .avatar-ring {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            padding: 4px;
+            background: conic-gradient(var(--primary) 65%, transparent 65%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: var(--bg-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: var(--primary);
+        }
+
+        .welcome-text {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .user-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .status-badge {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #10B981;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .action-btns {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .circle-btn {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background-color: var(--bg-card);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .circle-btn:hover {
+            background-color: var(--primary);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        /* Menu */
+        .menu-section {
+            padding: 30px 0;
+            flex: 1;
+        }
+
+        .menu-label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            letter-spacing: 2px;
+            font-weight: 700;
+            padding: 0 40px;
+            margin-bottom: 15px;
+        }
+
+        .menu-list {
+            list-style: none;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 14px 40px;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .menu-item:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .menu-item.active {
+            color: #fff;
+            background: var(--primary-light);
+            border-left-color: var(--primary);
+        }
+
+        .menu-item i { font-size: 1.2rem; }
+
+        /* ─── MAIN CONTENT AREA ─── */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+
+        /* ─── Elegant Tree Submenu Styling ─── */
+        .sidebar .submenu {
+            position: relative;
+            padding: 5px 0 10px 0 !important;
+            margin: 0;
+            list-style: none;
+        }
+
+        /* The vertical connecting line */
+        .sidebar .submenu::before {
+            content: '';
+            position: absolute;
+            left: 50px; /* Align with parent icon center */
+            top: 0;
+            bottom: 18px; /* Stop exactly at the last hook's curve */
+            width: 2px;
+            background-color: var(--border-color);
+        }
+
+        .sidebar .submenu li {
+            position: relative;
+            margin-bottom: 4px;
+        }
+
+        /* The curved horizontal branch hook for each item */
+        .sidebar .submenu li::before {
+            content: '';
+            position: absolute;
+            left: 50px;
+            top: 0;
+            width: 12px; /* Curved hook ending exactly at 62px */
+            height: 18px;
+            border-left: 2px solid var(--border-color);
+            border-bottom: 2px solid var(--border-color);
+            border-bottom-left-radius: 8px; /* Curved hook shape */
+            pointer-events: none;
+        }
+
+        /* Submenu Item Overrides */
+        .sidebar .submenu .menu-item {
+            padding: 8px 16px 8px 14px !important;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-left: none !important;
+            border-radius: 10px;
+            margin-left: 62px !important; /* Starts exactly where hook ends (50px + 12px) */
+            margin-right: 20px !important;
+            color: var(--text-dim);
+            transition: 0.2s ease-in-out;
+            background: transparent !important;
+        }
+
+        .sidebar .submenu .menu-item:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05) !important;
+        }
+
+        .sidebar .submenu .menu-item.active {
+            color: #fff;
+            background: var(--primary-light) !important;
+            border: 1px solid rgba(255, 77, 77, 0.2) !important;
+            font-weight: 700;
+        }
+
+        .sidebar .submenu .menu-item i {
+            font-size: 1rem;
+            transition: 0.2s ease-in-out;
+        }
+    </style>
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+
+    <div class="app-wrapper">
+        
+        <!-- ─── LEFT SIDEBAR ─── -->
+        <aside class="sidebar">
+            <div class="profile-section">
+                <div class="avatar-ring">
+                    <div class="avatar-inner">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                </div>
+                
+                <p class="welcome-text">WELCOME!</p>
+                <h2 class="user-name">@(Context.Session.GetString("CustomerUsername") ?? "Member")</h2>
+                <span class="status-badge">Active</span>
+
+                <div class="action-btns">
+                    <a href="#" class="circle-btn"><i class="bi bi-bell-fill"></i></a>
+                    <a href="#" class="circle-btn"><i class="bi bi-pencil-fill"></i></a>
+                    <a href="#" class="circle-btn"><i class="bi bi-gear-fill"></i></a>
+                </div>
+            </div>
+
+            <!-- Menu Navigation -->
+            <div class="menu-section">
+                <p class="menu-label">MENU</p>
+                <ul class="menu-list">
+                    @{
+                        var currentPath = Context.Request.Path.Value;
+                        var isDashboard = currentPath.Contains("MemberDashboard");
+                        var isBooking = currentPath.Contains("GetFreeSlots") || currentPath.Contains("MemberBooking") || currentPath.Contains("SelectTarget") || currentPath.Contains("SelectLane") || currentPath.Contains("MemberPayment") || currentPath.Contains("Payment");
+                        var isClassBooking = currentPath.Contains("ClassBooking");
+                        var isCalendar = currentPath.Contains("MemberCalendar");
+                        var isBookingSection = isBooking || isClassBooking;
+                    }
+                    <li><a href="/Account/MemberDashboard" class="menu-item @(isDashboard ? "active" : "")"><i class="bi bi-house-door"></i> Dashboard</a></li>
+                    <li>
+                        <a href="javascript:void(0)" class="menu-item @(isBookingSection ? "active" : "")" onclick="toggleBookingMenu()">
+                            <i class="bi bi-bullseye"></i> Book Session
+                            <i class="bi bi-chevron-down ms-auto" id="menu-arrow" style="font-size: 0.8rem; transition: 0.3s; margin-left: auto;"></i>
+                        </a>
+                        <ul class="submenu" id="booking-submenu" style="display: @(isBookingSection ? "block" : "none");">
+                            <li>
+                                <a href="/Booking/ClassBooking" class="menu-item @(isClassBooking ? "active" : "")">
+                                    <i class="bi bi-mortarboard me-2"></i> Class Booking
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/Booking/GetFreeSlots" class="menu-item @(isBooking ? "active" : "")">
+                                    <i class="bi bi-grid-3x3 me-2"></i> Target Booking
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li><a href="/Booking/MemberCalendar" class="menu-item @(isCalendar ? "active" : "")"><i class="bi bi-calendar3"></i> Calendar</a></li>
+                    <li><a href="#" class="menu-item"><i class="bi bi-clock-history"></i> History</a></li>
+                    <li><a href="#" class="menu-item"><i class="bi bi-shield-check"></i> Progress</a></li>
+                    <li><a href="#" class="menu-item"><i class="bi bi-tools"></i> Equipment</a></li>
+                    <li><a href="#" class="menu-item"><i class="bi bi-calendar-check"></i> Attendance</a></li>
+                    <li><a href="#" class="menu-item"><i class="bi bi-credit-card"></i> Fee / Payment</a></li>
+                </ul>
+
+                <p class="menu-label" style="margin-top: 40px;">SYSTEM</p>
+                <ul class="menu-list">
+                    <li><a href="/Account/Logout" class="menu-item text-danger"><i class="bi bi-box-arrow-left"></i> Logout</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- ─── MAIN CONTENT ─── -->
+        <main class="main-content">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        function toggleBookingMenu() {
+            const submenu = document.getElementById("booking-submenu");
+            const arrow = document.getElementById("menu-arrow");
+            if (submenu.style.display === "none") {
+                submenu.style.display = "block";
+                if (arrow) arrow.style.transform = "rotate(180deg)";
+            } else {
+                submenu.style.display = "none";
+                if (arrow) arrow.style.transform = "none";
+            }
+        }
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentPath = window.location.pathname;
+            if (currentPath.includes("GetFreeSlots") || currentPath.includes("SelectTarget") || currentPath.includes("SelectLane") || currentPath.includes("Payment") || currentPath.includes("ClassBooking") || currentPath.includes("MemberCalendar")) {
+                const arrow = document.getElementById("menu-arrow");
+                if (arrow) arrow.style.transform = "rotate(180deg)";
+            }
+        });
+
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 50
+        });
+    </script>
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

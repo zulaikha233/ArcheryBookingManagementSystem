@@ -60,5 +60,10 @@ namespace ArcheryAlley
 
         // Payment Management
         public void AddPayment(Payments payment);
+
+        // Class Session Registration
+        public void RegisterClassSession(ClassRegistrations registration);
+        public List<ClassRegistrations> GetClassRegistrationsByEmail(string email);
+        public List<Reservations> GetReservationsByEmail(string email);
     }
 }

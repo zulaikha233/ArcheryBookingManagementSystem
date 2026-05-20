@@ -1,15 +1,16 @@
 @{
     ViewData["Title"] = "Select Your Lane";
+    Layout = ViewBag.IsGuest == true ? "_Layout" : "_MemberLayout";
     var slotId       = ViewBag.SlotId;
     var name         = ViewBag.Name;
     var email        = ViewBag.Email;
     var phone        = ViewBag.Phone;
     var date         = ViewBag.Date;
     var duration     = ViewBag.Duration;
-    var ageGroup     = ViewBag.AgeGroup;
     var targetSize   = ViewBag.TargetSize;
     var targetAmount = ViewBag.TargetAmount;
     var isGuest      = ViewBag.IsGuest;
+    var enableLaneSelection = ViewBag.EnableLaneSelection ?? false;
 }
 
 <div class="booking-wizard-container py-5">
@@ -19,16 +20,6 @@
 
     <div class="premium-card" data-aos="fade-up">
         <h3 class="fw-bold mb-4" style="color: var(--primary);">Select Your Lane</h3>
-
-        <!-- Age Group Banner -->
-        <div class="mb-4 p-4 rounded-4 text-center" style="background: rgba(255, 77, 77, 0.08); border: 1px solid var(--primary-glow);">
-            <div class="text-dim fw-bold mb-2" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px;">Target Category</div>
-            <div class="h3 fw-900 mb-2" style="color: #fff;">@ageGroup</div>
-            <div class="text-dim small">
-                <i class="bi bi-info-circle me-1"></i>
-                Dedicated lanes for your category: <b class="text-primary">Lanes @(ageGroup == "Adult" ? "11 - 20" : "1 - 10")</b>
-            </div>
-        </div>
 
         <!-- Pax Counter -->
         <div class="premium-card mb-4 p-4" style="background: rgba(255,255,255,0.02);">
@@ -48,11 +39,20 @@
             </div>
         </div>
 
+        <!-- Auto Assign Allocation Display -->
+        <div id="autoAssignContainer" class="premium-card p-4 mb-4 text-center" style="display: none; background: rgba(255,255,255,0.01); border: 1px dashed var(--card-border);">
+            <div class="display-6 mb-3" style="color: var(--primary);"><i class="bi bi-cpu"></i></div>
+            <h5 class="fw-bold mb-2">Automatic Lane Allocation</h5>
+            <p class="text-dim mb-0" id="autoAssignText" style="font-size: 0.95rem;">
+                Based on your archer count, lanes will be dynamically allocated for your session.
+            </p>
+        </div>
+
         <div id="target-hint" class="mb-4 fw-bold text-center text-dim" style="font-size: 0.9rem;">Select your preferred lane(s) on the grid.</div>
         <div id="targetsGrid" class="targets-grid"></div>
 
         <div class="wizard-actions d-flex justify-content-between mt-5">
-            <a href="/Booking/SelectTarget?slotId=@slotId&name=@Uri.EscapeDataString(name?.ToString() ?? "")&email=@Uri.EscapeDataString(email?.ToString() ?? "")&phone=@Uri.EscapeDataString(phone?.ToString() ?? "")&date=@date&duration=@duration&ageGroup=@ageGroup"
+            <a href="/Booking/SelectTarget?slotId=@slotId&name=@Uri.EscapeDataString(name?.ToString() ?? "")&email=@Uri.EscapeDataString(email?.ToString() ?? "")&phone=@Uri.EscapeDataString(phone?.ToString() ?? "")&date=@date&duration=@duration"
                class="btn-premium-outline text-decoration-none">BACK</a>
             <button class="btn-premium" type="button" onclick="goToPayment()">CONFIRM BOOKING</button>
         </div>
@@ -109,20 +109,22 @@
 
 <script>
     const bookingData = {
-        slotId:       "@slotId",
-        name:         "@name",
-        email:        "@email",
-        phone:        "@phone",
-        date:         "@date",
-        duration:     "@duration",
-        ageGroup:     "@ageGroup",
-        targetSize:   "@targetSize",
-        targetAmount: "@targetAmount",
-        isGuest:      "@isGuest".toLowerCase() === "true",
-        pax:          1,
-        selectedTargetIds: [],
-        laneRanges: {}
+        slotId:             "@slotId",
+        name:               "@name",
+        email:              "@email",
+        phone:              "@phone",
+        date:               "@date",
+        duration:           "@duration",
+        targetSize:         "@targetSize",
+        targetAmount:       "@targetAmount",
+        isGuest:            "@isGuest".toLowerCase() === "true",
+        enableLaneSelection: "@enableLaneSelection".toLowerCase() === "true",
+        pax:                1,
+        selectedTargetIds:  [],
+        laneRanges:         {}
     };
+
+    let cachedOpenLanes = [];
 
     // Load lane grid on page load
     document.addEventListener("DOMContentLoaded", loadLaneGrid);
@@ -135,35 +137,61 @@
             const resp = await fetch(`/Booking/GetAvailableTargetsAjax?slotId=${bookingData.slotId}&date=${bookingData.date}&duration=${bookingData.duration}`);
             const availableTargets = await resp.json();
 
-            grid.innerHTML = "";
-            const isAdult = (bookingData.ageGroup === "Adult");
+            cachedOpenLanes = availableTargets.filter(t => t.status === 'Available').map(t => t.targetNumber);
 
-            for (let item of availableTargets) {
-                const i            = item.targetNumber;
-                const status       = item.status;
-                const isTaken      = (status === 'Taken');
-                const isMaint      = (status === 'Maintenance');
-                const isRestricted = isAdult ? (i <= 10) : (i >= 11);
+            if (!bookingData.enableLaneSelection) {
+                // Hide manual selection UI elements
+                grid.style.display = "none";
+                document.getElementById("target-hint").style.display = "none";
 
-                const box       = document.createElement("div");
-                box.className   = `target-box ${isTaken || isMaint ? 'disabled' : ''} ${isRestricted ? 'restricted' : ''}`;
-                const statusText = isMaint ? 'MAINTENANCE' : (isTaken ? 'Taken' : (isRestricted ? 'Restricted' : 'Open'));
+                // Show auto assign summary box
+                document.getElementById("autoAssignContainer").style.display = "block";
 
-                box.innerHTML = `
-                    <span style="font-size: 1.2rem; font-weight: 800;">${i}</span>
-                    <small style="font-size:0.5rem; text-transform: uppercase; opacity: 0.9; font-weight:800; letter-spacing: -0.2px;">${statusText}</small>
-                `;
-
-                if (!isTaken && !isRestricted && !isMaint) {
-                    box.onclick = () => selectTarget(i);
-                } else if (isRestricted) {
-                    box.title = isAdult ? "Lanes 1-10 are for Kids/Juniors" : "Lanes 11-20 are for Adults";
-                } else if (isMaint) {
-                    box.style.background = "#ff6b6b";
-                    box.style.color = "white";
-                    box.title = "This lane is currently under maintenance.";
+                // Calculate required lanes count
+                const requiredLanes = Math.ceil(bookingData.pax / 4);
+                bookingData.selectedTargetIds = cachedOpenLanes.slice(0, requiredLanes);
+                if (bookingData.selectedTargetIds.length === 0) {
+                    bookingData.selectedTargetIds = [1]; // Fallback to Lane 1
                 }
-                grid.appendChild(box);
+
+                // Update UI text
+                document.getElementById("autoAssignText").innerHTML = `Based on <strong>${bookingData.pax} archers</strong>, <strong>${requiredLanes} lane${requiredLanes > 1 ? 's' : ''}</strong> will be automatically allocated for your session.`;
+                
+                const hint = document.getElementById("laneRequiredHint");
+                hint.innerHTML = `<i class="bi bi-info-square me-1"></i> ${requiredLanes} Lane${requiredLanes > 1 ? 's' : ''} Auto-Assigned`;
+                hint.style.color = "var(--text-dim)";
+            } else {
+                // Show manual selection UI elements
+                grid.style.display = "grid";
+                document.getElementById("target-hint").style.display = "block";
+                document.getElementById("autoAssignContainer").style.display = "none";
+
+                grid.innerHTML = "";
+
+                for (let item of availableTargets) {
+                    const i            = item.targetNumber;
+                    const status       = item.status;
+                    const isTaken      = (status === 'Taken');
+                    const isMaint      = (status === 'Maintenance');
+
+                    const box       = document.createElement("div");
+                    box.className   = `target-box ${isTaken || isMaint ? 'disabled' : ''}`;
+                    const statusText = isMaint ? 'MAINTENANCE' : (isTaken ? 'Taken' : 'Open');
+
+                    box.innerHTML = `
+                        <span style="font-size: 1.2rem; font-weight: 800;">${i}</span>
+                        <small style="font-size:0.5rem; text-transform: uppercase; opacity: 0.9; font-weight:800; letter-spacing: -0.2px;">${statusText}</small>
+                    `;
+
+                    if (!isTaken && !isMaint) {
+                        box.onclick = () => selectTarget(i);
+                    } else if (isMaint) {
+                        box.style.background = "#ff6b6b";
+                        box.style.color = "white";
+                        box.title = "This lane is currently under maintenance.";
+                    }
+                    grid.appendChild(box);
+                }
             }
         } catch (e) {
             grid.innerHTML = "<div class='text-center w-100 p-4 text-danger'>Error loading lanes. Please try again.</div>";
@@ -171,6 +199,7 @@
     }
 
     function selectTarget(num) {
+        if (!bookingData.enableLaneSelection) return;
         const idx = bookingData.selectedTargetIds.indexOf(num);
         if (idx > -1) {
             bookingData.selectedTargetIds.splice(idx, 1);
@@ -194,10 +223,25 @@
         bookingData.pax = val;
 
         const requiredLanes = Math.ceil(val / 4);
-        const hint = document.getElementById("laneRequiredHint");
-        hint.innerHTML = `<i class="bi bi-info-square me-1"></i> Min ${requiredLanes} Lane${requiredLanes > 1 ? 's' : ''} Required`;
-        hint.style.color = (bookingData.selectedTargetIds.length < requiredLanes && bookingData.selectedTargetIds.length > 0)
-            ? "#dc3545" : "var(--text-dim)";
+
+        if (!bookingData.enableLaneSelection) {
+            // Auto allocate lanes based on pax counter
+            bookingData.selectedTargetIds = cachedOpenLanes.slice(0, requiredLanes);
+            if (bookingData.selectedTargetIds.length === 0) {
+                bookingData.selectedTargetIds = [1];
+            }
+
+            document.getElementById("autoAssignText").innerHTML = `Based on <strong>${val} archers</strong>, <strong>${requiredLanes} lane${requiredLanes > 1 ? 's' : ''}</strong> will be automatically allocated for your session.`;
+
+            const hint = document.getElementById("laneRequiredHint");
+            hint.innerHTML = `<i class="bi bi-info-square me-1"></i> ${requiredLanes} Lane${requiredLanes > 1 ? 's' : ''} Auto-Assigned`;
+            hint.style.color = "var(--text-dim)";
+        } else {
+            const hint = document.getElementById("laneRequiredHint");
+            hint.innerHTML = `<i class="bi bi-info-square me-1"></i> Min ${requiredLanes} Lane${requiredLanes > 1 ? 's' : ''} Required`;
+            hint.style.color = (bookingData.selectedTargetIds.length < requiredLanes && bookingData.selectedTargetIds.length > 0)
+                ? "#dc3545" : "var(--text-dim)";
+        }
     }
 
     function goToPayment() {

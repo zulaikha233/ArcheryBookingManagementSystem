@@ -4,6 +4,7 @@ using ArcheryAlley.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ArcheryAlley.Migrations
 {
     [DbContext(typeof(ArcheryAlleyDBContext))]
-    partial class ArcheryAlleyDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260518035043_AddCustomerBirthdayAndAddress")]
+    partial class AddCustomerBirthdayAndAddress
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,71 +47,6 @@ namespace ArcheryAlley.Migrations
                     b.HasKey("SlotId");
 
                     b.ToTable("BookingSlots");
-                });
-
-            modelBuilder.Entity("ArcheryAlley.Models.ClassRegistrations", b =>
-                {
-                    b.Property<int>("RegistrationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RegistrationId"));
-
-                    b.Property<decimal>("AnnualFee")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("CustomerEmail")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("CustomerName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("LearningMethod")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("LearningMethodPax")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("LearningMethodPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("PackagePrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("PackageType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("PaymentStatus")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime>("RegistrationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("TransactionId")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("RegistrationId");
-
-                    b.ToTable("ClassRegistrations");
                 });
 
             modelBuilder.Entity("ArcheryAlley.Models.Customers", b =>

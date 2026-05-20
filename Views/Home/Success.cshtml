@@ -43,11 +43,22 @@
 
             <div class="d-flex flex-column align-items-center">
                 @{
-                    var returnUrl = Context.Session.GetString("UserRole") == "Admin" ? Url.Action("ManageSlots", "Slot") : Url.Action("Index", "Home");
-                    var returnText = Context.Session.GetString("UserRole") == "Admin" ? "Return to Dashboard" : "Return to Arena";
+                    var returnUrl = "/";
+                    var returnText = "Return to Home";
+                    var userRole = Context.Session.GetString("UserRole");
+                    
+                    if (userRole == "Admin")
+                    {
+                        returnUrl = Url.Action("ManageSlots", "Slot");
+                        returnText = "Return to Dashboard";
+                    }
+                    else if (Context.Session.GetString("CustomerEmail") != null)
+                    {
+                        returnUrl = "/Account/MemberDashboard";
+                        returnText = "Go to Dashboard";
+                    }
                 }
                 <a href="@returnUrl" class="btn-premium text-decoration-none shadow-lg mb-3">@returnText</a>
-
             </div>
         </div>
     </div>

@@ -1,7 +1,9 @@
 @model ArcheryAlley.Models.PaymentViewModel
+@using Microsoft.AspNetCore.Http
 
 @{
     ViewData["Title"] = "Payment";
+    Layout = Context.Session.GetString("IsGuest") == "true" ? "_Layout" : "_MemberLayout";
 }
 
 <style>
@@ -37,31 +39,60 @@
     margin: 0 auto 25px; box-shadow: 0 15px 30px var(--primary-glow);
 }
 .fw-900 { font-weight: 900; }
+
+.premium-card.static-card:hover {
+    transform: none !important;
+    border-color: var(--card-border) !important;
+    box-shadow: none !important;
+}
+.premium-card.static-card:hover::before {
+    opacity: 0 !important;
+}
 </style>
 
 
 <div id="successModal" class="custom-modal-overlay">
-    <div class="custom-modal">
-        <div class="success-icon"><i class="bi bi-check-lg"></i></div>
-        <h3 class="fw-900 mb-2">Payment Secured</h3>
-        <p class="text-dim m-0">Your bullseye journey begins here.<br/>Generating your receipt...</p>
+    <div class="custom-modal text-center" style="max-width: 400px; padding: 40px; border-radius: 28px; background: #0c1017; border: 1px solid rgba(255, 77, 77, 0.15); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+        <div class="success-icon mb-4" style="width: 80px; height: 80px; background: rgba(255, 77, 77, 0.1); border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 2.5rem; color: var(--primary); box-shadow: 0 10px 25px rgba(255, 77, 77, 0.2); margin: 0 auto;">
+            <i class="bi bi-check-lg"></i>
+        </div>
+        <h3 class="fw-900 mb-3" style="font-size: 1.8rem; color: #fff; letter-spacing: 0.5px;">Payment Secured</h3>
+        <p class="text-dim mb-4" style="color: var(--text-dim); font-size: 0.95rem; line-height: 1.6;">
+            Your reservation has been verified and processed.<br/>
+            Your bullseye journey begins here!
+        </p>
+        <div>
+            <button onclick="goToDashboard()" class="btn btn-premium py-3 px-5" style="background: var(--primary); border-radius: 12px; font-weight: 800; border: none; box-shadow: 0 10px 20px var(--primary-glow); color: #000; letter-spacing: 1px; transition: all 0.3s ease; display: inline-block;">
+                Back to Dashboard
+            </button>
+        </div>
     </div>
 </div>
 
 <partial name="~/Views/Home/_BookingProgress.cshtml" model="4" />
 <div class="checkout-wrap py-5 px-4" data-aos="zoom-in">
-    <div class="premium-card">
+    <div class="premium-card static-card">
         <h3 class="fw-bold mb-4" style="color: var(--primary);">Booking Details</h3>
         
         <div class="detail-grid">
             <div class="col-left">
                 <div class="data-row">
                     <div class="data-label">SERVICE</div>
-                    <div class="data-value">Archery Arena</div>
+                    <div class="data-value">@(ViewBag.ServiceName ?? "Archery Game Session")</div>
                 </div>
                 <div class="data-row">
                     <div class="data-label">LANES</div>
-                    <div class="data-value">@Model.TargetDetails</div>
+                    <div class="data-value">
+                        @if (ViewBag.EnableLaneSelection == true)
+                        {
+                            @Model.TargetDetails
+                        }
+                        else
+                        {
+                            var totalLanes = Model.SelectedLanes?.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Length ?? 1;
+                            @($"{totalLanes} Lane{(totalLanes > 1 ? "s" : "")}")
+                        }
+                    </div>
                 </div>
                 <div class="data-row">
                     <div class="data-label">DURATION</div>
@@ -85,7 +116,7 @@
         </div>
 
         <h3 class="fw-bold mt-5 mb-4" style="color: var(--primary);">Customer Info</h3>
-        <div class="premium-card mb-5" style="background: rgba(255,255,255,0.02); padding: 25px;">
+        <div class="premium-card static-card mb-5" style="background: rgba(255,255,255,0.02); padding: 25px; border: 1px solid var(--primary) !important;">
             <div class="row g-4">
                 <div class="col-md-4">
                     <label class="form-label-premium">NAME</label>
@@ -113,7 +144,7 @@
         <div class="row g-5">
             <div class="col-md-7">
                 <h3 class="fw-bold mb-4" style="color: var(--secondary);">Promo Code</h3>
-                <div class="d-flex gap-2 mb-3">
+                <div class="d-flex mb-3" style="gap: 15px !important;">
                     <input type="text" id="promoCodeInput" class="form-control" placeholder="ENTER CODE" oninput="this.value=this.value.toUpperCase(); clearPromo()">
                     <button class="btn-premium" onclick="applyPromo()" style="background: var(--secondary); padding: 0 25px;">APPLY</button>
                 </div>
@@ -259,6 +290,17 @@
         msgEl.textContent   = '';
     }
 
+    // Fallback notification system if globalNotif is not available
+    const originalShowNotif = window.showNotif;
+    window.showNotif = function(message, type = 'info') {
+        const overlay = document.getElementById('globalNotifOverlay');
+        if (overlay && typeof originalShowNotif === 'function') {
+            originalShowNotif(message, type);
+        } else {
+            alert(message);
+        }
+    };
+
     async function finalizeBooking() {
         const confirmBtn = document.getElementById("payConfirmBtn");
         confirmBtn.disabled = true;
@@ -294,6 +336,7 @@
         formData.append("NumberOfPax", "@Model.NumberOfPax");
         formData.append("RateCode", appliedRateCode);
         formData.append("PaymentMethod", method);
+        formData.append("Date", "@Model.Date");
 
         try {
             const response = await fetch('/Booking/CreateCustomerBooking', {
@@ -306,9 +349,6 @@
                 const modal = document.getElementById('successModal');
                 modal.style.display = 'flex';
                 setTimeout(() => modal.classList.add('show'), 10);
-                setTimeout(() => {
-                    window.location.href = "@Url.Action("Success", "Home")?bookingCode=" + result.bookingCode;
-                }, 2000);
             } else {
                 showNotif("Booking failed: " + result.message, 'error');
                 confirmBtn.disabled = false;
@@ -319,6 +359,10 @@
             confirmBtn.disabled = false;
             confirmBtn.innerText = "Confirm Payment";
         }
+    }
+
+    function goToDashboard() {
+        window.location.href = "/Booking/MemberCalendar";
     }
 </script>
 

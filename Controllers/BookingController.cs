@@ -18,22 +18,120 @@ namespace ArcheryAlley.Controllers
 
         public IActionResult GetFreeSlots()
         {
+            _repository.SeedFixedSlots();
             HttpContext.Session.SetString("IsGuest", "false");
             ViewBag.CustomerEmail = HttpContext.Session.GetString("CustomerEmail");
             ViewBag.CustomerName = HttpContext.Session.GetString("CustomerName");
             ViewBag.CustomerPhone = HttpContext.Session.GetString("CustomerPhone");
-            return View();
+            return View("~/Views/Booking/MemberBooking.cshtml");
+        }
+
+        public IActionResult ClassBooking()
+        {
+            _repository.SeedFixedSlots();
+            HttpContext.Session.SetString("IsGuest", "false");
+            ViewBag.CustomerEmail = HttpContext.Session.GetString("CustomerEmail");
+            ViewBag.CustomerName = HttpContext.Session.GetString("CustomerName");
+            ViewBag.CustomerPhone = HttpContext.Session.GetString("CustomerPhone");
+            return View("~/Views/Booking/ClassBooking.cshtml");
+        }
+
+        public IActionResult MemberCalendar()
+        {
+            _repository.SeedFixedSlots();
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email))
+                return RedirectToAction("CustomerLogin", "Account");
+
+            ViewBag.CustomerName = HttpContext.Session.GetString("CustomerName");
+            
+            var rawReservations = _repository.GetReservationsByEmail(email);
+            ViewBag.Reservations = rawReservations.Select(r => new {
+                ReservationId = r.ReservationId,
+                CustomerName = r.CustomerName,
+                CustomerEmail = r.CustomerEmail,
+                ReservedOn = r.ReservedOn,
+                TargetNo = r.TargetNo,
+                RangeNo = r.RangeNo,
+                DurationHours = r.DurationHours,
+                TotalPrice = r.TotalPrice,
+                RateCode = r.RateCode,
+                Status = r.Status,
+                Slot = r.Slot != null ? new {
+                    SlotId = r.Slot.SlotId,
+                    SlotStartTime = r.Slot.SlotStartTime.ToString(@"hh\:mm"),
+                    SlotEndTime = r.Slot.SlotEndTime.ToString(@"hh\:mm"),
+                    IsNight = r.Slot.SlotStartTime.Hours >= 18
+                } : null
+            }).ToList();
+
+            return View("~/Views/Booking/MemberCalendar.cshtml");
+        }
+
+        [HttpPost]
+        public IActionResult CreateClassBooking(int slotId, string date, int duration = 2)
+        {
+            try
+            {
+                string email = HttpContext.Session.GetString("CustomerEmail") ?? "member@archery.com";
+                string name = HttpContext.Session.GetString("CustomerName") ?? "Member";
+                
+                var slots = _repository.GetBookingSlots();
+                var slot = slots.FirstOrDefault(s => s.SlotId == slotId);
+                var slotTime = slot != null ? slot.SlotStartTime : TimeSpan.Zero;
+                
+                DateTime bookingDate = DateTime.Now;
+                if (!string.IsNullOrEmpty(date))
+                {
+                    DateTime.TryParse(date, out bookingDate);
+                }
+                DateTime finalReservedOn = bookingDate.Date.Add(slotTime);
+
+                var reservation = new Reservations
+                {
+                    SlotId        = slotId,
+                    CustomerName  = name,
+                    CustomerEmail = email,
+                    ReservedBy    = email,
+                    TargetNo      = 1,
+                    RangeNo       = 1,
+                    DurationHours = duration,
+                    TotalPrice    = 0,
+                    RateCode      = "CLASS",
+                    ReservedOn    = finalReservedOn,
+                    NumberOfPax   = 1,
+                    Status        = 1
+                };
+                _repository.CreateReservation(reservation);
+                
+                string bookingCode = "AC" + new Random().Next(1000, 9999);
+                return Json(new { success = true, bookingCode = bookingCode });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         public IActionResult GuestBooking()
         {
+            _repository.SeedFixedSlots();
             HttpContext.Session.SetString("IsGuest", "true");
             return View();
         }
 
         [HttpGet]
-        public IActionResult SelectTarget(int slotId, string name, string email, string phone, string date, int duration, string ageGroup)
+        public IActionResult SelectTarget(int slotId, string name, string email, string phone, string date, int duration, int numberOfPax, string sessionType = "")
         {
+            if (!string.IsNullOrEmpty(sessionType))
+            {
+                HttpContext.Session.SetString("SessionType", sessionType);
+            }
+            else if (HttpContext.Session.GetString("IsGuest") == "true")
+            {
+                HttpContext.Session.SetString("SessionType", "class_trial");
+            }
+
             ViewBag.IsGuest  = HttpContext.Session.GetString("IsGuest") == "true";
             ViewBag.SlotId   = slotId;
             ViewBag.Name     = name;
@@ -41,23 +139,25 @@ namespace ArcheryAlley.Controllers
             ViewBag.Phone    = phone;
             ViewBag.Date     = date;
             ViewBag.Duration = duration;
-            ViewBag.AgeGroup = ageGroup;
+            ViewBag.NumberOfPax = numberOfPax;
             return View();
         }
 
         [HttpPost]
-        public IActionResult SelectLane(int slotId, string name, string email, string phone, string date, int duration, string ageGroup, string targetSize, int targetAmount)
+        public IActionResult SelectLane(int slotId, string name, string email, string phone, string date, int duration, string targetSize, int targetAmount, int numberOfPax)
         {
             ViewBag.IsGuest      = HttpContext.Session.GetString("IsGuest") == "true";
             ViewBag.SlotId       = slotId;
             ViewBag.Name         = name;
             ViewBag.Email        = email;
-            ViewBag.Phone        = phone;
+            ViewBag.Phone         = phone;
             ViewBag.Date         = date;
             ViewBag.Duration     = duration;
-            ViewBag.AgeGroup     = ageGroup;
             ViewBag.TargetSize   = targetSize;
             ViewBag.TargetAmount = targetAmount;
+            ViewBag.NumberOfPax  = numberOfPax;
+
+            ViewBag.EnableLaneSelection = SystemSettings.EnableLaneSelection;
             return View();
         }
 
@@ -76,7 +176,8 @@ namespace ArcheryAlley.Controllers
                     slotStartTime = s.SlotStartTime.ToString(@"hh\:mm"),
                     slotEndTime = s.SlotEndTime.ToString(@"hh\:mm"),
                     isNight = false,
-                    label = $"Slot {index + 1}"
+                    label = $"Slot {index + 1}",
+                    slotDurationHours = s.SlotEndTime >= s.SlotStartTime ? (s.SlotEndTime - s.SlotStartTime).TotalHours : (s.SlotEndTime - s.SlotStartTime).TotalHours + 24
                 }).ToList();
 
             var nightSlots = slots
@@ -87,7 +188,8 @@ namespace ArcheryAlley.Controllers
                     slotStartTime = s.SlotStartTime.ToString(@"hh\:mm"),
                     slotEndTime = s.SlotEndTime.ToString(@"hh\:mm"),
                     isNight = true,
-                    label = $"Slot {index + 1}"
+                    label = $"Slot {index + 1}",
+                    slotDurationHours = s.SlotEndTime >= s.SlotStartTime ? (s.SlotEndTime - s.SlotStartTime).TotalHours : (s.SlotEndTime - s.SlotStartTime).TotalHours + 24
                 }).ToList();
 
             return Json(morningSlots.Concat(nightSlots));
@@ -114,13 +216,56 @@ namespace ArcheryAlley.Controllers
         [HttpPost]
         public IActionResult Payment(ArcheryAlley.Models.PaymentViewModel model)
         {
-            // Populate Time string from SlotId
             if (model.SlotId > 0)
             {
-                var slot = _repository.GetBookingSlots().FirstOrDefault(s => s.SlotId == model.SlotId);
+                var slots = _repository.GetBookingSlots().OrderBy(s => s.SlotStartTime).ToList();
+                var slot = slots.FirstOrDefault(s => s.SlotId == model.SlotId);
                 if (slot != null)
                 {
-                    model.Time = $"{slot.SlotStartTime.ToString(@"hh\:mm")} - {slot.SlotEndTime.ToString(@"hh\:mm")}";
+                    var cutoff = new TimeSpan(18, 0, 0);
+                    
+                    string GetSlotLabel(BookingSlots s)
+                    {
+                        if (s.SlotStartTime < cutoff)
+                        {
+                            var morningList = slots.Where(x => x.SlotStartTime < cutoff).ToList();
+                            var idx = morningList.FindIndex(x => x.SlotId == s.SlotId);
+                            return idx >= 0 ? $"Slot {idx + 1}" : "Slot";
+                        }
+                        else
+                        {
+                            var nightList = slots.Where(x => x.SlotStartTime >= cutoff).ToList();
+                            var idx = nightList.FindIndex(x => x.SlotId == s.SlotId);
+                            return idx >= 0 ? $"Slot {idx + 1}" : "Slot";
+                        }
+                    }
+
+                    var primaryLabel = GetSlotLabel(slot);
+
+                    if (model.Duration == 4)
+                    {
+                        var isNight = slot.SlotStartTime >= cutoff;
+                        var sessionSlots = slots.Where(s => (s.SlotStartTime >= cutoff) == isNight).ToList();
+                        var primaryIndex = sessionSlots.FindIndex(s => s.SlotId == slot.SlotId);
+                        
+                        var nextSlot = (primaryIndex >= 0 && primaryIndex + 1 < sessionSlots.Count) 
+                            ? sessionSlots[primaryIndex + 1] 
+                            : null;
+
+                        if (nextSlot != null)
+                        {
+                            var secondaryLabel = GetSlotLabel(nextSlot);
+                            model.Time = $"{primaryLabel} & {secondaryLabel} ({slot.SlotStartTime.ToString(@"hh\:mm")} - {nextSlot.SlotEndTime.ToString(@"hh\:mm")})";
+                        }
+                        else
+                        {
+                            model.Time = $"{primaryLabel} ({slot.SlotStartTime.ToString(@"hh\:mm")} - {slot.SlotEndTime.ToString(@"hh\:mm")})";
+                        }
+                    }
+                    else
+                    {
+                        model.Time = $"{primaryLabel} ({slot.SlotStartTime.ToString(@"hh\:mm")} - {slot.SlotEndTime.ToString(@"hh\:mm")})";
+                    }
                 }
             }
 
@@ -133,6 +278,13 @@ namespace ArcheryAlley.Controllers
             // Default pax to 1 if not provided (since we removed pax selection)
             if (model.NumberOfPax <= 0) model.NumberOfPax = 1;
 
+            var sessionType = HttpContext.Session.GetString("SessionType") ?? "game";
+            string serviceName = "Archery Game Session";
+            if (sessionType == "class") serviceName = "Archery Class Session";
+            else if (sessionType == "self_training") serviceName = "Archery Self Training";
+            
+            ViewBag.ServiceName = serviceName;
+            ViewBag.EnableLaneSelection = SystemSettings.EnableLaneSelection;
             return View("~/Views/Payment/Payment.cshtml", model);
         }
 
@@ -154,18 +306,64 @@ namespace ArcheryAlley.Controllers
 
             if (model.SlotId > 0)
             {
-                var slot = _repository.GetBookingSlots().FirstOrDefault(s => s.SlotId == model.SlotId);
+                var slots = _repository.GetBookingSlots().OrderBy(s => s.SlotStartTime).ToList();
+                var slot = slots.FirstOrDefault(s => s.SlotId == model.SlotId);
                 if (slot != null)
                 {
-                    model.Time = $"{slot.SlotStartTime.ToString(@"hh\:mm")} - {slot.SlotEndTime.ToString(@"hh\:mm")}";
+                    var cutoff = new TimeSpan(18, 0, 0);
+                    
+                    string GetSlotLabel(BookingSlots s)
+                    {
+                        if (s.SlotStartTime < cutoff)
+                        {
+                            var morningList = slots.Where(x => x.SlotStartTime < cutoff).ToList();
+                            var idx = morningList.FindIndex(x => x.SlotId == s.SlotId);
+                            return idx >= 0 ? $"Slot {idx + 1}" : "Slot";
+                        }
+                        else
+                        {
+                            var nightList = slots.Where(x => x.SlotStartTime >= cutoff).ToList();
+                            var idx = nightList.FindIndex(x => x.SlotId == s.SlotId);
+                            return idx >= 0 ? $"Slot {idx + 1}" : "Slot";
+                        }
+                    }
+
+                    var primaryLabel = GetSlotLabel(slot);
+
+                    if (model.Duration == 4)
+                    {
+                        var isNight = slot.SlotStartTime >= cutoff;
+                        var sessionSlots = slots.Where(s => (s.SlotStartTime >= cutoff) == isNight).ToList();
+                        var primaryIndex = sessionSlots.FindIndex(s => s.SlotId == slot.SlotId);
+                        
+                        var nextSlot = (primaryIndex >= 0 && primaryIndex + 1 < sessionSlots.Count) 
+                            ? sessionSlots[primaryIndex + 1] 
+                            : null;
+
+                        if (nextSlot != null)
+                        {
+                            var secondaryLabel = GetSlotLabel(nextSlot);
+                            model.Time = $"{primaryLabel} & {secondaryLabel} ({slot.SlotStartTime.ToString(@"hh\:mm")} - {nextSlot.SlotEndTime.ToString(@"hh\:mm")})";
+                        }
+                        else
+                        {
+                            model.Time = $"{primaryLabel} ({slot.SlotStartTime.ToString(@"hh\:mm")} - {slot.SlotEndTime.ToString(@"hh\:mm")})";
+                        }
+                    }
+                    else
+                    {
+                        model.Time = $"{primaryLabel} ({slot.SlotStartTime.ToString(@"hh\:mm")} - {slot.SlotEndTime.ToString(@"hh\:mm")})";
+                    }
                 }
             }
 
+            ViewBag.ServiceName = "Archery Class Trial";
+            ViewBag.EnableLaneSelection = SystemSettings.EnableLaneSelection;
             return View("~/Views/Payment/PaymentGuest.cshtml", model);
         }
 
         [HttpPost]
-        public IActionResult CreateCustomerBooking(int SlotId, string CustomerName, string CustomerEmail, int TargetNo, int RangeNo, int Duration, decimal TotalPrice, string SelectedLanes, string SelectedLaneRanges, int NumberOfPax, string RateCode, string PaymentMethod)
+        public IActionResult CreateCustomerBooking(int SlotId, string CustomerName, string CustomerEmail, int TargetNo, int RangeNo, int Duration, decimal TotalPrice, string SelectedLanes, string SelectedLaneRanges, int NumberOfPax, string RateCode, string PaymentMethod, string Date = "")
         {
             try
             {
@@ -189,6 +387,18 @@ namespace ArcheryAlley.Controllers
 
                 string reservedBy = HttpContext.Session.GetString("EmpId") ?? CustomerEmail;
 
+                DateTime bookingDate = DateTime.Now;
+                if (!string.IsNullOrEmpty(Date))
+                {
+                    DateTime.TryParse(Date, out bookingDate);
+                }
+
+                // Retrieve slot start time for precision
+                var slots = _repository.GetBookingSlots();
+                var slot = slots.FirstOrDefault(s => s.SlotId == SlotId);
+                var slotTime = slot != null ? slot.SlotStartTime : TimeSpan.Zero;
+                DateTime finalReservedOn = bookingDate.Date.Add(slotTime);
+
                 int? firstId = null;
                 foreach (var lane in laneNumbers)
                 {
@@ -205,7 +415,7 @@ namespace ArcheryAlley.Controllers
                         DurationHours = Duration,
                         TotalPrice    = splitPrice,
                         RateCode      = string.IsNullOrWhiteSpace(RateCode) ? null : RateCode,
-                        ReservedOn    = DateTime.Now,
+                        ReservedOn    = finalReservedOn,
                         NumberOfPax   = NumberOfPax,
                         Status        = 1
                     };

@@ -17,12 +17,10 @@
                         <input type="text" id="bookingDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" placeholder="Select Date">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label-premium">Duration</label>
+                        <label class="form-label-premium">Select Slots</label>
                         <select id="duration" class="form-control">
-                            <option value="1">1 Hour</option>
-                            <option value="2">2 Hours</option>
-                            <option value="3">3 Hours</option>
-                            <option value="4">4 Hours</option>
+                            <option value="2">1 Slot</option>
+                            <option value="4">2 Slots</option>
                         </select>
                     </div>
                     <div class="col-md-4">
@@ -150,7 +148,7 @@
         name: "Guest User",
         email: "guest@archery.com",
         date: "@DateTime.Today.ToString("yyyy-MM-dd")",
-        duration: 1,
+        duration: 2,
         selectedSlotIds: [],
         slotId: null,
         allAvailableSlots: []
@@ -223,15 +221,19 @@
     }
 
     function selectSlot(slot) {
-        const duration = bookingData.duration;
+        const maxSlots = bookingData.duration / 2;
         const index = bookingData.selectedSlotIds.indexOf(slot.slotId);
 
         if (index > -1) {
             bookingData.selectedSlotIds.splice(index, 1);
         } else {
-            if (bookingData.selectedSlotIds.length >= duration) {
-                alert(`Please select only ${duration} slot(s).`);
-                return;
+            if (bookingData.selectedSlotIds.length >= maxSlots) {
+                if (maxSlots === 1) {
+                    bookingData.selectedSlotIds = [];
+                } else {
+                    alert(`Please select only ${maxSlots} slot(s) (${bookingData.duration} hours).`);
+                    return;
+                }
             }
             bookingData.selectedSlotIds.push(slot.slotId);
         }
@@ -244,18 +246,24 @@
 
         const hint = document.getElementById("slot-hint");
         const picks = bookingData.selectedSlotIds.length;
-        if (picks < duration) {
-            hint.style.display = "block";
-            hint.innerText = `Select ${duration} slots (${duration - picks} left)`;
+        if (picks < maxSlots) {
+            if (hint) {
+                hint.style.display = "block";
+                hint.innerText = `Select ${maxSlots} slot(s) (${maxSlots - picks} left)`;
+            }
         } else {
-            hint.style.display = "block";
-            hint.innerText = "All slots selected.";
-            bookingData.slotId = bookingData.selectedSlotIds.sort((a,b)=>a-b)[0];
+            if (hint) {
+                hint.style.display = "block";
+                hint.innerText = "All slots selected.";
+            }
+            bookingData.selectedSlotIds.sort((a,b)=>a-b);
+            bookingData.slotId = bookingData.selectedSlotIds[0];
         }
     }
 
     function proceedToConfigure() {
-        if (bookingData.selectedSlotIds.length < bookingData.duration) {
+        const maxSlots = bookingData.duration / 2;
+        if (bookingData.selectedSlotIds.length < maxSlots) {
             alert("Please select your time slots first.");
             return;
         }

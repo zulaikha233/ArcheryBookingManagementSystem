@@ -1,0 +1,776 @@
+@{
+    ViewData["Title"] = "Member Calendar";
+    Layout = "_MemberLayout";
+}
+
+@section Styles {
+    <style>
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 30px;
+            min-height: calc(100vh - 80px);
+            animation: fadeIn 0.8s ease;
+        }
+
+        @@media (max-width: 1200px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ─── LEFT COLUMN: CALENDAR VIEW ─── */
+        .calendar-card {
+            background: rgba(34, 38, 48, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .calendar-title-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .calendar-month-year {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+
+        .week-navigator {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 4px;
+        }
+
+        .nav-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .btn-create-booking {
+            background: linear-gradient(135deg, var(--primary), #D63031);
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(255, 77, 77, 0.2);
+            text-decoration: none;
+        }
+
+        .btn-create-booking:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(255, 77, 77, 0.3);
+            color: #fff;
+        }
+
+        /* ─── WEEKLY GRID TABLE ─── */
+        .calendar-grid-wrapper {
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+            table-layout: fixed;
+        }
+
+        .calendar-table th {
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 12px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .calendar-table td {
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .calendar-table td:not(.td-time-label) {
+            padding: 0 !important;
+            height: 95px;
+            box-sizing: border-box;
+        }
+
+        .calendar-table th {
+            background: rgba(255, 255, 255, 0.01);
+            padding: 16px 12px;
+            font-weight: 700;
+        }
+
+        .th-time-col {
+            width: 90px;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .th-day-col {
+            text-align: center;
+        }
+
+        .day-num {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fff;
+            margin-top: 4px;
+        }
+
+        .day-label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        .td-time-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            font-weight: 800;
+            background: rgba(255, 255, 255, 0.01);
+            text-align: right;
+            padding-right: 15px;
+            vertical-align: top;
+            padding-top: 8px;
+        }
+
+        .grid-cell-interactive {
+            height: 95px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        /* Interactive Hover + Icon */
+        .grid-cell-interactive::after {
+            content: '+';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-weight: 400;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
+        .grid-cell-interactive:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .grid-cell-interactive:hover::after {
+            opacity: 1;
+        }
+
+        /* ─── BOOKED APPOINTMENT CARDS ─── */
+        .scheduled-card {
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #fff;
+            margin: 4px;
+            height: calc(100% - 8px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            border-left: 4px solid transparent;
+            cursor: default;
+            box-sizing: border-box;
+        }
+
+        .scheduled-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.25);
+        }
+
+        /* Card Color Profiles */
+        .card-game {
+            background: linear-gradient(135deg, rgba(255, 77, 77, 0.15), rgba(255, 77, 77, 0.05));
+            border: 1px solid rgba(255, 77, 77, 0.2);
+            border-left-color: #FF4D4D;
+        }
+        .card-game .card-title { color: #FF4D4D; }
+
+        .card-self-train {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(168, 85, 247, 0.05));
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-left-color: #A855F7;
+        }
+        .card-self-train .card-title { color: #C084FC; }
+
+        .card-class {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-left-color: #3B82F6;
+        }
+        .card-class .card-title { color: #60A5FA; }
+
+        .card-title {
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .card-time {
+            font-weight: 800;
+            font-size: 1.05rem;
+            color: #fff;
+            margin: 4px 0 8px 0;
+            text-align: center;
+        }
+
+        .card-meta {
+            color: var(--text-dim);
+            font-size: 0.65rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        /* ─── RIGHT COLUMN: UPCOMING APPOINTMENTS ─── */
+        .right-column-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .panel-card {
+            background: rgba(34, 38, 48, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .panel-title {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .appointments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 480px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .appointment-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .appointment-item:hover {
+            border-color: rgba(255, 77, 77, 0.2);
+            background: rgba(255, 77, 77, 0.02);
+            transform: translateY(-2px);
+        }
+
+        .item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .item-type-badge {
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .badge-game { background: rgba(255, 77, 77, 0.1); color: #FF4D4D; }
+        .badge-self-train { background: rgba(168, 85, 247, 0.1); color: #A855F7; }
+        .badge-class { background: rgba(59, 130, 246, 0.1); color: #3B82F6; }
+
+        .item-status {
+            font-size: 0.7rem;
+            color: #10B981;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .item-body {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .item-datetime {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .item-slots-info {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .item-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px dashed rgba(255, 255, 255, 0.05);
+            padding-top: 12px;
+            font-size: 0.75rem;
+        }
+
+        .item-target {
+            color: var(--text-dim);
+        }
+
+        .item-price {
+            font-weight: 800;
+            color: #fff;
+        }
+
+        /* ─── Empty state styling ─── */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-dim);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--border-color);
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .empty-state p {
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        /* CSS Animation */
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+}
+
+<div class="dashboard-container">
+    <!-- LEFT COLUMN: WEEKLY CALENDAR -->
+    <div class="calendar-card">
+        <div class="calendar-header">
+            <div class="calendar-title-group">
+                <div class="calendar-month-year" id="monthYearDisplay">May 2026</div>
+                <div class="week-navigator">
+                    <button class="nav-btn" onclick="shiftWeek(-1)"><i class="bi bi-chevron-left"></i></button>
+                    <button class="nav-btn" onclick="resetWeek()">Today</button>
+                    <button class="nav-btn" onclick="shiftWeek(1)"><i class="bi bi-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="calendar-grid-wrapper">
+            <table class="calendar-table">
+                <thead>
+                    <tr id="calendarHeaders">
+                        <th class="th-time-col">Time</th>
+                        <!-- Dynamic dates header filled by JS -->
+                    </tr>
+                </thead>
+                <tbody id="calendarGridBody">
+                    <!-- Dynamic calendar rows filled by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- RIGHT COLUMN: DYNAMIC PANEL (UPCOMING APPOINTMENTS) -->
+    <div class="right-column-panel">
+        <div class="panel-card">
+            <h3 class="panel-title">
+                <span>🏹 Upcoming Appointments</span>
+                <span class="badge bg-danger rounded-pill small" id="appointmentsCount">0</span>
+            </h3>
+
+            <div class="appointments-list" id="upcomingList">
+                <!-- Dynamic cards or empty state in JS -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Parse database reservations from ViewBag
+        const rawReservations = @Html.Raw(Json.Serialize(ViewBag.Reservations));
+        console.log("Reservations Loaded:", rawReservations);
+
+        // State variables
+        let currentDate = new Date(); // Today
+        let weekStartDate = getStartOfWeek(currentDate);
+
+        // Fixed Time Rows mapping directly to operational slots
+        const timeSlots = [
+            { label: "08:00", startTime: "08:15:00", endTime: "09:15:00", isNightSlot: false },
+            { label: "09:00", startTime: "09:15:00", endTime: "10:15:00", isNightSlot: false },
+            { label: "10:00", startTime: "10:15:00", endTime: "11:15:00", isNightSlot: false },
+            { label: "11:00", startTime: "11:15:00", endTime: "12:15:00", isNightSlot: false },
+            { label: "13:00", startTime: "13:15:00", endTime: "14:15:00", isNightSlot: false },
+            { label: "14:00", startTime: "14:15:00", endTime: "15:15:00", isNightSlot: false },
+            { label: "15:00", startTime: "15:15:00", endTime: "16:15:00", isNightSlot: false },
+            { label: "20:00", startTime: "20:00:00", endTime: "21:00:00", isNightSlot: true },
+            { label: "21:00", startTime: "21:00:00", endTime: "22:00:00", isNightSlot: true },
+            { label: "22:00", startTime: "22:00:00", endTime: "23:00:00", isNightSlot: true },
+            { label: "23:00", startTime: "23:00:00", endTime: "00:00:00", isNightSlot: true },
+            { label: "00:00", startTime: "00:00:00", endTime: "01:00:00", isNightSlot: true }
+        ];
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderDashboard();
+        });
+
+        function getStartOfWeek(d) {
+            let date = new Date(d);
+            let day = date.getDay();
+            let diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust when Sunday is 0
+            return new Date(date.setDate(diff));
+        }
+
+        function shiftWeek(offset) {
+            weekStartDate.setDate(weekStartDate.getDate() + (offset * 7));
+            renderDashboard();
+        }
+
+        function resetWeek() {
+            weekStartDate = getStartOfWeek(new Date());
+            renderDashboard();
+        }
+
+        function formatDateStr(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function renderDashboard() {
+            renderCalendarHeader();
+            renderCalendarBody();
+            renderUpcomingPanel();
+        }
+
+        function renderCalendarHeader() {
+            const display = document.getElementById("monthYearDisplay");
+            
+            // Generate range details
+            const startStr = weekStartDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            const endDate = new Date(weekStartDate);
+            endDate.setDate(endDate.getDate() + 6);
+            const endStr = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            
+            display.innerText = `${startStr} - ${endStr}`;
+
+            // Render table header columns
+            const headersRow = document.getElementById("calendarHeaders");
+            headersRow.innerHTML = `<th class="th-time-col">Time</th>`;
+            
+            const daysNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+            for (let i = 0; i < 7; i++) {
+                const dayDate = new Date(weekStartDate);
+                dayDate.setDate(dayDate.getDate() + i);
+
+                const isToday = dayDate.toDateString() === new Date().toDateString();
+                const style = isToday ? 'style="border-bottom: 3px solid var(--primary);"' : '';
+
+                headersRow.innerHTML += `
+                    <th class="th-day-col" ${style}>
+                        <div class="day-label">${daysNames[i]}</div>
+                        <div class="day-num" style="${isToday ? 'color: var(--primary);' : ''}">${dayDate.getDate()}</div>
+                    </th>
+                `;
+            }
+        }
+
+        function isMatchingSlot(resSlotStartTime, calendarSlotStartTime) {
+            const resHours = parseInt(resSlotStartTime.split(':')[0], 10);
+            const resMins = parseInt(resSlotStartTime.split(':')[1], 10);
+            const calHours = parseInt(calendarSlotStartTime.split(':')[0], 10);
+            const calMins = parseInt(calendarSlotStartTime.split(':')[1], 10);
+            
+            const resTime = resHours * 60 + resMins;
+            const calTime = calHours * 60 + calMins;
+            
+            // Match if start times are within 20 minutes (e.g. 10:30 matches 10:15)
+            return Math.abs(resTime - calTime) <= 20;
+        }
+
+        function renderCalendarBody() {
+            const gridBody = document.getElementById("calendarGridBody");
+            gridBody.innerHTML = "";
+
+            // Keep track of spanned rows to skip rendering cells in lower rows
+            let skipCells = [0, 0, 0, 0, 0, 0, 0];
+
+            timeSlots.forEach((slot, slotIndex) => {
+                const row = document.createElement("tr");
+
+                // Time label column
+                const timeTd = document.createElement("td");
+                timeTd.className = "td-time-label";
+                timeTd.innerText = slot.label;
+                row.appendChild(timeTd);
+
+                // Mon-Sun columns
+                for (let i = 0; i < 7; i++) {
+                    // If this column has active rowspan from a previous row, decrement and skip
+                    if (skipCells[i] > 0) {
+                        skipCells[i]--;
+                        continue;
+                    }
+
+                    const dayDate = new Date(weekStartDate);
+                    dayDate.setDate(dayDate.getDate() + i);
+                    const dateStr = formatDateStr(dayDate);
+                    
+                    const cellTd = document.createElement("td");
+                    
+                    // Filter matching reservations
+                    const matchingRes = rawReservations.find(res => {
+                        const resDate = res.reservedOn.split('T')[0];
+                        if (resDate !== dateStr) return false;
+
+                        if (res.slot && res.slot.slotStartTime) {
+                            return isMatchingSlot(res.slot.slotStartTime, slot.startTime);
+                        }
+                        return false;
+                    });
+
+                    if (matchingRes) {
+                        // Every row represents 1 hour, so rowSpan is equal to durationHours
+                        const numSlots = Math.max(1, Math.round(matchingRes.durationHours));
+                        
+                        cellTd.rowSpan = numSlots;
+                        skipCells[i] = numSlots - 1; // Mark subsequent cells to skip
+
+                        cellTd.style.cursor = "default";
+                        cellTd.style.padding = "4px";
+
+                        let typeClass = "card-game";
+                        let typeTitle = "Game Session";
+                        let typeIcon = "bi-bullseye";
+
+                        if (matchingRes.rateCode === "CLASS") {
+                            typeClass = "card-class";
+                            typeTitle = "Class Session";
+                            typeIcon = "bi-mortarboard";
+                        } else if (matchingRes.rateCode === "SELF_TRAINING" || (matchingRes.slot && matchingRes.slot.isNight)) {
+                            typeClass = "card-self-train";
+                            typeTitle = "Self Training";
+                            typeIcon = "bi-moon-stars";
+                        }
+
+                        // Calculate actual end time dynamically based on spanned slots
+                        const startIndex = slotIndex;
+                        const endIndex = Math.min(startIndex + numSlots - 1, timeSlots.length - 1);
+                        
+                        // Use reservation's own start/end if available, else project from timeSlots
+                        const startStr = matchingRes.slot ? matchingRes.slot.slotStartTime.substring(0, 5) : slot.startTime.substring(0, 5);
+                        const endStr = timeSlots[endIndex].endTime.substring(0, 5);
+
+                        const totalSlotsLabel = slot.isNightSlot 
+                            ? Math.max(1, Math.round(matchingRes.durationHours / 2))
+                            : Math.max(1, Math.round(matchingRes.durationHours));
+
+                        let metaHtml = "";
+                        if (matchingRes.rateCode === "CLASS") {
+                            metaHtml = `<span>${totalSlotsLabel} ${totalSlotsLabel === 1 ? 'Slot' : 'Slots'}</span>`;
+                        } else {
+                            metaHtml = `
+                                <span>Target ${matchingRes.targetNo}</span>
+                                <span>•</span>
+                                <span>${totalSlotsLabel} ${totalSlotsLabel === 1 ? 'Slot' : 'Slots'}</span>
+                            `;
+                        }
+
+                        cellTd.innerHTML = `
+                            <div class="scheduled-card ${typeClass}" style="height: 100%; min-height: ${95 * matchingRes.durationHours - 8}px;">
+                                <div class="card-title"><i class="bi ${typeIcon}"></i> ${typeTitle}</div>
+                                <div class="card-time">${startStr} - ${endStr}</div>
+                                <div class="card-meta">
+                                    ${metaHtml}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        if (slot.label === "00:00") {
+                            cellTd.style.background = "rgba(255, 255, 255, 0.01)";
+                            cellTd.style.cursor = "default";
+                        } else {
+                            // Empty interactive cell -> Redirects to booking forms
+                            cellTd.className = "grid-cell-interactive";
+                            cellTd.onclick = () => {
+                                const isWeekend = dayDate.getDay() === 0 || dayDate.getDay() === 6;
+                                if (isWeekend) {
+                                    window.location.href = `/Booking/ClassBooking?date=${dateStr}`;
+                                } else {
+                                    window.location.href = `/Booking/GetFreeSlots?date=${dateStr}`;
+                                }
+                            };
+                        }
+                    }
+                    row.appendChild(cellTd);
+                }
+                gridBody.appendChild(row);
+            });
+        }
+
+        function renderUpcomingPanel() {
+            const listContainer = document.getElementById("upcomingList");
+            const countDisplay = document.getElementById("appointmentsCount");
+            
+            // Get current and future reservations sorted by date & time
+            const nowStr = formatDateStr(new Date());
+            
+            const activeReservations = rawReservations.filter(res => {
+                const resDate = res.reservedOn.split('T')[0];
+                return resDate >= nowStr && res.status !== 2; // Not cancelled
+            }).sort((a, b) => new Date(a.reservedOn) - new Date(b.reservedOn));
+
+            countDisplay.innerText = activeReservations.length;
+
+            if (activeReservations.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="bi bi-calendar-x"></i>
+                        <h6 class="text-white fw-bold mb-2">No Upcoming Appointments</h6>
+                        <p class="text-dim">You don't have any dynamic shooting sessions scheduled yet.</p>
+                        <a href="/Booking/GetFreeSlots" class="btn-create-booking mt-3 justify-content-center">Book Now</a>
+                    </div>
+                `;
+                return;
+            }
+
+            listContainer.innerHTML = "";
+
+            activeReservations.forEach(res => {
+                const item = document.createElement("div");
+                item.className = "appointment-item";
+
+                let badgeClass = "badge-game";
+                let typeTitle = "Game Session";
+                let typeIcon = "bi-bullseye";
+
+                if (res.rateCode === "CLASS") {
+                    badgeClass = "badge-class";
+                    typeTitle = "Class Session";
+                    typeIcon = "bi-mortarboard";
+                } else if (res.rateCode === "SELF_TRAINING" || (res.slot && res.slot.isNight)) {
+                    badgeClass = "badge-self-train";
+                    typeTitle = "Self Training";
+                    typeIcon = "bi-moon-stars";
+                }
+
+                const resDateObj = new Date(res.reservedOn);
+                const readableDate = resDateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+                
+                const startStr = res.slot ? res.slot.slotStartTime.substring(0,5) : "";
+                const endStr = res.slot ? res.slot.slotEndTime.substring(0,5) : "";
+
+                item.innerHTML = `
+                    <div class="item-header">
+                        <span class="item-type-badge ${badgeClass}"><i class="bi ${typeIcon} me-1"></i> ${typeTitle}</span>
+                        <span class="item-status"><i class="bi bi-patch-check-fill"></i> Confirmed</span>
+                    </div>
+                    <div class="item-body">
+                        <div class="item-datetime">${readableDate}</div>
+                        <div class="item-slots-info">
+                            <i class="bi bi-clock-fill text-primary"></i> ${startStr} - ${endStr} (${res.durationHours} ${res.durationHours === 1 ? 'Slot' : 'Slots'})
+                        </div>
+                    </div>
+                    <div class="item-footer">
+                        <span class="item-target"><i class="bi bi-bullseye"></i> Target ${res.targetNo} (Lane ${res.rangeNo})</span>
+                        <span class="item-price">RM ${(res.totalPrice).toFixed(2)}</span>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+    </script>
+}

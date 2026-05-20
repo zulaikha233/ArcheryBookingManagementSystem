@@ -1,5 +1,6 @@
 @{
     ViewData["Title"] = "Book Your Session";
+    Layout = "_MemberLayout";
 }
 
 <div class="booking-wizard-container animate-fade-in" data-aos="fade-up">
@@ -10,52 +11,73 @@
     <div class="wizard-step active" id="wizard-step-1">
         <div class="premium-card p-0 overflow-hidden">
             <div class="wizard-grid-layout">
-                <!-- Column 1 -->
-                <div class="wizard-column border-end" style="border-color: var(--card-border) !important;">
-                    <div class="p-5" style="background: rgba(255, 77, 77, 0.08); border-bottom: 1px solid var(--card-border); box-shadow: inset 0 0 40px rgba(255, 77, 77, 0.05);">
-                         <p class="mb-2 text-dim" style="font-size: 0.7rem; letter-spacing: 2px; font-weight: 700; text-transform: uppercase;">MEMBER PORTAL</p>
-                         <h4 class="fw-bold mb-1" style="color: var(--primary); text-shadow: 0 0 15px rgba(255, 77, 77, 0.3);">@(ViewBag.CustomerName)</h4>
-                         <small class="text-dim" style="opacity: 0.9;">@(ViewBag.CustomerEmail)</small>
-                         <input type="hidden" id="customerName" value="@ViewBag.CustomerName">
-                         <input type="hidden" id="customerEmail" value="@ViewBag.CustomerEmail">
-                         <input type="hidden" id="customerPhone" value="@ViewBag.CustomerPhone">
+                <!-- Column 1 (Left): Form Fields & Rules -->
+                <div class="wizard-column border-end p-5" style="border-color: var(--card-border) !important;">
+                    <input type="hidden" id="customerName" value="@ViewBag.CustomerName">
+                    <input type="hidden" id="customerEmail" value="@ViewBag.CustomerEmail">
+                    <input type="hidden" id="customerPhone" value="@ViewBag.CustomerPhone">
+
+                    <div class="mb-4">
+                        <label class="form-label-premium">Session Type</label>
+                        <select id="sessionType" class="form-control">
+                            <option value="game">Game Session</option>
+                            <option value="self_training">Self Training</option>
+                        </select>
                     </div>
 
-
-                    <div class="session-group p-5">
-                        <h5 class="session-label">&#9728; Morning Session</h5>
-                        <div id="morning-slots" class="slots-grid"></div>
-                    </div>
-                </div>
-
-                <!-- Column 2 -->
-                <div class="wizard-column p-5">
                     <div class="row g-4 mb-4">
                         <div class="col-md-6">
                             <label class="form-label-premium">Booking Date</label>
                             <input type="text" id="bookingDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" placeholder="Select Date">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label-premium">Duration</label>
+                            <label class="form-label-premium" id="durationLabel">Select Slots</label>
                             <select id="duration" class="form-control">
-                                <option value="1">1 Hour</option>
-                                <option value="2">2 Hours</option>
-                                <option value="3">3 Hours</option>
-                                <option value="4">4 Hours</option>
+                                <option value="2">1 Slot</option>
+                                <option value="4">2 Slots</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="mb-5">
-                        <label class="form-label-premium">Age Group</label>
-                        <select id="ageGroup" class="form-control">
-                            <option value="Adult">Adult (18+)</option>
-                            <option value="Junior">Junior (12-17)</option>
-                            <option value="Child">Child (Under 12)</option>
-                        </select>
+                    <!-- Number of Archers -->
+                    <input type="hidden" id="numberOfPax" value="1">
+
+                    <div id="game-session-banner" class="p-4" style="display: none; background: rgba(255, 77, 77, 0.05); border: 1px dashed rgba(255, 77, 77, 0.2); border-radius: 20px;">
+                        <h5 class="text-white fw-bold mb-3 d-flex align-items-center gap-2">
+                            <i class="bi bi-info-circle-fill text-primary"></i> Notes
+                        </h5>
+                        <ul class="text-dim small ps-3 mb-0" style="line-height: 1.8;">
+                            <li>Available on weekdays only (8:15 AM - 4:30 PM).</li>                            
+                            <li><strong>No Coach</strong> will be present.</li>
+                            <li><strong>RM 20.00</strong> /per slot.</li>
+                            <li>Max 4 hours (2 Slot).</li>
+                        </ul>
                     </div>
 
-                    <div class="session-group">
+
+                    <div id="self-training-banner" class="p-4" style="display: none; background: rgba(255, 77, 77, 0.05); border: 1px dashed rgba(255, 77, 77, 0.2); border-radius: 20px;">
+                        <h5 class="text-white fw-bold mb-3 d-flex align-items-center gap-2">
+                            <i class="bi bi-info-circle-fill text-primary"></i> Notes
+                        </h5>
+                        <ul class="text-dim small ps-3 mb-0" style="line-height: 1.8;">
+                            <li>Available every night (8:00 PM - 12:00 AM).</li>
+                            <li>Exclusive member-only practice session.</li>
+                            <li><strong>No Coach</strong> will be present.</li>
+                            <li><strong>RM 20.00</strong> /per slot.</li>
+                            <li>Max 4 hours (2 Slot).</li>
+                        </ul>
+                    </div>
+                    
+                </div>
+
+                <!-- Column 2 (Right): Time Slots Grid -->
+                <div class="wizard-column p-5">
+                    <div class="session-group mb-5" id="morning-session-wrapper">
+                        <h5 class="session-label">&#9728; Morning Session</h5>
+                        <div id="morning-slots" class="slots-grid"></div>
+                    </div>
+
+                    <div class="session-group" id="night-session-wrapper">
                         <h5 class="session-label">&#127769; Night Session</h5>
                         <div id="night-slots" class="slots-grid"></div>
                     </div>
@@ -149,20 +171,25 @@
         email: "@(ViewBag.CustomerEmail)",
         phone: "@(ViewBag.CustomerPhone)",
         date: "@DateTime.Today.ToString("yyyy-MM-dd")",
-        duration: 1,
+        duration: 2,
         selectedSlotIds: [],
         slotId: null,
         allAvailableSlots: []
     };
 
+    let fpInstance;
+
     document.addEventListener("DOMContentLoaded", () => {
-        const fp = flatpickr("#bookingDate", {
+        fpInstance = flatpickr("#bookingDate", {
             dateFormat: "Y-m-d",
             minDate: "today",
             disableMobile: "true",
-            static: true,
-            closeOnSelect: false,
-            clickOpens: false,
+            disable: [
+                function(date) {
+                    // Default to Game mode: Disable weekends (Saturday/Sunday)
+                    return (date.getDay() === 0 || date.getDay() === 6);
+                }
+            ],
             onChange: function(selectedDates, dateStr) {
                 bookingData.date = dateStr;
                 bookingData.selectedSlotIds = [];
@@ -170,9 +197,14 @@
             }
         });
 
-        document.getElementById("bookingDate").addEventListener("click", () => {
-            fp.toggle();
-        });
+        // Initial date validation: If today is Saturday or Sunday, force next Monday
+        let initDate = fpInstance.selectedDates[0] || new Date();
+        let day = initDate.getDay();
+        if (day === 0 || day === 6) {
+            let offset = (day === 6) ? 2 : 1;
+            let newDate = new Date(initDate.setDate(initDate.getDate() + offset));
+            fpInstance.setDate(newDate, true);
+        }
 
         loadSlots();
 
@@ -181,7 +213,81 @@
             bookingData.selectedSlotIds = [];
             document.querySelectorAll(".slot-card").forEach(c => c.classList.remove("selected"));
             document.getElementById("slot-hint").style.display = "none";
+            loadSlots();
         });
+
+        document.getElementById("sessionType").addEventListener("change", (e) => {
+            const sType = e.target.value;
+            const durationSelect = document.getElementById("duration");
+            const durationLabel = document.getElementById("durationLabel");
+            const morningWrapper = document.getElementById("morning-session-wrapper");
+            const nightWrapper = document.getElementById("night-session-wrapper");
+            
+            const gameBanner = document.getElementById("game-session-banner");
+            const classBanner = document.getElementById("class-session-banner");
+            const selfTrainingBanner = document.getElementById("self-training-banner");
+
+            bookingData.selectedSlotIds = [];
+            document.querySelectorAll(".slot-card").forEach(c => c.classList.remove("selected"));
+            document.getElementById("slot-hint").style.display = "none";
+
+            // Default: Show morning session (daytime), hide night session, hide all banners
+            if (morningWrapper) morningWrapper.style.display = "block";
+            if (nightWrapper) nightWrapper.style.display = "none";
+            if (gameBanner) gameBanner.style.display = "none";
+            if (classBanner) classBanner.style.display = "none";
+            if (selfTrainingBanner) selfTrainingBanner.style.display = "none";
+
+            if (sType === "game") {
+                // Game session (Weekday only)
+                if (gameBanner) gameBanner.style.display = "block";
+                durationLabel.innerText = "Select Slots";
+                durationSelect.innerHTML = `
+                    <option value="2">1 Slot</option>
+                    <option value="4">2 Slots</option>
+                `;
+                bookingData.duration = 2;
+
+                // Restrict datepicker to Weekdays only (disable Sat/Sun)
+                fpInstance.set('disable', [
+                    function(date) {
+                        return (date.getDay() === 0 || date.getDay() === 6);
+                    }
+                ]);
+                fpInstance.redraw();
+
+                // If currently selected date is weekend, force next Monday
+                let curDate = fpInstance.selectedDates[0] || new Date();
+                let curDay = curDate.getDay();
+                if (curDay === 0 || curDay === 6) {
+                    let offset = (curDay === 6) ? 2 : 1;
+                    let newDate = new Date(curDate.setDate(curDate.getDate() + offset));
+                    fpInstance.setDate(newDate, true);
+                }
+
+            } else if (sType === "self_training") {
+                // Self Training (Everyday, Night only)
+                if (selfTrainingBanner) selfTrainingBanner.style.display = "block";
+                durationLabel.innerText = "Select Slots";
+                durationSelect.innerHTML = `
+                    <option value="2">1 Slot</option>
+                    <option value="4">2 Slots</option>
+                `;
+                bookingData.duration = 2;
+
+                // Hide morning session wrapper, show night session wrapper
+                if (morningWrapper) morningWrapper.style.display = "none";
+                if (nightWrapper) nightWrapper.style.display = "block";
+
+                // Everyday is available (no disable filter on flatpickr)
+                fpInstance.set('disable', []);
+                fpInstance.redraw();
+            }
+            loadSlots();
+        });
+
+        // Trigger change event on page load to initialize the default state
+        document.getElementById("sessionType").dispatchEvent(new Event("change"));
     });
 
     async function loadSlots() {
@@ -194,7 +300,17 @@
         
         try {
             const response = await fetch(`/Booking/GetAvailableSlotsAjax?date=${bookingData.date}`);
-            const slots = await response.json();
+            let slots = await response.json();
+            
+            // Filter slots based on session type
+            const sType = document.getElementById("sessionType").value;
+            if (sType === "self_training") {
+                // Self Training: Only show night 2-hour slots
+                slots = slots.filter(slot => slot.isNight && slot.slotDurationHours === 2);
+            } else {
+                // Game session: Only show daytime 2-hour slots
+                slots = slots.filter(slot => !slot.isNight && slot.slotDurationHours === 2);
+            }
             
             morningGrid.innerHTML = "";
             nightGrid.innerHTML = "";
@@ -221,15 +337,19 @@
     }
 
     function selectSlot(slot) {
-        const duration = bookingData.duration;
+        const maxSlots = bookingData.duration / 2;
         const index = bookingData.selectedSlotIds.indexOf(slot.slotId);
 
         if (index > -1) {
             bookingData.selectedSlotIds.splice(index, 1);
         } else {
-            if (bookingData.selectedSlotIds.length >= duration) {
-                alert(`Please select only ${duration} slot(s).`);
-                return;
+            if (bookingData.selectedSlotIds.length >= maxSlots) {
+                if (maxSlots === 1) {
+                    bookingData.selectedSlotIds = [];
+                } else {
+                    alert(`Please select only ${maxSlots} slot(s) (${bookingData.duration} hours).`);
+                    return;
+                }
             }
             bookingData.selectedSlotIds.push(slot.slotId);
         }
@@ -242,24 +362,40 @@
 
         const hint = document.getElementById("slot-hint");
         const picks = bookingData.selectedSlotIds.length;
-        if (picks < duration) {
-            hint.style.display = "block";
-            hint.innerText = `Select ${duration} slots (${duration - picks} left)`;
+        if (picks < maxSlots) {
+            if (hint) {
+                hint.style.display = "block";
+                hint.innerText = `Select ${maxSlots} slot(s) (${maxSlots - picks} left)`;
+            }
         } else {
-            hint.style.display = "block";
-            hint.innerText = "All slots selected.";
-            bookingData.slotId = bookingData.selectedSlotIds.sort((a,b)=>a-b)[0];
+            if (hint) {
+                hint.style.display = "block";
+                hint.innerText = "All slots selected.";
+            }
+            bookingData.selectedSlotIds.sort((a,b)=>a-b);
+            bookingData.slotId = bookingData.selectedSlotIds[0];
         }
     }
 
+    function adjustPax(change) {
+        let pax = parseInt(document.getElementById("numberOfPax").value) || 1;
+        pax += change;
+        if (pax < 1) pax = 1;
+        if (pax > 80) pax = 80;
+        document.getElementById("numberOfPax").value = pax;
+        document.getElementById("paxDisplay").innerText = pax;
+    }
+
     function proceedToConfigure() {
-        if (bookingData.selectedSlotIds.length < bookingData.duration) {
+        const maxSlots = bookingData.duration / 2;
+        if (bookingData.selectedSlotIds.length < maxSlots) {
             alert("Please select your time slots first.");
             return;
         }
         
-        const ageGroup = document.getElementById("ageGroup").value;
-        const url = `/Booking/SelectTarget?slotId=${bookingData.slotId}&name=${encodeURIComponent(bookingData.name)}&email=${encodeURIComponent(bookingData.email)}&phone=${encodeURIComponent(bookingData.phone)}&date=${bookingData.date}&duration=${bookingData.duration}&ageGroup=${ageGroup}`;
+        const sType = document.getElementById("sessionType").value;
+        const pax = document.getElementById("numberOfPax").value;
+        const url = `/Booking/SelectTarget?slotId=${bookingData.slotId}&name=${encodeURIComponent(bookingData.name)}&email=${encodeURIComponent(bookingData.email)}&phone=${encodeURIComponent(bookingData.phone)}&date=${bookingData.date}&duration=${bookingData.duration}&numberOfPax=${pax}&sessionType=${sType}`;
         window.location.href = url;
     }
 </script>

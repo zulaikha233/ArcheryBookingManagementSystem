@@ -23,6 +23,7 @@ namespace ArcheryAlley.Models
         public  DbSet<Payments> Payments { get; set; }
         public  DbSet<Lanes> Lanes { get; set; }
         public  DbSet<Targets> Targets { get; set; }
+        public  DbSet<ClassRegistrations> ClassRegistrations { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

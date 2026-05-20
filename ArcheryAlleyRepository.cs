@@ -283,7 +283,7 @@ namespace ArcheryAlley
         {
             var requiredSlots = new List<(TimeSpan Start, TimeSpan End)>
             {
-                // Pagi
+                // Pagi (1 Hour Slots for Game Session)
                 (new TimeSpan(8, 15, 0), new TimeSpan(9, 15, 0)),
                 (new TimeSpan(9, 15, 0), new TimeSpan(10, 15, 0)),
                 (new TimeSpan(10, 15, 0), new TimeSpan(11, 15, 0)),
@@ -291,7 +291,17 @@ namespace ArcheryAlley
                 (new TimeSpan(13, 15, 0), new TimeSpan(14, 15, 0)),
                 (new TimeSpan(14, 15, 0), new TimeSpan(15, 15, 0)),
                 (new TimeSpan(15, 15, 0), new TimeSpan(16, 15, 0)),
-                // Malam
+
+                // Class 2-Hour Slots (8:15 - 10:15, 10:30 - 12:30, 14:30 - 16:30)
+                (new TimeSpan(8, 15, 0), new TimeSpan(10, 15, 0)),
+                (new TimeSpan(10, 30, 0), new TimeSpan(12, 30, 0)),
+                (new TimeSpan(14, 30, 0), new TimeSpan(16, 30, 0)),
+
+                // Self Training 2-Hour Slots (8 PM - 12 AM)
+                (new TimeSpan(20, 0, 0), new TimeSpan(22, 0, 0)),
+                (new TimeSpan(22, 0, 0), new TimeSpan(0, 0, 0)),
+
+                // Malam (1 Hour Slots)
                 (new TimeSpan(19, 45, 0), new TimeSpan(20, 45, 0)),
                 (new TimeSpan(20, 45, 0), new TimeSpan(21, 45, 0)),
                 (new TimeSpan(21, 45, 0), new TimeSpan(22, 45, 0)),
@@ -577,6 +587,25 @@ namespace ArcheryAlley
         {
             _context.Payments.Add(payment);
             _context.SaveChanges();
+        }
+
+        public void RegisterClassSession(ClassRegistrations registration)
+        {
+            _context.ClassRegistrations.Add(registration);
+            _context.SaveChanges();
+        }
+
+        public List<ClassRegistrations> GetClassRegistrationsByEmail(string email)
+        {
+            return _context.ClassRegistrations.Where(cr => cr.CustomerEmail.ToLower() == email.ToLower()).ToList();
+        }
+
+        public List<Reservations> GetReservationsByEmail(string email)
+        {
+            return _context.Reservations
+                .Include(r => r.Slot)
+                .Where(r => r.CustomerEmail.ToLower() == email.ToLower() || r.ReservedBy.ToLower() == email.ToLower())
+                .ToList();
         }
     }
 }
