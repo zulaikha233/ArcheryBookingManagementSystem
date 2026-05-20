@@ -17,6 +17,18 @@ namespace ArcheryAlley.Controllers
         }
 
         [HttpGet]
+        public IActionResult Profile()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (string.IsNullOrEmpty(role))
+                return RedirectToAction("Login");
+
+            ViewBag.StaffName = HttpContext.Session.GetString("UserName");
+            ViewBag.EmpId = HttpContext.Session.GetString("EmpId");
+            return View("~/Views/Staff/StaffProfile.cshtml");
+        }
+
+        [HttpGet]
         public IActionResult Login()
         {
             return View("~/Views/Account/StaffLogin.cshtml");
@@ -39,7 +51,7 @@ namespace ArcheryAlley.Controllers
                 }
                 else
                 {
-                    return RedirectToAction("StaffDashBoard", "Booking");
+                    return RedirectToAction("StaffDashboard", "Booking");
                 }
             }
 

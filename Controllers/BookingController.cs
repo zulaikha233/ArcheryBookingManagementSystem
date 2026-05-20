@@ -510,7 +510,7 @@ namespace ArcheryAlley.Controllers
                 return RedirectToAction("ManageSlots", "Slot");
 
             ViewBag.StaffName = HttpContext.Session.GetString("UserName");
-            return View();
+            return View("~/Views/Staff/StaffDashboard.cshtml");
         }
 
         [HttpGet]
@@ -525,7 +525,7 @@ namespace ArcheryAlley.Controllers
                 return RedirectToAction("ManageSlots", "Slot");
 
             ViewBag.StaffName = HttpContext.Session.GetString("UserName");
-            return View("~/Views/Dashboard/StaffDashboard.cshtml");
+            return View("~/Views/Staff/StaffDashboard.cshtml");
         }
     }
 }
