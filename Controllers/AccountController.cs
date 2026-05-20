@@ -17,6 +17,18 @@ namespace ArcheryAlley.Controllers
         }
 
         [HttpGet]
+        public IActionResult Profile()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (string.IsNullOrEmpty(role))
+                return RedirectToAction("Login");
+
+            ViewBag.StaffName = HttpContext.Session.GetString("UserName");
+            ViewBag.EmpId = HttpContext.Session.GetString("EmpId");
+            return View("~/Views/Staff/StaffProfile.cshtml");
+        }
+
+        [HttpGet]
         public IActionResult Login()
         {
             return View("~/Views/Account/StaffLogin.cshtml");
@@ -39,7 +51,7 @@ namespace ArcheryAlley.Controllers
                 }
                 else
                 {
-                    return RedirectToAction("StaffDashBoard", "Booking");
+                    return RedirectToAction("StaffDashboard", "Booking");
                 }
             }
 
@@ -153,6 +165,16 @@ namespace ArcheryAlley.Controllers
         }
 
         [HttpGet]
+        public IActionResult ClassRegistration()
+        {
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email))
+                return RedirectToAction("CustomerLogin");
+                
+            return View("~/Views/Account/ClassRegistration.cshtml");
+        }
+
+        [HttpGet]
         public IActionResult Register()
         {
             if (HttpContext.Session.GetString("UserRole") != "Admin") return RedirectToAction("Login");
@@ -196,10 +218,6 @@ namespace ArcheryAlley.Controllers
             string PackageType, decimal PackagePrice, string LearningMethod, int LearningMethodPax, decimal LearningMethodPrice,
             decimal AnnualFee, decimal TotalPrice, string PaymentMethod)
         {
-<<<<<<< HEAD
-            if (string.IsNullOrEmpty(FullName) || string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Email) ||
-                string.IsNullOrEmpty(PhoneNumber) || string.IsNullOrEmpty(Password) || Birthday == default || string.IsNullOrEmpty(Address))
-=======
             string email = HttpContext.Session.GetString("CustomerEmail");
             if (string.IsNullOrEmpty(email))
             {
@@ -207,7 +225,6 @@ namespace ArcheryAlley.Controllers
             }
 
             if (string.IsNullOrEmpty(FullName) || string.IsNullOrEmpty(PhoneNumber) || Birthday == default || string.IsNullOrEmpty(Address))
->>>>>>> 8e9612d85f8338dd88e1655118a0b1a4d7209508
             {
                 return Json(new { success = false, message = "Please fill in all member details." });
             }
@@ -244,17 +261,9 @@ namespace ArcheryAlley.Controllers
             {
                 _repository.RegisterClassSession(registration);
 
-<<<<<<< HEAD
-                HttpContext.Session.SetString("CustomerEmail", newCustomer.Email);
-                HttpContext.Session.SetString("CustomerName", newCustomer.FullName);
-                HttpContext.Session.SetString("CustomerPhone", newCustomer.PhoneNumber ?? "");
-                HttpContext.Session.SetString("CustomerUsername", newCustomer.Username);
-                HttpContext.Session.SetString("UserRole", "Member");
-=======
                 HttpContext.Session.SetString("CustomerName", customer.FullName);
                 HttpContext.Session.SetString("CustomerPhone", customer.PhoneNumber);
                 HttpContext.Session.SetString("CustomerStatus", "Active");
->>>>>>> 8e9612d85f8338dd88e1655118a0b1a4d7209508
 
                 return Json(new { success = true, transactionId = registration.TransactionId });
             }
