@@ -247,8 +247,9 @@ body {
     align-items: center;
 }
 
-/* Modern Date Picker UI */
-#bookingDate {
+/* Modern Date Picker UI — shared by all date inputs */
+#bookingDate,
+#regBirthday {
     background-color: #ffffff !important;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ff4d4d' class='bi bi-calendar-event' viewBox='0 0 16 16'%3E%3Cpath d='M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z'/%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
@@ -256,6 +257,20 @@ body {
     background-size: 20px !important;
     width: 100% !important;
     padding-right: 45px !important;
+}
+
+/* Hide default browser calendar picker icon but keep it fully clickable */
+#bookingDate::-webkit-calendar-picker-indicator,
+#regBirthday::-webkit-calendar-picker-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
 }
 
 /* Ensure Flatpickr wrapper doesn't shrink the input */

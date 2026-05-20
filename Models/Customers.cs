@@ -10,9 +10,8 @@ namespace ArcheryAlley.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int CustomerId { get; set; }
 
-        [Required]
         [StringLength(100)]
-        public string FullName { get; set; }
+        public string? FullName { get; set; }
 
         [Required]
         [StringLength(150)]
@@ -22,20 +21,20 @@ namespace ArcheryAlley.Models
         [StringLength(50)]
         public string Username { get; set; }
 
-        [Required]
         [StringLength(20)]
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
 
         [Required]
         [StringLength(50)]
         public string Password { get; set; }
 
-        [Required]
-        public DateTime Birthday { get; set; }
+        public DateTime? Birthday { get; set; }
 
-        [Required]
         [StringLength(250)]
-        public string Address { get; set; }
+        public string? Address { get; set; }
+
+        [StringLength(20)]
+        public string Status { get; set; } = "Inactive";
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }

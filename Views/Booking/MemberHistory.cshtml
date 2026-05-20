@@ -1,0 +1,661 @@
+@using Microsoft.AspNetCore.Http
+@model List<ArcheryAlley.Models.BookingHistoryViewModel>
+@{
+    ViewData["Title"] = "Booking History";
+    Layout = "_MemberLayout";
+}
+
+@section Styles {
+<style>
+    .history-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        animation: fadeIn 0.6s ease;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+        margin-bottom: 30px;
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+        font-weight: 900;
+        color: #fff;
+        letter-spacing: -0.5px;
+        margin: 0 0 4px 0;
+    }
+
+    .page-subtitle {
+        font-size: 0.82rem;
+        color: var(--text-dim);
+        margin: 0;
+    }
+
+    /* ── FILTER BAR ── */
+    .filter-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        display: flex;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 10px 16px;
+        gap: 10px;
+        flex: 1;
+        min-width: 220px;
+        max-width: 320px;
+        transition: all 0.2s;
+    }
+
+    .search-box:focus-within {
+        border-color: rgba(255, 77, 77, 0.4);
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .search-box i { color: var(--text-dim); font-size: 0.9rem; }
+
+    .search-box input {
+        background: none;
+        border: none;
+        outline: none;
+        color: #fff;
+        font-size: 0.85rem;
+        width: 100%;
+    }
+
+    .search-box input::placeholder { color: var(--text-dim); }
+
+    .filter-select {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 10px 16px;
+        color: #fff;
+        font-size: 0.85rem;
+        outline: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        appearance: none;
+        -webkit-appearance: none;
+        padding-right: 32px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23a1a1aa' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+    }
+
+    .filter-select:focus {
+        border-color: rgba(255, 77, 77, 0.4);
+    }
+
+    .filter-select option {
+        background: #1a1e28;
+        color: #fff;
+    }
+
+    .filter-summary {
+        margin-left: auto;
+        font-size: 0.78rem;
+        color: var(--text-dim);
+        white-space: nowrap;
+    }
+
+    /* ── TABLE CARD ── */
+    .table-card {
+        background: rgba(34, 38, 48, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.83rem;
+    }
+
+    .history-table thead tr {
+        background: rgba(255, 255, 255, 0.02);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .history-table thead th {
+        padding: 14px 18px;
+        text-align: left;
+        font-size: 0.68rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-dim);
+        white-space: nowrap;
+    }
+
+    .history-table tbody tr {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        transition: background 0.15s ease;
+    }
+
+    .history-table tbody tr:last-child { border-bottom: none; }
+
+    .history-table tbody tr:hover {
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .history-table tbody td {
+        padding: 16px 18px;
+        vertical-align: middle;
+        color: #fff;
+    }
+
+    /* ── COLUMN STYLES ── */
+    .col-ref {
+        font-weight: 800;
+        font-size: 0.82rem;
+        color: var(--text-dim);
+        font-family: 'Courier New', monospace;
+        letter-spacing: 0.5px;
+    }
+
+    .col-session { white-space: nowrap; }
+
+    .col-date {
+        color: var(--text-dim);
+        white-space: nowrap;
+        font-size: 0.82rem;
+    }
+
+    .col-date .date-main { color: #fff; font-weight: 600; }
+    .col-date .date-time { font-size: 0.72rem; color: var(--text-dim); }
+
+    .col-time { white-space: nowrap; font-weight: 700; }
+
+    .col-lane {
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
+    .col-amount {
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .col-status { text-align: right; white-space: nowrap; }
+
+    /* ── SESSION TYPE BADGES ── */
+    .badge-session {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    .badge-game {
+        background: rgba(255, 77, 77, 0.12);
+        color: #FF4D4D;
+        border: 1px solid rgba(255, 77, 77, 0.25);
+    }
+
+    .badge-self-train {
+        background: rgba(168, 85, 247, 0.12);
+        color: #C084FC;
+        border: 1px solid rgba(168, 85, 247, 0.25);
+    }
+
+    .badge-class {
+        background: rgba(59, 130, 246, 0.12);
+        color: #60A5FA;
+        border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+
+    /* ── STATUS BADGES ── */
+    .badge-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-confirmed {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10B981;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .status-cancelled {
+        background: rgba(239, 68, 68, 0.1);
+        color: #EF4444;
+        border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .status-pending {
+        background: rgba(250, 204, 21, 0.1);
+        color: #FBBF24;
+        border: 1px solid rgba(250, 204, 21, 0.25);
+    }
+
+    /* ── AMOUNT ── */
+    .amount-value { color: #fff; }
+    .amount-foc   { color: #FBBF24; }
+
+    /* ── LANE CHIPS ── */
+    .lane-chip {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        padding: 2px 8px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        margin: 2px;
+        color: #fff;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+    }
+
+    .empty-state i {
+        font-size: 3.5rem;
+        color: rgba(255, 255, 255, 0.1);
+        display: block;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h5 {
+        color: #fff;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+
+    .empty-state p {
+        color: var(--text-dim);
+        font-size: 0.85rem;
+        margin-bottom: 24px;
+    }
+
+    /* ── PAGINATION ── */
+    .pagination-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.04);
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .page-info {
+        font-size: 0.8rem;
+        color: var(--text-dim);
+    }
+
+    .page-controls {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .page-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text-dim);
+        font-size: 0.8rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .page-btn:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .page-btn.active {
+        background: var(--primary);
+        color: #000;
+        border-color: var(--primary);
+        font-weight: 800;
+    }
+
+    .page-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+</style>
+}
+
+<div class="history-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">Booking History</h1>
+        <p class="page-subtitle">All your past and upcoming reservations in one place.</p>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="searchInput" placeholder="Search by ref, date, type…" oninput="applyFilters()">
+        </div>
+
+        <select class="filter-select" id="typeFilter" onchange="applyFilters()">
+            <option value="">All Session Types</option>
+            <option value="game">Game Session</option>
+            <option value="self_training">Self Training</option>
+            <option value="class">Class Session</option>
+        </select>
+
+        <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+            <option value="">All Statuses</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="pending">Pending</option>
+        </select>
+
+        <span class="filter-summary" id="resultSummary"></span>
+    </div>
+
+    <!-- Table Card -->
+    <div class="table-card">
+        <div style="overflow-x: auto;">
+            <table class="history-table" id="historyTable">
+                <thead>
+                    <tr>
+                        <th>Ref #</th>
+                        <th>Session Type</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Lane / Target</th>
+                        <th>Duration</th>
+                        <th>Amount</th>
+                        <th style="text-align:right;">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            // Determine session type
+                            string sessionType = "game";
+                            string sessionLabel = "Game Session";
+                            string sessionIcon = "bi-bullseye";
+                            string sessionBadge = "badge-game";
+
+                            if (item.RateCode == "CLASS")
+                            {
+                                sessionType = "class";
+                                sessionLabel = "Class Session";
+                                sessionIcon = "bi-mortarboard";
+                                sessionBadge = "badge-class";
+                            }
+                            else if (item.RateCode == "SELF_TRAINING" || (item.Slot != null && item.Slot.SlotStartTime.Hours >= 18))
+                            {
+                                sessionType = "self_training";
+                                sessionLabel = "Self Training";
+                                sessionIcon = "bi-moon-stars";
+                                sessionBadge = "badge-self-train";
+                            }
+
+                            // Status
+                            string statusClass = "status-pending";
+                            string statusLabel = "Pending";
+                            string statusIcon = "bi-clock";
+                            if (item.Status == 1) { statusClass = "status-confirmed"; statusLabel = "Confirmed"; statusIcon = "bi-patch-check-fill"; }
+                            else if (item.Status == 2) { statusClass = "status-cancelled"; statusLabel = "Cancelled"; statusIcon = "bi-x-circle-fill"; }
+
+                            <tr class="history-row"
+                                data-type="@sessionType"
+                                data-status="@statusLabel.ToLower()"
+                                data-search="@item.GroupId @item.ReservedOn.ToString("dd MMM yyyy") @sessionLabel @statusLabel">
+                                <!-- REF -->
+                                <td class="col-ref">#@item.GroupId.ToString("D4")</td>
+
+                                <!-- SESSION TYPE -->
+                                <td class="col-session">
+                                    <span class="badge-session @sessionBadge">
+                                        <i class="bi @sessionIcon"></i>@sessionLabel
+                                    </span>
+                                </td>
+
+                                <!-- DATE -->
+                                <td class="col-date">
+                                    <div class="date-main">@item.ReservedOn.ToString("dd MMM yyyy")</div>
+                                    <div class="date-time">@item.ReservedOn.ToString("ddd")</div>
+                                </td>
+
+                                <!-- TIME -->
+                                <td class="col-time">
+                                    @if (item.Slot != null)
+                                    {
+                                        <span>@item.Slot.SlotStartTime.ToString(@"hh\:mm") – @item.Slot.SlotEndTime.ToString(@"hh\:mm")</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="color: var(--text-dim)">—</span>
+                                    }
+                                </td>
+
+                                <!-- LANE / TARGET -->
+                                <td class="col-lane">
+                                    @foreach (var t in item.TargetNos)
+                                    {
+                                        <span class="lane-chip">Lane @t</span>
+                                    }
+                                </td>
+
+                                <!-- DURATION -->
+                                <td style="color: var(--text-dim); white-space: nowrap;">
+                                    @item.DurationHours hr@(item.DurationHours != 1 ? "s" : "")
+                                </td>
+
+                                <!-- AMOUNT -->
+                                <td class="col-amount">
+                                    @if (item.TotalPrice == 0)
+                                    {
+                                        <span class="amount-foc">FOC</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="amount-value">RM @item.TotalPrice.ToString("0.00")</span>
+                                    }
+                                </td>
+
+                                <!-- STATUS -->
+                                <td class="col-status">
+                                    <span class="badge-status @statusClass">
+                                        <i class="bi @statusIcon"></i>@statusLabel
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr id="emptyStateRow">
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <i class="bi bi-calendar-x"></i>
+                                    <h5>No Bookings Yet</h5>
+                                    <p>You haven't made any bookings. Start your archery journey today!</p>
+                                    <a href="javascript:void(0)" onclick="handleBookingClick('/Booking/GetFreeSlots')" class="btn btn-danger btn-sm mt-3" style="border-radius: 8px; padding: 8px 16px; font-weight: 600; font-size: 0.85rem;">
+                                        <i class="bi bi-plus-circle"></i> Book a Session
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Bar -->
+        <div class="pagination-bar" id="paginationBar">
+            <span class="page-info" id="pageInfo"></span>
+            <div class="page-controls" id="pageControls"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const customerStatus = "@Context.Session.GetString("CustomerStatus")" || "Inactive";
+
+    function handleBookingClick(url) {
+        if (customerStatus === "Inactive") {
+            alert("Please complete your class registration to activate your account and access booking features.");
+        } else {
+            window.location.href = url;
+        }
+    }
+
+    const ROWS_PER_PAGE = 10;
+    let currentPage = 1;
+    let visibleRows = [];
+
+    function getSessionTypeFromCode(code, slotIsNight) {
+        if (code === 'CLASS') return 'class';
+        if (code === 'SELF_TRAINING' || slotIsNight) return 'self_training';
+        return 'game';
+    }
+
+    function applyFilters() {
+        const search = document.getElementById('searchInput').value.toLowerCase();
+        const typeFilter = document.getElementById('typeFilter').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+
+        const allRows = Array.from(document.querySelectorAll('.history-row'));
+
+        visibleRows = allRows.filter(row => {
+            const rowType   = row.dataset.type;
+            const rowStatus = row.dataset.status;
+            const rowSearch = row.dataset.search.toLowerCase();
+
+            const matchSearch = !search || rowSearch.includes(search);
+            const matchType   = !typeFilter || rowType === typeFilter;
+            const matchStatus = !statusFilter || rowStatus === statusFilter;
+
+            row.style.display = 'none';
+            return matchSearch && matchType && matchStatus;
+        });
+
+        currentPage = 1;
+        renderPage();
+    }
+
+    function renderPage() {
+        const total = visibleRows.length;
+        const totalPages = Math.max(1, Math.ceil(total / ROWS_PER_PAGE));
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const start = (currentPage - 1) * ROWS_PER_PAGE;
+        const end   = Math.min(start + ROWS_PER_PAGE, total);
+
+        // Hide all visible rows first
+        visibleRows.forEach((r, i) => {
+            r.style.display = (i >= start && i < end) ? '' : 'none';
+        });
+
+        // Summary
+        document.getElementById('resultSummary').textContent =
+            total === 0 ? 'No results' : `${total} booking${total !== 1 ? 's' : ''} found`;
+
+        // Empty state inside table
+        const noResultRow = document.getElementById('noResultRow');
+        const hasAnyHistory = document.querySelectorAll('.history-row').length > 0;
+        
+        if (total === 0 && hasAnyHistory) {
+            if (!noResultRow) {
+                const tr = document.createElement('tr');
+                tr.id = 'noResultRow';
+                tr.innerHTML = `<td colspan="8" style="text-align:center; padding:50px; color: var(--text-dim);">
+                    <i class="bi bi-search" style="font-size:2rem; display:block; margin-bottom:12px; opacity:0.3;"></i>
+                    No bookings match your filters.
+                </td>`;
+                document.getElementById('tableBody').appendChild(tr);
+            }
+        } else {
+            if (noResultRow) noResultRow.remove();
+        }
+
+        // Page info
+        document.getElementById('pageInfo').textContent =
+            total === 0 ? '' : `Page ${currentPage} of ${totalPages}  ·  Showing ${start + 1}–${end} of ${total}`;
+
+        // Page buttons
+        const controls = document.getElementById('pageControls');
+        controls.innerHTML = '';
+
+        // Prev
+        const prev = document.createElement('button');
+        prev.className = 'page-btn';
+        prev.innerHTML = '<i class="bi bi-chevron-left"></i>';
+        prev.disabled = currentPage === 1;
+        prev.onclick = () => { currentPage--; renderPage(); };
+        controls.appendChild(prev);
+
+        // Page number buttons (max 5 visible)
+        const range = 2;
+        for (let p = 1; p <= totalPages; p++) {
+            if (p === 1 || p === totalPages || Math.abs(p - currentPage) <= range) {
+                const btn = document.createElement('button');
+                btn.className = 'page-btn' + (p === currentPage ? ' active' : '');
+                btn.textContent = p;
+                btn.onclick = (pp => () => { currentPage = pp; renderPage(); })(p);
+                controls.appendChild(btn);
+            } else if (Math.abs(p - currentPage) === range + 1) {
+                const dots = document.createElement('span');
+                dots.textContent = '…';
+                dots.style.cssText = 'color: var(--text-dim); padding: 0 4px; font-size: 0.85rem;';
+                controls.appendChild(dots);
+            }
+        }
+
+        // Next
+        const next = document.createElement('button');
+        next.className = 'page-btn';
+        next.innerHTML = '<i class="bi bi-chevron-right"></i>';
+        next.disabled = currentPage === totalPages;
+        next.onclick = () => { currentPage++; renderPage(); };
+        controls.appendChild(next);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        applyFilters(); // initialise with no filter
+    });
+</script>
+}

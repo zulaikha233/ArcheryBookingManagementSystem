@@ -1,0 +1,803 @@
+@{
+    ViewBag.Title = "Member Registration & Class Onboarding";
+}
+
+<style>
+    .wizard-container {
+        max-width: 1200px;
+        margin: 40px auto;
+    }
+
+    /* Standardized Stepper (Matches Booking Progress) */
+    .step-indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 40px;
+    }
+
+    .step {
+        text-align: center;
+        opacity: 0.4;
+        transition: all 0.3s ease;
+    }
+
+    .step.active { 
+        opacity: 1; 
+    }
+
+    .step span {
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        margin: 0 auto 10px;
+        font-weight: 800;
+        color: var(--text-dim);
+        transition: all 0.3s ease;
+    }
+
+    .step.active span {
+        background: var(--primary);
+        color: #000;
+        border: none;
+        box-shadow: 0 0 25px var(--primary-glow);
+    }
+
+    .step p { 
+        font-size: 0.7rem; 
+        text-transform: uppercase; 
+        margin: 0; 
+        letter-spacing: 2px; 
+        color: var(--text-dim); 
+        font-weight: 700; 
+        transition: all 0.3s ease;
+    }
+    
+    .step.active p { 
+        color: var(--primary); 
+    }
+
+    .step-line {
+        width: 80px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.08);
+        margin-top: -25px;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+    }
+    
+    .step-line.active {
+        background: var(--primary);
+        box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    /* Wizard Forms */
+    .wizard-step-section {
+        display: none;
+        animation: fadeIn 0.5s ease forwards;
+    }
+
+    .wizard-step-section.active {
+        display: block;
+    }
+
+    .step-card {
+        background-color: var(--bg-card);
+        border-radius: var(--radius-md);
+        padding: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.08); /* Clear, beautiful visible border */
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+        position: relative;
+    }
+
+    .step-header {
+        border-bottom: 1px dashed var(--border-color);
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+
+    .step-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.3px;
+        margin: 0;
+    }
+
+    /* Package & Method Selection */
+    .package-grid, .method-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .selection-card {
+        background: rgba(255, 255, 255, 0.01);
+        border: 2px solid var(--border-color);
+        border-radius: 16px;
+        padding: 30px 25px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .selection-card:hover {
+        border-color: rgba(255, 77, 77, 0.3);
+        background: rgba(255, 255, 255, 0.03);
+        transform: translateY(-3px);
+    }
+
+    .selection-card.selected {
+        border-color: var(--primary) !important;
+        background: var(--primary) !important;
+        color: #000 !important;
+        box-shadow: 0 15px 35px var(--primary-glow) !important;
+        transform: translateY(-5px);
+    }
+
+    .selection-card.selected::after {
+        content: '\e272';
+        font-family: 'bootstrap-icons';
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        color: #000 !important;
+        font-size: 1.4rem;
+        font-weight: 800;
+    }
+
+    /* Target all descendants of selected selection-card to make text readable */
+    .selection-card.selected h2,
+    .selection-card.selected h4,
+    .selection-card.selected .price-display,
+    .selection-card.selected .currency,
+    .selection-card.selected .amount,
+    .selection-card.selected .period,
+    .selection-card.selected p,
+    .selection-card.selected .text-dim,
+    .selection-card.selected .benefit-list li,
+    .selection-card.selected .benefit-list i {
+        color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    .pricing-card {
+        padding: 40px 30px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .price-display {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        margin-top: 1.5rem;
+    }
+
+    .currency {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dim);
+    }
+
+    .amount {
+        font-size: 3.2rem;
+        font-weight: 900;
+        line-height: 1;
+        margin: 0 5px;
+        transition: all 0.3s ease;
+    }
+
+    .selection-card.selected .amount {
+        color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    .period {
+        color: var(--text-dim);
+        font-size: 0.95rem;
+    }
+
+    .benefit-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .benefit-list li {
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.85rem;
+        color: var(--text-dim);
+    }
+
+    .benefit-list i {
+        font-size: 1rem;
+    }
+
+    .fw-900 { font-weight: 900; }
+
+    .pax-counter-box {
+        margin-top: 20px;
+        background: rgba(0,0,0,0.25);
+        padding: 20px;
+        border-radius: 14px;
+        border: 1px solid var(--border-color);
+        display: none;
+    }
+
+    .selection-card.selected .pax-counter-box {
+        display: block !important;
+        animation: slideDown 0.3s ease;
+        background: rgba(0,0,0,0.15) !important;
+        border-color: rgba(0,0,0,0.15) !important;
+    }
+
+    .pax-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .pax-btn:hover {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #000;
+    }
+
+    /* Style overrides for pax box items inside the solid selected state */
+    .selection-card.selected .pax-counter-box label,
+    .selection-card.selected .pax-counter-box span,
+    .selection-card.selected .pax-counter-box .pax-value {
+        color: #000 !important;
+    }
+
+    .selection-card.selected .pax-btn {
+        border-color: rgba(0, 0, 0, 0.2) !important;
+        background: rgba(0, 0, 0, 0.05) !important;
+        color: #000 !important;
+    }
+
+    .selection-card.selected .pax-btn:hover {
+        background: #000 !important;
+        color: var(--primary) !important;
+    }
+
+    .pax-value {
+        font-size: 1.3rem;
+        font-weight: 800;
+        width: 45px;
+        text-align: center;
+        color: #fff;
+    }
+
+    /* Live Summary Card */
+    .live-summary-card {
+        background: linear-gradient(145deg, #131924, #080c11);
+        border-radius: var(--radius-md);
+        padding: 35px;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        position: sticky;
+        top: 30px;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 14px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .summary-label {
+        color: var(--text-dim);
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .summary-val {
+        font-weight: 750;
+        color: #fff;
+    }
+
+    /* Payment Panel Selection */
+    .pay-card-option {
+        border: 1px solid var(--border-color);
+        background: rgba(255,255,255,0.01);
+        border-radius: 14px;
+        padding: 18px;
+        margin-bottom: 15px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        transition: 0.2s;
+    }
+
+    .pay-card-option input {
+        accent-color: var(--primary);
+        width: 20px;
+        height: 20px;
+    }
+
+    .pay-card-option.selected {
+        border-color: var(--primary);
+        background: rgba(255, 77, 77, 0.03);
+    }
+
+    /* Modal Overlay Success */
+    .success-modal-overlay {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(3, 7, 12, 0.95); backdrop-filter: blur(20px);
+        display: none; align-items: center; justify-content: center; z-index: 99999;
+    }
+
+    .success-modal {
+        background: #0d121c; border: 1px solid rgba(255,255,255,0.05); border-radius: 36px;
+        padding: 60px 45px; text-align: center; max-width: 500px; width: 90%;
+        box-shadow: 0 45px 120px rgba(0, 0, 0, 0.9);
+    }
+
+    .success-badge-icon {
+        width: 88px; height: 88px; border-radius: 28px; background: var(--primary);
+        color: #000; font-size: 2.8rem; display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 25px; box-shadow: 0 20px 40px var(--primary-glow);
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @@keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<!-- Fullscreen Success Modal Overlay -->
+<div id="registrationSuccessModal" class="success-modal-overlay">
+    <div class="success-modal">
+        <div class="success-badge-icon"><i class="bi bi-check-lg"></i></div>
+        <h3 class="fw-extrabold text-white mb-2" style="font-size: 2rem;">REGISTRATION SUCESSFUL !</h3>
+        <p class="text-dim mb-4" style="font-size: 0.95rem;">Welcome to the Arena. Your membership has been activated and let's book your class session now !</p>
+        
+        <div class="p-3 mb-4" style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); border-radius: 18px; text-align: left;">
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-dim small">TRANSACTION ID:</span>
+                <span class="text-white fw-bold small" id="resTxId">TXN-XXXXXX</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-dim small">CLASS PACKAGE:</span>
+                <span class="text-white fw-bold small" id="resPackage">6 Slots</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-dim small">MEMBERSHIP FEE:</span>
+                <span class="text-white fw-bold small">RM 80.00 (Annual)</span>
+            </div>
+            <div class="d-flex justify-content-between pt-2 border-top border-secondary">
+                <span class="text-dim small font-weight-bold">TOTAL PAID:</span>
+                <span class="text-primary fw-extrabold" id="resTotal">RM 450.00</span>
+            </div>
+        </div>
+
+        <button class="btn-premium w-100 justify-content-center" onclick="window.location.href='/Account/MemberDashboard'" style="padding: 15px;">
+            ENTER MEMBER PORTAL <i class="bi bi-arrow-right ms-2"></i>
+        </button>
+    </div>
+</div>
+
+<div class="wizard-container py-3">
+    <!-- Page Main Header -->
+    <div class="text-center mb-5">
+        <h1 class="text-white fw-extrabold mb-2" style="font-size: 2.6rem; letter-spacing: -0.5px;">MEMBER <span style="color: var(--primary);">ONBOARDING</span></h1>
+        <p class="text-dim">Fill in your member profile details and register for your annual class sessions.</p>
+    </div>
+
+    <!-- Step Tracker Header (Standardized) -->
+    <div class="step-indicator mb-5">
+        <div class="step active" id="trackStep-1">
+            <span>1</span>
+            <p>Personal Details</p>
+        </div>
+        <div class="step-line" id="trackLine-1"></div>
+        <div class="step" id="trackStep-2">
+            <span>2</span>
+            <p>Class Package</p>
+        </div>
+        <div class="step-line" id="trackLine-2"></div>
+        <div class="step" id="trackStep-3">
+            <span>3</span>
+            <p>Payment</p>
+        </div>
+    </div>
+
+    <!-- Error/Notice Alert Box -->
+    <div class="alert mb-4" id="wizardAlertBox" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; border-radius: 16px; display: none;">
+        <i class="bi bi-exclamation-circle me-2"></i> <span id="wizardAlertMessage"></span>
+    </div>
+
+    <!-- Master Row layout -->
+    <div class="row g-4">
+        <!-- Left Side: Wizard Forms -->
+        <div class="col-lg-12" id="wizFormCol" style="transition: all 0.3s ease;">
+            
+            <!-- STEP 1: Personal Details -->
+            <div class="wizard-step-section active" id="stepSection-1">
+                <div class="step-card">
+                    <div class="step-header d-flex align-items-center justify-content-between">
+                        <h3 class="step-title">CREATE ACCOUNT PROFILE</h3>
+                        <span class="text-dim small fw-bold">Step 1 of 4</span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Full Name</label>
+                            <input type="text" id="regFullName" class="form-control" placeholder="e.g. Aminah Talib" required />
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Phone Number</label>
+                            <input type="text" id="regPhoneNumber" class="form-control" placeholder="0123456789" required />
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Birthday</label>
+                            <input type="date" id="regBirthday" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Address</label>
+                            <input type="text" id="regAddress" class="form-control" placeholder="e.g. 123 Jalan Ampang, KL" required />
+                        </div>
+                    </div>
+
+
+
+                    <div class="d-flex justify-content-end gap-3 mt-4">
+                        <button type="button" class="btn-premium" onclick="goToStep(2)">NEXT</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: Choose Class Package -->
+            <div class="wizard-step-section" id="stepSection-2">
+                <div class="step-card">
+                    <div class="step-header d-flex align-items-center justify-content-between">
+                        <h3 class="step-title">SELECT CLASS SESSION PACKAGE</h3>
+                        <span class="text-dim small fw-bold">Step 2 of 4</span>
+                    </div>
+                    <p class="text-dim small mb-4">Weekend coaching class sessions require active members to choose one starter package.</p>
+                    
+                    <div class="package-grid">
+                        <div class="selection-card pricing-card text-center h-100 selected" id="opt-pkg-4slots" onclick="selectWizardPackage('4slots', 150.00, '2 Session (4 Slots)')">
+                            <h2 class="fw-900 mb-2">2 Session (4 Slots)</h2>
+                            <div class="price-display">
+                                <span class="currency">RM</span>
+                                <span class="amount">150</span>
+                                <span class="period">/ Starter</span>
+                            </div>
+                            <p class="text-dim mt-3" style="font-size: 0.85rem;">Comprises 4 total instruction hours scheduled across 2 weekend slots. Perfect for beginners.</p>
+                            <ul class="benefit-list text-start mt-4 mb-0" style="padding-left: 20px;">
+                                <li><i class="bi bi-check-circle-fill text-primary"></i> 4 Instruction Hours</li>
+                                <li><i class="bi bi-check-circle-fill text-primary"></i> 2 Weekend Sessions</li>
+                                <li><i class="bi bi-check-circle-fill text-primary"></i> Certified Coaching Included</li>
+                            </ul>
+                        </div>
+
+                        <div class="selection-card pricing-card text-center h-100" id="opt-pkg-6slots" onclick="selectWizardPackage('6slots', 210.00, '6 Slots')">
+                            <h2 class="fw-900 mb-2">6 Slots Package</h2>
+                            <div class="price-display">
+                                <span class="currency">RM</span>
+                                <span class="amount">210</span>
+                                <span class="period">/ Best Value</span>
+                            </div>
+                            <p class="text-dim mt-3" style="font-size: 0.85rem;">Unlocks 6 instruction hours with certified coaches on weekends. Excellent value.</p>
+                            <ul class="benefit-list text-start mt-4 mb-0" style="padding-left: 20px;">
+                                <li><i class="bi bi-check-circle-fill text-primary"></i> 6 Instruction Hours</li>
+                                <li><i class="bi bi-check-circle-fill text-primary"></i> 6 Weekend Sessions</li>
+                                <li><i class="bi bi-check-circle-fill text-primary"></i> Best Value For Progression</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between gap-3 mt-5">
+                        <button type="button" class="btn-premium-outline" onclick="goToStep(1)">BACK</button>
+                        <button type="button" class="btn-premium" onclick="goToStep(3)">NEXT</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: Checkout & Payment Options -->
+            <div class="wizard-step-section" id="stepSection-3">
+                <div class="step-card">
+                    <div class="step-header d-flex align-items-center justify-content-between">
+                        <h3 class="step-title">CHOOSE SECURE PAYMENT METHOD</h3>
+                        <span class="text-dim small fw-bold">Step 3 of 3</span>
+                    </div>
+
+                    <div class="pay-card-option selected" id="wiz-pay-fpx" onclick="selectWizardPayment('fpx')">
+                        <input type="radio" name="wizPaymentOption" value="fpx" checked />
+                        <div class="d-flex flex-column">
+                            <span class="text-white fw-bold mb-1" style="font-size: 0.95rem;">FPX Online Banking</span>
+                            <span class="text-dim small" style="font-size: 0.75rem;">Fast, secure redirection to your retail banking portal</span>
+                        </div>
+                    </div>
+
+                    <div id="wizFpxBankSelect" class="p-3 mb-4" style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px;">
+                        <select class="form-select form-control" id="wizSelectedBank" style="background-color: transparent; border: none; color: #fff; font-weight: 700;">
+                            <option value="" style="background-color: #ffffff; color: #000000;">-- Choose Retail Bank --</option>
+                            <option value="Maybank2U" style="background-color: #ffffff; color: #000000;">Maybank2U</option>
+                            <option value="CIMB Clicks" style="background-color: #ffffff; color: #000000;">CIMB Clicks</option>
+                            <option value="Public Bank" style="background-color: #ffffff; color: #000000;">Public Bank</option>
+                            <option value="RHB Now" style="background-color: #ffffff; color: #000000;">RHB Now</option>
+                            <option value="Bank Islam" style="background-color: #ffffff; color: #000000;">Bank Islam</option>
+                        </select>
+                    </div>
+
+                    <div class="pay-card-option" id="wiz-pay-card" onclick="selectWizardPayment('card')">
+                        <input type="radio" name="wizPaymentOption" value="card" />
+                        <div class="d-flex flex-column">
+                            <span class="text-white fw-bold mb-1" style="font-size: 0.95rem;">Credit / Debit Card</span>
+                            <span class="text-dim small" style="font-size: 0.75rem;">Visa, Mastercard & American Express are accepted</span>
+                        </div>
+                    </div>
+
+                    <div id="wizCardDetails" class="p-3 mb-4" style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; display: none;">
+                        <input type="text" class="form-control mb-3" placeholder="Card Number" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff;" />
+                        <div class="row g-2">
+                            <div class="col-6"><input type="text" class="form-control" placeholder="MM/YY" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff;" /></div>
+                            <div class="col-6"><input type="text" class="form-control" placeholder="CVV" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff;" /></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between gap-3 mt-5">
+                        <button type="button" class="btn-premium-outline" onclick="goToStep(2)">BACK</button>
+                        <button type="button" class="btn-premium" id="wizPayBtn" onclick="submitWizCompleteRegistration()">
+                            SECURE PAYMENT NOW <i class="bi bi-shield-lock-fill ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Sticky Checkout / Summary Details -->
+        <div class="col-lg-5 d-none" id="wizSummaryCol" style="transition: all 0.3s ease;">
+            <div class="live-summary-card">
+                <h3 class="fw-bold text-white mb-4" style="font-size: 1.25rem; letter-spacing: 0.3px;">LIVE ORDER SUMMARY</h3>
+
+                <div class="summary-row">
+                    <span class="summary-label">Annual Registration Fee</span>
+                    <span class="summary-val text-white">RM 80.00</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label" id="wizSummaryPackageLabel">2 Session (4 Slots)</span>
+                    <span class="summary-val text-white" id="wizSummaryPackagePrice">RM 150.00</span>
+                </div>
+                <div class="summary-row mt-4 pt-3 border-top" style="border-color: rgba(255,255,255,0.1) !important;">
+                    <span class="text-white fw-extrabold" style="font-size: 1.05rem;">TOTAL CHARGE</span>
+                    <span class="text-primary fw-extrabold" style="font-size: 2rem;" id="wizSummaryTotalPrice">RM 230.00</span>
+                </div>
+
+                <!-- Step Completion Helper -->
+                <div class="mt-4 p-3 rounded-lg" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.02); border-radius: 12px;">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-info-circle-fill text-primary" style="font-size: 1.25rem;"></i>
+                        <p class="text-dim small m-0" style="font-size: 0.8rem; line-height: 1.4;">Class sessions are held every weekend. Select slots later in the member dashboard after payment.</p>
+                    </div>
+                </div>
+
+                <div class="text-center pt-4 mt-4 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
+                    <p class="text-dim mb-2 small">Already have a membership?</p>
+                    <a href="@Url.Action("CustomerLogin", "Account")" class="text-decoration-none fw-bold" style="color: var(--primary); font-size: 0.8rem; letter-spacing: 0.5px;">
+                        LOGIN HERE <i class="bi bi-chevron-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // State Tracking variables
+    let currentStep = 1;
+    
+    // Step 2 variables
+    let selPackageId = '4slots';
+    let selPackageName = '2 Session (4 Slots)';
+    let selPackagePrice = 150.00;
+
+    // Step 3 variables
+    let annualFee = 80.00;
+    let totalDuePrice = 230.00;
+    let selPayment = 'fpx';
+
+    function showWizardAlert(msg) {
+        document.getElementById('wizardAlertMessage').innerText = msg;
+        document.getElementById('wizardAlertBox').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function hideWizardAlert() {
+        document.getElementById('wizardAlertBox').style.display = 'none';
+    }
+
+    function goToStep(step) {
+        hideWizardAlert();
+
+        // If trying to move forward from Step 1, perform simple validations
+        if (step > 1 && currentStep === 1) {
+            const fullName = document.getElementById('regFullName').value.trim();
+            const phone = document.getElementById('regPhoneNumber').value.trim();
+            const birthday = document.getElementById('regBirthday').value.trim();
+            const address = document.getElementById('regAddress').value.trim();
+
+            if (!fullName || !phone || !birthday || !address) {
+                showWizardAlert("Please fill in all details in Step 1 before proceeding.");
+                return;
+            }
+        }
+
+        // Deactivate current section and activate next
+        document.querySelectorAll('.wizard-step-section').forEach(s => s.classList.remove('active'));
+        document.getElementById(`stepSection-${step}`).classList.add('active');
+
+        // Update Tracker UI (Standardized)
+        for (let i = 1; i <= 3; i++) {
+            const stepEl = document.getElementById(`trackStep-${i}`);
+            if (i <= step) {
+                stepEl.classList.add('active');
+            } else {
+                stepEl.classList.remove('active');
+            }
+
+            if (i < 3) {
+                const lineEl = document.getElementById(`trackLine-${i}`);
+                if (i < step) {
+                    lineEl.classList.add('active');
+                } else {
+                    lineEl.classList.remove('active');
+                }
+            }
+        }
+
+        // Update Columns layout dynamically
+        const formCol = document.getElementById('wizFormCol');
+        const summaryCol = document.getElementById('wizSummaryCol');
+        if (step === 3) {
+            formCol.classList.remove('col-lg-12');
+            formCol.classList.add('col-lg-7');
+            summaryCol.classList.remove('d-none');
+        } else {
+            formCol.classList.remove('col-lg-7');
+            formCol.classList.add('col-lg-12');
+            summaryCol.classList.add('d-none');
+        }
+
+        currentStep = step;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Step 2 selector
+    function selectWizardPackage(pkgId, price, displayName) {
+        document.querySelectorAll('#stepSection-2 .selection-card').forEach(c => c.classList.remove('selected'));
+        document.getElementById(`opt-pkg-${pkgId}`).classList.add('selected');
+
+        selPackageId = pkgId;
+        selPackagePrice = price;
+        selPackageName = displayName;
+
+        updateWizardSummary();
+    }
+
+
+
+    // Step 4 Payment option selector
+    function selectWizardPayment(option) {
+        document.querySelectorAll('.pay-card-option').forEach(c => c.classList.remove('selected'));
+        document.getElementById(`wiz-pay-${option}`).classList.add('selected');
+        document.getElementById(`wiz-pay-${option}`).querySelector('input[type="radio"]').checked = true;
+
+        selPayment = option;
+
+        document.getElementById('wizFpxBankSelect').style.display = (option === 'fpx') ? 'block' : 'none';
+        document.getElementById('wizCardDetails').style.display = (option === 'card') ? 'block' : 'none';
+    }
+
+    function updateWizardSummary() {
+        document.getElementById('wizSummaryPackageLabel').innerText = selPackageName;
+        document.getElementById('wizSummaryPackagePrice').innerText = `RM ${selPackagePrice.toFixed(2)}`;
+
+        totalDuePrice = annualFee + selPackagePrice;
+        document.getElementById('wizSummaryTotalPrice').innerText = `RM ${totalDuePrice.toFixed(2)}`;
+    }
+
+    // Submit all details and complete registration in a single unified action
+    async function submitWizCompleteRegistration() {
+        hideWizardAlert();
+        const payBtn = document.getElementById('wizPayBtn');
+        payBtn.disabled = true;
+
+        if (selPayment === 'fpx') {
+            const bank = document.getElementById('wizSelectedBank').value;
+            if (!bank) {
+                showWizardAlert('Please choose a retail bank for your FPX online banking payment.');
+                payBtn.disabled = false;
+                return;
+            }
+            payBtn.innerHTML = `Redirecting to ${bank}... <div class="spinner-border spinner-border-sm text-light ms-2"></div>`;
+        } else {
+            payBtn.innerHTML = `Authorizing Secure Card... <div class="spinner-border spinner-border-sm text-light ms-2"></div>`;
+        }
+
+        // Simulate network redirect/authorization delay
+        await new Promise(r => setTimeout(r, 1500));
+        payBtn.innerHTML = `Activating Membership... <div class="spinner-border spinner-border-sm text-light ms-2"></div>`;
+
+        // Gather Step 1 data
+        const fullName = document.getElementById('regFullName').value.trim();
+        const phone = document.getElementById('regPhoneNumber').value.trim();
+        const birthday = document.getElementById('regBirthday').value.trim();
+        const address = document.getElementById('regAddress').value.trim();
+
+        // Gather Class data
+        const formData = new FormData();
+        formData.append('FullName', fullName);
+        formData.append('PhoneNumber', phone);
+        formData.append('Birthday', birthday);
+        formData.append('Address', address);
+
+        formData.append('PackageType', selPackageName);
+        formData.append('PackagePrice', selPackagePrice);
+        formData.append('LearningMethod', 'N/A');
+        formData.append('LearningMethodPax', 0);
+        formData.append('LearningMethodPrice', 0);
+        formData.append('AnnualFee', annualFee);
+        formData.append('TotalPrice', totalDuePrice);
+        formData.append('PaymentMethod', selPayment);
+
+        try {
+            const resp = await fetch('/Account/CompleteClassRegistration', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await resp.json();
+
+            if (result.success) {
+                document.getElementById('resTxId').innerText = result.transactionId;
+                document.getElementById('resPackage').innerText = selPackageName;
+                document.getElementById('resTotal').innerText = `RM ${totalDuePrice.toFixed(2)}`;
+                
+                // Show gorgeous fullscreen overlay success modal
+                const modal = document.getElementById('registrationSuccessModal');
+                modal.style.display = 'flex';
+            } else {
+                showWizardAlert('Registration failed: ' + result.message);
+                payBtn.disabled = false;
+                payBtn.innerHTML = `SECURE PAYMENT NOW <i class="bi bi-shield-lock-fill ms-2"></i>`;
+            }
+        } catch (err) {
+            showWizardAlert('Network error occurred. Please try again.');
+            payBtn.disabled = false;
+            payBtn.innerHTML = `SECURE PAYMENT NOW <i class="bi bi-shield-lock-fill ms-2"></i>`;
+        }
+    }
+</script>

@@ -2,78 +2,435 @@
     ViewBag.Title = "Customer Login";
 }
 
-<div class="container py-5" data-aos="fade-up">
-    <div class="row justify-content-center">
-        <div class="col-lg-11">
+<style>
+    .login-page-wrapper {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
 
-            <div class="premium-card p-0 overflow-hidden" data-aos="fade-up" data-aos-delay="200">
-                <div class="row g-0" style="min-height: 600px;">
-                    <!-- Visual Column -->
-                    <div class="col-lg-7 d-none d-lg-flex flex-column justify-content-center p-5 text-center" style="background: linear-gradient(135deg, rgba(6, 10, 15, 0.6) 0%, rgba(6, 10, 15, 0.95) 100%), url('/modern_archery_hero.png'); background-size: cover; background-position: center; border-right: 1px solid var(--card-border);">
+    .login-split-card {
+        display: flex;
+        width: 100%;
+        max-width: 920px;
+        min-height: 520px;
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+        position: relative;
+    }
 
-                        <div class="mb-4">
-                            <img src="~/images/Archery_Logo.png" alt="Logo" class="login-portal-logo" />
-                        </div>
-                        <h1 class="hero-title mb-3" style="font-size: 3.8rem;">CUSTOMER <span style="display: block;">PORTAL</span></h1>
+    /* ══════════════════════════════════
+       LEFT PANEL — Archery BG + Maroon overlay
+    ══════════════════════════════════ */
+    .login-left {
+        width: 42%;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        background:
+            linear-gradient(to right, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 100%),
+            url('/modern_archery_hero.png');
+        background-size: cover;
+        background-position: center;
+    }
 
-                        <p class="text-dim px-4">Join our elite community of archers. Manage your sessions, track progress, and claim exclusive rewards.</p>
-                    </div>
+    /* Diamond deco shapes */
+    .login-left::before {
+        content: '';
+        position: absolute;
+        top: -90px; left: -90px;
+        width: 360px; height: 360px;
+        background: rgba(255,255,255,0.07);
+        transform: rotate(45deg);
+        border-radius: 40px;
+        pointer-events: none;
+    }
 
-                    <!-- Form Column -->
-                    <div class="col-lg-5 p-5 d-flex flex-column justify-content-center" style="position: relative; z-index: 10;">
+    .login-left::after {
+        content: '';
+        position: absolute;
+        bottom: -70px; right: -70px;
+        width: 230px; height: 230px;
+        background: rgba(255,255,255,0.05);
+        transform: rotate(45deg);
+        border-radius: 22px;
+        pointer-events: none;
+    }
 
-                        <div class="mb-4 d-lg-none text-center">
-                             <h1 class="hero-title" style="font-size: 2rem;">CUSTOMER <span>PORTAL</span></h1>
-                        </div>
+    /* Chevron arrows */
+    .geo-arrow { position: absolute; width: 0; height: 0; pointer-events: none; }
+    .geo-arrow-1 { top: 32%; left: -10px; border-top: 88px solid transparent; border-bottom: 88px solid transparent; border-left: 76px solid rgba(255,255,255,0.09); }
+    .geo-arrow-2 { top: 37%; left: 52px;  border-top: 63px solid transparent; border-bottom: 63px solid transparent; border-left: 56px solid rgba(255,255,255,0.06); }
+    .geo-arrow-3 { top: 41%; left: 95px;  border-top: 43px solid transparent; border-bottom: 43px solid transparent; border-left: 42px solid rgba(255,255,255,0.04); }
 
-                        @if (ViewBag.ErrorMessage != null)
-                        {
-                            <div class="alert mb-4" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; border-radius: 16px;">
-                                <i class="bi bi-exclamation-circle me-2"></i> @ViewBag.ErrorMessage
-                            </div>
-                        }
+    /* Logo — sits below Member Portal label */
+    .login-left-logo {
+        position: relative;
+        z-index: 3;
+        width: 90px; height: 150px;
+        object-fit: contain;
+        filter: drop-shadow(0 4px 16px rgba(0,0,0,0.6));
+        margin-top: 12px;
+    }
 
-                        <form asp-action="CustomerLogin" method="post">
-                            <div class="mb-4">
-                                <label class="form-label text-dim fw-600 mb-2" style="font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase;">EMAIL ADDRESS</label>
-                                <input type="email" name="Email" class="form-control" placeholder="name@example.com" required />
-                            </div>
+    /* Title label + logo wrapper inside left panel */
+    .left-panel-header {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
 
-                            <div class="mb-5">
-                                <label class="form-label text-dim fw-600 mb-2" style="font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase;">PASSWORD</label>
-                                <input type="password" name="Password" class="form-control" placeholder="••••••••" required />
-                            </div>
+    .left-panel-title {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.65);
+        margin: 0;
+    }
 
-                            <button type="submit" class="btn-premium w-100 justify-content-center mb-4">
-                                SIGN IN <i class="bi bi-box-arrow-in-right ms-2"></i>
-                            </button>
-                        </form>
-                        
-                        <div class="text-center pt-4 border-top" style="border-color: var(--card-border) !important;">
-                            <p class="text-dim mb-3" style="font-size: 0.9rem;">Don't have an account?</p>
-                            <a href="@Url.Action("CustomerRegister", "Account")" class="btn-premium w-100 justify-content-center" style="background: transparent; border: 1px solid var(--primary); color: var(--primary); box-shadow: none;">
-                                CREATE ACCOUNT
-                            </a>
-                            
-                            <div class="mt-4">
-                                <a href="@Url.Action("GuestBooking", "Booking")" class="text-decoration-none fw-bold" style="color: var(--secondary); font-size: 0.85rem; letter-spacing: 1px;">
-                                    CONTINUE AS GUEST <i class="bi bi-chevron-right ms-1"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    /* ═══════════════════════════════════════
+       SIDEBAR TABS — exact code from user
+    ═══════════════════════════════════════ */
+    .sidebar-tabs {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        width: 100%;
+        margin-top: 0;
+        z-index: 4;
+    }
+
+    .tab-btn {
+        position: relative;
+        z-index: 2;
+        width: 140px;
+        height: 56px;
+        background: none;
+        border: none;
+        font-weight: 800;
+        font-size: 0.82rem;
+        letter-spacing: 2px;
+        color: rgba(255, 255, 255, 0.55);
+        text-align: center;
+        cursor: pointer;
+        transition: color 0.3s ease;
+        font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    }
+
+    /* Active tab — text turns dark (readable on white badge) */
+    .tab-btn.active {
+        color: #7a0020;
+    }
+
+    /* The sliding indicator pill */
+    .tab-indicator {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 140px;
+        height: 56px;
+        background-color: #1a1e28;
+        border-radius: 28px 0 0 28px;
+        z-index: 1;
+        transition: top 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    }
+
+    /* SVG curve connectors */
+    .tab-curve-top,
+    .tab-curve-bottom {
+        position: absolute;
+        right: 0;
+        width: 30px;
+        height: 30px;
+        z-index: 2;
+        pointer-events: none;
+        transition: top 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    }
+
+    /* ══════════════════════════════════
+       RIGHT PANEL
+    ══════════════════════════════════ */
+    .login-right {
+        flex: 1;
+        background: #1a1e28;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 50px 48px 50px 52px;
+        position: relative;
+        z-index: 5;
+    }
+
+    .login-avatar-icon {
+        width: 70px; height: 70px;
+        border-radius: 50%;
+        background: linear-gradient(145deg, #c0002a, #FF4D4D);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.8rem; color: #fff;
+        margin-bottom: 12px;
+        box-shadow: 0 8px 28px rgba(255,77,77,0.4);
+    }
+
+    .login-title {
+        font-size: 1.55rem;
+        font-weight: 900;
+        color: #FF4D4D;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-bottom: 28px;
+    }
+
+    /* Underline input */
+    .login-field-group {
+        width: 100%;
+        margin-bottom: 26px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-bottom: 1.5px solid rgba(255,255,255,0.13);
+        padding-bottom: 10px;
+        transition: border-color 0.3s;
+    }
+    .login-field-group:focus-within { border-bottom-color: #FF4D4D; }
+    .login-field-group i { color: rgba(255,255,255,0.28); font-size: 1.05rem; flex-shrink: 0; transition: color 0.3s; }
+    .login-field-group:focus-within i { color: #FF4D4D; }
+    .login-field-group input {
+        background: transparent !important; border: none !important;
+        outline: none !important; box-shadow: none !important;
+        color: #fff !important; font-size: 0.93rem; font-weight: 500;
+        width: 100%; padding: 0;
+        font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    }
+    .login-field-group input::placeholder { color: rgba(255,255,255,0.26); }
+
+    .login-actions-row {
+        display: flex; align-items: center;
+        justify-content: space-between;
+        width: 100%; margin-bottom: 26px;
+    }
+
+    .forgot-link {
+        font-size: 0.76rem; color: #FF4D4D;
+        text-decoration: none; font-weight: 600; transition: opacity 0.2s;
+    }
+    .forgot-link:hover { opacity: 0.70; color: #FF4D4D; }
+
+    .login-submit-btn {
+        background: linear-gradient(135deg, #FF4D4D, #c0002a);
+        border: none; color: #fff;
+        font-size: 0.75rem; font-weight: 800;
+        letter-spacing: 2px; text-transform: uppercase;
+        padding: 11px 26px; border-radius: 50px;
+        cursor: pointer; transition: all 0.3s;
+        box-shadow: 0 6px 20px rgba(255,77,77,0.35);
+    }
+    .login-submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,77,77,0.5); }
+
+    .login-divider {
+        display: flex; align-items: center;
+        width: 100%; gap: 14px; margin-bottom: 18px;
+        color: rgba(255,255,255,0.22); font-size: 0.7rem; letter-spacing: 1px;
+    }
+    .login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
+
+    .login-bottom-links { display: flex; align-items: center; gap: 16px; font-size: 0.76rem; }
+    .login-bottom-links a { color: rgba(255,255,255,0.38); text-decoration: none; font-weight: 600; transition: color 0.2s; display: flex; align-items: center; gap: 5px; }
+    .login-bottom-links a:hover { color: #FF4D4D; }
+    .login-bottom-links .divider-dot { color: rgba(255,255,255,0.1); }
+
+    .login-error-box {
+        width: 100%;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.25);
+        color: #ef4444; border-radius: 12px;
+        padding: 10px 16px; font-size: 0.8rem;
+        margin-bottom: 18px;
+        display: flex; align-items: center; gap: 8px;
+    }
+
+    /* Form transition */
+    .form-panel { width: 100%; }
+    .form-panel.hidden { display: none; }
+
+    @@media (max-width: 768px) {
+        .login-left { display: none; }
+        .login-right { padding: 40px 28px; }
+        .login-split-card { border-radius: 20px; }
+    }
+</style>
+
+<div class="login-page-wrapper">
+    <div class="login-split-card">
+
+        <!-- ── LEFT DECORATIVE PANEL ── -->
+        <div class="login-left">
+                <div class="geo-arrow geo-arrow-1"></div>
+            <div class="geo-arrow geo-arrow-2"></div>
+            <div class="geo-arrow geo-arrow-3"></div>
+
+            <div class="left-panel-header">
+                <p class="left-panel-title">Member Portal</p>
+                <img src="~/images/Archery_Logo.png" alt="Archery Logo" class="login-left-logo" />
             </div>
 
-            <div class="text-center mt-4">
-                <a href="@Url.Action("Index", "Home")" class="text-decoration-none text-dim" style="transition: var(--transition-smooth); font-size: 0.9rem;">
-                    <i class="bi bi-arrow-left me-2"></i> Back to Home
+            <!-- ── SIDEBAR TABS ── -->
+            <div class="sidebar-tabs">
+                <!-- Sliding pill -->
+                <div class="tab-indicator" id="tabIndicator"></div>
+
+                <!--
+                    curveTop: sits ABOVE the pill.
+                    Fills ONLY the bottom-right corner piece (quarter-circle).
+                    This corner piece is #1a1e28, blending pill top-right into panel.
+                    Path: arc from top-right (30,0) CCW to bottom-left (0,30),
+                    then line to bottom-right (30,30), close. Fills the bottom-right sector.
+                -->
+                <svg class="tab-curve-top" id="curveTop" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M 0 30 A 30 30 0 0 0 30 0 L 30 30 Z" fill="#1a1e28"/>
+                </svg>
+
+                <!--
+                    curveBottom: sits BELOW the pill.
+                    Fills ONLY the top-right corner piece (quarter-circle).
+                    Path: start top-left (0,0), arc CCW to bottom-right (30,30),
+                    line to top-right (30,0), close. Fills the top-right sector.
+                -->
+                <svg class="tab-curve-bottom" id="curveBottom" viewBox="0 0 30 30" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M 0 0 A 30 30 0 0 1 30 30 L 30 0 Z" fill="#1a1e28"/>
+                </svg>
+
+                <button class="tab-btn active" onclick="switchTab(this, 0)">LOGIN</button>
+                <button class="tab-btn" onclick="switchTab(this, 1)">SIGN IN</button>
+            </div>
+        </div>
+
+        <!-- ── RIGHT FORM PANEL ── -->
+        <div class="login-right">
+
+            <div class="login-avatar-icon">
+                <i class="bi bi-person-fill"></i>
+            </div>
+
+            <h2 class="login-title" id="formTitle">Login</h2>
+
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="login-error-box">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                    @ViewBag.ErrorMessage
+                </div>
+            }
+
+            <!-- Form: LOGIN -->
+            <div class="form-panel" id="panelLogin">
+                <form asp-action="CustomerLogin" method="post">
+                    <div class="login-field-group">
+                        <i class="bi bi-person-circle"></i>
+                        <input type="email" name="Email" placeholder="Email" required autocomplete="email" />
+                    </div>
+                    <div class="login-field-group">
+                        <i class="bi bi-lock-fill"></i>
+                        <input type="password" name="Password" placeholder="Password" required autocomplete="current-password" />
+                    </div>
+                    <div class="login-actions-row">
+                        <a href="#" class="forgot-link">Forgot Password?</a>
+                        <button type="submit" class="login-submit-btn">Login</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Form: SIGN IN / Register -->
+            <div class="form-panel hidden" id="panelSignin">
+                <p style="color: rgba(255,255,255,0.42); font-size:0.85rem; margin-bottom:24px; line-height:1.7;">
+                    New to Archery Alley? Create your member account to book sessions, track your progress and access exclusive member benefits.
+                </p>
+                <a href="@Url.Action("CustomerRegister", "Account")"
+                   style="display:flex; align-items:center; justify-content:center; gap:10px;
+                          background: linear-gradient(135deg,#FF4D4D,#c0002a);
+                          color:#fff; font-weight:800; font-size:0.8rem; letter-spacing:2px;
+                          text-transform:uppercase; padding:14px 28px; border-radius:50px;
+                          text-decoration:none; box-shadow:0 6px 20px rgba(255,77,77,0.35);
+                          transition:all 0.3s; width:100%;"
+                   onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 28px rgba(255,77,77,0.5)'"
+                   onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(255,77,77,0.35)'">
+                    <i class="bi bi-person-plus-fill"></i> CREATE ACCOUNT
+                </a>
+            </div>
+
+            <div class="login-divider" style="margin-top:28px;">Or</div>
+
+            <div class="login-bottom-links">
+                <a href="@Url.Action("GuestBooking", "Booking")">
+                    <i class="bi bi-box-arrow-in-right"></i> Guest
+                </a>
+                <span class="divider-dot">•</span>
+                <a href="@Url.Action("Index", "Home")">
+                    <i class="bi bi-arrow-left"></i> Home
                 </a>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    .fw-600 { font-weight: 600; }
-</style>
+<script>
+    const TAB_H = 56; // height of each tab button in px
+
+    function switchTab(element, index) {
+        // 1. Remove active from all buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+        // 2. Set active on clicked button
+        element.classList.add('active');
+
+        // 3. Move the pill indicator
+        const indicator  = document.getElementById('tabIndicator');
+        const curveTop   = document.getElementById('curveTop');
+        const curveBottom = document.getElementById('curveBottom');
+        const newTop = index * TAB_H;
+
+        indicator.style.top = newTop + 'px';
+
+        // 4. Move SVG curves: top curve sits directly above pill, bottom curve directly below
+        const CURVE_SIZE = 30;
+        curveTop.style.top    = (newTop - CURVE_SIZE) + 'px';
+        curveBottom.style.top = (newTop + TAB_H) + 'px';
+
+        // 5. Switch right panel content
+        const formTitle   = document.getElementById('formTitle');
+        const panelLogin  = document.getElementById('panelLogin');
+        const panelSignin = document.getElementById('panelSignin');
+
+        if (index === 0) {
+            formTitle.textContent = 'Login';
+            panelLogin.classList.remove('hidden');
+            panelSignin.classList.add('hidden');
+        } else {
+            formTitle.textContent = 'Sign In';
+            panelLogin.classList.add('hidden');
+            panelSignin.classList.remove('hidden');
+        }
+    }
+
+    // Init positions on load
+    document.addEventListener('DOMContentLoaded', function () {
+        const curveTop    = document.getElementById('curveTop');
+        const curveBottom = document.getElementById('curveBottom');
+        curveTop.style.top    = '-20px';
+        curveBottom.style.top = TAB_H + 'px';
+    });
+</script>

@@ -179,7 +179,21 @@
     </style>
 }
 
-<div style="min-height: 60vh;"></div>
+@if (ViewBag.ClassRegistrations == null || !((IEnumerable<dynamic>)ViewBag.ClassRegistrations).Any())
+{
+    <div class="banner-premium" style="background: linear-gradient(135deg, #131924, #1a1e28); border-radius: var(--radius-md); padding: 30px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 15px 35px rgba(0,0,0,0.4);">
+        <div>
+            <span class="badge bg-danger text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px; padding: 6px 12px; border-radius: 6px; box-shadow: 0 0 10px rgba(255,77,77,0.3);">WEEKEND CLASS</span>
+            <h2 class="text-white fw-bold mb-2" style="font-size: 1.4rem; letter-spacing: -0.5px;">Unlock Certified Archery Coaching</h2>
+            <p class="text-dim m-0" style="font-size: 0.9rem;">Register today for annual access and choose either 2 Session (4 Slots) or 6 Slots with expert coaching.</p>
+        </div>
+        <div>
+            <a href="@Url.Action("ClassRegistration", "Account")" class="btn-premium" style="padding: 12px 25px; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 0 20px rgba(255,77,77,0.4);">
+                REGISTER <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+}
 
 @*
 <div class="dashboard-grid">

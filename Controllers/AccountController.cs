@@ -61,19 +61,16 @@ namespace ArcheryAlley.Controllers
 
         public IActionResult Logout()
         {
-            // Determine where to redirect based on current session
-            bool isCustomer = !string.IsNullOrEmpty(HttpContext.Session.GetString("CustomerEmail"));
+            string userRole = HttpContext.Session.GetString("UserRole");
             
             HttpContext.Session.Clear();
 
-            if (isCustomer)
-            {
-                return RedirectToAction("CustomerLogin");
-            }
-            else
+            if (userRole == "Admin")
             {
                 return RedirectToAction("Login");
             }
+            
+            return RedirectToAction("CustomerLogin");
         }
 
         [HttpGet]
@@ -91,9 +88,10 @@ namespace ArcheryAlley.Controllers
                 if (customer != null)
                 {
                     HttpContext.Session.SetString("CustomerEmail", customer.Email);
-                    HttpContext.Session.SetString("CustomerName", customer.FullName);
+                    HttpContext.Session.SetString("CustomerName", customer.FullName ?? customer.Username);
                     HttpContext.Session.SetString("CustomerPhone", customer.PhoneNumber ?? "");
                     HttpContext.Session.SetString("CustomerUsername", customer.Username);
+                    HttpContext.Session.SetString("CustomerStatus", customer.Status ?? "Inactive");
                     HttpContext.Session.SetString("UserRole", "Member"); // Assign Member role
                     return RedirectToAction("MemberDashboard", "Account");
                 }
@@ -108,7 +106,63 @@ namespace ArcheryAlley.Controllers
             return View("~/Views/Account/MemberRegister.cshtml");
         }
 
+        [HttpPost]
+        public IActionResult CustomerRegister(string Username, string Email, string Password, string ConfirmPassword)
+        {
+            if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
+            {
+                ViewBag.ErrorMessage = "Please fill in all details.";
+                return View("~/Views/Account/MemberRegister.cshtml");
+            }
+            if (Password != ConfirmPassword)
+            {
+                ViewBag.ErrorMessage = "Passwords do not match.";
+                return View("~/Views/Account/MemberRegister.cshtml");
+            }
 
+            var existingCustomer = _repository.GetCustomerByEmail(Email);
+            if (existingCustomer != null)
+            {
+                ViewBag.ErrorMessage = "This email is already registered.";
+                return View("~/Views/Account/MemberRegister.cshtml");
+            }
+
+            var newCustomer = new Customers
+            {
+                Username = Username,
+                Email = Email,
+                Password = Password
+            };
+
+            try
+            {
+                _repository.RegisterCustomer(newCustomer);
+                
+                HttpContext.Session.SetString("CustomerEmail", newCustomer.Email);
+                HttpContext.Session.SetString("CustomerName", newCustomer.Username);
+                HttpContext.Session.SetString("CustomerPhone", "");
+                HttpContext.Session.SetString("CustomerUsername", newCustomer.Username);
+                HttpContext.Session.SetString("CustomerStatus", "Inactive");
+                HttpContext.Session.SetString("UserRole", "Member");
+                
+                return RedirectToAction("MemberDashboard", "Account");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = "An error occurred: " + ex.Message;
+                return View("~/Views/Account/MemberRegister.cshtml");
+            }
+        }
+
+        [HttpGet]
+        public IActionResult ClassRegistration()
+        {
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email))
+                return RedirectToAction("CustomerLogin");
+                
+            return View("~/Views/Account/ClassRegistration.cshtml");
+        }
 
         [HttpGet]
         public IActionResult Register()
@@ -148,40 +202,38 @@ namespace ArcheryAlley.Controllers
             }
         }
 
-
-
         [HttpPost]
         public IActionResult CompleteClassRegistration(
-            string FullName, string Username, string Email, string PhoneNumber, string Password, DateTime Birthday, string Address,
+            string FullName, string PhoneNumber, DateTime Birthday, string Address,
             string PackageType, decimal PackagePrice, string LearningMethod, int LearningMethodPax, decimal LearningMethodPrice,
             decimal AnnualFee, decimal TotalPrice, string PaymentMethod)
         {
-            if (string.IsNullOrEmpty(FullName) || string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Email) || 
-                string.IsNullOrEmpty(PhoneNumber) || string.IsNullOrEmpty(Password) || Birthday == default || string.IsNullOrEmpty(Address))
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email))
+            {
+                return Json(new { success = false, message = "Session expired. Please login again." });
+            }
+
+            if (string.IsNullOrEmpty(FullName) || string.IsNullOrEmpty(PhoneNumber) || Birthday == default || string.IsNullOrEmpty(Address))
             {
                 return Json(new { success = false, message = "Please fill in all member details." });
             }
 
-            var existingCustomer = _repository.GetCustomerByEmail(Email);
-            if (existingCustomer != null)
+            var customer = _repository.GetCustomerByEmail(email);
+            if (customer == null)
             {
-                return Json(new { success = false, message = "This email is already registered." });
+                return Json(new { success = false, message = "Customer not found." });
             }
 
-            var newCustomer = new Customers
-            {
-                FullName = FullName,
-                Username = Username,
-                Email = Email,
-                PhoneNumber = PhoneNumber,
-                Password = Password,
-                Birthday = Birthday,
-                Address = Address
-            };
+            customer.FullName = FullName;
+            customer.PhoneNumber = PhoneNumber;
+            customer.Birthday = Birthday;
+            customer.Address = Address;
+            customer.Status = "Active";
 
             var registration = new ClassRegistrations
             {
-                CustomerEmail = Email,
+                CustomerEmail = email,
                 CustomerName = FullName,
                 PackageType = PackageType,
                 PackagePrice = PackagePrice,
@@ -197,15 +249,11 @@ namespace ArcheryAlley.Controllers
 
             try
             {
-                _repository.RegisterCustomer(newCustomer);
                 _repository.RegisterClassSession(registration);
 
-                // Auto-login the customer
-                HttpContext.Session.SetString("CustomerEmail", newCustomer.Email);
-                HttpContext.Session.SetString("CustomerName", newCustomer.FullName);
-                HttpContext.Session.SetString("CustomerPhone", newCustomer.PhoneNumber ?? "");
-                HttpContext.Session.SetString("CustomerUsername", newCustomer.Username);
-                HttpContext.Session.SetString("UserRole", "Member");
+                HttpContext.Session.SetString("CustomerName", customer.FullName);
+                HttpContext.Session.SetString("CustomerPhone", customer.PhoneNumber);
+                HttpContext.Session.SetString("CustomerStatus", "Active");
 
                 return Json(new { success = true, transactionId = registration.TransactionId });
             }

@@ -18,6 +18,10 @@ namespace ArcheryAlley.Controllers
 
         public IActionResult GetFreeSlots()
         {
+            if (HttpContext.Session.GetString("CustomerStatus") == "Inactive")
+            {
+                return RedirectToAction("MemberDashboard", "Account");
+            }
             _repository.SeedFixedSlots();
             HttpContext.Session.SetString("IsGuest", "false");
             ViewBag.CustomerEmail = HttpContext.Session.GetString("CustomerEmail");
@@ -28,6 +32,10 @@ namespace ArcheryAlley.Controllers
 
         public IActionResult ClassBooking()
         {
+            if (HttpContext.Session.GetString("CustomerStatus") == "Inactive")
+            {
+                return RedirectToAction("MemberDashboard", "Account");
+            }
             _repository.SeedFixedSlots();
             HttpContext.Session.SetString("IsGuest", "false");
             ViewBag.CustomerEmail = HttpContext.Session.GetString("CustomerEmail");
@@ -496,6 +504,51 @@ namespace ArcheryAlley.Controllers
                 .ToList();
 
             return View(grouped);
+        }
+
+        public IActionResult MemberHistory()
+        {
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email))
+                return RedirectToAction("CustomerLogin", "Account");
+
+            var allSlots = _repository.GetBookingSlots();
+            var history  = _repository.GetReservationsByEmail(email);
+
+            foreach (var res in history)
+                res.Slot = allSlots.FirstOrDefault(s => s.SlotId == res.SlotId);
+
+            var grouped = history
+                .GroupBy(r => new
+                {
+                    r.CustomerName,
+                    r.SlotId,
+                    Date = r.ReservedOn.Date,
+                    r.ReservedBy,
+                    r.DurationHours,
+                    r.RateCode,
+                    r.Status
+                })
+                .Select(g => new ArcheryAlley.Models.BookingHistoryViewModel
+                {
+                    GroupId       = g.Min(r => r.ReservationId),
+                    CustomerName  = g.Key.CustomerName,
+                    CustomerEmail = g.First().CustomerEmail,
+                    ReservedBy    = g.Key.ReservedBy,
+                    ReservedOn    = g.First().ReservedOn,
+                    Slot          = g.First().Slot,
+                    TargetNos     = g.Select(r => r.TargetNo).OrderBy(t => t).ToList(),
+                    RangeNos      = g.Select(r => r.RangeNo).Distinct().OrderBy(r => r).ToList(),
+                    DurationHours = g.Key.DurationHours,
+                    TotalPrice    = g.Sum(r => r.TotalPrice),
+                    RateCode      = g.Key.RateCode,
+                    NumberOfPax   = g.Sum(r => r.NumberOfPax),
+                    Status        = g.Key.Status
+                })
+                .OrderByDescending(g => g.ReservedOn)
+                .ToList();
+
+            return View("~/Views/Booking/MemberHistory.cshtml", grouped);
         }
 
         [HttpGet]
