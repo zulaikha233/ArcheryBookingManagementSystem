@@ -57,21 +57,24 @@
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            padding: 40px 0;
+            padding: 24px 0 0;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .profile-section {
             text-align: center;
-            padding: 0 30px 30px;
+            padding: 0 20px 16px;
             border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
         }
 
         .avatar-ring {
-            width: 110px;
-            height: 110px;
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
-            margin: 0 auto 20px;
-            padding: 4px;
+            margin: 0 auto 12px;
+            padding: 3px;
             background: conic-gradient(var(--primary) 65%, transparent 65%);
             display: flex;
             align-items: center;
@@ -86,31 +89,31 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
+            font-size: 1.6rem;
             color: var(--primary);
         }
 
         .welcome-text {
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             color: var(--text-dim);
             letter-spacing: 2px;
             text-transform: uppercase;
             font-weight: 700;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
 
         .user-name {
-            font-size: 1.5rem;
+            font-size: 1.1rem;
             font-weight: 800;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
 
         .status-badge {
             background-color: rgba(16, 185, 129, 0.15);
             color: #10B981;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 700;
-            padding: 6px 14px;
+            padding: 4px 10px;
             border-radius: 20px;
             display: inline-block;
         }
@@ -118,18 +121,19 @@
         .action-btns {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin-top: 25px;
+            gap: 10px;
+            margin-top: 14px;
         }
 
         .circle-btn {
-            width: 40px; height: 40px;
+            width: 32px; height: 32px;
             border-radius: 50%;
             background-color: var(--bg-card);
             display: flex; align-items: center; justify-content: center;
             color: var(--text-dim);
             text-decoration: none;
             transition: 0.3s;
+            font-size: 0.85rem;
         }
 
         .circle-btn:hover {
@@ -140,9 +144,16 @@
 
         /* Menu */
         .menu-section {
-            padding: 30px 0;
+            padding: 20px 0;
             flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
+
+        /* Scrollbar for menu section */
+        .menu-section::-webkit-scrollbar { width: 4px; }
+        .menu-section::-webkit-scrollbar-track { background: transparent; }
+        .menu-section::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
 
         .menu-label {
             font-size: 0.7rem;
@@ -282,7 +293,12 @@
                 
                 <p class="welcome-text">WELCOME!</p>
                 <h2 class="user-name">@(Context.Session.GetString("CustomerUsername") ?? "Member")</h2>
-                <span class="status-badge">Active</span>
+                @{
+                    var status = Context.Session.GetString("CustomerStatus") ?? "Inactive";
+                    var statusBg = status == "Active" ? "rgba(16, 185, 129, 0.15)" : "rgba(245, 158, 11, 0.15)";
+                    var statusColor = status == "Active" ? "#10B981" : "#F59E0B";
+                }
+                <span class="status-badge" style="background-color: @statusBg; color: @statusColor;">@status</span>
 
                 <div class="action-btns">
                     <a href="#" class="circle-btn"><i class="bi bi-bell-fill"></i></a>
@@ -293,7 +309,6 @@
 
             <!-- Menu Navigation -->
             <div class="menu-section">
-                <p class="menu-label">MENU</p>
                 <ul class="menu-list">
                     @{
                         var currentPath = Context.Request.Path.Value;
@@ -304,8 +319,12 @@
                         var isBookingSection = isBooking || isClassBooking;
                     }
                     <li><a href="/Account/MemberDashboard" class="menu-item @(isDashboard ? "active" : "")"><i class="bi bi-house-door"></i> Dashboard</a></li>
+                    @{
+                        var statusMenu = Context.Session.GetString("CustomerStatus") ?? "Inactive";
+                        var toggleAction = statusMenu == "Active" ? "toggleBookingMenu()" : "showInactiveAlert()";
+                    }
                     <li>
-                        <a href="javascript:void(0)" class="menu-item @(isBookingSection ? "active" : "")" onclick="toggleBookingMenu()">
+                        <a href="javascript:void(0)" class="menu-item @(isBookingSection ? "active" : "")" onclick="@toggleAction">
                             <i class="bi bi-bullseye"></i> Book Session
                             <i class="bi bi-chevron-down ms-auto" id="menu-arrow" style="font-size: 0.8rem; transition: 0.3s; margin-left: auto;"></i>
                         </a>
@@ -323,7 +342,7 @@
                         </ul>
                     </li>
                     <li><a href="/Booking/MemberCalendar" class="menu-item @(isCalendar ? "active" : "")"><i class="bi bi-calendar3"></i> Calendar</a></li>
-                    <li><a href="#" class="menu-item"><i class="bi bi-clock-history"></i> History</a></li>
+                    <li><a href="/Booking/MemberHistory" class="menu-item @(currentPath.Contains("MemberHistory") ? "active" : "")"><i class="bi bi-clock-history"></i> History</a></li>
                     <li><a href="#" class="menu-item"><i class="bi bi-shield-check"></i> Progress</a></li>
                     <li><a href="#" class="menu-item"><i class="bi bi-tools"></i> Equipment</a></li>
                     <li><a href="#" class="menu-item"><i class="bi bi-calendar-check"></i> Attendance</a></li>
@@ -358,6 +377,10 @@
                 submenu.style.display = "none";
                 if (arrow) arrow.style.transform = "none";
             }
+        }
+
+        function showInactiveAlert() {
+            alert("Please complete your class registration to activate your account and access booking features.");
         }
         
         document.addEventListener("DOMContentLoaded", function() {

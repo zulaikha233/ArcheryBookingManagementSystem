@@ -1,3 +1,4 @@
+@using Microsoft.AspNetCore.Http
 @{
     ViewData["Title"] = "Member Calendar";
     Layout = "_MemberLayout";
@@ -443,7 +444,7 @@
                 <div class="calendar-month-year" id="monthYearDisplay">May 2026</div>
                 <div class="week-navigator">
                     <button class="nav-btn" onclick="shiftWeek(-1)"><i class="bi bi-chevron-left"></i></button>
-                    <button class="nav-btn" onclick="resetWeek()">Today</button>
+                    <button class="nav-btn" onclick="resetWeek()">Week</button>
                     <button class="nav-btn" onclick="shiftWeek(1)"><i class="bi bi-chevron-right"></i></button>
                 </div>
             </div>
@@ -484,6 +485,15 @@
         // Parse database reservations from ViewBag
         const rawReservations = @Html.Raw(Json.Serialize(ViewBag.Reservations));
         console.log("Reservations Loaded:", rawReservations);
+        const customerStatus = "@Context.Session.GetString("CustomerStatus")" || "Inactive";
+
+        function handleBookingClick(url) {
+            if (customerStatus === "Inactive") {
+                alert("Please complete your class registration to activate your account and access booking features.");
+            } else {
+                window.location.href = url;
+            }
+        }
 
         // State variables
         let currentDate = new Date(); // Today
@@ -687,11 +697,8 @@
                             cellTd.className = "grid-cell-interactive";
                             cellTd.onclick = () => {
                                 const isWeekend = dayDate.getDay() === 0 || dayDate.getDay() === 6;
-                                if (isWeekend) {
-                                    window.location.href = `/Booking/ClassBooking?date=${dateStr}`;
-                                } else {
-                                    window.location.href = `/Booking/GetFreeSlots?date=${dateStr}`;
-                                }
+                                const targetUrl = isWeekend ? `/Booking/ClassBooking?date=${dateStr}` : `/Booking/GetFreeSlots?date=${dateStr}`;
+                                handleBookingClick(targetUrl);
                             };
                         }
                     }
@@ -721,7 +728,7 @@
                         <i class="bi bi-calendar-x"></i>
                         <h6 class="text-white fw-bold mb-2">No Upcoming Appointments</h6>
                         <p class="text-dim">You don't have any dynamic shooting sessions scheduled yet.</p>
-                        <a href="/Booking/GetFreeSlots" class="btn-create-booking mt-3 justify-content-center">Book Now</a>
+                        <a href="javascript:void(0)" onclick="handleBookingClick('/Booking/GetFreeSlots')" class="btn-create-booking mt-3 justify-content-center">Book Now</a>
                     </div>
                 `;
                 return;
