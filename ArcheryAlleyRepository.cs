@@ -607,5 +607,31 @@ namespace ArcheryAlley
                 .Where(r => r.CustomerEmail.ToLower() == email.ToLower() || r.ReservedBy.ToLower() == email.ToLower())
                 .ToList();
         }
+
+        public void UpdateCustomer(Customers customer)
+        {
+            _context.Customers.Update(customer);
+            _context.SaveChanges();
+        }
+
+        public List<Reservations> GetReservationsByDate(DateTime date)
+        {
+            return _context.Reservations
+                .Include(r => r.Slot)
+                .Where(r => r.ReservedOn.Date == date.Date && r.Status != 2)
+                .OrderBy(r => r.Slot.SlotStartTime)
+                .ToList();
+        }
+     
+        public void UpdateAttendance(int reservationId, bool attended)
+        {
+            var reservation = _context.Reservations.FirstOrDefault(r => r.ReservationId == reservationId);
+            if (reservation != null)
+            {
+                reservation.Attended = attended;
+                _context.SaveChanges();
+            }
+        }
+
     }
 }

@@ -21,6 +21,7 @@ namespace ArcheryAlley.Models
         public int? Status { get; set; }
         
         public BookingSlots Slot { get; set; }
+        public bool Attended { get; set; } = false;
 
     }
 }

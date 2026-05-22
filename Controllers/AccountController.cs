@@ -164,15 +164,6 @@ namespace ArcheryAlley.Controllers
             return View("~/Views/Account/ClassRegistration.cshtml");
         }
 
-        [HttpGet]
-        public IActionResult ClassRegistration()
-        {
-            string email = HttpContext.Session.GetString("CustomerEmail");
-            if (string.IsNullOrEmpty(email))
-                return RedirectToAction("CustomerLogin");
-                
-            return View("~/Views/Account/ClassRegistration.cshtml");
-        }
 
         [HttpGet]
         public IActionResult Register()
@@ -240,6 +231,7 @@ namespace ArcheryAlley.Controllers
             customer.Birthday = Birthday;
             customer.Address = Address;
             customer.Status = "Active";
+
 
             var registration = new ClassRegistrations
             {

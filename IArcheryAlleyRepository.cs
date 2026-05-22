@@ -65,5 +65,8 @@ namespace ArcheryAlley
         public void RegisterClassSession(ClassRegistrations registration);
         public List<ClassRegistrations> GetClassRegistrationsByEmail(string email);
         public List<Reservations> GetReservationsByEmail(string email);
+
+        List <Reservations> GetReservationsByDate(DateTime Date);
+        void UpdateAttendance(int reservationId, bool attended);
     }
 }

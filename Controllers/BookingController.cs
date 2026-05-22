@@ -565,6 +565,57 @@ namespace ArcheryAlley.Controllers
             ViewBag.StaffName = HttpContext.Session.GetString("UserName");
             return View("~/Views/Staff/StaffDashboard.cshtml");
         }
+        [HttpGet]
+        public JsonResult GetAttendanceByDate(DateTime date)
+        {
+            var reservations = _repository.GetReservationsByDate(date);
+
+            var result = reservations.Select(r => new {
+                id = r.ReservationId,
+                name = r.CustomerName,
+                email = r.CustomerEmail,
+                packageType = r.RateCode ?? "General",
+                time = r.Slot != null
+                                ? $"{r.Slot.SlotStartTime.ToString(@"hh\:mm")} - {r.Slot.SlotEndTime.ToString(@"hh\:mm")}"
+                                : "—",
+                attended = r.Attended  // the column you added earlier
+            });
+
+            return Json(result);
+        }
+
+        [HttpPost]
+        public JsonResult ToggleAttendance(int reservationId, bool attended)
+        {
+            try
+            {
+                var reservation = _repository.GetReservations()
+                    .FirstOrDefault(r => r.ReservationId == reservationId);
+
+                if (reservation == null)
+                    return Json(new { success = false, message = "Reservation not found" });
+
+                reservation.Attended = attended;
+                _repository.UpdateAttendance(reservationId, attended);
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult StudentAttendance()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (string.IsNullOrEmpty(role))
+                return RedirectToAction("Login", "Account");
+
+            ViewBag.StaffName = HttpContext.Session.GetString("UserName");
+            return View("~/Views/Staff/StudentAttendance.cshtml");
+        }
 
         [HttpGet]
         public IActionResult StaffDashBoard()
@@ -580,5 +631,8 @@ namespace ArcheryAlley.Controllers
             ViewBag.StaffName = HttpContext.Session.GetString("UserName");
             return View("~/Views/Staff/StaffDashboard.cshtml");
         }
+
+        
     }
+
 }
