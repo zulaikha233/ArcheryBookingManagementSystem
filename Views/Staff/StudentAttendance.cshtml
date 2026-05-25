@@ -2,7 +2,6 @@
 @{
     ViewData["Title"] = "Student Attendance";
     Layout = null;
-    /* ── THEME NOTE: Change Layout to a shared staff layout if created later ── */
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -10,52 +9,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Attendance — Archery Alley</title>
-
-    <!-- ── FONT NOTE: Change font import here to retheme typography ── -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-
     <style>
-        /* ════════════════════════════════════════════════
-           THEME VARIABLES
-           ── THEME NOTE: Edit these to retheme the entire
-              page. Matches MemberCalendar dark glass style ──
-        ════════════════════════════════════════════════ */
         :root {
             --primary: #FF4D4D;
             --primary-dark: #D63031;
             --primary-glow: rgba(255,77,77,0.2);
             --primary-subtle: rgba(255,77,77,0.08);
-
-            --present-color: #34D399;       /* ── Attended / present green ── */
+            --present-color: #34D399;
             --present-bg: rgba(52,211,153,0.1);
             --present-border: rgba(52,211,153,0.25);
-
-            --absent-color: rgba(255,255,255,0.25);  /* ── Absent state ── */
+            --absent-color: rgba(255,255,255,0.25);
             --absent-bg: rgba(255,255,255,0.03);
             --absent-border: rgba(255,255,255,0.08);
-
             --bg: #0d0f14;
             --sidebar-bg: #111318;
             --card-bg: rgba(34,38,48,0.6);
             --card-border: rgba(255,255,255,0.05);
-
             --sidebar-width: 260px;
             --topbar-height: 60px;
-
             --text-light: #f1f5f9;
             --text-dim: #8892a4;
             --text-white: #ffffff;
-
             --input-bg: rgba(255,255,255,0.04);
             --input-border: rgba(255,255,255,0.08);
-
             --radius-sm: 12px;
             --radius-md: 20px;
-
             --shadow-card: 0 20px 40px rgba(0,0,0,0.3);
             --shadow-primary: 0 10px 25px rgba(255,77,77,0.25);
-
             --transition: all 0.25s ease;
         }
 
@@ -70,9 +52,7 @@
             overflow-x: hidden;
         }
 
-        /* ════════════════════════════════════════════════
-           SIDEBAR
-        ════════════════════════════════════════════════ */
+        /* ── SIDEBAR ── */
         .sidebar {
             width: var(--sidebar-width);
             background: var(--sidebar-bg);
@@ -83,7 +63,6 @@
             border-right: 1px solid var(--card-border);
             transition: transform 0.3s ease, width 0.3s ease;
         }
-
         .sidebar.collapsed { width: 68px; }
         .sidebar.collapsed .sidebar-logo span,
         .sidebar.collapsed .staff-badge,
@@ -102,7 +81,6 @@
             border-bottom: 1px solid rgba(255,77,77,0.15);
             display: flex; align-items: center; justify-content: space-between;
         }
-
         .sidebar-logo {
             font-size: 1.1rem; font-weight: 800; color: var(--primary);
             letter-spacing: 1px; text-transform: uppercase;
@@ -112,7 +90,6 @@
             display: block; font-size: 0.68rem; color: rgba(255,255,255,0.3);
             font-weight: 400; letter-spacing: 2px; margin-top: 2px;
         }
-
         .sidebar-toggle-btn {
             background: none; border: none; color: rgba(255,255,255,0.35);
             font-size: 1.2rem; cursor: pointer; padding: 4px;
@@ -130,9 +107,7 @@
         .staff-badge h6 { font-size: 0.9rem; color: #fff; font-weight: 600; }
 
         .sidebar-nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; }
-
         .nav-label { font-size: 0.6rem; color: rgba(255,255,255,0.18); text-transform: uppercase; letter-spacing: 2px; padding: 10px 8px 5px; font-weight: 600; white-space: nowrap; }
-
         .nav-item {
             display: flex; align-items: center; gap: 12px;
             padding: 12px 14px; border-radius: var(--radius-sm);
@@ -154,9 +129,7 @@
         }
         .logout-btn:hover { background: rgba(220,38,38,0.08); color: #ef4444; }
 
-        /* ════════════════════════════════════════════════
-           OVERLAY + TOPBAR (mobile)
-        ════════════════════════════════════════════════ */
+        /* ── OVERLAY + TOPBAR ── */
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 199; backdrop-filter: blur(4px); }
         .sidebar-overlay.active { display: block; }
 
@@ -172,38 +145,19 @@
         .topbar-menu-btn { background: none; border: none; color: rgba(255,255,255,0.65); font-size: 1.5rem; cursor: pointer; padding: 6px; border-radius: 8px; }
         .topbar-menu-btn:hover { color: var(--primary); }
 
-        /* ════════════════════════════════════════════════
-           MAIN CONTENT
-        ════════════════════════════════════════════════ */
-        .main-content {
-            margin-left: var(--sidebar-width);
-            flex: 1; padding: 40px; min-height: 100vh;
-            transition: margin-left 0.3s ease;
-        }
+        /* ── MAIN ── */
+        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 40px; min-height: 100vh; transition: margin-left 0.3s ease; }
         .main-content.sidebar-collapsed { margin-left: 68px; }
 
-        .page-header { margin-bottom: 32px; animation: fadeInUp 0.5s ease both; }
+        .page-header { margin-bottom: 32px; }
         .page-header p { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 6px; }
         .page-header h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; color: var(--text-white); }
         .page-header h1 span { color: var(--primary); }
 
-        /* ════════════════════════════════════════════════
-           TWO-COLUMN LAYOUT
-           ── LAYOUT NOTE: Adjust left column width here ──
-        ════════════════════════════════════════════════ */
-        .attendance-layout {
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 24px;
-            align-items: start;
-            animation: fadeInUp 0.6s ease both;
-        }
+        /* ── LAYOUT ── */
+        .attendance-layout { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
 
-        /* ════════════════════════════════════════════════
-           GLASS CARD — matches MemberCalendar style
-           ── THEME NOTE: Change --card-bg and
-              backdrop-filter to adjust card look ──
-        ════════════════════════════════════════════════ */
+        /* ── GLASS CARD ── */
         .glass-card {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
@@ -213,23 +167,12 @@
             box-shadow: var(--shadow-card);
         }
 
-        /* ════════════════════════════════════════════════
-           LEFT PANEL: CALENDAR WIDGET
-        ════════════════════════════════════════════════ */
+        /* ── CALENDAR ── */
         .left-panel { display: flex; flex-direction: column; gap: 20px; }
-
         .calendar-widget { padding: 24px; }
-
-        .cal-header {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .cal-month-label { font-size: 1rem; font-weight: 800; color: var(--text-white); letter-spacing: -0.3px; }
-
+        .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .cal-month-label { font-size: 1rem; font-weight: 800; color: var(--text-white); }
         .cal-nav-group { display: flex; gap: 4px; }
-
-        /* ── THEME NOTE: Calendar nav button ── */
         .cal-nav-btn {
             width: 32px; height: 32px; border-radius: 8px; border: none;
             background: var(--input-bg); color: var(--text-dim);
@@ -239,245 +182,128 @@
         .cal-nav-btn:hover { background: var(--primary-subtle); color: var(--primary); }
 
         .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
-
-        .cal-day-label {
-            text-align: center; font-size: 0.6rem; font-weight: 700;
-            color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; padding: 6px 0;
-        }
-
+        .cal-day-label { text-align: center; font-size: 0.6rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; padding: 6px 0; }
         .cal-day {
-            aspect-ratio: 1;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.8rem; font-weight: 600;
-            border-radius: 8px; cursor: pointer; transition: var(--transition);
-            color: var(--text-light); position: relative;
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 600; border-radius: 8px; cursor: pointer;
+            transition: var(--transition); color: var(--text-light); position: relative;
         }
         .cal-day:hover:not(.empty):not(.selected) { background: var(--input-bg); color: var(--text-white); }
-
-        /* ── THEME NOTE: Today dot ── */
-        .cal-day.today::after {
-            content: ''; position: absolute; bottom: 3px; left: 50%;
-            transform: translateX(-50%);
-            width: 4px; height: 4px; border-radius: 50%; background: var(--primary);
-        }
-
-        /* ── THEME NOTE: Selected day ── */
-        .cal-day.selected {
-            background: var(--primary) !important; color: #fff !important;
-            font-weight: 800; box-shadow: var(--shadow-primary);
-        }
-
+        .cal-day.today::after { content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--primary); }
+        .cal-day.selected { background: var(--primary) !important; color: #fff !important; font-weight: 800; box-shadow: var(--shadow-primary); }
         .cal-day.empty { cursor: default; }
+        .cal-day.has-data::before { content: ''; position: absolute; top: 3px; right: 3px; width: 5px; height: 5px; border-radius: 50%; background: var(--present-color); opacity: 0.7; }
 
-        /* ── Has-attendance dot indicator ── */
-        .cal-day.has-data::before {
-            content: ''; position: absolute; top: 3px; right: 3px;
-            width: 5px; height: 5px; border-radius: 50%;
-            background: var(--present-color);
-            opacity: 0.7;
-        }
-
-        /* ── Summary footer inside calendar ── */
-        .cal-summary {
-            margin-top: 18px;
-            padding-top: 16px;
-            border-top: 1px solid var(--card-border);
-            display: none;
-        }
+        .cal-summary { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--card-border); display: none; }
         .cal-summary.visible { display: block; }
-
-        .cal-summary-date {
-            font-size: 0.72rem; color: var(--text-dim);
-            display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
-        }
+        .cal-summary-date { font-size: 0.72rem; color: var(--text-dim); display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
         .cal-summary-date i { color: var(--primary); }
         .cal-summary-date strong { color: var(--text-white); }
-
         .cal-summary-stats { display: flex; gap: 10px; }
-
-        /* ── THEME NOTE: Summary stat chips ── */
-        .summary-chip {
-            flex: 1; text-align: center; padding: 10px 8px;
-            border-radius: var(--radius-sm);
-            background: var(--input-bg); border: 1px solid var(--card-border);
-        }
+        .summary-chip { flex: 1; text-align: center; padding: 10px 8px; border-radius: var(--radius-sm); background: var(--input-bg); border: 1px solid var(--card-border); }
         .summary-chip span { display: block; font-size: 1.3rem; font-weight: 800; }
-        .summary-chip p    { font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+        .summary-chip p { font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
         .chip-present span { color: var(--present-color); }
-        .chip-absent  span { color: #f87171; }
-        .chip-total   span { color: var(--primary); }
+        .chip-absent span  { color: #f87171; }
+        .chip-total span   { color: var(--primary); }
 
-        /* ════════════════════════════════════════════════
-           RIGHT PANEL: STUDENT LIST
-        ════════════════════════════════════════════════ */
-        .right-panel { display: flex; flex-direction: column; gap: 0; }
-
-        /* ── Empty / placeholder state ── */
-        .empty-panel {
-            padding: 70px 40px; text-align: center; color: var(--text-dim);
-        }
+        /* ── STUDENT LIST ── */
+        .empty-panel { padding: 70px 40px; text-align: center; color: var(--text-dim); }
         .empty-panel i { font-size: 3.2rem; color: rgba(255,77,77,0.2); margin-bottom: 18px; display: block; }
         .empty-panel h4 { font-size: 1rem; color: rgba(255,255,255,0.45); font-weight: 700; margin-bottom: 8px; }
         .empty-panel p  { font-size: 0.82rem; line-height: 1.6; }
 
-        /* ── List header ── */
         .list-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--card-border);
+            padding: 20px 24px; border-bottom: 1px solid var(--card-border);
             display: flex; align-items: center; justify-content: space-between;
             flex-wrap: wrap; gap: 12px;
             border-radius: var(--radius-md) var(--radius-md) 0 0;
         }
-
         .list-header-left h3   { font-size: 0.95rem; font-weight: 700; color: var(--text-white); }
         .list-header-left span { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; display: block; }
-
         .list-header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-        /* ── THEME NOTE: Mark all button ── */
         .btn-mark-all {
             display: flex; align-items: center; gap: 7px;
             padding: 8px 16px; border-radius: var(--radius-sm);
-            background: var(--present-bg);
-            border: 1px solid var(--present-border);
-            color: var(--present-color);
-            font-size: 0.78rem; font-weight: 700;
+            background: var(--present-bg); border: 1px solid var(--present-border);
+            color: var(--present-color); font-size: 0.78rem; font-weight: 700;
             cursor: pointer; font-family: 'Outfit', sans-serif; transition: var(--transition);
         }
         .btn-mark-all:hover { background: rgba(52,211,153,0.18); }
 
-        /* ── Filter tabs ── */
         .filter-tabs { display: flex; gap: 6px; }
         .filter-tab {
-            padding: 6px 14px; border-radius: 20px;
-            border: 1px solid var(--input-border);
-            background: transparent; color: var(--text-dim);
-            font-size: 0.74rem; font-weight: 600;
+            padding: 6px 14px; border-radius: 20px; border: 1px solid var(--input-border);
+            background: transparent; color: var(--text-dim); font-size: 0.74rem; font-weight: 600;
             cursor: pointer; font-family: 'Outfit', sans-serif; transition: var(--transition);
         }
         .filter-tab:hover { border-color: var(--primary); color: var(--primary); }
         .filter-tab.active { background: var(--primary-subtle); border-color: var(--primary); color: var(--primary); }
 
-        /* ── Student rows ── */
         .student-list { display: flex; flex-direction: column; }
-
         .student-row {
-            display: flex; align-items: center;
-            padding: 16px 24px; gap: 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            transition: var(--transition);
+            display: flex; align-items: center; padding: 16px 24px; gap: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.03); transition: var(--transition);
         }
-        .student-row:last-child { border-bottom: none; border-radius: 0 0 var(--radius-md) var(--radius-md); }
+        .student-row:last-child { border-bottom: none; }
         .student-row:hover { background: rgba(255,255,255,0.015); }
 
-        /* ── THEME NOTE: Student avatar ── */
         .student-avatar {
             width: 42px; height: 42px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1rem; font-weight: 800; color: #fff;
-            flex-shrink: 0;
-            /* ── THEME NOTE: Avatar gradient, change colors here ── */
+            font-size: 1rem; font-weight: 800; color: #fff; flex-shrink: 0;
             background: linear-gradient(135deg, #333a4d, #1e2233);
             border: 1px solid rgba(255,255,255,0.08);
         }
-
-        .student-avatar.present {
-            background: linear-gradient(135deg, rgba(52,211,153,0.3), rgba(52,211,153,0.15));
-            border-color: rgba(52,211,153,0.3);
-        }
+        .student-avatar.present { background: linear-gradient(135deg, rgba(52,211,153,0.3), rgba(52,211,153,0.15)); border-color: rgba(52,211,153,0.3); }
 
         .student-info { flex: 1; min-width: 0; }
-        .student-name  { font-size: 0.92rem; font-weight: 700; color: var(--text-white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .student-meta  { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .student-name { font-size: 0.92rem; font-weight: 700; color: var(--text-white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .student-meta { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .student-meta i { font-size: 0.7rem; color: var(--primary); }
 
-        /* ── Class type badge ── */
-        .class-badge {
-            font-size: 0.62rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 1px;
-            padding: 2px 8px; border-radius: 20px;
-        }
-        /* ── THEME NOTE: Class type badge colors ── */
+        .class-badge { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 2px 8px; border-radius: 20px; }
         .badge-beginner     { background: rgba(255,77,77,0.12);   color: #FF4D4D; border: 1px solid rgba(255,77,77,0.25); }
         .badge-intermediate { background: rgba(245,158,11,0.12);  color: #FBBF24; border: 1px solid rgba(245,158,11,0.25); }
         .badge-advanced     { background: rgba(139,92,246,0.12);  color: #A78BFA; border: 1px solid rgba(139,92,246,0.25); }
         .badge-private      { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1); }
 
-        /* ── Attendance toggle button ── */
         .attend-btn {
-            display: flex; align-items: center; gap: 7px;
-            padding: 8px 16px; border-radius: var(--radius-sm);
-            font-size: 0.78rem; font-weight: 700;
-            cursor: pointer; font-family: 'Outfit', sans-serif;
-            transition: var(--transition); flex-shrink: 0;
-            border: 1px solid var(--absent-border);
+            display: flex; align-items: center; gap: 7px; padding: 8px 16px;
+            border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 700;
+            cursor: pointer; font-family: 'Outfit', sans-serif; transition: var(--transition);
+            flex-shrink: 0; border: 1px solid var(--absent-border);
             background: var(--absent-bg); color: var(--absent-color);
         }
+        .attend-btn.attended { background: var(--present-bg); border-color: var(--present-border); color: var(--present-color); }
+        .attend-btn:hover:not(.attended) { border-color: var(--present-border); color: var(--present-color); background: rgba(52,211,153,0.06); }
+        .attend-btn.attended:hover { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.3); color: #fca5a5; }
 
-        /* ── THEME NOTE: Attended state ── */
-        .attend-btn.attended {
-            background: var(--present-bg);
-            border-color: var(--present-border);
-            color: var(--present-color);
-        }
-
-        .attend-btn:hover:not(.attended) {
-            border-color: var(--present-border);
-            color: var(--present-color);
-            background: rgba(52,211,153,0.06);
-        }
-
-        .attend-btn.attended:hover {
-            background: rgba(239,68,68,0.08);
-            border-color: rgba(239,68,68,0.3);
-            color: #fca5a5;
-        }
-
-        /* ── Timestamp shown after marking ── */
-        .attend-time {
-            font-size: 0.65rem; color: var(--present-color);
-            display: none; white-space: nowrap; text-align: right;
-        }
+        .attend-time { font-size: 0.65rem; color: var(--present-color); display: none; white-space: nowrap; text-align: right; }
         .attend-time.visible { display: block; }
 
-        /* ════════════════════════════════════════════════
-           TOAST NOTIFICATION
-           ── THEME NOTE: Change border/icon color here ──
-        ════════════════════════════════════════════════ */
+        /* ── TOAST ── */
         .toast-notif {
             position: fixed; bottom: 28px; right: 28px;
-            background: rgba(20,22,30,0.95);
-            border: 1px solid rgba(52,211,153,0.3);
+            background: rgba(20,22,30,0.95); border: 1px solid rgba(52,211,153,0.3);
             border-radius: 16px; padding: 13px 20px;
             display: flex; align-items: center; gap: 12px;
             font-size: 0.85rem; font-weight: 600; color: var(--text-white);
-            box-shadow: 0 12px 35px rgba(0,0,0,0.5);
-            backdrop-filter: blur(10px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.5); backdrop-filter: blur(10px);
             transform: translateY(80px); opacity: 0;
-            transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
-            z-index: 9999;
+            transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275); z-index: 9999;
         }
         .toast-notif.show { transform: translateY(0); opacity: 1; }
         .toast-notif i { font-size: 1.1rem; }
         .toast-notif.present i { color: var(--present-color); }
         .toast-notif.absent  i { color: #f87171; }
 
-        /* ════════════════════════════════════════════════
-           ANIMATIONS
-        ════════════════════════════════════════════════ */
         @@keyframes fadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
         @@keyframes rowIn    { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
-
         .student-row { animation: rowIn 0.3s ease both; }
 
-        /* ════════════════════════════════════════════════
-           RESPONSIVE
-           ── LAYOUT NOTE: Breakpoints here ──
-        ════════════════════════════════════════════════ */
-        @@media (max-width: 1024px) {
-            .attendance-layout { grid-template-columns: 1fr; }
-        }
-
+        @@media (max-width: 1024px) { .attendance-layout { grid-template-columns: 1fr; } }
         @@media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); width: var(--sidebar-width) !important; }
             .sidebar.mobile-open { transform: translateX(0); }
@@ -486,11 +312,9 @@
             .main-content { margin-left: 0 !important; padding: 76px 14px 24px; }
             .page-header h1 { font-size: 1.5rem; }
             .list-header { flex-direction: column; align-items: flex-start; }
-            .attend-btn span { display: none; } /* icon only on mobile */
+            .attend-btn span { display: none; }
             .attend-btn { padding: 8px 12px; }
-            .student-meta { gap: 5px; }
         }
-
         @@media (max-width: 380px) {
             .cal-summary-stats { gap: 6px; }
             .summary-chip { padding: 8px 4px; }
@@ -499,16 +323,13 @@
 </head>
 <body>
 
-    <!-- ── OVERLAY ── -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-    <!-- ── TOPBAR (mobile) ── -->
     <div class="topbar">
         <div class="topbar-logo">Archery Alley</div>
         <button class="topbar-menu-btn" onclick="openSidebar()"><i class="bi bi-list"></i></button>
     </div>
 
-    <!-- ── SIDEBAR ── -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-logo">
@@ -519,12 +340,10 @@
                 <i class="bi bi-layout-sidebar-reverse" id="toggleIcon"></i>
             </button>
         </div>
-
         <div class="staff-badge">
             <p>Logged in as</p>
             <h6>@(ViewBag.StaffName ?? "Staff")</h6>
         </div>
-
         <nav class="sidebar-nav">
             <div class="nav-label">Menu</div>
             <a href="/Booking/StaffDashboard" class="nav-item">
@@ -533,7 +352,7 @@
             <a href="/Account/Profile" class="nav-item">
                 <i class="bi bi-person-circle"></i><span class="nav-text">Profile</span>
             </a>
-            <a href="/Attendance/Index" class="nav-item active">
+            <a href="/Booking/StudentAttendance" class="nav-item active">
                 <i class="bi bi-calendar-check"></i><span class="nav-text">Student Attendance</span>
             </a>
             <a href="/Report/StudentPerformance" class="nav-item">
@@ -543,7 +362,6 @@
                 <i class="bi bi-bullseye"></i><span class="nav-text">Slot Booking</span>
             </a>
         </nav>
-
         <div class="sidebar-footer">
             <a href="/Account/Logout" class="logout-btn">
                 <i class="bi bi-box-arrow-left"></i>
@@ -552,9 +370,7 @@
         </div>
     </aside>
 
-    <!-- ── MAIN CONTENT ── -->
     <main class="main-content" id="mainContent">
-
         <div class="page-header">
             <p>Coach Tools</p>
             <h1>Student <span>Attendance</span></h1>
@@ -562,10 +378,8 @@
 
         <div class="attendance-layout">
 
-            <!-- ════ LEFT: CALENDAR ════ -->
             <div class="left-panel">
                 <div class="glass-card calendar-widget">
-
                     <div class="cal-header">
                         <div class="cal-month-label" id="calMonthLabel">—</div>
                         <div class="cal-nav-group">
@@ -573,12 +387,7 @@
                             <button class="cal-nav-btn" onclick="shiftMonth(1)"><i class="bi bi-chevron-right"></i></button>
                         </div>
                     </div>
-
-                    <div class="cal-grid" id="calGrid">
-                        <!-- Filled by JS -->
-                    </div>
-
-                    <!-- Summary stats shown after a date is selected -->
+                    <div class="cal-grid" id="calGrid"></div>
                     <div class="cal-summary" id="calSummary">
                         <div class="cal-summary-date">
                             <i class="bi bi-calendar-event"></i>
@@ -586,27 +395,20 @@
                         </div>
                         <div class="cal-summary-stats">
                             <div class="summary-chip chip-total">
-                                <span id="statTotal">0</span>
-                                <p>Students</p>
+                                <span id="statTotal">0</span><p>Students</p>
                             </div>
                             <div class="summary-chip chip-present">
-                                <span id="statPresent">0</span>
-                                <p>Present</p>
+                                <span id="statPresent">0</span><p>Present</p>
                             </div>
                             <div class="summary-chip chip-absent">
-                                <span id="statAbsent">0</span>
-                                <p>Absent</p>
+                                <span id="statAbsent">0</span><p>Absent</p>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
 
-            <!-- ════ RIGHT: STUDENT LIST ════ -->
             <div id="rightPanel">
-
-                <!-- Default empty state -->
                 <div class="glass-card" id="emptyCard">
                     <div class="empty-panel">
                         <i class="bi bi-calendar2-week"></i>
@@ -615,7 +417,6 @@
                     </div>
                 </div>
 
-                <!-- Student list (hidden until date selected) -->
                 <div class="glass-card" id="studentListCard" style="display:none;">
                     <div class="list-header">
                         <div class="list-header-left">
@@ -623,42 +424,35 @@
                             <span id="listSubtitle">—</span>
                         </div>
                         <div class="list-header-right">
-                            <!-- Filter tabs -->
                             <div class="filter-tabs">
                                 <button class="filter-tab active" data-filter="all"     onclick="applyFilter(this)">All</button>
                                 <button class="filter-tab"        data-filter="present" onclick="applyFilter(this)">Present</button>
                                 <button class="filter-tab"        data-filter="absent"  onclick="applyFilter(this)">Absent</button>
                             </div>
-                            <!-- Mark all present -->
                             <button class="btn-mark-all" onclick="markAllPresent()">
                                 <i class="bi bi-check2-all"></i>
                                 <span>Mark All Present</span>
                             </button>
                         </div>
                     </div>
-
-                    <!-- Rows injected here -->
                     <div class="student-list" id="studentList"></div>
                 </div>
-
             </div>
+
         </div>
     </main>
 
-    <!-- ── TOAST ── -->
     <div class="toast-notif" id="toast">
         <i class="bi bi-check-circle-fill"></i>
         <span id="toastMsg">Attendance updated</span>
     </div>
 
     <script>
-        /* ══════════════════════════════════════════════
-           SIDEBAR
-        ══════════════════════════════════════════════ */
-        const sidebar = document.getElementById('sidebar');
+        /* ── SIDEBAR ── */
+        const sidebar     = document.getElementById('sidebar');
         const mainContent = document.getElementById('mainContent');
-        const overlay = document.getElementById('sidebarOverlay');
-        const toggleIcon = document.getElementById('toggleIcon');
+        const overlay     = document.getElementById('sidebarOverlay');
+        const toggleIcon  = document.getElementById('toggleIcon');
 
         function toggleDesktopSidebar() {
             const collapsed = sidebar.classList.toggle('collapsed');
@@ -687,53 +481,25 @@
         });
         window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 
-        // ══════════════════════════════════════════════
-        //    MOCK DATA
-        //    ── DATA NOTE: Replace mockSessions with a real
-        //       AJAX fetch to your controller like:
-        //       fetch(`/Attendance/GetByDate?date=${dateStr}`)
-        //       Each session needs:
-        //         id, name, email, packageType, time, attended
-        //    ──
-        // ══════════════════════════════════════════════
-        // const mockSessions = {
-        //     "2026-05-21": [
-        //         { id: 1, name: "Ahmad Faris",   email: "ahmad@email.com",  packageType: "Beginner",     time: "09:00 - 10:00", attended: false },
-        //         { id: 2, name: "Nurul Aina",     email: "nurul@email.com",  packageType: "Intermediate", time: "09:00 - 10:00", attended: false },
-        //         { id: 3, name: "Haziq Danial",   email: "haziq@email.com",  packageType: "Beginner",     time: "14:00 - 15:00", attended: false },
-        //         { id: 4, name: "Syafiq Rahman",  email: "syafiq@email.com", packageType: "Advanced",     time: "14:00 - 15:00", attended: false },
-        //     ],
-        //     "2026-05-19": [
-        //         { id: 5, name: "Izzati Husna",  email: "izzati@email.com", packageType: "Beginner", time: "10:00 - 11:00", attended: true  },
-        //         { id: 6, name: "Kamarul Azhar", email: "kam@email.com",    packageType: "Private",   time: "10:00 - 11:00", attended: false },
-        //     ],
-        //     "2026-05-15": [
-        //         { id: 7, name: "Fatin Zahra",  email: "fatin@email.com", packageType: "Beginner",     time: "09:00 - 10:00", attended: true },
-        //         { id: 8, name: "Danial Hakim", email: "dani@email.com",  packageType: "Intermediate", time: "09:00 - 10:00", attended: true },
-        //     ]
-        // };
-
-        /* ══════════════════════════════════════════════
-           CALENDAR STATE
-        ══════════════════════════════════════════════ */
-        const today = new Date();
-        let calYear = today.getFullYear();
+        /* ── CALENDAR STATE ── */
+        const today  = new Date();
+        let calYear  = today.getFullYear();
         let calMonth = today.getMonth();
-        let selectedDate = null;
-        let activeFilter = 'all';
+        let selectedDate  = null;
+        let activeFilter  = 'all';
+        let currentStudents = []; // holds students loaded from backend
 
+        // ── DATA NOTE: Replace with real dates from backend to show green dots ──
         const datesWithReports = new Set();
 
-        const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        const DAY_LBLS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const MONTHS   = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        const DAY_LBLS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
-        /* ══════════════════════════════════════════════
-           CALENDAR RENDER
-        ══════════════════════════════════════════════ */
+        /* ── CALENDAR RENDER ── */
         function shiftMonth(offset) {
             calMonth += offset;
             if (calMonth > 11) { calMonth = 0; calYear++; }
-            if (calMonth < 0) { calMonth = 11; calYear--; }
+            if (calMonth < 0)  { calMonth = 11; calYear--; }
             renderCalendar();
         }
 
@@ -749,10 +515,10 @@
                 grid.appendChild(el);
             });
 
-            const firstDay = new Date(calYear, calMonth, 1).getDay();
-            const blanks = firstDay === 0 ? 6 : firstDay - 1;
+            const firstDay    = new Date(calYear, calMonth, 1).getDay();
+            const blanks      = firstDay === 0 ? 6 : firstDay - 1;
             const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            const todayStr    = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
 
             for (let b = 0; b < blanks; b++) {
                 const blank = document.createElement('div');
@@ -761,23 +527,21 @@
             }
 
             for (let d = 1; d <= daysInMonth; d++) {
-                const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 const el = document.createElement('div');
                 el.className = 'cal-day';
                 el.textContent = d;
 
-                if (dateStr === todayStr) el.classList.add('today');
-                if (dateStr === selectedDate) el.classList.add('selected');
+                if (dateStr === todayStr)          el.classList.add('today');
+                if (dateStr === selectedDate)      el.classList.add('selected');
                 if (datesWithReports.has(dateStr)) el.classList.add('has-data');
 
                 el.onclick = () => selectDate(dateStr);
                 grid.appendChild(el);
             }
-        } // ← make sure this closing brace exists
+        }
 
-        /* ══════════════════════════════════════════════
-           DATE SELECTION
-        ══════════════════════════════════════════════ */
+        /* ── DATE SELECTION ── */
         async function selectDate(dateStr) {
             selectedDate = dateStr;
             activeFilter = 'all';
@@ -792,137 +556,96 @@
             document.getElementById('summaryDateLabel').textContent = formatted;
             document.getElementById('calSummary').classList.add('visible');
 
-            async function renderStudentList() {
-                // Fetch real data from controller
+            await renderStudentList();
+        }
+
+        /* ── STUDENT LIST — fetches from backend ── */
+        async function renderStudentList() {
+            try {
                 const response = await fetch(`/Booking/GetAttendanceByDate?date=${selectedDate}`);
                 const students = await response.json();
+                currentStudents = students;
 
-                document.getElementById('emptyCard').style.display = 'none';
+                document.getElementById('emptyCard').style.display       = 'none';
                 document.getElementById('studentListCard').style.display = '';
 
                 const formatted = new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-MY', {
                     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
                 });
-
-                document.getElementById('listTitle').textContent = students.length === 0 ? 'No Classes' : `${students.length} Student${students.length !== 1 ? 's' : ''}`;
-                document.getElementById('listSubtitle').textContent = formatted;
-
-                await renderStudentList();
-            }
-
-            /* ══════════════════════════════════════════════
-               STUDENT LIST RENDER
-            ══════════════════════════════════════════════ */
-            function renderStudentList() {
-                /* ── DATA NOTE: Replace this with real data fetch ──
-                   Example when backend is ready:
-                   const res = await fetch(`/Attendance/GetByDate?date=${selectedDate}`);
-                   const students = await res.json();
-                ── */
-                const response = await fetch('/Booking/GetAttendanceByDate?date=${selectedDate}');
-                const students = await response.json();
-                currentStudents = students; // Store for filter access
-
-                document.getElementById('emptyCard').style.display = 'none';
-                document.getElementById('studentListCard').style.display = '';
-
-                const formatted = new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-MY', {
-                    weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
-                });
-                document.getElementById('listTitle').textContent = students.length === 0 ? 'No Classes' : `${students.length} Student${students.length !== 1 ? 's' : ''}`;
+                document.getElementById('listTitle').textContent    = students.length === 0 ? 'No Classes' : `${students.length} Student${students.length !== 1 ? 's' : ''}`;
                 document.getElementById('listSubtitle').textContent = formatted;
 
                 updateStats(students);
                 renderRows(students);
+            } catch (err) {
+                console.error('Failed to load students:', err);
+            }
+        }
+
+        /* ── RENDER ROWS ── */
+        function renderRows(students) {
+            const list = document.getElementById('studentList');
+            list.innerHTML = '';
+
+            const filtered = students.filter(s => {
+                if (activeFilter === 'present') return s.attended;
+                if (activeFilter === 'absent')  return !s.attended;
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<div style="padding:36px;text-align:center;color:var(--text-dim);font-size:0.85rem;">No students match this filter.</div>`;
+                return;
             }
 
-            function renderRows(students) {
-                const list = document.getElementById('studentList');
-                list.innerHTML = '';
+            const badgeMap = { 'Beginner':'badge-beginner', 'Intermediate':'badge-intermediate', 'Advanced':'badge-advanced', 'Private':'badge-private' };
 
-                const filtered = students.filter(s => {
-                    if (activeFilter === 'present') return s.attended;
-                    if (activeFilter === 'absent') return !s.attended;
-                    return true;
-                });
+            filtered.forEach((s, idx) => {
+                const row = document.createElement('div');
+                row.className = 'student-row';
+                row.id = `row-${s.id}`;
+                row.style.animationDelay = `${idx * 0.04}s`;
 
-                if (filtered.length === 0) {
-                    list.innerHTML = `
-                            <div style="padding:36px; text-align:center; color:var(--text-dim); font-size:0.85rem;">
-                                No students match this filter.
-                            </div>`;
-                    return;
-                }
+                const bClass = badgeMap[s.packageType] || 'badge-beginner';
 
-                filtered.forEach((s, idx) => {
-                    const row = document.createElement('div');
-                    row.className = 'student-row';
-                    row.id = `row-${s.id}`;
-                    row.style.animationDelay = `${idx * 0.04}s`;
+                row.innerHTML = `
+                    <div class="student-avatar ${s.attended ? 'present' : ''}" id="avatar-${s.id}">
+                        ${s.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="student-info">
+                        <div class="student-name">${s.name}</div>
+                        <div class="student-meta">
+                            <i class="bi bi-clock"></i> ${s.time}
+                            <span class="class-badge ${bClass}">${s.packageType}</span>
+                        </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                        <button class="attend-btn ${s.attended ? 'attended' : ''}" id="btn-${s.id}" onclick="toggleAttendance(${s.id})">
+                            <i class="bi ${s.attended ? 'bi-check-circle-fill' : 'bi-circle'}"></i>
+                            <span>${s.attended ? 'Present' : 'Mark Present'}</span>
+                        </button>
+                        <div class="attend-time ${s.attended ? 'visible' : ''}" id="time-${s.id}">
+                            ${s.attended ? 'Marked just now' : ''}
+                        </div>
+                    </div>`;
+                list.appendChild(row);
+            });
+        }
 
-                    /* ── THEME NOTE: Badge class per package type ── */
-                    const badgeMap = {
-                        'Beginner': 'badge-beginner',
-                        'Intermediate': 'badge-intermediate',
-                        'Advanced': 'badge-advanced',
-                        'Private': 'badge-private'
-                    };
-                    const bClass = badgeMap[s.packageType] || 'badge-beginner';
+        /* ── TOGGLE ATTENDANCE ── */
+        async function toggleAttendance(id) {
+            const student = currentStudents.find(s => s.id === id);
+            if (!student) return;
 
-                    row.innerHTML = `
-                            <div class="student-avatar ${s.attended ? 'present' : ''}" id="avatar-${s.id}">
-                                ${s.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div class="student-info">
-                                <div class="student-name">${s.name}</div>
-                                <div class="student-meta">
-                                    <i class="bi bi-clock"></i> ${s.time}
-                                    <span class="class-badge ${bClass}">${s.packageType}</span>
-                                </div>
-                            </div>
-                            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
-                                <button
-                                    class="attend-btn ${s.attended ? 'attended' : ''}"
-                                    id="btn-${s.id}"
-                                    onclick="toggleAttendance(${s.id})"
-                                >
-                                    <i class="bi ${s.attended ? 'bi-check-circle-fill' : 'bi-circle'}"></i>
-                                    <span>${s.attended ? 'Present' : 'Mark Present'}</span>
-                                </button>
-                                <div class="attend-time ${s.attended ? 'visible' : ''}" id="time-${s.id}">
-                                    ${s.attended ? 'Marked just now' : ''}
-                                </div>
-                            </div>
-                        `;
-                    list.appendChild(row);
-                });
-            }
+            student.attended = !student.attended;
 
-            /* ══════════════════════════════════════════════
-               ATTENDANCE TOGGLE
-               ── DATA NOTE: When backend is ready, call:
-                  await fetch('/Attendance/Toggle', {
-                    method: 'POST',
-                    body: new FormData with { reservationId: id, attended: newState }
-                  });
-               after toggling so it persists to database ──
-            ══════════════════════════════════════════════ */
-            async function toggleAttendance(id) {
-                const students = await getCurrentStudents();
-                const student = students.find(s => s.id === id);
-                if (!student) return;
+            await fetch('/Booking/ToggleAttendance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `reservationId=${id}&attended=${student.attended}`
+            });
 
-                student.attended = !student.attended;
-
-                await fetch('/Booking/ToggleAttendance', {
-                    method: "POST",
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `reservationId=${id}&attended=${student.attended}`
-                });
-
-                    
-
-            const btn = document.getElementById(`btn-${id}`);
+            const btn    = document.getElementById(`btn-${id}`);
             const avatar = document.getElementById(`avatar-${id}`);
             const timeEl = document.getElementById(`time-${id}`);
 
@@ -930,7 +653,7 @@
                 btn.classList.add('attended');
                 btn.innerHTML = `<i class="bi bi-check-circle-fill"></i><span>Present</span>`;
                 avatar.classList.add('present');
-                timeEl.textContent = `Marked at ${new Date().toLocaleTimeString('en-MY', { hour: '2-digit', minute: '2-digit' })}`;
+                timeEl.textContent = `Marked at ${new Date().toLocaleTimeString('en-MY', {hour:'2-digit', minute:'2-digit'})}`;
                 timeEl.classList.add('visible');
                 showToast(`${student.name} marked present`, true);
             } else {
@@ -942,59 +665,50 @@
                 showToast(`${student.name} marked absent`, false);
             }
 
-            updateStats(students);
+            updateStats(currentStudents);
         }
 
-        /* ══════════════════════════════════════════════
-           MARK ALL PRESENT
-        ══════════════════════════════════════════════ */
-        function markAllPresent() {
-            renderRows(currentStudents);
-            updateStats(currentStudents);
-            students.forEach(s => {
+        /* ── MARK ALL PRESENT ── */
+        async function markAllPresent() {
+            for (const s of currentStudents) {
                 if (!s.attended) {
                     s.attended = true;
+                    await fetch('/Booking/ToggleAttendance', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `reservationId=${s.id}&attended=true`
+                    });
                 }
-            });
-            renderRows(students);
-            updateStats(students);
+            }
+            renderRows(currentStudents);
+            updateStats(currentStudents);
             showToast('All students marked present', true);
         }
 
-        /* ══════════════════════════════════════════════
-           FILTER TABS
-        ══════════════════════════════════════════════ */
+        /* ── FILTER ── */
         function applyFilter(tab) {
             activeFilter = tab.dataset.filter;
             document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
-            const students = mockSessions[selectedDate] || [];
-            renderRows(students);
+            renderRows(currentStudents);
         }
 
-        /* ══════════════════════════════════════════════
-           STATS UPDATE
-        ══════════════════════════════════════════════ */
+        /* ── STATS ── */
         function updateStats(students) {
             const presentCount = students.filter(s => s.attended).length;
-            document.getElementById('statTotal').textContent = students.length;
+            document.getElementById('statTotal').textContent   = students.length;
             document.getElementById('statPresent').textContent = presentCount;
-            document.getElementById('statAbsent').textContent = students.length - presentCount;
+            document.getElementById('statAbsent').textContent  = students.length - presentCount;
         }
 
-        /* ══════════════════════════════════════════════
-           TOAST
-        ══════════════════════════════════════════════ */
+        /* ── TOAST ── */
         function showToast(msg, isPresent) {
-            const toast = document.getElementById('toast');
-            const msgEl = document.getElementById('toastMsg');
+            const toast  = document.getElementById('toast');
+            const msgEl  = document.getElementById('toastMsg');
             const iconEl = toast.querySelector('i');
-
             msgEl.textContent = msg;
             toast.classList.remove('present', 'absent');
-            iconEl.className = isPresent
-                ? 'bi bi-check-circle-fill'
-                : 'bi bi-x-circle-fill';
+            iconEl.className = isPresent ? 'bi bi-check-circle-fill' : 'bi bi-x-circle-fill';
             toast.classList.add(isPresent ? 'present' : 'absent');
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 2800);
