@@ -655,10 +655,10 @@
         /* ══════════════════════════════════════════════
            SIDEBAR
         ══════════════════════════════════════════════ */
-        const sidebar     = document.getElementById('sidebar');
+        const sidebar = document.getElementById('sidebar');
         const mainContent = document.getElementById('mainContent');
-        const overlay     = document.getElementById('sidebarOverlay');
-        const toggleIcon  = document.getElementById('toggleIcon');
+        const overlay = document.getElementById('sidebarOverlay');
+        const toggleIcon = document.getElementById('toggleIcon');
 
         function toggleDesktopSidebar() {
             const collapsed = sidebar.classList.toggle('collapsed');
@@ -666,7 +666,7 @@
             toggleIcon.className = collapsed ? 'bi bi-layout-sidebar' : 'bi bi-layout-sidebar-reverse';
             localStorage.setItem('sidebarCollapsed', collapsed);
         }
-        function openSidebar()  {
+        function openSidebar() {
             sidebar.classList.add('mobile-open');
             overlay.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -717,13 +717,15 @@
            CALENDAR STATE
         ══════════════════════════════════════════════ */
         const today = new Date();
-        let calYear  = today.getFullYear();
+        let calYear = today.getFullYear();
         let calMonth = today.getMonth();
         let selectedDate = null;
         let activeFilter = 'all';
 
-        const MONTHS   = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-        const DAY_LBLS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+        const datesWithReports = new Set();
+
+        const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const DAY_LBLS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
         /* ══════════════════════════════════════════════
            CALENDAR RENDER
@@ -731,7 +733,7 @@
         function shiftMonth(offset) {
             calMonth += offset;
             if (calMonth > 11) { calMonth = 0; calYear++; }
-            if (calMonth < 0)  { calMonth = 11; calYear--; }
+            if (calMonth < 0) { calMonth = 11; calYear--; }
             renderCalendar();
         }
 
@@ -740,43 +742,43 @@
             const grid = document.getElementById('calGrid');
             grid.innerHTML = '';
 
-        DAY_LBLS.forEach(d => {
-            const el = document.createElement('div');
-            el.className = 'cal-day-label';
-            el.textContent = d;
-            grid.appendChild(el);
-        });
+            DAY_LBLS.forEach(d => {
+                const el = document.createElement('div');
+                el.className = 'cal-day-label';
+                el.textContent = d;
+                grid.appendChild(el);
+            });
 
-        const firstDay    = new Date(calYear, calMonth, 1).getDay();
-        const blanks      = firstDay === 0 ? 6 : firstDay - 1;
-        const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-        const todayStr    = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+            const firstDay = new Date(calYear, calMonth, 1).getDay();
+            const blanks = firstDay === 0 ? 6 : firstDay - 1;
+            const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-        for (let b = 0; b < blanks; b++) {
-            const blank = document.createElement('div');
-            blank.className = 'cal-day empty';
-            grid.appendChild(blank);
-    }
+            for (let b = 0; b < blanks; b++) {
+                const blank = document.createElement('div');
+                blank.className = 'cal-day empty';
+                grid.appendChild(blank);
+            }
 
-    for (let d = 1; d <= daysInMonth; d++) {
-        const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        const el = document.createElement('div');
-        el.className = 'cal-day';
-        el.textContent = d;
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const el = document.createElement('div');
+                el.className = 'cal-day';
+                el.textContent = d;
 
-        if (dateStr === todayStr)     el.classList.add('today');
-        if (dateStr === selectedDate) el.classList.add('selected');
-        if (datesWithReports.has(dateStr)) el.classList.add('has-data');
+                if (dateStr === todayStr) el.classList.add('today');
+                if (dateStr === selectedDate) el.classList.add('selected');
+                if (datesWithReports.has(dateStr)) el.classList.add('has-data');
 
-        el.onclick = () => selectDate(dateStr);
-        grid.appendChild(el);
-    }
-} // ← make sure this closing brace exists
+                el.onclick = () => selectDate(dateStr);
+                grid.appendChild(el);
+            }
+        } // ← make sure this closing brace exists
 
         /* ══════════════════════════════════════════════
            DATE SELECTION
         ══════════════════════════════════════════════ */
-        async selectDate(dateStr) {
+        async function selectDate(dateStr) {
             selectedDate = dateStr;
             activeFilter = 'all';
             document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
@@ -790,162 +792,165 @@
             document.getElementById('summaryDateLabel').textContent = formatted;
             document.getElementById('calSummary').classList.add('visible');
 
-           async function renderStudentList() {
-    // Fetch real data from controller
-        const response = await fetch(`/Booking/GetAttendanceByDate?date=${selectedDate}`);
-        const students = await response.json();
+            async function renderStudentList() {
+                // Fetch real data from controller
+                const response = await fetch(`/Booking/GetAttendanceByDate?date=${selectedDate}`);
+                const students = await response.json();
 
-        document.getElementById('emptyCard').style.display       = 'none';
-        document.getElementById('studentListCard').style.display = '';
+                document.getElementById('emptyCard').style.display = 'none';
+                document.getElementById('studentListCard').style.display = '';
 
-        const formatted = new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-MY', {
-            weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
-        });
+                const formatted = new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-MY', {
+                    weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+                });
 
-        document.getElementById('listTitle').textContent    = students.length === 0 ? 'No Classes' : `${students.length} Student${students.length !== 1 ? 's' : ''}`;
-        document.getElementById('listSubtitle').textContent = formatted;
+                document.getElementById('listTitle').textContent = students.length === 0 ? 'No Classes' : `${students.length} Student${students.length !== 1 ? 's' : ''}`;
+                document.getElementById('listSubtitle').textContent = formatted;
 
-        updateStats(students);
-        renderRows(students);
-    }
-
-        /* ══════════════════════════════════════════════
-           STUDENT LIST RENDER
-        ══════════════════════════════════════════════ */
-        function renderStudentList() {
-            /* ── DATA NOTE: Replace this with real data fetch ──
-               Example when backend is ready:
-               const res = await fetch(`/Attendance/GetByDate?date=${selectedDate}`);
-               const students = await res.json();
-            ── */
-            const students = mockSessions[selectedDate] || [];
-
-            document.getElementById('emptyCard').style.display       = 'none';
-            document.getElementById('studentListCard').style.display = '';
-
-            const formatted = new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-MY', {
-                weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
-            });
-            document.getElementById('listTitle').textContent    = students.length === 0 ? 'No Classes' : `${students.length} Student${students.length !== 1 ? 's' : ''}`;
-            document.getElementById('listSubtitle').textContent = formatted;
-
-            updateStats(students);
-            renderRows(students);
-        }
-
-        function renderRows(students) {
-            const list = document.getElementById('studentList');
-            list.innerHTML = '';
-
-            const filtered = students.filter(s => {
-                if (activeFilter === 'present') return s.attended;
-                if (activeFilter === 'absent')  return !s.attended;
-                return true;
-            });
-
-            if (filtered.length === 0) {
-                list.innerHTML = `
-                    <div style="padding:36px; text-align:center; color:var(--text-dim); font-size:0.85rem;">
-                        No students match this filter.
-                    </div>`;
-                return;
+                await renderStudentList();
             }
 
-            filtered.forEach((s, idx) => {
-                const row = document.createElement('div');
-                row.className = 'student-row';
-                row.id = `row-${s.id}`;
-                row.style.animationDelay = `${idx * 0.04}s`;
+            /* ══════════════════════════════════════════════
+               STUDENT LIST RENDER
+            ══════════════════════════════════════════════ */
+            function renderStudentList() {
+                /* ── DATA NOTE: Replace this with real data fetch ──
+                   Example when backend is ready:
+                   const res = await fetch(`/Attendance/GetByDate?date=${selectedDate}`);
+                   const students = await res.json();
+                ── */
+                const response = await fetch('/Booking/GetAttendanceByDate?date=${selectedDate}');
+                const students = await response.json();
+                currentStudents = students; // Store for filter access
 
-                /* ── THEME NOTE: Badge class per package type ── */
-                const badgeMap = {
-                    'Beginner':     'badge-beginner',
-                    'Intermediate': 'badge-intermediate',
-                    'Advanced':     'badge-advanced',
-                    'Private':      'badge-private'
-                };
-                const bClass = badgeMap[s.packageType] || 'badge-beginner';
+                document.getElementById('emptyCard').style.display = 'none';
+                document.getElementById('studentListCard').style.display = '';
 
-                row.innerHTML = `
-                    <div class="student-avatar ${s.attended ? 'present' : ''}" id="avatar-${s.id}">
-                        ${s.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div class="student-info">
-                        <div class="student-name">${s.name}</div>
-                        <div class="student-meta">
-                            <i class="bi bi-clock"></i> ${s.time}
-                            <span class="class-badge ${bClass}">${s.packageType}</span>
-                        </div>
-                    </div>
-                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
-                        <button
-                            class="attend-btn ${s.attended ? 'attended' : ''}"
-                            id="btn-${s.id}"
-                            onclick="toggleAttendance(${s.id})"
-                        >
-                            <i class="bi ${s.attended ? 'bi-check-circle-fill' : 'bi-circle'}"></i>
-                            <span>${s.attended ? 'Present' : 'Mark Present'}</span>
-                        </button>
-                        <div class="attend-time ${s.attended ? 'visible' : ''}" id="time-${s.id}">
-                            ${s.attended ? 'Marked just now' : ''}
-                        </div>
-                    </div>
-                `;
-                list.appendChild(row);
-            });
+                const formatted = new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-MY', {
+                    weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+                });
+                document.getElementById('listTitle').textContent = students.length === 0 ? 'No Classes' : `${students.length} Student${students.length !== 1 ? 's' : ''}`;
+                document.getElementById('listSubtitle').textContent = formatted;
+
+                updateStats(students);
+                renderRows(students);
+            }
+
+            function renderRows(students) {
+                const list = document.getElementById('studentList');
+                list.innerHTML = '';
+
+                const filtered = students.filter(s => {
+                    if (activeFilter === 'present') return s.attended;
+                    if (activeFilter === 'absent') return !s.attended;
+                    return true;
+                });
+
+                if (filtered.length === 0) {
+                    list.innerHTML = `
+                            <div style="padding:36px; text-align:center; color:var(--text-dim); font-size:0.85rem;">
+                                No students match this filter.
+                            </div>`;
+                    return;
+                }
+
+                filtered.forEach((s, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'student-row';
+                    row.id = `row-${s.id}`;
+                    row.style.animationDelay = `${idx * 0.04}s`;
+
+                    /* ── THEME NOTE: Badge class per package type ── */
+                    const badgeMap = {
+                        'Beginner': 'badge-beginner',
+                        'Intermediate': 'badge-intermediate',
+                        'Advanced': 'badge-advanced',
+                        'Private': 'badge-private'
+                    };
+                    const bClass = badgeMap[s.packageType] || 'badge-beginner';
+
+                    row.innerHTML = `
+                            <div class="student-avatar ${s.attended ? 'present' : ''}" id="avatar-${s.id}">
+                                ${s.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div class="student-info">
+                                <div class="student-name">${s.name}</div>
+                                <div class="student-meta">
+                                    <i class="bi bi-clock"></i> ${s.time}
+                                    <span class="class-badge ${bClass}">${s.packageType}</span>
+                                </div>
+                            </div>
+                            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+                                <button
+                                    class="attend-btn ${s.attended ? 'attended' : ''}"
+                                    id="btn-${s.id}"
+                                    onclick="toggleAttendance(${s.id})"
+                                >
+                                    <i class="bi ${s.attended ? 'bi-check-circle-fill' : 'bi-circle'}"></i>
+                                    <span>${s.attended ? 'Present' : 'Mark Present'}</span>
+                                </button>
+                                <div class="attend-time ${s.attended ? 'visible' : ''}" id="time-${s.id}">
+                                    ${s.attended ? 'Marked just now' : ''}
+                                </div>
+                            </div>
+                        `;
+                    list.appendChild(row);
+                });
+            }
+
+            /* ══════════════════════════════════════════════
+               ATTENDANCE TOGGLE
+               ── DATA NOTE: When backend is ready, call:
+                  await fetch('/Attendance/Toggle', {
+                    method: 'POST',
+                    body: new FormData with { reservationId: id, attended: newState }
+                  });
+               after toggling so it persists to database ──
+            ══════════════════════════════════════════════ */
+            async function toggleAttendance(id) {
+                const students = await getCurrentStudents();
+                const student = students.find(s => s.id === id);
+                if (!student) return;
+
+                student.attended = !student.attended;
+
+                await fetch('/Booking/ToggleAttendance', {
+                    method: "POST",
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `reservationId=${id}&attended=${student.attended}`
+                });
+
+                    
+
+            const btn = document.getElementById(`btn-${id}`);
+            const avatar = document.getElementById(`avatar-${id}`);
+            const timeEl = document.getElementById(`time-${id}`);
+
+            if (student.attended) {
+                btn.classList.add('attended');
+                btn.innerHTML = `<i class="bi bi-check-circle-fill"></i><span>Present</span>`;
+                avatar.classList.add('present');
+                timeEl.textContent = `Marked at ${new Date().toLocaleTimeString('en-MY', { hour: '2-digit', minute: '2-digit' })}`;
+                timeEl.classList.add('visible');
+                showToast(`${student.name} marked present`, true);
+            } else {
+                btn.classList.remove('attended');
+                btn.innerHTML = `<i class="bi bi-circle"></i><span>Mark Present</span>`;
+                avatar.classList.remove('present');
+                timeEl.textContent = '';
+                timeEl.classList.remove('visible');
+                showToast(`${student.name} marked absent`, false);
+            }
+
+            updateStats(students);
         }
-
-        /* ══════════════════════════════════════════════
-           ATTENDANCE TOGGLE
-           ── DATA NOTE: When backend is ready, call:
-              await fetch('/Attendance/Toggle', {
-                method: 'POST',
-                body: new FormData with { reservationId: id, attended: newState }
-              });
-           after toggling so it persists to database ──
-        ══════════════════════════════════════════════ */
-        async function toggleAttendance(id) {
-            const students = await getCurrentStudents();
-            const student = students.find (s => s.id === id);
-            if (!student) return;
-
-            student.attended = !student.attended;
-
-            await fetch('/Booking/ToggleAttendance', {
-                method: "POST",
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `reservationId=${id}&attended=${student.attended}`}
-
-            });
-
-           const btn    = document.getElementById(`btn-${id}`);
-           const avatar = document.getElementById(`avatar-${id}`);
-           const timeEl = document.getElementById(`time-${id}`);
-
-    if (student.attended) {
-        btn.classList.add('attended');
-        btn.innerHTML = `<i class="bi bi-check-circle-fill"></i><span>Present</span>`;
-        avatar.classList.add('present');
-        timeEl.textContent = `Marked at ${new Date().toLocaleTimeString('en-MY', {hour:'2-digit', minute:'2-digit'})}`;
-        timeEl.classList.add('visible');
-        showToast(`${student.name} marked present`, true);
-    } else {
-        btn.classList.remove('attended');
-        btn.innerHTML = `<i class="bi bi-circle"></i><span>Mark Present</span>`;
-        avatar.classList.remove('present');
-        timeEl.textContent = '';
-        timeEl.classList.remove('visible');
-        showToast(`${student.name} marked absent`, false);
-    }
-
-    updateStats(students);
-}
 
         /* ══════════════════════════════════════════════
            MARK ALL PRESENT
         ══════════════════════════════════════════════ */
         function markAllPresent() {
-            const students = mockSessions[selectedDate] || [];
+            renderRows(currentStudents);
+            updateStats(currentStudents);
             students.forEach(s => {
                 if (!s.attended) {
                     s.attended = true;
@@ -972,21 +977,21 @@
         ══════════════════════════════════════════════ */
         function updateStats(students) {
             const presentCount = students.filter(s => s.attended).length;
-            document.getElementById('statTotal').textContent   = students.length;
+            document.getElementById('statTotal').textContent = students.length;
             document.getElementById('statPresent').textContent = presentCount;
-            document.getElementById('statAbsent').textContent  = students.length - presentCount;
+            document.getElementById('statAbsent').textContent = students.length - presentCount;
         }
 
         /* ══════════════════════════════════════════════
            TOAST
         ══════════════════════════════════════════════ */
         function showToast(msg, isPresent) {
-            const toast   = document.getElementById('toast');
-            const msgEl   = document.getElementById('toastMsg');
-            const iconEl  = toast.querySelector('i');
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toastMsg');
+            const iconEl = toast.querySelector('i');
 
             msgEl.textContent = msg;
-            toast.classList.remove('present','absent');
+            toast.classList.remove('present', 'absent');
             iconEl.className = isPresent
                 ? 'bi bi-check-circle-fill'
                 : 'bi bi-x-circle-fill';
