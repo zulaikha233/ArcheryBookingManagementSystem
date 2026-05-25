@@ -67,6 +67,50 @@
             opacity: 1;
             bottom: -35px;
         }
+
+        .back-btn-premium {
+            color: var(--primary) !important;
+            border: 1px solid rgba(255, 77, 77, 0.2);
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition-smooth);
+            background: rgba(255, 77, 77, 0.05);
+            font-size: 1.2rem;
+            position: relative;
+        }
+
+        .back-btn-premium:hover {
+            background: rgba(255, 77, 77, 0.15) !important;
+            color: #fff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 77, 77, 0.2);
+            border-color: rgba(255, 77, 77, 0.5);
+        }
+
+        .back-btn-premium::before {
+            content: 'Back';
+            position: absolute;
+            bottom: -30px;
+            right: 0;
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition-smooth);
+            white-space: nowrap;
+        }
+
+        .back-btn-premium:hover::before {
+            opacity: 1;
+            bottom: -35px;
+        }
     </style>
 </head>
 <body>
@@ -76,6 +120,7 @@
             
             bool isLoginPage = currentAction == "Login" || currentAction == "CustomerLogin" || currentAction == "CustomerRegister";
             bool isHomePage = currentController == "Home" && currentAction == "Index";
+            bool isClassRegistration = currentController == "Account" && currentAction == "ClassRegistration";
             
             // Define booking process actions
             var bookingActions = new[] { "StaffBooking", "GetFreeSlots", "SelectionLane", "Payment", "PaymentGuest", "GuestBooking", "BookSlots" };
@@ -164,7 +209,7 @@
                         </ul>
                         
                     </div>
-                @if ((!string.IsNullOrEmpty(userName) || !string.IsNullOrEmpty(customerName)) && !isLoginPage && !isHomePage)
+                @if ((!string.IsNullOrEmpty(userName) || !string.IsNullOrEmpty(customerName)) && !isLoginPage && !isHomePage && !isClassRegistration)
                 {
                     <div style="position: absolute; right: 30px; top: 50%; transform: translateY(-50%); z-index: 100;">
                         <a class="logout-btn-premium" href="@Url.Action("Logout", "Account")" title="Logout">

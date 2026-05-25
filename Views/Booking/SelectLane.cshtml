@@ -11,11 +11,13 @@
     var targetAmount = ViewBag.TargetAmount;
     var isGuest      = ViewBag.IsGuest;
     var enableLaneSelection = ViewBag.EnableLaneSelection ?? false;
+    var studentId    = ViewBag.StudentId;
+    var sessionType  = ViewBag.SessionType;
 }
 
 <div class="booking-wizard-container py-5">
     <div data-aos="fade-down">
-        <partial name="~/Views/Home/_BookingProgress.cshtml" model="3" />
+        <partial name="~/Views/Home/BookingProgress.cshtml" model="3" />
     </div>
 
     <div class="premium-card" data-aos="fade-up">
@@ -116,12 +118,14 @@
         date:               "@date",
         duration:           "@duration",
         targetSize:         "@targetSize",
-        targetAmount:       "@targetAmount",
+        targetAmount:       parseInt("@targetAmount") || 1,
         isGuest:            "@isGuest".toLowerCase() === "true",
         enableLaneSelection: "@enableLaneSelection".toLowerCase() === "true",
         pax:                1,
         selectedTargetIds:  [],
-        laneRanges:         {}
+        laneRanges:         {},
+        studentId:          "@studentId",
+        sessionType:        "@sessionType"
     };
 
     let cachedOpenLanes = [];
@@ -255,6 +259,22 @@
             return;
         }
 
+        let calculatedPrice = 0;
+        const dur = parseInt(bookingData.duration);
+        const paxCount = parseInt(bookingData.pax);
+        
+        if (bookingData.isGuest) {
+            // Guest Mode: (Duration / 2) * 50 * Pax
+            calculatedPrice = (dur / 2) * 50 * paxCount;
+        } else if (bookingData.sessionType === "self_training") {
+            // Self-Training: (Duration / 2) * 20
+            calculatedPrice = (dur / 2) * 20;
+        } else {
+            // Game Session: SelectedLanesCount * TargetAmount * 80
+            const lanesCount = bookingData.selectedTargetIds.length;
+            calculatedPrice = lanesCount * bookingData.targetAmount * 80;
+        }
+
         const form   = document.createElement("form");
         form.method  = "POST";
         form.action  = bookingData.isGuest ? "/Booking/PaymentGuest" : "/Booking/Payment";
@@ -266,11 +286,12 @@
             PhoneNumber:       bookingData.phone,
             Date:              bookingData.date,
             Duration:          bookingData.duration,
-            TotalPrice:        parseInt(bookingData.duration) * 10,
+            TotalPrice:        calculatedPrice,
             SelectedLanes:     bookingData.selectedTargetIds.join(", "),
             TargetSize:        bookingData.targetSize,
             TargetAmount:      bookingData.targetAmount,
-            NumberOfPax:       bookingData.pax
+            NumberOfPax:       bookingData.pax,
+            StudentId:         bookingData.studentId
         };
 
         for (let k in fields) {

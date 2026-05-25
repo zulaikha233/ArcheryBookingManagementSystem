@@ -279,6 +279,31 @@ namespace ArcheryAlley
             return _context.Customers.FirstOrDefault(c => c.Email.ToLower() == email.ToLower());
         }
 
+        public void UpdateCustomerStatus(string email, string status)
+        {
+            var customer = _context.Customers.FirstOrDefault(c => c.Email.ToLower() == email.ToLower());
+            if (customer != null)
+            {
+                customer.Status = status;
+                _context.SaveChanges();
+            }
+        }
+
+        public void UpdateCustomer(Customers customer)
+        {
+            var existing = _context.Customers.FirstOrDefault(c => c.CustomerId == customer.CustomerId);
+            if (existing != null)
+            {
+                existing.FullName = customer.FullName;
+                existing.PhoneNumber = customer.PhoneNumber;
+                existing.ICNumber = customer.ICNumber;
+                existing.Address = customer.Address;
+                existing.Birthday = customer.Birthday;
+                existing.Status = customer.Status;
+                _context.SaveChanges();
+            }
+        }
+
         public List<BookingSlots> SeedFixedSlots()
         {
             var requiredSlots = new List<(TimeSpan Start, TimeSpan End)>
@@ -589,6 +614,14 @@ namespace ArcheryAlley
             _context.SaveChanges();
         }
 
+        public List<Payments> GetPaymentsByEmail(string email)
+        {
+            return _context.Payments
+                .Include(p => p.Reservation)
+                .Where(p => p.Reservation.CustomerEmail.ToLower() == email.ToLower() || p.Reservation.ReservedBy.ToLower() == email.ToLower())
+                .ToList();
+        }
+
         public void RegisterClassSession(ClassRegistrations registration)
         {
             _context.ClassRegistrations.Add(registration);
@@ -604,34 +637,104 @@ namespace ArcheryAlley
         {
             return _context.Reservations
                 .Include(r => r.Slot)
+                .Include(r => r.Student)
                 .Where(r => r.CustomerEmail.ToLower() == email.ToLower() || r.ReservedBy.ToLower() == email.ToLower())
                 .ToList();
         }
 
-        public void UpdateCustomer(Customers customer)
+        // ──────────────────────────────────────────────
+        // STUDENT (CHILD) MANAGEMENT
+        // ──────────────────────────────────────────────
+
+        public void AddStudent(Students student)
         {
-            _context.Customers.Update(customer);
+            _context.Students.Add(student);
             _context.SaveChanges();
         }
 
-        public List<Reservations> GetReservationsByDate(DateTime date)
+        public List<Students> GetStudentsByParentId(int customerId)
         {
-            return _context.Reservations
-                .Include(r => r.Slot)
-                .Where(r => r.ReservedOn.Date == date.Date && r.Status != 2)
-                .OrderBy(r => r.Slot.SlotStartTime)
+            return _context.Students
+                .Where(s => s.ParentCustomerId == customerId)
+                .OrderBy(s => s.CreatedAt)
                 .ToList();
         }
-     
-        public void UpdateAttendance(int reservationId, bool attended)
+
+        public Students GetStudentById(int studentId)
         {
-            var reservation = _context.Reservations.FirstOrDefault(r => r.ReservationId == reservationId);
-            if (reservation != null)
+            return _context.Students.FirstOrDefault(s => s.StudentId == studentId);
+        }
+
+        public ClassRegistrations GetClassRegistrationByStudentId(int studentId)
+        {
+            return _context.ClassRegistrations.FirstOrDefault(cr => cr.StudentId == studentId);
+        }
+
+        public void UpdateStudentStatus(int studentId, string status)
+        {
+            var student = _context.Students.FirstOrDefault(s => s.StudentId == studentId);
+            if (student != null)
             {
-                reservation.Attended = attended;
+                student.Status = status;
                 _context.SaveChanges();
             }
         }
 
+        public List<ClassRegistrations> GetPendingPaymentsByEmail(string email)
+        {
+            return _context.ClassRegistrations
+                .Where(cr => cr.CustomerEmail.ToLower() == email.ToLower() && cr.PaymentStatus == "Pending")
+                .ToList();
+        }
+
+        public void ClearPendingPaymentsByEmail(string email, string? type = null, int? id = null)
+        {
+            // Class registrations
+            var pendingClasses = _context.ClassRegistrations
+                .Where(cr => cr.CustomerEmail.ToLower() == email.ToLower() && cr.PaymentStatus == "Pending" && 
+                             (string.IsNullOrEmpty(type) || type == "all" || (type == "class" && cr.RegistrationId == id)))
+                .ToList();
+            foreach (var pc in pendingClasses)
+            {
+                pc.PaymentStatus = "Success";
+                pc.PaymentMethod = "Online (FPX)";
+                pc.TransactionId = "TXN-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
+            }
+
+            // Reservations
+            var pendingReservations = _context.Reservations
+                .Where(r => (r.CustomerEmail.ToLower() == email.ToLower() || r.ReservedBy.ToLower() == email.ToLower()) && r.Status == 0 && 
+                             (string.IsNullOrEmpty(type) || type == "all" || (type == "reservation" && r.ReservationId == id)))
+                .ToList();
+            foreach (var pr in pendingReservations)
+            {
+                pr.Status = 1; // Paid
+                
+                // Add associated payment record if not already exists
+                var existingPayment = _context.Payments.FirstOrDefault(p => p.ReservationId == pr.ReservationId);
+                if (existingPayment == null)
+                {
+                    var payment = new Payments
+                    {
+                        ReservationId = pr.ReservationId,
+                        Amount = pr.TotalPrice,
+                        PaymentMethod = "Online (FPX)",
+                        PaymentDate = DateTime.Now,
+                        Status = "Success",
+                        TransactionId = "POS-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper()
+                    };
+                    _context.Payments.Add(payment);
+                }
+                else
+                {
+                    existingPayment.Status = "Success";
+                    existingPayment.PaymentDate = DateTime.Now;
+                    existingPayment.PaymentMethod = "Online (FPX)";
+                    existingPayment.TransactionId = "POS-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
+                }
+            }
+
+            _context.SaveChanges();
+        }
     }
 }

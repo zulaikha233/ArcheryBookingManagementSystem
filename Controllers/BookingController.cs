@@ -18,16 +18,40 @@ namespace ArcheryAlley.Controllers
 
         public IActionResult GetFreeSlots()
         {
-            if (HttpContext.Session.GetString("CustomerStatus") == "Inactive")
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email))
+                return RedirectToAction("CustomerLogin", "Account");
+
+            var parent = _repository.GetCustomerByEmail(email);
+            var students = parent != null ? _repository.GetStudentsByParentId(parent.CustomerId).Where(s => {
+                if (s.Status != "Registered") return false;
+                
+                // Exclude students who have a class registration with a pending payment status
+                var classReg = _repository.GetClassRegistrationByStudentId(s.StudentId);
+                if (classReg != null && (classReg.PaymentStatus == "Pending" || classReg.PaymentStatus == "Pending Payment"))
+                {
+                    return false;
+                }
+                return true;
+            }).ToList() : new List<Students>();
+
+            bool isParentActive = HttpContext.Session.GetString("CustomerStatus") == "Active";
+            
+            // Bypass block if parent is inactive but has registered students
+            if (!isParentActive && !students.Any())
             {
                 return RedirectToAction("MemberDashboard", "Account");
             }
+
             _repository.SeedFixedSlots();
             HttpContext.Session.SetString("IsGuest", "false");
-            ViewBag.CustomerEmail = HttpContext.Session.GetString("CustomerEmail");
+            ViewBag.CustomerEmail = email;
             ViewBag.CustomerName = HttpContext.Session.GetString("CustomerName");
             ViewBag.CustomerPhone = HttpContext.Session.GetString("CustomerPhone");
-            return View("~/Views/Booking/MemberBooking.cshtml");
+            ViewBag.Students = students;
+            ViewBag.ParentActive = isParentActive;
+
+            return View("~/Views/Booking/MemberTargetBooking.cshtml");
         }
 
         public IActionResult ClassBooking()
@@ -41,7 +65,7 @@ namespace ArcheryAlley.Controllers
             ViewBag.CustomerEmail = HttpContext.Session.GetString("CustomerEmail");
             ViewBag.CustomerName = HttpContext.Session.GetString("CustomerName");
             ViewBag.CustomerPhone = HttpContext.Session.GetString("CustomerPhone");
-            return View("~/Views/Booking/ClassBooking.cshtml");
+            return View("~/Views/Booking/MemberClassBooking.cshtml");
         }
 
         public IActionResult MemberCalendar()
@@ -129,7 +153,7 @@ namespace ArcheryAlley.Controllers
         }
 
         [HttpGet]
-        public IActionResult SelectTarget(int slotId, string name, string email, string phone, string date, int duration, int numberOfPax, string sessionType = "")
+        public IActionResult SelectTarget(int slotId, string name, string email, string phone, string date, int duration, int numberOfPax, string sessionType = "", int? studentId = null)
         {
             if (!string.IsNullOrEmpty(sessionType))
             {
@@ -148,22 +172,25 @@ namespace ArcheryAlley.Controllers
             ViewBag.Date     = date;
             ViewBag.Duration = duration;
             ViewBag.NumberOfPax = numberOfPax;
+            ViewBag.StudentId = studentId;
             return View();
         }
 
         [HttpPost]
-        public IActionResult SelectLane(int slotId, string name, string email, string phone, string date, int duration, string targetSize, int targetAmount, int numberOfPax)
+        public IActionResult SelectLane(int slotId, string name, string email, string phone, string date, int duration, string targetSize, int targetAmount, int numberOfPax, int? studentId = null)
         {
             ViewBag.IsGuest      = HttpContext.Session.GetString("IsGuest") == "true";
             ViewBag.SlotId       = slotId;
             ViewBag.Name         = name;
             ViewBag.Email        = email;
-            ViewBag.Phone         = phone;
+            ViewBag.Phone        = phone;
             ViewBag.Date         = date;
             ViewBag.Duration     = duration;
             ViewBag.TargetSize   = targetSize;
             ViewBag.TargetAmount = targetAmount;
             ViewBag.NumberOfPax  = numberOfPax;
+            ViewBag.StudentId    = studentId;
+            ViewBag.SessionType  = HttpContext.Session.GetString("SessionType") ?? "game";
 
             ViewBag.EnableLaneSelection = SystemSettings.EnableLaneSelection;
             return View();
@@ -293,7 +320,17 @@ namespace ArcheryAlley.Controllers
             
             ViewBag.ServiceName = serviceName;
             ViewBag.EnableLaneSelection = SystemSettings.EnableLaneSelection;
-            return View("~/Views/Payment/Payment.cshtml", model);
+
+            if (model.StudentId.HasValue)
+            {
+                var student = _repository.GetStudentById(model.StudentId.Value);
+                if (student != null)
+                {
+                    ViewBag.ShooterName = student.FullName;
+                }
+            }
+
+            return View("~/Views/Payment/MemberBookingPayment.cshtml", model);
         }
 
         public IActionResult PaymentGuest(int SlotId, string CustomerName, string CustomerEmail, string Date, int Duration, decimal TotalPrice, string SelectedLanes, string TargetSize, int TargetAmount, int NumberOfPax)
@@ -371,7 +408,7 @@ namespace ArcheryAlley.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateCustomerBooking(int SlotId, string CustomerName, string CustomerEmail, int TargetNo, int RangeNo, int Duration, decimal TotalPrice, string SelectedLanes, string SelectedLaneRanges, int NumberOfPax, string RateCode, string PaymentMethod, string Date = "")
+        public IActionResult CreateCustomerBooking(int SlotId, string CustomerName, string CustomerEmail, int TargetNo, int RangeNo, int Duration, decimal TotalPrice, string SelectedLanes, string SelectedLaneRanges, int NumberOfPax, string RateCode, string PaymentMethod, string Date = "", int? StudentId = null)
         {
             try
             {
@@ -425,7 +462,8 @@ namespace ArcheryAlley.Controllers
                         RateCode      = string.IsNullOrWhiteSpace(RateCode) ? null : RateCode,
                         ReservedOn    = finalReservedOn,
                         NumberOfPax   = NumberOfPax,
-                        Status        = 1
+                        Status        = 1,
+                        StudentId     = StudentId
                     };
                     _repository.CreateReservation(reservation);
                     if (firstId == null) firstId = reservation.ReservationId;
@@ -527,7 +565,8 @@ namespace ArcheryAlley.Controllers
                     r.ReservedBy,
                     r.DurationHours,
                     r.RateCode,
-                    r.Status
+                    r.Status,
+                    r.StudentId
                 })
                 .Select(g => new ArcheryAlley.Models.BookingHistoryViewModel
                 {
@@ -543,12 +582,13 @@ namespace ArcheryAlley.Controllers
                     TotalPrice    = g.Sum(r => r.TotalPrice),
                     RateCode      = g.Key.RateCode,
                     NumberOfPax   = g.Sum(r => r.NumberOfPax),
-                    Status        = g.Key.Status
+                    Status        = g.Key.Status,
+                    ShooterName   = g.First().Student != null ? g.First().Student.FullName : g.Key.CustomerName
                 })
                 .OrderByDescending(g => g.ReservedOn)
                 .ToList();
 
-            return View("~/Views/Booking/MemberHistory.cshtml", grouped);
+            return View("~/Views/History/MemberHistory.cshtml", grouped);
         }
 
         [HttpGet]

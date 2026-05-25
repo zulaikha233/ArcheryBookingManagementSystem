@@ -4,6 +4,7 @@ using ArcheryAlley.Models;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace ArcheryAlley.Controllers
 {
@@ -82,22 +83,35 @@ namespace ArcheryAlley.Controllers
         [HttpPost]
         public IActionResult CustomerLogin(string Email, string Password)
         {
-            if (!string.IsNullOrEmpty(Email) && !string.IsNullOrEmpty(Password))
+            if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
             {
-                var customer = _repository.GetCustomerLogin(Email, Password);
-                if (customer != null)
-                {
-                    HttpContext.Session.SetString("CustomerEmail", customer.Email);
-                    HttpContext.Session.SetString("CustomerName", customer.FullName ?? customer.Username);
-                    HttpContext.Session.SetString("CustomerPhone", customer.PhoneNumber ?? "");
-                    HttpContext.Session.SetString("CustomerUsername", customer.Username);
-                    HttpContext.Session.SetString("CustomerStatus", customer.Status ?? "Inactive");
-                    HttpContext.Session.SetString("UserRole", "Member"); // Assign Member role
-                    return RedirectToAction("MemberDashboard", "Account");
-                }
+                ViewBag.ErrorMessage = "Please enter your email and password.";
+                return View("~/Views/Account/MemberLogin.cshtml");
             }
-            ViewBag.ErrorMessage = "Please enter valid credentials.";
-            return View("~/Views/Account/MemberLogin.cshtml");
+
+            // Check if email exists first
+            var customerByEmail = _repository.GetCustomerByEmail(Email);
+            if (customerByEmail == null)
+            {
+                ViewBag.ErrorMessage = "Incorrect email. No account found with this email address.";
+                return View("~/Views/Account/MemberLogin.cshtml");
+            }
+
+            // Email exists, now check password
+            var customer = _repository.GetCustomerLogin(Email, Password);
+            if (customer == null)
+            {
+                ViewBag.ErrorMessage = "Incorrect password. Please try again.";
+                return View("~/Views/Account/MemberLogin.cshtml");
+            }
+
+            HttpContext.Session.SetString("CustomerEmail", customer.Email);
+            HttpContext.Session.SetString("CustomerName", customer.FullName ?? customer.Username);
+            HttpContext.Session.SetString("CustomerPhone", customer.PhoneNumber ?? "");
+            HttpContext.Session.SetString("CustomerUsername", customer.Username);
+            HttpContext.Session.SetString("CustomerStatus", customer.Status ?? "Inactive");
+            HttpContext.Session.SetString("UserRole", "Member");
+            return RedirectToAction("MemberDashboard", "Account");
         }
 
         [HttpGet]
@@ -155,12 +169,25 @@ namespace ArcheryAlley.Controllers
         }
 
         [HttpGet]
-        public IActionResult ClassRegistration()
+        public IActionResult ClassRegistration(int? studentId = null)
         {
             string email = HttpContext.Session.GetString("CustomerEmail");
             if (string.IsNullOrEmpty(email))
                 return RedirectToAction("CustomerLogin");
-                
+
+            // If registering for a student, validate the student belongs to this parent
+            if (studentId.HasValue)
+            {
+                var parent = _repository.GetCustomerByEmail(email);
+                var student = _repository.GetStudentById(studentId.Value);
+                if (student == null || student.ParentCustomerId != parent.CustomerId)
+                    return RedirectToAction("MemberDashboard");
+
+                ViewBag.StudentId = studentId.Value;
+                ViewBag.StudentName = student.FullName;
+                ViewBag.StudentIC = student.ICNumber;
+            }
+
             return View("~/Views/Account/ClassRegistration.cshtml");
         }
 
@@ -205,9 +232,9 @@ namespace ArcheryAlley.Controllers
 
         [HttpPost]
         public IActionResult CompleteClassRegistration(
-            string FullName, string PhoneNumber, DateTime Birthday, string Address,
+            string FullName, string PhoneNumber, string ICNumber, string Address,
             string PackageType, decimal PackagePrice, string LearningMethod, int LearningMethodPax, decimal LearningMethodPrice,
-            decimal AnnualFee, decimal TotalPrice, string PaymentMethod)
+            decimal AnnualFee, decimal TotalPrice, string PaymentMethod, int? StudentId = null)
         {
             string email = HttpContext.Session.GetString("CustomerEmail");
             if (string.IsNullOrEmpty(email))
@@ -215,7 +242,7 @@ namespace ArcheryAlley.Controllers
                 return Json(new { success = false, message = "Session expired. Please login again." });
             }
 
-            if (string.IsNullOrEmpty(FullName) || string.IsNullOrEmpty(PhoneNumber) || Birthday == default || string.IsNullOrEmpty(Address))
+            if (string.IsNullOrEmpty(FullName) || string.IsNullOrEmpty(PhoneNumber) || string.IsNullOrEmpty(ICNumber) || string.IsNullOrEmpty(Address))
             {
                 return Json(new { success = false, message = "Please fill in all member details." });
             }
@@ -228,10 +255,28 @@ namespace ArcheryAlley.Controllers
 
             customer.FullName = FullName;
             customer.PhoneNumber = PhoneNumber;
-            customer.Birthday = Birthday;
+            customer.ICNumber = ICNumber;
             customer.Address = Address;
             customer.Status = "Active";
 
+            if (!string.IsNullOrEmpty(ICNumber) && ICNumber.Length == 12)
+            {
+                if (int.TryParse(ICNumber.Substring(0, 2), out int year) &&
+                    int.TryParse(ICNumber.Substring(2, 2), out int month) &&
+                    int.TryParse(ICNumber.Substring(4, 2), out int day))
+                {
+                    int currentYear2Digit = DateTime.Now.Year % 100;
+                    year += (year > currentYear2Digit) ? 1900 : 2000;
+                    try
+                    {
+                        customer.Birthday = new DateTime(year, month, day);
+                    }
+                    catch
+                    {
+                        customer.Birthday = null;
+                    }
+                }
+            }
 
             var registration = new ClassRegistrations
             {
@@ -246,7 +291,8 @@ namespace ArcheryAlley.Controllers
                 TotalPrice = TotalPrice,
                 PaymentMethod = PaymentMethod == "fpx" ? "Online (FPX)" : "Credit/Debit Card",
                 PaymentStatus = "Success",
-                TransactionId = "TXN-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper()
+                TransactionId = "TXN-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+                StudentId = StudentId
             };
 
             try
@@ -296,7 +342,268 @@ namespace ArcheryAlley.Controllers
 
             ViewBag.ClassRegistrations = _repository.GetClassRegistrationsByEmail(email);
 
+            // Pass students (children) list
+            var parent = _repository.GetCustomerByEmail(email);
+            if (parent != null)
+            {
+                var students = _repository.GetStudentsByParentId(parent.CustomerId);
+                var classRegs = _repository.GetClassRegistrationsByEmail(email);
+                ViewBag.Students = students.Select(s => new {
+                    s.StudentId,
+                    s.FullName,
+                    s.ICNumber,
+                    s.Birthday,
+                    ClassReg = classRegs.FirstOrDefault(cr => cr.StudentId == s.StudentId)
+                }).ToList();
+            }
+
             return View("~/Views/Dashboard/MemberDashboard.cshtml");
+        }
+
+        [HttpGet]
+        public IActionResult MemberProfile()
+        {
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email))
+                return RedirectToAction("CustomerLogin");
+
+            var customer = _repository.GetCustomerByEmail(email);
+            if (customer == null)
+                return RedirectToAction("CustomerLogin");
+
+            return View("~/Views/Account/MemberProfile.cshtml", customer);
+        }
+
+        [HttpPost]
+        public IActionResult MemberProfile(string FullName, string PhoneNumber, string ICNumber, string Address)
+        {
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email))
+                return RedirectToAction("CustomerLogin");
+
+            var customer = _repository.GetCustomerByEmail(email);
+            if (customer == null)
+                return RedirectToAction("CustomerLogin");
+
+            if (string.IsNullOrEmpty(FullName) || string.IsNullOrEmpty(PhoneNumber) || string.IsNullOrEmpty(ICNumber) || string.IsNullOrEmpty(Address))
+            {
+                ViewBag.ErrorMessage = "Please fill in all profile details.";
+                return View("~/Views/Account/MemberProfile.cshtml", customer);
+            }
+
+            customer.FullName = FullName;
+            customer.PhoneNumber = PhoneNumber;
+            customer.ICNumber = ICNumber;
+            customer.Address = Address;
+
+            if (!string.IsNullOrEmpty(ICNumber) && ICNumber.Length == 12)
+            {
+                if (int.TryParse(ICNumber.Substring(0, 2), out int year) &&
+                    int.TryParse(ICNumber.Substring(2, 2), out int month) &&
+                    int.TryParse(ICNumber.Substring(4, 2), out int day))
+                {
+                    int currentYear2Digit = DateTime.Now.Year % 100;
+                    year += (year > currentYear2Digit) ? 1900 : 2000;
+                    try
+                    {
+                        customer.Birthday = new DateTime(year, month, day);
+                    }
+                    catch
+                    {
+                        customer.Birthday = null;
+                    }
+                }
+            }
+
+            try
+            {
+                _repository.UpdateCustomer(customer);
+
+                HttpContext.Session.SetString("CustomerName", customer.FullName ?? customer.Username);
+                HttpContext.Session.SetString("CustomerPhone", customer.PhoneNumber ?? "");
+
+                ViewBag.SuccessMessage = "Profile updated successfully!";
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = "An error occurred: " + ex.Message;
+            }
+
+            return View("~/Views/Account/MemberProfile.cshtml", customer);
+        }
+
+        [HttpGet]
+        public IActionResult MemberSettings()
+        {
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email))
+                return RedirectToAction("CustomerLogin");
+
+            var customer = _repository.GetCustomerByEmail(email);
+            if (customer == null)
+                return RedirectToAction("CustomerLogin");
+
+            return View("~/Views/Account/MemberSettings.cshtml", customer);
+        }
+
+        [HttpPost]
+        public IActionResult MemberSettings(string CurrentPassword, string NewPassword)
+        {
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email))
+                return RedirectToAction("CustomerLogin");
+
+            var customer = _repository.GetCustomerByEmail(email);
+            if (customer == null)
+                return RedirectToAction("CustomerLogin");
+
+            if (string.IsNullOrEmpty(CurrentPassword) || string.IsNullOrEmpty(NewPassword))
+            {
+                ViewBag.ErrorMessage = "Please fill in all password fields.";
+                return View("~/Views/Account/MemberSettings.cshtml", customer);
+            }
+
+            if (customer.Password != CurrentPassword)
+            {
+                ViewBag.ErrorMessage = "The current password you entered is incorrect.";
+                return View("~/Views/Account/MemberSettings.cshtml", customer);
+            }
+
+            try
+            {
+                customer.Password = NewPassword;
+                _repository.UpdateCustomer(customer);
+                ViewBag.SuccessMessage = "Password updated successfully!";
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = "An error occurred: " + ex.Message;
+            }
+
+            return View("~/Views/Account/MemberSettings.cshtml", customer);
+        }
+
+        [HttpGet]
+        public IActionResult MemberPayment()
+        {
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email))
+                return RedirectToAction("CustomerLogin");
+
+            var customer = _repository.GetCustomerByEmail(email);
+            if (customer == null)
+                return RedirectToAction("CustomerLogin");
+
+            var classRegs = _repository.GetClassRegistrationsByEmail(email) ?? new List<ClassRegistrations>();
+            var reservations = _repository.GetReservationsByEmail(email) ?? new List<Reservations>();
+            var payments = _repository.GetPaymentsByEmail(email) ?? new List<Payments>();
+
+            ViewBag.ClassRegs = classRegs;
+            ViewBag.Reservations = reservations;
+            ViewBag.Payments = payments;
+
+            return View("~/Views/Payment/Fee/MemberPayment.cshtml", customer);
+        }
+
+        [HttpPost]
+        public IActionResult ClearPendingPayments(string? type = null, int? id = null)
+        {
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email))
+                return Json(new { success = false, message = "Session expired. Please login again." });
+
+            try
+            {
+                _repository.ClearPendingPaymentsByEmail(email, type, id);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "An error occurred: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult UpdateDefaultPaymentMethod(string method)
+        {
+            if (string.IsNullOrEmpty(method))
+                return Json(new { success = false, message = "Invalid payment method." });
+
+            HttpContext.Session.SetString("DefaultPaymentMethod", method);
+            return Json(new { success = true });
+        }
+
+        // ─── Helper: read saved cards list from session ───────────────────────
+        private List<Dictionary<string, string>> GetSavedCards()
+        {
+            var raw = HttpContext.Session.GetString("SavedCards");
+            if (string.IsNullOrEmpty(raw))
+                return new List<Dictionary<string, string>>();
+            try
+            {
+                return JsonSerializer.Deserialize<List<Dictionary<string, string>>>(raw)
+                       ?? new List<Dictionary<string, string>>();
+            }
+            catch
+            {
+                return new List<Dictionary<string, string>>();
+            }
+        }
+
+        private void SaveCards(List<Dictionary<string, string>> cards)
+        {
+            HttpContext.Session.SetString("SavedCards", JsonSerializer.Serialize(cards));
+        }
+
+        // ─── Add a new card to the wallet ────────────────────────────────────
+        [HttpPost]
+        public IActionResult AddSavedCard(string cardNumber, string cardExpiry, string cardCvv)
+        {
+            if (string.IsNullOrWhiteSpace(cardNumber) || string.IsNullOrWhiteSpace(cardExpiry) || string.IsNullOrWhiteSpace(cardCvv))
+                return Json(new { success = false, message = "Please fill in all card fields." });
+
+            var cards = GetSavedCards();
+            var newId = Guid.NewGuid().ToString();
+            cards.Add(new Dictionary<string, string>
+            {
+                { "id",     newId },
+                { "number", cardNumber.Trim() },
+                { "expiry", cardExpiry.Trim() },
+                { "cvv",    cardCvv.Trim() }
+            });
+            SaveCards(cards);
+
+            // Auto-select the newly added card
+            HttpContext.Session.SetString("SelectedCardId", newId);
+
+            return Json(new { success = true, id = newId });
+        }
+
+        // ─── Delete a card by ID ─────────────────────────────────────────────
+        [HttpPost]
+        public IActionResult DeleteSavedCard(string cardId)
+        {
+            var cards = GetSavedCards();
+            cards.RemoveAll(c => c.ContainsKey("id") && c["id"] == cardId);
+            SaveCards(cards);
+
+            // If deleted card was selected, pick the first remaining or clear
+            var selectedId = HttpContext.Session.GetString("SelectedCardId");
+            if (selectedId == cardId)
+            {
+                var first = cards.FirstOrDefault();
+                HttpContext.Session.SetString("SelectedCardId", first != null ? first["id"] : "");
+            }
+
+            return Json(new { success = true });
+        }
+
+        // ─── Set the active/selected card ────────────────────────────────────
+        [HttpPost]
+        public IActionResult SelectCard(string cardId)
+        {
+            HttpContext.Session.SetString("SelectedCardId", cardId ?? "");
+            return Json(new { success = true });
         }
     }
 }

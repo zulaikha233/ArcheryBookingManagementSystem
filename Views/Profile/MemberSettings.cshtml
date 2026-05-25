@@ -1,0 +1,396 @@
+@model ArcheryAlley.Models.Customers
+@{
+    ViewBag.Title = "Settings";
+    Layout = "~/Views/Shared/_MemberLayout.cshtml";
+
+    // Generate Avatar Initials
+    string initials = "M";
+    if (!string.IsNullOrEmpty(Model.FullName))
+    {
+        var parts = Model.FullName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length > 0)
+        {
+            initials = parts[0][0].ToString();
+            if (parts.Length > 1)
+            {
+                initials += parts[parts.Length - 1][0].ToString();
+            }
+        }
+    }
+    else if (!string.IsNullOrEmpty(Model.Username))
+    {
+        initials = Model.Username[0].ToString().ToUpper();
+    }
+    initials = initials.ToUpper();
+}
+
+<style>
+    /* ── SETTINGS SYSTEM CUSTOM THEME ── */
+    .settings-container {
+        max-width: 1250px;
+        margin: 0 auto;
+        animation: fadeIn 0.6s ease;
+    }
+
+    .settings-grid {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 30px;
+        align-items: start;
+    }
+
+    @@media (max-width: 992px) {
+        .settings-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ── LEFT SIDEBAR ── */
+    .sidebar-card {
+        background: rgba(30, 35, 45, 0.4);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 24px;
+        padding: 30px 20px;
+    }
+
+    .sidebar-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 5px;
+        letter-spacing: -0.5px;
+    }
+
+    .sidebar-subtitle {
+        font-size: 0.78rem;
+        color: var(--text-dim);
+        margin-bottom: 30px;
+    }
+
+    .settings-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .settings-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 18px;
+        border-radius: 14px;
+        color: var(--text-dim);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none !important;
+        transition: all 0.25s ease;
+        border: 1px solid transparent;
+        cursor: pointer;
+    }
+
+    .settings-nav-item:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .settings-nav-item.active {
+        background: linear-gradient(135deg, rgba(255, 77, 77, 0.12), rgba(255, 77, 77, 0.02));
+        border-color: rgba(255, 77, 77, 0.15);
+        color: var(--primary) !important;
+        font-weight: 700;
+        box-shadow: 0 4px 20px rgba(255, 77, 77, 0.05);
+    }
+
+    .settings-nav-item i {
+        font-size: 1.05rem;
+    }
+
+    /* ── RIGHT SECURITY CARD ── */
+    .settings-content-card {
+        background: rgba(20, 24, 33, 0.6);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        border-radius: 28px;
+        padding: 40px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-header-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 35px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .settings-card-title {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: #fff;
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+
+    .form-section-title {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 20px;
+        letter-spacing: -0.2px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-section-title::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .premium-form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px 24px;
+        margin-bottom: 35px;
+    }
+
+    @@media (max-width: 768px) {
+        .premium-form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .form-group-premium {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-label-premium {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .form-control-premium {
+        background: rgba(255, 255, 255, 0.02) !important;
+        border: 1px solid rgba(255, 255, 255, 0.07) !important;
+        border-radius: 14px !important;
+        color: #fff !important;
+        padding: 12px 18px !important;
+        font-size: 0.88rem !important;
+        font-weight: 600 !important;
+        transition: all 0.25s ease !important;
+        outline: none !important;
+    }
+
+    .form-control-premium:focus {
+        border-color: rgba(255, 77, 77, 0.5) !important;
+        background: rgba(255, 255, 255, 0.03) !important;
+        box-shadow: 0 0 12px rgba(255, 77, 77, 0.15) !important;
+    }
+
+    /* Security Buttons & Badges */
+    .btn-premium-action {
+        background: var(--primary);
+        border: none;
+        color: #000;
+        font-weight: 800;
+        font-size: 0.82rem;
+        letter-spacing: 0.5px;
+        padding: 10px 24px;
+        border-radius: 50px;
+        box-shadow: 0 8px 20px var(--primary-glow);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.25s ease;
+        text-decoration: none !important;
+    }
+
+    .btn-premium-action:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 25px var(--primary-glow);
+        background: #ff6666;
+        color: #000;
+    }
+
+    .badge-premium-disabled {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-dim);
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .badge-premium-active {
+        background: rgba(16, 185, 129, 0.15);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        color: #10B981;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .btn-outline-premium {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-dim);
+        font-weight: 700;
+        font-size: 0.82rem;
+        padding: 12px 24px;
+        border-radius: 50px;
+        transition: all 0.25s ease;
+        text-decoration: none !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-outline-premium:hover {
+        border-color: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="settings-container py-4">
+    <div class="settings-grid">
+        
+        <!-- ─── LEFT SIDEBAR ─── -->
+        <div class="sidebar-card" data-aos="fade-right">
+            <h2 class="sidebar-title">Settings</h2>
+            <p class="sidebar-subtitle">You can find all settings here.</p>
+            
+            <nav class="settings-nav">
+                <a href="javascript:void(0)" class="settings-nav-item active" onclick="alert('Security Options are currently active.')">
+                    <i class="bi bi-shield-lock"></i> Security Options
+                </a>
+                <a href="javascript:void(0)" class="settings-nav-item" onclick="alert('Chat module coming soon!')">
+                    <i class="bi bi-chat-left-dots"></i> Chat
+                </a>
+                <a href="javascript:void(0)" class="settings-nav-item" onclick="alert('System Preferences coming soon!')">
+                    <i class="bi bi-sliders"></i> Preferences
+                </a>
+                <a href="javascript:void(0)" class="settings-nav-item" onclick="alert('Notifications panel coming soon!')">
+                    <i class="bi bi-bell"></i> Notifications
+                </a>
+            </nav>
+        </div>
+
+        <!-- ─── RIGHT CONTENT CARD (SECURITY ONLY) ─── -->
+        <div class="settings-content-card" data-aos="fade-left">
+            
+            <!-- Header -->
+            <div class="card-header-wrap">
+                <h3 class="settings-card-title">Security Options</h3>
+            </div>
+
+            <!-- Live Alerts / Notifications -->
+            @if (ViewBag.SuccessMessage != null)
+            {
+                <div class="alert alert-success alert-premium d-flex align-items-center gap-2 border-0 bg-success bg-opacity-10 text-success mb-4" role="alert">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <div>@ViewBag.SuccessMessage</div>
+                </div>
+            }
+
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="alert alert-danger alert-premium d-flex align-items-center gap-2 border-0 bg-danger bg-opacity-10 text-danger mb-4" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>@ViewBag.ErrorMessage</div>
+                </div>
+            }
+
+            <!-- Form: Change Password -->
+            <form asp-action="MemberSettings" method="post" id="securityForm" class="needs-validation" novalidate>
+                
+                <div class="form-section-title">Change Password</div>
+                
+                <div class="premium-form-grid">
+                    <!-- Current Password -->
+                    <div class="form-group-premium">
+                        <label class="form-label-premium">Current Password</label>
+                        <input type="password" name="CurrentPassword" class="form-control-premium" placeholder="••••••••" required>
+                        <div class="invalid-feedback" style="font-size: 0.72rem; color: #ff4d4d; margin-top: 3px;">Current password is required.</div>
+                    </div>
+
+                    <!-- New Password -->
+                    <div class="form-group-premium">
+                        <label class="form-label-premium">New Password</label>
+                        <input type="password" name="NewPassword" class="form-control-premium" placeholder="••••••••" required>
+                        <div class="invalid-feedback" style="font-size: 0.72rem; color: #ff4d4d; margin-top: 3px;">New password is required.</div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mb-5">
+                    <button type="submit" class="btn-premium-action">
+                        <i class="bi bi-key-fill"></i> Update Password
+                    </button>
+                </div>
+
+            </form>
+
+            <!-- Section: Two-Factor Authentication -->
+            <div class="form-section-title">Two-Factor Authentication</div>
+            
+            <div class="d-flex align-items-center justify-content-between p-4 mb-5" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px;">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.06);">
+                        <i class="bi bi-shield-lock-fill" style="color: var(--primary); font-size: 1.3rem;"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-white fw-bold mb-1">App Authenticator <span class="badge-premium-disabled ms-2">Disabled</span></h6>
+                        <p class="text-dim small mb-0">Use applications like Google Authenticator to generate secure verification codes.</p>
+                    </div>
+                </div>
+                <button class="btn-outline-premium" onclick="alert('Two-factor authentication setup coming soon!')" style="padding: 8px 20px; font-size: 0.78rem;">Configure</button>
+            </div>
+
+
+            <!-- Footer Navigation -->
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-5" style="border-color: rgba(255,255,255,0.05) !important;">
+                <a href="/Account/MemberDashboard" class="btn-outline-premium">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            'use strict';
+            var form = document.getElementById('securityForm');
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        })();
+    </script>
+}

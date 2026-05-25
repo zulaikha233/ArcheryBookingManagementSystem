@@ -24,6 +24,7 @@ namespace ArcheryAlley.Models
         public  DbSet<Lanes> Lanes { get; set; }
         public  DbSet<Targets> Targets { get; set; }
         public  DbSet<ClassRegistrations> ClassRegistrations { get; set; }
+        public  DbSet<Students> Students { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -57,23 +58,7 @@ namespace ArcheryAlley.Models
                     .HasDefaultValue(true);
             });
 
-            modelBuilder.Entity<Reservations>(entity =>
-            {
-                entity.HasKey(e => e.ReservationId);
 
-                entity.Property(e => e.ReservedOn)
-                    .HasColumnType("datetime");
-
-                entity.Property(e => e.TotalPrice)
-                    .HasColumnType("decimal(18,2)");
-
-                entity.Property(e => e.Status)
-                    .HasDefaultValueSql("((1))");
-
-                entity.Property(e => e.RateCode)
-                    .HasMaxLength(20);
-
-            });
 
             modelBuilder.Entity<Roles>(entity =>
             {
@@ -139,6 +124,52 @@ namespace ArcheryAlley.Models
             modelBuilder.Entity<Targets>(entity =>
             {
                 entity.HasKey(e => e.TargetId);
+            });
+
+            modelBuilder.Entity<Students>(entity =>
+            {
+                entity.ToTable("Archers");
+                entity.HasKey(e => e.StudentId);
+                entity.HasOne(e => e.Parent)
+                      .WithMany()
+                      .HasForeignKey(e => e.ParentCustomerId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.Status)
+                    .HasMaxLength(20)
+                    .HasDefaultValue("Pending");
+            });
+
+            modelBuilder.Entity<ClassRegistrations>(entity =>
+            {
+                entity.HasOne(e => e.Student)
+                      .WithMany()
+                      .HasForeignKey(e => e.StudentId)
+                      .IsRequired(false)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<Reservations>(entity =>
+            {
+                entity.HasKey(e => e.ReservationId);
+
+                entity.Property(e => e.ReservedOn)
+                    .HasColumnType("datetime");
+
+                entity.Property(e => e.TotalPrice)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(e => e.Status)
+                    .HasDefaultValueSql("((1))");
+
+                entity.Property(e => e.RateCode)
+                    .HasMaxLength(20);
+
+                entity.HasOne(e => e.Student)
+                      .WithMany()
+                      .HasForeignKey(e => e.StudentId)
+                      .IsRequired(false)
+                      .OnDelete(DeleteBehavior.SetNull);
             });
         }
 

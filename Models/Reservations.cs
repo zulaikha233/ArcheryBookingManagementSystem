@@ -1,6 +1,7 @@
 using System.Data;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ArcheryAlley.Models
 {
@@ -22,6 +23,12 @@ namespace ArcheryAlley.Models
         
         public BookingSlots Slot { get; set; }
         public bool Attended { get; set; } = false;
+
+        // Optional FK — links booking to a specific archer
+        public int? StudentId { get; set; }
+
+        [ForeignKey("StudentId")]
+        public Students? Student { get; set; }
 
     }
 }

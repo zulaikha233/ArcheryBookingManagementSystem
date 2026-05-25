@@ -225,7 +225,7 @@
             }
 
             <div class="form-panel">
-                <form asp-action="CustomerRegister" method="post">
+                <form asp-action="CustomerRegister" method="post" id="registerForm">
                     <div class="login-field-group">
                         <i class="bi bi-person-circle"></i>
                         <input type="text" name="Username" placeholder="Username" required />
@@ -236,11 +236,16 @@
                     </div>
                     <div class="login-field-group">
                         <i class="bi bi-lock-fill"></i>
-                        <input type="password" name="Password" placeholder="Password" required />
+                        <input type="password" name="Password" id="registerPassword" placeholder="Password" required />
+                        <i class="bi bi-eye-slash toggle-password" data-target="registerPassword" style="cursor: pointer; color: rgba(255,255,255,0.5);"></i>
                     </div>
-                    <div class="login-field-group">
+                    <div class="login-field-group" id="confirmPasswordGroup">
                         <i class="bi bi-shield-lock-fill"></i>
-                        <input type="password" name="ConfirmPassword" placeholder="Confirm Password" required />
+                        <input type="password" name="ConfirmPassword" id="registerConfirmPassword" placeholder="Confirm Password" required />
+                        <i class="bi bi-eye-slash toggle-password" data-target="registerConfirmPassword" style="cursor: pointer; color: rgba(255,255,255,0.5);"></i>
+                    </div>
+                    <div id="passwordMatchError" style="visibility: hidden; color: #ef4444; font-size: 0.75rem; margin-top: -15px; margin-bottom: 20px; text-align: left; width: 100%; min-height: 18px;">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Passwords do not match
                     </div>
                     <div class="login-actions-row">
                         <button type="submit" class="login-submit-btn">Create Account</button>
@@ -258,3 +263,56 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleButtons = document.querySelectorAll('.toggle-password');
+        toggleButtons.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const targetId = this.getAttribute('data-target');
+                const passwordField = document.getElementById(targetId);
+                if (passwordField) {
+                    const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordField.setAttribute('type', type);
+                    this.classList.toggle('bi-eye');
+                    this.classList.toggle('bi-eye-slash');
+                }
+            });
+        });
+
+        // Password Match Validation
+        const registerForm = document.getElementById('registerForm');
+        const passwordInput = document.getElementById('registerPassword');
+        const confirmPasswordInput = document.getElementById('registerConfirmPassword');
+        const matchError = document.getElementById('passwordMatchError');
+        const confirmGroup = document.getElementById('confirmPasswordGroup');
+
+        if (registerForm) {
+            function validatePasswordMatch() {
+                // Only validate if confirm password has some value
+                if (confirmPasswordInput.value !== '' && passwordInput.value !== confirmPasswordInput.value) {
+                    matchError.style.visibility = 'visible';
+                    confirmGroup.style.borderBottomColor = '#ef4444';
+                    return false;
+                } else {
+                    matchError.style.visibility = 'hidden';
+                    confirmGroup.style.borderBottomColor = '';
+                    return true;
+                }
+            }
+
+            confirmPasswordInput.addEventListener('input', validatePasswordMatch);
+            passwordInput.addEventListener('input', validatePasswordMatch);
+
+            registerForm.addEventListener('submit', function (e) {
+                if (confirmPasswordInput.value === '' || !validatePasswordMatch()) {
+                    e.preventDefault();
+                    if (confirmPasswordInput.value === '') {
+                        matchError.style.visibility = 'visible';
+                        confirmGroup.style.borderBottomColor = '#ef4444';
+                    }
+                }
+            });
+        }
+    });
+</script>

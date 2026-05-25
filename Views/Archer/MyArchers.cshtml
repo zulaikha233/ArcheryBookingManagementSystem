@@ -1,0 +1,132 @@
+@{
+    ViewData["Title"] = "My Archers";
+    Layout = "_MemberLayout";
+}
+
+@section Styles {
+    <style>
+        .page-header {
+            margin-bottom: 35px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .page-header p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 6px;
+        }
+
+        .card-premium {
+            background-color: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.03);
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+    </style>
+}
+
+<div class="page-header d-flex justify-content-between align-items-end">
+    <div>
+        <h1 class="text-white">MY <span style="color: var(--primary);">ARCHERS</span></h1>
+        <p>Manage your archers' profiles and class registrations.</p>
+    </div>
+    <a href="/Archer/AddArcher" class="btn-premium" style="padding: 10px 20px; font-size: 0.85rem; text-decoration: none;">
+        <i class="bi bi-plus-circle me-2"></i> ADD ARCHER
+    </a>
+</div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-premium d-flex align-items-center gap-2 border-0 mb-4" role="alert" 
+             style="border-radius: 14px; padding: 15px 20px; font-weight: 600; font-size: 0.88rem; margin-top: 20px; 
+                    background: rgba(255, 77, 77, 0.1) !important; color: #ff4d4d !important; border: 1px solid rgba(255, 77, 77, 0.2) !important;">
+            <i class="bi bi-exclamation-triangle-fill" style="font-size: 1.1rem; color: #ff4d4d !important;"></i>
+            <div>@TempData["ErrorMessage"]</div>
+        </div>
+    }
+
+<div class="card-premium" style="padding: 20px 25px;">
+    @{
+        var students = ViewBag.Students as IEnumerable<ArcheryAlley.Models.ArcherViewModel>;
+    }
+
+    @if (students != null && students.Any())
+    {
+        <div style="display: flex; flex-direction: column; gap: 14px;">
+            @foreach (var s in students)
+            {
+                bool hasReg = s.ClassReg != null;
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                        <div style="width: 42px; height: 42px; border-radius: 50%; background: var(--primary-light); border: 1px solid rgba(255,77,77,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="bi bi-person-fill" style="color: var(--primary); font-size: 1.1rem;"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; font-size: 0.95rem; color: #fff;">@s.FullName</div>
+                            <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 2px;">
+                                @if (s.Age.HasValue)
+                                {
+                                    @($"{s.Age} years old")
+                                }
+                                else if (s.Birthday != null)
+                                {
+                                    @($"Born: {((DateTime)s.Birthday).ToString("dd MMM yyyy")}")
+                                }
+                            </div>
+                            @if (hasReg)
+                            {
+                                <span style="font-size: 0.65rem; background: rgba(16,185,129,0.15); color: #10B981; padding: 2px 8px; border-radius: 20px; font-weight: 700; margin-top: 4px; display: inline-block;">
+                                    @s.ClassReg.PackageType
+                                </span>
+                            }
+                            else
+                            {
+                                <span style="font-size: 0.65rem; background: rgba(245,158,11,0.15); color: #F59E0B; padding: 2px 8px; border-radius: 20px; font-weight: 700; margin-top: 4px; display: inline-block;">
+                                    Not Registered
+                                </span>
+                            }
+                        </div>
+                    </div>
+                    @if (!hasReg)
+                    {
+                        <a href="/Archer/AddArcherRegister?studentId=@s.StudentId"
+                           style="flex-shrink: 0; background: var(--primary); color: #000; font-size: 0.72rem; font-weight: 800; padding: 7px 14px; border-radius: 10px; text-decoration: none; letter-spacing: 0.5px; white-space: nowrap; transition: 0.3s;"
+                           onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                            <i class="bi bi-mortarboard-fill me-1"></i> REGISTER CLASS
+                        </a>
+                    }
+                    else
+                    {
+                        var isPaid = s.ClassReg.PaymentStatus == "Paid" || s.ClassReg.PaymentStatus == "Success";
+                        if (isPaid)
+                        {
+                            <span style="flex-shrink: 0; font-size: 0.72rem; font-weight: 700; color: #10B981; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 6px 14px; border-radius: 50px; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;">
+                                <i class="bi bi-check-circle-fill"></i> Active
+                            </span>
+                        }
+                        else
+                        {
+                            <span style="flex-shrink: 0; font-size: 0.72rem; font-weight: 700; color: #F59E0B; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); padding: 6px 14px; border-radius: 50px; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;">
+                                <i class="bi bi-clock-fill"></i> Pending Payment
+                            </span>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div style="text-align: center; padding: 30px 0; color: var(--text-dim);">
+            <i class="bi bi-people" style="font-size: 2.5rem; opacity: 0.2; display: block; margin-bottom: 12px;"></i>
+            <p style="font-size: 0.85rem; margin-bottom: 16px;">No archers added yet.</p>
+        </div>
+    }
+</div>
