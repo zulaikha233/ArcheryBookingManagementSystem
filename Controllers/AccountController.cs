@@ -47,7 +47,7 @@ namespace ArcheryAlley.Controllers
 
                 if (role.RoleType)
                 {
-                    return RedirectToAction("ManageSlots", "Slot");
+                    return RedirectToAction("AdminDashboard", "Slot");
                 }
                 else
                 {

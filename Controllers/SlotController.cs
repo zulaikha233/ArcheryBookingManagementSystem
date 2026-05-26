@@ -99,6 +99,21 @@ namespace ArcheryAlley.Controllers
             {
                 return Json(new { success = false, message = "An error occurred." });
             }
+
+        }
+
+        [HttpGet]
+        public IActionResult AdminDashboard()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (string.IsNullOrEmpty(role))
+                return RedirectToAction("Login", "Account");
+
+            if (role != "Admin")
+                return RedirectToAction("StaffDashboard", "Booking");
+
+            ViewBag.AdminName = HttpContext.Session.GetString("UserName");
+            return View("~/Views/Staff_Admin/AdminDashboard.cshtml");
         }
     }
 }
