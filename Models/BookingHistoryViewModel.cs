@@ -36,6 +36,7 @@ namespace ArcheryAlley.Models
         public int NumberOfPax { get; set; }
 
         public int? Status { get; set; }
+        public string? ShooterName { get; set; }
 
         // Helper: display lanes as comma-separated string e.g. "Lane 13, Lane 14"
         public string LanesDisplay => string.Join(", ", TargetNos.ConvertAll(t => $"Lane {t}"));

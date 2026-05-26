@@ -1,0 +1,232 @@
+@{
+    ViewBag.Title = "Add Archer";
+    Layout = "~/Views/Shared/_MemberLayout.cshtml";
+}
+
+<style>
+    .add-student-container {
+        max-width: 550px;
+        margin: 60px auto;
+    }
+
+    .page-header {
+        margin-bottom: 35px;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+    }
+
+    .page-header p {
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        margin-top: 6px;
+    }
+
+    .form-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 35px 30px;
+    }
+
+    .form-label {
+        font-size: 0.7rem;
+        letter-spacing: 1px;
+        font-weight: 700;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .form-control {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        color: #fff;
+        padding: 12px 16px;
+        font-size: 0.95rem;
+        transition: 0.3s;
+    }
+
+    .form-control:focus {
+        background: rgba(255,255,255,0.06);
+        border-color: rgba(255, 77, 77, 0.5);
+        box-shadow: 0 0 0 3px rgba(255, 77, 77, 0.12);
+        color: #fff;
+        outline: none;
+    }
+
+    .form-control::placeholder { color: rgba(255,255,255,0.2); }
+
+    .error-alert {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 0.85rem;
+        margin-bottom: 20px;
+    }
+
+    .btn-premium-outline {
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.15);
+        color: var(--text-dim);
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .btn-premium-outline:hover {
+        border-color: rgba(255,255,255,0.3);
+        color: #fff;
+    }
+
+    .ic-hint {
+        font-size: 0.72rem;
+        color: var(--text-dim);
+        margin-top: 6px;
+    }
+
+    .form-control[readonly] {
+        background: rgba(255, 255, 255, 0.02) !important;
+        border-color: rgba(255, 255, 255, 0.05) !important;
+        color: rgba(255, 255, 255, 0.4) !important;
+        cursor: not-allowed;
+    }
+</style>
+
+<div class="add-student-container">
+    <div class="page-header">
+        <h1 class="text-white">ADD <span style="color: var(--primary);">ARCHER</span></h1>
+        <p>Register a new archer under your account.</p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage as string))
+    {
+        <div class="error-alert">
+            <i class="bi bi-exclamation-circle me-2"></i> @ViewBag.ErrorMessage
+        </div>
+    }
+
+    <div class="form-card">
+        <form method="post" action="/Archer/AddArcher" id="addArcherForm">
+            <div class="mb-4">
+                <label class="form-label">Archer's Full Name</label>
+                <input type="text" name="FullName" class="form-control" placeholder="e.g. Ahmad bin Ali" required />
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">IC Number</label>
+                <input type="text" id="icInput" name="ICNumber" class="form-control" placeholder="e.g. 050403-10-1234" required />
+                <div id="icFeedback" class="mt-2" style="font-size: 0.75rem;"></div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Birthday</label>
+                <input type="date" id="dobDisplay" name="Birthday" class="form-control" readonly required />
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Age</label>
+                <input type="number" id="ageDisplay" name="Age" class="form-control" placeholder="Age" min="1" max="99" readonly required />
+            </div>
+
+            <div class="d-flex justify-content-between gap-3 mt-4">
+                <a href="/Archer/MyArchers" class="btn-premium-outline">
+                    <i class="bi bi-arrow-left me-2"></i> BACK
+                </a>
+                <button type="submit" class="btn-premium" id="saveBtn" disabled>
+                    SAVE ARCHER <i class="bi bi-person-plus-fill ms-2"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const icInput = document.getElementById('icInput');
+            const dobDisplay = document.getElementById('dobDisplay');
+            const ageDisplay = document.getElementById('ageDisplay');
+            const icFeedback = document.getElementById('icFeedback');
+            const saveBtn = document.getElementById('saveBtn');
+
+            function parseIC(ic) {
+                // Remove all non-digits (like hyphens)
+                const cleanIc = ic.replace(/[^0-9]/g, '');
+                
+                if (!cleanIc || cleanIc.length !== 12) {
+                    icFeedback.innerHTML = '';
+                    dobDisplay.value = '';
+                    ageDisplay.value = '';
+                    saveBtn.disabled = true;
+                    return false;
+                }
+
+                const year2Digit = parseInt(cleanIc.substring(0, 2));
+                const month = parseInt(cleanIc.substring(2, 4));
+                const day = parseInt(cleanIc.substring(4, 6));
+
+                if (month < 1 || month > 12 || day < 1 || day > 31) {
+                    icFeedback.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle-fill me-1"></i> Invalid birthdate encoded in IC</span>';
+                    dobDisplay.value = '';
+                    ageDisplay.value = '';
+                    saveBtn.disabled = true;
+                    return false;
+                }
+
+                const currentYear = new Date().getFullYear();
+                const currentYear2Digit = currentYear % 100;
+                const year = year2Digit + (year2Digit > currentYear2Digit ? 1900 : 2000);
+
+                // Format as YYYY-MM-DD for date input
+                const paddedMonth = String(month).padStart(2, '0');
+                const paddedDay = String(day).padStart(2, '0');
+                const isoDateStr = `${year}-${paddedMonth}-${paddedDay}`;
+                
+                const birthDate = new Date(year, month - 1, day);
+                if (isNaN(birthDate.getTime())) {
+                    icFeedback.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle-fill me-1"></i> Invalid Date of Birth</span>';
+                    dobDisplay.value = '';
+                    ageDisplay.value = '';
+                    saveBtn.disabled = true;
+                    return false;
+                }
+
+                // Calculate age
+                let age = currentYear - year;
+                const m = new Date().getMonth() - (month - 1);
+                if (m < 0 || (m === 0 && new Date().getDate() < day)) {
+                    age--;
+                }
+
+                dobDisplay.value = isoDateStr;
+                ageDisplay.value = age >= 0 ? age : 0;
+                icFeedback.innerHTML = '';
+                saveBtn.disabled = false;
+                return true;
+            }
+
+            icInput.addEventListener('input', function() {
+                parseIC(this.value);
+            });
+
+            // If IC is already filled on reload, parse it
+            if (icInput.value) {
+                parseIC(icInput.value);
+            }
+        });
+    </script>
+}

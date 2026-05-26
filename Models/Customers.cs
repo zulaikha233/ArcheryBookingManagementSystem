@@ -28,6 +28,9 @@ namespace ArcheryAlley.Models
         [StringLength(50)]
         public string Password { get; set; }
 
+        [StringLength(20)]
+        public string? ICNumber { get; set; }
+
         public DateTime? Birthday { get; set; }
 
         [StringLength(250)]

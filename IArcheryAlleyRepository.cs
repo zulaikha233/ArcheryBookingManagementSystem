@@ -37,6 +37,8 @@ namespace ArcheryAlley
         public void RegisterCustomer(Customers customer);
         public Customers GetCustomerLogin(string email, string password);
         public Customers GetCustomerByEmail(string email);
+        public void UpdateCustomerStatus(string email, string status);
+        public void UpdateCustomer(Customers customer);
 
         public void RegisterStaff(Roles role);
 
@@ -60,13 +62,20 @@ namespace ArcheryAlley
 
         // Payment Management
         public void AddPayment(Payments payment);
+        public List<Payments> GetPaymentsByEmail(string email);
 
         // Class Session Registration
         public void RegisterClassSession(ClassRegistrations registration);
         public List<ClassRegistrations> GetClassRegistrationsByEmail(string email);
         public List<Reservations> GetReservationsByEmail(string email);
 
-        List <Reservations> GetReservationsByDate(DateTime Date);
-        void UpdateAttendance(int reservationId, bool attended);
+        // Student (Child) Management
+        public void AddStudent(Students student);
+        public List<Students> GetStudentsByParentId(int customerId);
+        public Students GetStudentById(int studentId);
+        public ClassRegistrations GetClassRegistrationByStudentId(int studentId);
+        public void UpdateStudentStatus(int studentId, string status);
+        public List<ClassRegistrations> GetPendingPaymentsByEmail(string email);
+        public void ClearPendingPaymentsByEmail(string email, string? type = null, int? id = null);
     }
 }

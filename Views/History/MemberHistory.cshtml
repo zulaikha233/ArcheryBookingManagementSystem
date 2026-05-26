@@ -130,7 +130,7 @@
 
     .history-table thead th {
         padding: 14px 18px;
-        text-align: left;
+        text-align: center;
         font-size: 0.68rem;
         font-weight: 800;
         text-transform: uppercase;
@@ -154,6 +154,7 @@
         padding: 16px 18px;
         vertical-align: middle;
         color: #fff;
+        text-align: center;
     }
 
     /* ── COLUMN STYLES ── */
@@ -188,7 +189,7 @@
         white-space: nowrap;
     }
 
-    .col-status { text-align: right; white-space: nowrap; }
+    .col-status { text-align: center; white-space: nowrap; }
 
     /* ── SESSION TYPE BADGES ── */
     .badge-session {
@@ -276,7 +277,7 @@
         padding: 80px 20px;
     }
 
-    .empty-state i {
+    .empty-state > i {
         font-size: 3.5rem;
         color: rgba(255, 255, 255, 0.1);
         display: block;
@@ -395,14 +396,14 @@
             <table class="history-table" id="historyTable">
                 <thead>
                     <tr>
-                        <th>Ref #</th>
                         <th>Session Type</th>
+                        <th>Archer</th>
                         <th>Date</th>
                         <th>Time</th>
                         <th>Lane / Target</th>
                         <th>Duration</th>
                         <th>Amount</th>
-                        <th style="text-align:right;">Status</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -441,15 +442,18 @@
                             <tr class="history-row"
                                 data-type="@sessionType"
                                 data-status="@statusLabel.ToLower()"
-                                data-search="@item.GroupId @item.ReservedOn.ToString("dd MMM yyyy") @sessionLabel @statusLabel">
-                                <!-- REF -->
-                                <td class="col-ref">#@item.GroupId.ToString("D4")</td>
+                                data-search="@item.GroupId @item.ReservedOn.ToString("dd MMM yyyy") @sessionLabel @statusLabel @(item.ShooterName ?? "")">
 
                                 <!-- SESSION TYPE -->
                                 <td class="col-session">
                                     <span class="badge-session @sessionBadge">
                                         <i class="bi @sessionIcon"></i>@sessionLabel
                                     </span>
+                                </td>
+
+                                <!-- SHOOTER -->
+                                <td style="font-weight: 700; white-space: nowrap;">
+                                    @(string.IsNullOrEmpty(item.ShooterName) ? "Myself" : item.ShooterName)
                                 </td>
 
                                 <!-- DATE -->
@@ -512,8 +516,8 @@
                                     <i class="bi bi-calendar-x"></i>
                                     <h5>No Bookings Yet</h5>
                                     <p>You haven't made any bookings. Start your archery journey today!</p>
-                                    <a href="javascript:void(0)" onclick="handleBookingClick('/Booking/GetFreeSlots')" class="btn btn-danger btn-sm mt-3" style="border-radius: 8px; padding: 8px 16px; font-weight: 600; font-size: 0.85rem;">
-                                        <i class="bi bi-plus-circle"></i> Book a Session
+                                    <a href="javascript:void(0)" onclick="handleBookingClick('/Booking/GetFreeSlots')" class="btn-premium mt-3" style="text-decoration: none; display: inline-flex; align-items: center; gap: 10px; padding: 12px 25px; box-shadow: 0 0 20px rgba(255,77,77,0.4);">
+                                        BOOK A SESSION <i class="bi bi-arrow-right"></i>
                                     </a>
                                 </div>
                             </td>

@@ -52,5 +52,11 @@ namespace ArcheryAlley.Models
 
         [StringLength(100)]
         public string TransactionId { get; set; }
+
+        // Optional FK — null = parent registered for themselves, value = registered for a child
+        public int? StudentId { get; set; }
+
+        [ForeignKey("StudentId")]
+        public Students? Student { get; set; }
     }
 }

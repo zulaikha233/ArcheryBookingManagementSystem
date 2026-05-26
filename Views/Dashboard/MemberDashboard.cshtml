@@ -1,6 +1,31 @@
 @{
     ViewData["Title"] = "Member Dashboard";
     Layout = "_MemberLayout";
+
+    var classRegs = ViewBag.ClassRegistrations as IEnumerable<ArcheryAlley.Models.ClassRegistrations> ?? new List<ArcheryAlley.Models.ClassRegistrations>();
+    var reservations = ViewBag.Reservations as IEnumerable<dynamic> ?? new List<dynamic>();
+
+    decimal actualPending = 0;
+    if (classRegs != null)
+    {
+        foreach (var r in classRegs)
+        {
+            if (r.PaymentStatus == "Pending")
+            {
+                actualPending += r.TotalPrice;
+            }
+        }
+    }
+    if (reservations != null)
+    {
+        foreach (var r in reservations)
+        {
+            if (r.Status == 0)
+            {
+                actualPending += (decimal)r.TotalPrice;
+            }
+        }
+    }
 }
 
 @section Styles {
@@ -56,6 +81,7 @@
 
         .right-col { display: flex; flex-direction: column; gap: 30px; }
         .payment-card { background: linear-gradient(135deg, #FF4D4D, #D63031); border-radius: var(--radius-md); padding: 30px 25px; color: #fff; position: relative; overflow: hidden; box-shadow: 0 15px 30px rgba(255, 77, 77, 0.2); }
+        .payment-card.cleared { background: linear-gradient(135deg, #10B981, #059669) !important; box-shadow: 0 15px 30px rgba(16, 185, 129, 0.2) !important; }
         .payment-card::after { content: ''; position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; }
 
         .attendance-stat { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px dashed var(--border-color); }
@@ -185,7 +211,7 @@
         <div>
             <span class="badge bg-danger text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px; padding: 6px 12px; border-radius: 6px; box-shadow: 0 0 10px rgba(255,77,77,0.3);">WEEKEND CLASS</span>
             <h2 class="text-white fw-bold mb-2" style="font-size: 1.4rem; letter-spacing: -0.5px;">Unlock Certified Archery Coaching</h2>
-            <p class="text-dim m-0" style="font-size: 0.9rem;">Register today for annual access and choose either 2 Session (4 Slots) or 6 Slots with expert coaching.</p>
+            <p class="text-dim m-0" style="font-size: 0.9rem;">Register today for annual access and choose either 4 Slots or 6 Slots with expert coaching.</p>
         </div>
         <div>
             <a href="@Url.Action("ClassRegistration", "Account")" class="btn-premium" style="padding: 12px 25px; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 0 20px rgba(255,77,77,0.4);">
@@ -195,7 +221,8 @@
     </div>
 }
 
-@*
+
+
 <div class="dashboard-grid">
     <!-- LEFT COLUMN: PERFORMANCE & EQUIPMENT -->
     <div class="middle-col">
@@ -269,7 +296,89 @@
                 </div>
             </div>
         </div>
+
+        <!-- ─── MY ARCHERS SECTION ─── -->
+        @{
+            var students = ViewBag.Students as dynamic;
+        }
+        <h3 class="section-title">
+            MY ARCHERS
+            <a href="/Archer/AddArcher" style="font-size: 0.72rem; color: var(--primary); font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 5px; letter-spacing: 1px;">
+                <i class="bi bi-plus-circle"></i> ADD ARCHER
+            </a>
+        </h3>
+        <div class="card-premium" style="padding: 20px 25px;">
+            @if (students != null && ((IEnumerable<dynamic>)students).Any())
+            {
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    @foreach (var s in students)
+                    {
+                        bool hasReg = s.ClassReg != null;
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 14px; padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px;">
+                            <div style="display: flex; align-items: center; gap: 14px;">
+                                <div style="width: 42px; height: 42px; border-radius: 50%; background: var(--primary-light); border: 1px solid rgba(255,77,77,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <i class="bi bi-person-fill" style="color: var(--primary); font-size: 1.1rem;"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 700; font-size: 0.95rem; color: #fff;">@s.FullName</div>
+                                    <div style="font-size: 0.7rem; color: var(--text-dim); margin-top: 2px;">
+                                        @if (s.Birthday != null)
+                                        {
+                                            var birthDate = (DateTime)s.Birthday;
+                                            var age = DateTime.Today.Year - birthDate.Year;
+                                            if (birthDate.Date > DateTime.Today.AddYears(-age)) age--;
+                                            @($"{age} years old (Born: {birthDate.ToString("dd MMM yyyy")})")
+                                        }
+                                        @if (!string.IsNullOrEmpty(s.ICNumber))
+                                        {
+                                            @($" | IC: {s.ICNumber}")
+                                        }
+                                    </div>
+                                    @if (hasReg)
+                                    {
+                                        <span style="font-size: 0.65rem; background: rgba(16,185,129,0.15); color: #10B981; padding: 2px 8px; border-radius: 20px; font-weight: 700; margin-top: 4px; display: inline-block;">
+                                            @s.ClassReg.PackageType
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span style="font-size: 0.65rem; background: rgba(245,158,11,0.15); color: #F59E0B; padding: 2px 8px; border-radius: 20px; font-weight: 700; margin-top: 4px; display: inline-block;">
+                                            Not Registered
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                            @if (!hasReg)
+                            {
+                                <a href="/Archer/AddArcherRegister?studentId=@s.StudentId"
+                                   style="flex-shrink: 0; background: var(--primary); color: #000; font-size: 0.72rem; font-weight: 800; padding: 7px 14px; border-radius: 10px; text-decoration: none; letter-spacing: 0.5px; white-space: nowrap; transition: 0.3s;"
+                                   onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                                    <i class="bi bi-mortarboard-fill me-1"></i> REGISTER CLASS
+                                </a>
+                            }
+                            else
+                            {
+                                <span style="flex-shrink: 0; font-size: 0.72rem; font-weight: 700; color: #10B981; white-space: nowrap;">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Active
+                                </span>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div style="text-align: center; padding: 30px 0; color: var(--text-dim);">
+                    <i class="bi bi-people" style="font-size: 2.5rem; opacity: 0.2; display: block; margin-bottom: 12px;"></i>
+                    <p style="font-size: 0.85rem; margin-bottom: 16px;">No archers added yet.</p>
+                    <a href="/Archer/AddArcher" style="background: var(--primary); color: #000; font-size: 0.8rem; font-weight: 800; padding: 10px 20px; border-radius: 10px; text-decoration: none; letter-spacing: 0.5px;">
+                        <i class="bi bi-plus-circle me-2"></i> ADD ARCHER
+                    </a>
+                </div>
+            }
+        </div>
     </div>
+
 
     <!-- RIGHT COLUMN: APPOINTMENTS & ACCOUNT BILLING -->
     <div class="right-col">
@@ -283,20 +392,40 @@
 
         <!-- Fee / Payment Section -->
         <h3 class="section-title">FEE STATUS <i class="bi bi-three-dots"></i></h3>
-        <div class="payment-card">
-            <p style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Outstanding Balance</p>
-            <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 20px;">RM 50.00</h2>
-            <div style="background: rgba(255,255,255,0.2); padding: 12px 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px;">
-                <i class="bi bi-exclamation-circle-fill" style="font-size: 1.2rem;"></i>
-                <div>
-                    <div style="font-size: 0.8rem; font-weight: 700;">Membership Renewal</div>
-                    <div style="font-size: 0.65rem; opacity: 0.8;">Due by end of month</div>
+        @if (actualPending > 0)
+        {
+            <div class="payment-card">
+                <p style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Outstanding Balance</p>
+                <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 20px;">RM @actualPending.ToString("N2")</h2>
+                <div style="background: rgba(255,255,255,0.2); padding: 12px 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px;">
+                    <i class="bi bi-exclamation-circle-fill" style="font-size: 1.2rem;"></i>
+                    <div>
+                        <div style="font-size: 0.8rem; font-weight: 700;">Pending Payment</div>
+                        <div style="font-size: 0.65rem; opacity: 0.8;">Please clear outstanding dues.</div>
+                    </div>
                 </div>
+                <button onclick="window.location.href='/Account/MemberPayment'" style="width: 100%; padding: 12px; border-radius: 10px; border: none; background: #fff; color: #000; font-weight: 800; font-size: 0.9rem; margin-top: 20px; cursor: pointer; transition: 0.3s;">
+                    PAY NOW
+                </button>
             </div>
-            <button style="width: 100%; padding: 12px; border-radius: 10px; border: none; background: #fff; color: #000; font-weight: 800; font-size: 0.9rem; margin-top: 20px; cursor: pointer; transition: 0.3s;">
-                PAY NOW
-            </button>
-        </div>
+        }
+        else
+        {
+            <div class="payment-card cleared">
+                <p style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">Outstanding Balance</p>
+                <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 20px;">RM 0.00</h2>
+                <div style="background: rgba(255,255,255,0.2); padding: 12px 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px;">
+                    <i class="bi bi-shield-check" style="font-size: 1.2rem;"></i>
+                    <div>
+                        <div style="font-size: 0.8rem; font-weight: 700;">No Outstanding Payment</div>
+                        <div style="font-size: 0.65rem; opacity: 0.8;">All payments are cleared!</div>
+                    </div>
+                </div>
+                <button onclick="window.location.href='/Account/MemberPayment'" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.3); background: transparent; color: #fff; font-weight: 800; font-size: 0.9rem; margin-top: 20px; cursor: pointer; transition: 0.3s;">
+                    VIEW HISTORY
+                </button>
+            </div>
+        }
 
         <!-- Attendance Summary -->
         <h3 class="section-title">ATTENDANCE SUMMARY</h3>
@@ -334,7 +463,6 @@
         </div>
     </div>
 </div>
-*@
 
 @section Scripts {
     <script>

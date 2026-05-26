@@ -1,0 +1,592 @@
+@{
+    ViewBag.Title = "Archer Class Registration";
+    Layout = "~/Views/Shared/_MemberLayout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .wizard-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Stepper */
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .step {
+            text-align: center;
+            opacity: 0.4;
+            transition: all 0.3s ease;
+        }
+
+        .step.active { opacity: 1; }
+
+        .step span {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            font-weight: 800;
+            color: var(--text-dim);
+            transition: all 0.3s ease;
+        }
+
+        .step.active span {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            box-shadow: 0 0 25px rgba(255, 77, 77, 0.3);
+        }
+
+        .step p {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            margin: 0;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .step.active p { color: var(--primary); }
+
+        .step-line {
+            width: 80px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.08);
+            margin-top: -25px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .step-line.active {
+            background: var(--primary);
+            box-shadow: 0 0 10px rgba(255, 77, 77, 0.3);
+        }
+
+        /* Wizard Forms */
+        .wizard-step-section {
+            display: none;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .wizard-step-section.active { display: block; }
+
+        .step-card {
+            background-color: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        .step-header {
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .step-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.3px;
+            margin: 0;
+        }
+
+        /* Archer Info Banner */
+        .archer-info-banner {
+            background: linear-gradient(135deg, rgba(255, 77, 77, 0.08), rgba(255, 77, 77, 0.02));
+            border: 1px solid rgba(255, 77, 77, 0.15);
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .archer-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .archer-avatar i {
+            font-size: 1.3rem;
+            color: #000;
+        }
+
+        /* Package & Method Selection */
+        .package-grid, .method-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .selection-card {
+            background: rgba(255, 255, 255, 0.01);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px 25px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .selection-card:hover {
+            border-color: rgba(255, 77, 77, 0.3);
+            background: rgba(255, 255, 255, 0.03);
+            transform: translateY(-3px);
+        }
+
+        .selection-card.selected {
+            border-color: var(--primary) !important;
+            background: var(--primary) !important;
+            color: #000 !important;
+            box-shadow: 0 15px 35px rgba(255, 77, 77, 0.2) !important;
+            transform: translateY(-5px);
+        }
+
+        .selection-card.selected::after {
+            content: '\e272';
+            font-family: 'bootstrap-icons';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #000 !important;
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .selection-card.selected h2,
+        .selection-card.selected h4,
+        .selection-card.selected .price-display,
+        .selection-card.selected .currency,
+        .selection-card.selected .amount,
+        .selection-card.selected .period,
+        .selection-card.selected p,
+        .selection-card.selected .text-dim,
+        .selection-card.selected .benefit-list li,
+        .selection-card.selected .benefit-list i {
+            color: #000 !important;
+            text-shadow: none !important;
+        }
+
+        .pricing-card {
+            padding: 40px 30px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .price-display {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .currency { font-size: 1.5rem; font-weight: 700; color: var(--text-dim); }
+        .amount { font-size: 3.2rem; font-weight: 900; line-height: 1; margin: 0 5px; transition: all 0.3s ease; }
+        .selection-card.selected .amount { color: #000 !important; }
+        .period { color: var(--text-dim); font-size: 0.95rem; }
+
+        .benefit-list { list-style: none; padding: 0; }
+        .benefit-list li { margin-bottom: 12px; display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: var(--text-dim); }
+        .benefit-list i { font-size: 1rem; }
+
+        .fw-900 { font-weight: 900; }
+
+        /* Pax Counter */
+        .pax-counter-box {
+            margin-top: 20px;
+            background: rgba(0,0,0,0.25);
+            padding: 20px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .selection-card.selected .pax-counter-box {
+            display: block !important;
+            animation: slideDown 0.3s ease;
+            background: rgba(0,0,0,0.15) !important;
+            border-color: rgba(0,0,0,0.15) !important;
+        }
+
+        .pax-btn {
+            width: 44px; height: 44px; border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff; font-weight: 800; cursor: pointer; transition: all 0.2s;
+        }
+
+        .pax-btn:hover { background: var(--primary); border-color: var(--primary); color: #000; }
+
+        .selection-card.selected .pax-counter-box label,
+        .selection-card.selected .pax-counter-box span,
+        .selection-card.selected .pax-counter-box .pax-value { color: #000 !important; }
+
+        .selection-card.selected .pax-btn {
+            border-color: rgba(0, 0, 0, 0.2) !important;
+            background: rgba(0, 0, 0, 0.05) !important;
+            color: #000 !important;
+        }
+
+        .selection-card.selected .pax-btn:hover { background: #000 !important; color: var(--primary) !important; }
+
+        .pax-value { font-size: 1.3rem; font-weight: 800; width: 45px; text-align: center; color: #fff; }
+
+        /* Summary Card */
+        .live-summary-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(0,0,0,0.2));
+            border-radius: var(--radius-md);
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            margin-top: 30px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .summary-label { color: var(--text-dim); font-size: 0.85rem; font-weight: 600; }
+        .summary-val { font-weight: 750; color: #fff; }
+
+        /* Success Modal */
+        .success-modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 12, 18, 0.6); backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center; z-index: 999;
+        }
+
+        .success-modal {
+            background: #0d121c; border: 1px solid rgba(255,255,255,0.05); border-radius: 36px;
+            padding: 60px 45px; text-align: center; max-width: 500px; width: 90%;
+            box-shadow: 0 45px 120px rgba(0, 0, 0, 0.9);
+        }
+
+        .success-badge-icon {
+            width: 88px; height: 88px; border-radius: 28px; background: var(--primary);
+            color: #000; font-size: 2.8rem; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 25px; box-shadow: 0 20px 40px rgba(255, 77, 77, 0.3);
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @@keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+}
+
+<!-- Success Modal -->
+<div id="registrationSuccessModal" class="success-modal-overlay">
+    <div class="success-modal">
+        <div class="success-badge-icon"><i class="bi bi-check-lg"></i></div>
+        <h3 class="fw-extrabold text-white mb-2" style="font-size: 2rem;">CLASS REGISTERED!</h3>
+        <p class="text-dim mb-4" style="font-size: 0.95rem;">
+            <span id="resArcherName" style="color: var(--primary); font-weight: 700;"></span> has been successfully registered for class sessions. Payment has been added to your fee summary.
+        </p>
+
+        <div class="p-3 mb-4" style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); border-radius: 18px; text-align: left;">
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-dim small">ARCHER:</span>
+                <span class="text-white fw-bold small" id="resArcherNameDetail"></span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-dim small">CLASS PACKAGE:</span>
+                <span class="text-white fw-bold small" id="resPackage"></span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-dim small">PAYMENT STATUS:</span>
+                <span class="fw-bold small" style="color: #F59E0B;">Pending</span>
+            </div>
+            <div class="d-flex justify-content-between pt-2 border-top border-secondary">
+                <span class="text-dim small font-weight-bold">TOTAL DUE:</span>
+                <span class="text-primary fw-extrabold" id="resTotal"></span>
+            </div>
+        </div>
+
+        <button class="btn-premium w-100 justify-content-center" onclick="window.location.href='/Archer/MyArchers'" style="padding: 15px;">
+            BACK TO MY ARCHERS <i class="bi bi-arrow-right ms-2"></i>
+        </button>
+    </div>
+</div>
+
+<div class="wizard-container py-3">
+    <!-- Archer Info Banner -->
+    <div class="archer-info-banner">
+        <div class="archer-avatar">
+            <i class="bi bi-person-fill"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.65rem; color: var(--text-dim); letter-spacing: 2px; font-weight: 700; text-transform: uppercase;">REGISTERING CLASS FOR</div>
+            <div style="font-size: 1.2rem; font-weight: 800; color: #fff;">@ViewBag.StudentName</div>
+            @if (ViewBag.StudentAge != null)
+            {
+                <div style="font-size: 0.75rem; color: var(--text-dim); margin-top: 2px;">@ViewBag.StudentAge years old</div>
+            }
+        </div>
+    </div>
+
+    <!-- Page Header -->
+    <div class="text-center mb-5">
+        <h1 class="text-white fw-extrabold mb-2" style="font-size: 2.2rem; letter-spacing: -0.5px;">ARCHER <span style="color: var(--primary);">CLASS REGISTRATION</span></h1>
+        <p class="text-dim">Select a class package for this archer.</p>
+    </div>
+
+    <!-- Step Tracker -->
+    <div class="step-indicator mb-5">
+        <div class="step active" id="trackStep-1">
+            <span>1</span>
+            <p>Package</p>
+        </div>
+        <div class="step-line" id="trackLine-1"></div>
+        <div class="step" id="trackStep-2">
+            <span>2</span>
+            <p>Confirm</p>
+        </div>
+    </div>
+
+    <!-- Alert Box -->
+    <div class="alert mb-4" id="wizardAlertBox" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #ef4444; border-radius: 16px; display: none;">
+        <i class="bi bi-exclamation-circle me-2"></i> <span id="wizardAlertMessage"></span>
+    </div>
+
+    <!-- STEP 1: Choose Package -->
+    <div class="wizard-step-section active" id="stepSection-1">
+        <div class="step-card">
+            <div class="step-header d-flex align-items-center justify-content-between">
+                <h3 class="step-title">SELECT CLASS SESSION PACKAGE</h3>
+                <span class="text-dim small fw-bold">Step 1 of 2</span>
+            </div>
+            <p class="text-dim small mb-4">Choose a class session package for your archer. All packages include certified coaching on weekends.</p>
+
+            <div class="package-grid">
+                <div class="selection-card pricing-card text-center h-100 selected" id="opt-pkg-4slots" onclick="selectPackage('4slots', 150.00, '2 Session (4 Slots)')">
+                    <h2 class="fw-900 mb-2">4 Slots Package</h2>
+                    <div class="price-display">
+                        <span class="currency">RM</span>
+                        <span class="amount">150</span>
+                        <span class="period">/ Starter</span>
+                    </div>
+                    <p class="text-dim mt-3" style="font-size: 0.85rem;">8 total instruction hours across 2 weekend sessions. Perfect for beginners.</p>
+                    <ul class="benefit-list text-start mt-4 mb-0" style="padding-left: 20px;">
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> 8 Instruction Hours</li>
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> Certified Coaching Included</li>
+                    </ul>
+                </div>
+
+                <div class="selection-card pricing-card text-center h-100" id="opt-pkg-6slots" onclick="selectPackage('6slots', 210.00, '6 Slots')">
+                    <h2 class="fw-900 mb-2">6 Slots Package</h2>
+                    <div class="price-display">
+                        <span class="currency">RM</span>
+                        <span class="amount">210</span>
+                        <span class="period">/ Best Value</span>
+                    </div>
+                    <p class="text-dim mt-3" style="font-size: 0.85rem;">12 instruction hours with certified coaches. Excellent value for progression.</p>
+                    <ul class="benefit-list text-start mt-4 mb-0" style="padding-left: 20px;">
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> 12 Instruction Hours</li>
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> Best Value For Progression</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between gap-3 mt-5">
+                <button type="button" class="btn-premium-outline" onclick="window.location.href='/Archer/MyArchers'">
+                    <i class="bi bi-arrow-left me-2"></i> BACK
+                </button>
+                <button type="button" class="btn-premium" onclick="goToStep(2)">NEXT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEP 2: Confirmation Summary -->
+    <div class="wizard-step-section" id="stepSection-2">
+        <div class="step-card">
+            <div class="step-header d-flex align-items-center justify-content-between">
+                <h3 class="step-title">REGISTRATION SUMMARY</h3>
+                <span class="text-dim small fw-bold">Step 2 of 2</span>
+            </div>
+
+            <div class="live-summary-card" style="margin-top: 0;">
+                <h4 class="fw-bold text-white mb-4" style="font-size: 1.1rem; letter-spacing: 0.3px;">
+                    <i class="bi bi-receipt me-2" style="color: var(--primary);"></i>ORDER SUMMARY
+                </h4>
+
+                <div class="summary-row">
+                    <span class="summary-label">Archer</span>
+                    <span class="summary-val text-white">@ViewBag.StudentName</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Annual Registration Fee</span>
+                    <span class="summary-val text-white">RM 80.00</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label" id="summaryPackageLabel">4 Slots Package</span>
+                    <span class="summary-val text-white" id="summaryPackagePrice">RM 150.00</span>
+                </div>
+                <div class="summary-row mt-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.1) !important;">
+                    <span class="text-white fw-extrabold" style="font-size: 1.05rem;">TOTAL DUE</span>
+                    <span class="text-primary fw-extrabold" style="font-size: 2rem;" id="summaryTotal">RM 230.00</span>
+                </div>
+
+                <div class="mt-4 p-3" style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 12px;">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-clock-fill" style="color: #F59E0B; font-size: 1.25rem;"></i>
+                        <p class="m-0 small" style="color: #F59E0B; font-size: 0.8rem; line-height: 1.4;">
+                            <strong>Payment Pending</strong> — This amount will be added to your Fee / Payment section for settlement.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between gap-3 mt-5">
+                <button type="button" class="btn-premium-outline" onclick="goToStep(1)">BACK</button>
+                <button type="button" class="btn-premium" id="confirmBtn" onclick="submitRegistration()">
+                    CONFIRM REGISTRATION <i class="bi bi-check-circle-fill ms-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // State
+        let currentStep = 1;
+        const studentId = @ViewBag.StudentId;
+        const studentName = '@ViewBag.StudentName';
+
+        // Package
+        let selPackageId = '4slots';
+        let selPackageName = '2 Session (4 Slots)';
+        let selPackagePrice = 150.00;
+
+        // Fees
+        const annualFee = 80.00;
+
+        function showAlert(msg) {
+            document.getElementById('wizardAlertMessage').innerText = msg;
+            document.getElementById('wizardAlertBox').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function hideAlert() {
+            document.getElementById('wizardAlertBox').style.display = 'none';
+        }
+
+        function goToStep(step) {
+            hideAlert();
+
+            document.querySelectorAll('.wizard-step-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(`stepSection-${step}`).classList.add('active');
+
+            for (let i = 1; i <= 2; i++) {
+                const stepEl = document.getElementById(`trackStep-${i}`);
+                if (i <= step) stepEl.classList.add('active');
+                else stepEl.classList.remove('active');
+
+                if (i < 2) {
+                    const lineEl = document.getElementById(`trackLine-${i}`);
+                    if (i < step) lineEl.classList.add('active');
+                    else lineEl.classList.remove('active');
+                }
+            }
+
+            if (step === 2) updateSummary();
+
+            currentStep = step;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function selectPackage(pkgId, price, displayName) {
+            document.querySelectorAll('#stepSection-1 .selection-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById(`opt-pkg-${pkgId}`).classList.add('selected');
+            selPackageId = pkgId;
+            selPackagePrice = price;
+            selPackageName = displayName;
+        }
+
+        function updateSummary() {
+            document.getElementById('summaryPackageLabel').innerText = selPackageName;
+            document.getElementById('summaryPackagePrice').innerText = `RM ${selPackagePrice.toFixed(2)}`;
+
+            const total = annualFee + selPackagePrice;
+            document.getElementById('summaryTotal').innerText = `RM ${total.toFixed(2)}`;
+        }
+
+        async function submitRegistration() {
+            hideAlert();
+            const btn = document.getElementById('confirmBtn');
+            btn.disabled = true;
+            btn.innerHTML = `Processing... <div class="spinner-border spinner-border-sm text-light ms-2"></div>`;
+
+            const totalPrice = annualFee + selPackagePrice;
+
+            const formData = new FormData();
+            formData.append('StudentId', studentId);
+            formData.append('PackageType', selPackageName);
+            formData.append('PackagePrice', selPackagePrice);
+            formData.append('LearningMethod', 'N/A');
+            formData.append('LearningMethodPax', 0);
+            formData.append('LearningMethodPrice', 0);
+            formData.append('AnnualFee', annualFee);
+            formData.append('TotalPrice', totalPrice);
+
+            try {
+                const resp = await fetch('/Archer/CompleteArcherRegistration', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await resp.json();
+
+                if (result.success) {
+                    document.getElementById('resArcherName').innerText = result.archerName;
+                    document.getElementById('resArcherNameDetail').innerText = result.archerName;
+                    document.getElementById('resPackage').innerText = selPackageName;
+                    document.getElementById('resTotal').innerText = `RM ${totalPrice.toFixed(2)}`;
+
+                    document.getElementById('registrationSuccessModal').style.display = 'flex';
+                } else {
+                    showAlert('Registration failed: ' + result.message);
+                    btn.disabled = false;
+                    btn.innerHTML = `CONFIRM REGISTRATION <i class="bi bi-check-circle-fill ms-2"></i>`;
+                }
+            } catch (err) {
+                showAlert('An error occurred. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = `CONFIRM REGISTRATION <i class="bi bi-check-circle-fill ms-2"></i>`;
+            }
+        }
+    </script>
+}

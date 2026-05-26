@@ -345,7 +345,8 @@
                     </div>
                     <div class="login-field-group">
                         <i class="bi bi-lock-fill"></i>
-                        <input type="password" name="Password" placeholder="Password" required autocomplete="current-password" />
+                        <input type="password" name="Password" id="loginPassword" placeholder="Password" required autocomplete="current-password" />
+                        <i class="bi bi-eye-slash" id="toggleLoginPassword" style="cursor: pointer; color: rgba(255,255,255,0.5);"></i>
                     </div>
                     <div class="login-actions-row">
                         <a href="#" class="forgot-link">Forgot Password?</a>
@@ -432,5 +433,17 @@
         const curveBottom = document.getElementById('curveBottom');
         curveTop.style.top    = '-20px';
         curveBottom.style.top = TAB_H + 'px';
+
+        // Password visibility toggle
+        const toggleLoginPassword = document.getElementById('toggleLoginPassword');
+        if (toggleLoginPassword) {
+            toggleLoginPassword.addEventListener('click', function () {
+                const passwordField = document.getElementById('loginPassword');
+                const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordField.setAttribute('type', type);
+                this.classList.toggle('bi-eye');
+                this.classList.toggle('bi-eye-slash');
+            });
+        }
     });
 </script>

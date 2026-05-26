@@ -4,6 +4,7 @@ using ArcheryAlley.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ArcheryAlley.Migrations
 {
     [DbContext(typeof(ArcheryAlleyDBContext))]
-    partial class ArcheryAlleyDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260521082539_AddAgeToStudents")]
+    partial class AddAgeToStudents
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -325,9 +328,6 @@ namespace ArcheryAlley.Migrations
                         .HasColumnType("int")
                         .HasDefaultValueSql("((1))");
 
-                    b.Property<int?>("StudentId")
-                        .HasColumnType("int");
-
                     b.Property<int>("TargetNo")
                         .HasColumnType("int");
 
@@ -337,8 +337,6 @@ namespace ArcheryAlley.Migrations
                     b.HasKey("ReservationId");
 
                     b.HasIndex("SlotId");
-
-                    b.HasIndex("StudentId");
 
                     b.ToTable("Reservations");
                 });
@@ -398,17 +396,11 @@ namespace ArcheryAlley.Migrations
                     b.Property<int>("ParentCustomerId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Status")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Pending");
-
                     b.HasKey("StudentId");
 
                     b.HasIndex("ParentCustomerId");
 
-                    b.ToTable("Archers", (string)null);
+                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("ArcheryAlley.Models.Targets", b =>
@@ -469,14 +461,7 @@ namespace ArcheryAlley.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_Reservations_BookingSlots");
 
-                    b.HasOne("ArcheryAlley.Models.Students", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.Navigation("Slot");
-
-                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("ArcheryAlley.Models.Students", b =>

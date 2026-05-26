@@ -1,5 +1,6 @@
 @{
     ViewBag.Title = "Member Registration & Class Onboarding";
+    Layout = "_MemberLayout";
 }
 
 <style>
@@ -346,8 +347,8 @@
     /* Modal Overlay Success */
     .success-modal-overlay {
         position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(3, 7, 12, 0.95); backdrop-filter: blur(20px);
-        display: none; align-items: center; justify-content: center; z-index: 99999;
+        background: rgba(10, 12, 18, 0.6); backdrop-filter: blur(8px);
+        display: none; align-items: center; justify-content: center; z-index: 999;
     }
 
     .success-modal {
@@ -461,18 +462,59 @@
 
                     <div class="row g-3 mt-2">
                         <div class="col-md-6 mb-2">
-                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Birthday</label>
-                            <input type="date" id="regBirthday" class="form-control" required />
+                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Identification Card (IC)</label>
+                            <input type="text" id="regICNumber" class="form-control" placeholder="e.g. 900101145123" maxlength="12" required />
                         </div>
                         <div class="col-md-6 mb-2">
-                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Address</label>
-                            <input type="text" id="regAddress" class="form-control" placeholder="e.g. 123 Jalan Ampang, KL" required />
+                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">House / Unit No</label>
+                            <input type="text" id="regHouseNo" class="form-control" placeholder="e.g. No. 12-A" required />
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-12 mb-2">
+                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Street</label>
+                            <input type="text" id="regStreet" class="form-control" placeholder="e.g. Jalan Sentosa 4, Taman Sentosa" required />
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Postcode</label>
+                            <input type="text" id="regPostcode" class="form-control" placeholder="e.g. 76000" maxlength="5" required />
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">City</label>
+                            <input type="text" id="regCity" class="form-control" placeholder="e.g. Raub" required />
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">State</label>
+                            <select id="regState" class="form-select form-control text-dark" required>
+                                <option value="" disabled selected>Select State</option>
+                                <option value="Johor">Johor</option>
+                                <option value="Kedah">Kedah</option>
+                                <option value="Kelantan">Kelantan</option>
+                                <option value="Melaka">Melaka</option>
+                                <option value="Negeri Sembilan">Negeri Sembilan</option>
+                                <option value="Pahang">Pahang</option>
+                                <option value="Penang">Penang</option>
+                                <option value="Perak">Perak</option>
+                                <option value="Perlis">Perlis</option>
+                                <option value="Sabah">Sabah</option>
+                                <option value="Sarawak">Sarawak</option>
+                                <option value="Selangor">Selangor</option>
+                                <option value="Terengganu">Terengganu</option>
+                                <option value="Wilayah Persekutuan Kuala Lumpur">W.P. Kuala Lumpur</option>
+                                <option value="Wilayah Persekutuan Labuan">W.P. Labuan</option>
+                                <option value="Wilayah Persekutuan Putrajaya">W.P. Putrajaya</option>
+                            </select>
                         </div>
                     </div>
 
 
 
-                    <div class="d-flex justify-content-end gap-3 mt-4">
+                    <div class="d-flex justify-content-between gap-3 mt-4">
+                        <button type="button" class="btn-premium-outline" onclick="window.location.href='/Account/MemberDashboard'">BACK</button>
                         <button type="button" class="btn-premium" onclick="goToStep(2)">NEXT</button>
                     </div>
                 </div>
@@ -488,17 +530,16 @@
                     <p class="text-dim small mb-4">Weekend coaching class sessions require active members to choose one starter package.</p>
                     
                     <div class="package-grid">
-                        <div class="selection-card pricing-card text-center h-100 selected" id="opt-pkg-4slots" onclick="selectWizardPackage('4slots', 150.00, '2 Session (4 Slots)')">
-                            <h2 class="fw-900 mb-2">2 Session (4 Slots)</h2>
+                        <div class="selection-card pricing-card text-center h-100 selected" id="opt-pkg-4slots" onclick="selectWizardPackage('4slots', 150.00, '4 Slot'">
+                            <h2 class="fw-900 mb-2">4 Slots Package</h2>
                             <div class="price-display">
                                 <span class="currency">RM</span>
                                 <span class="amount">150</span>
                                 <span class="period">/ Starter</span>
                             </div>
-                            <p class="text-dim mt-3" style="font-size: 0.85rem;">Comprises 4 total instruction hours scheduled across 2 weekend slots. Perfect for beginners.</p>
+                            <p class="text-dim mt-3" style="font-size: 0.85rem;">Comprises 8 total instruction hours scheduled across 2 weekend slots. Perfect for beginners.</p>
                             <ul class="benefit-list text-start mt-4 mb-0" style="padding-left: 20px;">
-                                <li><i class="bi bi-check-circle-fill text-primary"></i> 4 Instruction Hours</li>
-                                <li><i class="bi bi-check-circle-fill text-primary"></i> 2 Weekend Sessions</li>
+                                <li><i class="bi bi-check-circle-fill text-primary"></i> 8 Instruction Hours</li>
                                 <li><i class="bi bi-check-circle-fill text-primary"></i> Certified Coaching Included</li>
                             </ul>
                         </div>
@@ -510,10 +551,9 @@
                                 <span class="amount">210</span>
                                 <span class="period">/ Best Value</span>
                             </div>
-                            <p class="text-dim mt-3" style="font-size: 0.85rem;">Unlocks 6 instruction hours with certified coaches on weekends. Excellent value.</p>
+                            <p class="text-dim mt-3" style="font-size: 0.85rem;">Unlocks 12 instruction hours with certified coaches on weekends. Excellent value.</p>
                             <ul class="benefit-list text-start mt-4 mb-0" style="padding-left: 20px;">
-                                <li><i class="bi bi-check-circle-fill text-primary"></i> 6 Instruction Hours</li>
-                                <li><i class="bi bi-check-circle-fill text-primary"></i> 6 Weekend Sessions</li>
+                                <li><i class="bi bi-check-circle-fill text-primary"></i> 12 Instruction Hours</li>
                                 <li><i class="bi bi-check-circle-fill text-primary"></i> Best Value For Progression</li>
                             </ul>
                         </div>
@@ -589,7 +629,7 @@
                     <span class="summary-val text-white">RM 80.00</span>
                 </div>
                 <div class="summary-row">
-                    <span class="summary-label" id="wizSummaryPackageLabel">2 Session (4 Slots)</span>
+                    <span class="summary-label" id="wizSummaryPackageLabel">4 Slots Package</span>
                     <span class="summary-val text-white" id="wizSummaryPackagePrice">RM 150.00</span>
                 </div>
                 <div class="summary-row mt-4 pt-3 border-top" style="border-color: rgba(255,255,255,0.1) !important;">
@@ -622,7 +662,7 @@
     
     // Step 2 variables
     let selPackageId = '4slots';
-    let selPackageName = '2 Session (4 Slots)';
+    let selPackageName = '4 Slots Package';
     let selPackagePrice = 150.00;
 
     // Step 3 variables
@@ -647,11 +687,28 @@
         if (step > 1 && currentStep === 1) {
             const fullName = document.getElementById('regFullName').value.trim();
             const phone = document.getElementById('regPhoneNumber').value.trim();
-            const birthday = document.getElementById('regBirthday').value.trim();
-            const address = document.getElementById('regAddress').value.trim();
+            const icNumber = document.getElementById('regICNumber').value.trim();
+            
+            const houseNo = document.getElementById('regHouseNo').value.trim();
+            const street = document.getElementById('regStreet').value.trim();
+            const postcode = document.getElementById('regPostcode').value.trim();
+            const city = document.getElementById('regCity').value.trim();
+            const state = document.getElementById('regState').value;
 
-            if (!fullName || !phone || !birthday || !address) {
-                showWizardAlert("Please fill in all details in Step 1 before proceeding.");
+            if (!fullName || !phone || !icNumber || !houseNo || !street || !postcode || !city || !state) {
+                showWizardAlert("Please fill in all details before proceeding.");
+                return;
+            }
+
+            const icRegex = /^\d{12}$/;
+            if (!icRegex.test(icNumber)) {
+                showWizardAlert("Invalid IC Number format. Please enter a 12-digit number.");
+                return;
+            }
+
+            const postcodeRegex = /^\d{5}$/;
+            if (!postcodeRegex.test(postcode)) {
+                showWizardAlert("Invalid Postcode format. Please enter a 5-digit postcode.");
                 return;
             }
         }
@@ -755,14 +812,22 @@
         // Gather Step 1 data
         const fullName = document.getElementById('regFullName').value.trim();
         const phone = document.getElementById('regPhoneNumber').value.trim();
-        const birthday = document.getElementById('regBirthday').value.trim();
-        const address = document.getElementById('regAddress').value.trim();
+        const icNumber = document.getElementById('regICNumber').value.trim();
+        
+        const houseNo = document.getElementById('regHouseNo').value.trim();
+        const street = document.getElementById('regStreet').value.trim();
+        const postcode = document.getElementById('regPostcode').value.trim();
+        const city = document.getElementById('regCity').value.trim();
+        const state = document.getElementById('regState').value;
+
+        // Combine into a beautifully structured, modern single address string
+        const address = `${houseNo}, ${street}, ${postcode} ${city}, ${state}`;
 
         // Gather Class data
         const formData = new FormData();
         formData.append('FullName', fullName);
         formData.append('PhoneNumber', phone);
-        formData.append('Birthday', birthday);
+        formData.append('ICNumber', icNumber);
         formData.append('Address', address);
 
         formData.append('PackageType', selPackageName);

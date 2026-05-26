@@ -20,5 +20,6 @@ namespace ArcheryAlley.Models
         public decimal OriginalPrice { get; set; }  // pre-promo price, for display
         public string TargetSize { get; set; }
         public int TargetAmount { get; set; }
+        public int? StudentId { get; set; }
     }
 }

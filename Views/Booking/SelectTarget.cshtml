@@ -12,7 +12,7 @@
 
 <div class="booking-wizard-container py-5">
     <div data-aos="fade-down">
-        <partial name="~/Views/Home/_BookingProgress.cshtml" model="2" />
+        <partial name="~/Views/Home/BookingProgress.cshtml" model="2" />
     </div>
 
     <div class="premium-card" data-aos="fade-up">
@@ -29,6 +29,7 @@
             <input type="hidden" name="NumberOfPax" value="@numberOfPax">
             <input type="hidden" name="TargetSize"   id="hiddenTargetSize">
             <input type="hidden" name="TargetAmount" id="hiddenTargetAmount" value="1">
+            <input type="hidden" name="StudentId"    value="@ViewBag.StudentId">
 
             <!-- Target Size Cards -->
             <div class="row g-4 mb-5 justify-content-center">

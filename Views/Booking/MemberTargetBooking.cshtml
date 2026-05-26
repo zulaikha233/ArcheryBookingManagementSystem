@@ -5,7 +5,7 @@
 
 <div class="booking-wizard-container animate-fade-in" data-aos="fade-up">
     <!-- Progress Header -->
-    <partial name="~/Views/Home/_BookingProgress.cshtml" model="1" />
+    <partial name="~/Views/Home/BookingProgress.cshtml" model="1" />
 
     <!-- Step 1: Customer Info & Session -->
     <div class="wizard-step active" id="wizard-step-1">
@@ -16,6 +16,20 @@
                     <input type="hidden" id="customerName" value="@ViewBag.CustomerName">
                     <input type="hidden" id="customerEmail" value="@ViewBag.CustomerEmail">
                     <input type="hidden" id="customerPhone" value="@ViewBag.CustomerPhone">
+
+                    <div class="mb-4">
+                        <label class="form-label-premium">Who is Shooting?</label>
+                        <select id="shooterSelect" class="form-control">
+                            @if (ViewBag.ParentActive)
+                            {
+                                <option value="" data-name="@ViewBag.CustomerName" data-email="@ViewBag.CustomerEmail" data-phone="@ViewBag.CustomerPhone">Myself (@ViewBag.CustomerName)</option>
+                            }
+                            @foreach (var student in ViewBag.Students)
+                            {
+                                <option value="@student.StudentId" data-name="@student.FullName" data-email="@ViewBag.CustomerEmail" data-phone="@ViewBag.CustomerPhone">@student.FullName (Archer)</option>
+                            }
+                        </select>
+                    </div>
 
                     <div class="mb-4">
                         <label class="form-label-premium">Session Type</label>
@@ -395,7 +409,10 @@
         
         const sType = document.getElementById("sessionType").value;
         const pax = document.getElementById("numberOfPax").value;
-        const url = `/Booking/SelectTarget?slotId=${bookingData.slotId}&name=${encodeURIComponent(bookingData.name)}&email=${encodeURIComponent(bookingData.email)}&phone=${encodeURIComponent(bookingData.phone)}&date=${bookingData.date}&duration=${bookingData.duration}&numberOfPax=${pax}&sessionType=${sType}`;
+        const shooterSelect = document.getElementById("shooterSelect");
+        const studentId = shooterSelect ? shooterSelect.value : "";
+        
+        const url = `/Booking/SelectTarget?slotId=${bookingData.slotId}&name=${encodeURIComponent(bookingData.name)}&email=${encodeURIComponent(bookingData.email)}&phone=${encodeURIComponent(bookingData.phone)}&date=${bookingData.date}&duration=${bookingData.duration}&numberOfPax=${pax}&sessionType=${sType}&studentId=${studentId}`;
         window.location.href = url;
     }
 </script>
