@@ -145,12 +145,31 @@ namespace ArcheryAlley.Controllers
             {
                 Username = Username,
                 Email = Email,
-                Password = Password
+                Password = Password,
+                Status = "Inactive"
             };
 
             try
             {
                 _repository.RegisterCustomer(newCustomer);
+
+                // Create pending Annual Membership payment immediately
+                var annualMembership = new ClassRegistrations
+                {
+                    CustomerEmail = newCustomer.Email,
+                    CustomerName = newCustomer.Username,
+                    PackageType = "Annual Membership",
+                    PackagePrice = 0.00m,
+                    LearningMethod = "None",
+                    LearningMethodPax = 0,
+                    LearningMethodPrice = 0.00m,
+                    AnnualFee = 80.00m,
+                    TotalPrice = 80.00m,
+                    PaymentMethod = "None",
+                    PaymentStatus = "Pending",
+                    TransactionId = "MEM-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper()
+                };
+                _repository.RegisterClassSession(annualMembership);
                 
                 HttpContext.Session.SetString("CustomerEmail", newCustomer.Email);
                 HttpContext.Session.SetString("CustomerName", newCustomer.Username);
@@ -175,12 +194,14 @@ namespace ArcheryAlley.Controllers
             if (string.IsNullOrEmpty(email))
                 return RedirectToAction("CustomerLogin");
 
+            var parent = _repository.GetCustomerByEmail(email);
+            ViewBag.HasPaidAnnualFee = parent != null && parent.Status == "Active";
+
             // If registering for a student, validate the student belongs to this parent
             if (studentId.HasValue)
             {
-                var parent = _repository.GetCustomerByEmail(email);
                 var student = _repository.GetStudentById(studentId.Value);
-                if (student == null || student.ParentCustomerId != parent.CustomerId)
+                if (student == null || parent == null || student.ParentCustomerId != parent.CustomerId)
                     return RedirectToAction("MemberDashboard");
 
                 ViewBag.StudentId = studentId.Value;
@@ -278,6 +299,15 @@ namespace ArcheryAlley.Controllers
                 }
             }
 
+            decimal finalAnnualFee = AnnualFee;
+            decimal finalTotalPrice = TotalPrice;
+
+            if (!StudentId.HasValue && customer.Status == "Active")
+            {
+                finalAnnualFee = 0.00m;
+                finalTotalPrice = PackagePrice + LearningMethodPrice;
+            }
+
             var registration = new ClassRegistrations
             {
                 CustomerEmail = email,
@@ -287,8 +317,8 @@ namespace ArcheryAlley.Controllers
                 LearningMethod = LearningMethod,
                 LearningMethodPax = LearningMethodPax,
                 LearningMethodPrice = LearningMethodPrice,
-                AnnualFee = AnnualFee,
-                TotalPrice = TotalPrice,
+                AnnualFee = finalAnnualFee,
+                TotalPrice = finalTotalPrice,
                 PaymentMethod = PaymentMethod == "fpx" ? "Online (FPX)" : "Credit/Debit Card",
                 PaymentStatus = "Success",
                 TransactionId = "TXN-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
@@ -515,6 +545,13 @@ namespace ArcheryAlley.Controllers
             try
             {
                 _repository.ClearPendingPaymentsByEmail(email, type, id);
+
+                var customer = _repository.GetCustomerByEmail(email);
+                if (customer != null)
+                {
+                    HttpContext.Session.SetString("CustomerStatus", customer.Status ?? "Inactive");
+                }
+
                 return Json(new { success = true });
             }
             catch (Exception ex)

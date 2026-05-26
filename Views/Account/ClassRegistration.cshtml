@@ -392,7 +392,7 @@
             </div>
             <div class="d-flex justify-content-between mb-2">
                 <span class="text-dim small">MEMBERSHIP FEE:</span>
-                <span class="text-white fw-bold small">RM 80.00 (Annual)</span>
+                <span class="text-white fw-bold small" id="resAnnualFee">RM 80.00 (Annual)</span>
             </div>
             <div class="d-flex justify-content-between pt-2 border-top border-secondary">
                 <span class="text-dim small font-weight-bold">TOTAL PAID:</span>
@@ -626,7 +626,7 @@
 
                 <div class="summary-row">
                     <span class="summary-label">Annual Registration Fee</span>
-                    <span class="summary-val text-white">RM 80.00</span>
+                    <span class="summary-val text-white" id="wizSummaryAnnualFee">RM 80.00</span>
                 </div>
                 <div class="summary-row">
                     <span class="summary-label" id="wizSummaryPackageLabel">4 Slots Package</span>
@@ -666,8 +666,10 @@
     let selPackagePrice = 150.00;
 
     // Step 3 variables
-    let annualFee = 80.00;
-    let totalDuePrice = 230.00;
+    let hasPaidAnnualFee = '@ViewBag.HasPaidAnnualFee' === 'True';
+    let isChildReg = @(ViewBag.StudentId != null ? "true" : "false");
+    let annualFee = (hasPaidAnnualFee && !isChildReg) ? 0.00 : 80.00;
+    let totalDuePrice = annualFee + 150.00;
     let selPayment = 'fpx';
 
     function showWizardAlert(msg) {
@@ -781,7 +783,14 @@
 
     function updateWizardSummary() {
         document.getElementById('wizSummaryPackageLabel').innerText = selPackageName;
-        document.getElementById('wizSummaryPackagePrice').innerText = `RM ${selPackagePrice.toFixed(2)}`;
+        document.getElementById('wizSummaryPackagePrice').innerText = RM ;
+
+        totalDuePrice = annualFee + selPackagePrice;
+        document.getElementById('wizSummaryTotalPrice').innerText = RM ;
+        if (document.getElementById('wizSummaryAnnualFee')) {
+            document.getElementById('wizSummaryAnnualFee').innerText = annualFee === 0 ? 'RM 0.00 (Waived)' : RM ;
+        }
+    }`;
 
         totalDuePrice = annualFee + selPackagePrice;
         document.getElementById('wizSummaryTotalPrice').innerText = `RM ${totalDuePrice.toFixed(2)}`;
@@ -850,6 +859,9 @@
                 document.getElementById('resTxId').innerText = result.transactionId;
                 document.getElementById('resPackage').innerText = selPackageName;
                 document.getElementById('resTotal').innerText = `RM ${totalDuePrice.toFixed(2)}`;
+                if (document.getElementById('resAnnualFee')) {
+                    document.getElementById('resAnnualFee').innerText = annualFee === 0 ? 'RM 0.00 (Waived)' : 'RM 80.00 (Annual)';
+                }
                 
                 // Show gorgeous fullscreen overlay success modal
                 const modal = document.getElementById('registrationSuccessModal');

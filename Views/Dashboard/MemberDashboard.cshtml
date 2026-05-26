@@ -4,6 +4,7 @@
 
     var classRegs = ViewBag.ClassRegistrations as IEnumerable<ArcheryAlley.Models.ClassRegistrations> ?? new List<ArcheryAlley.Models.ClassRegistrations>();
     var reservations = ViewBag.Reservations as IEnumerable<dynamic> ?? new List<dynamic>();
+    var activeClassRegs = classRegs.Where(cr => cr.PackageType != "Annual Membership");
 
     decimal actualPending = 0;
     if (classRegs != null)
@@ -23,6 +24,46 @@
             if (r.Status == 0)
             {
                 actualPending += (decimal)r.TotalPrice;
+            }
+        }
+    }
+
+    // Determine the specific type/message of pending payment
+    string pendingHeader = "Pending Payment";
+    string pendingTypeText = "Please clear outstanding dues.";
+
+    if (actualPending > 0)
+    {
+        var pendingClass = classRegs.FirstOrDefault(cr => cr.PaymentStatus == "Pending");
+        if (pendingClass != null)
+        {
+            if (pendingClass.PackageType == "Annual Membership")
+            {
+                pendingHeader = "Annual Membership";
+                pendingTypeText = "Please pay your Annual Membership fee.";
+            }
+            else
+            {
+                pendingHeader = "Class Registration";
+                pendingTypeText = "Please clear class registration payment.";
+            }
+        }
+        else
+        {
+            var pendingRes = reservations.FirstOrDefault(r => r.Status == 0);
+            if (pendingRes != null)
+            {
+                string rateCode = pendingRes.RateCode ?? "";
+                if (rateCode == "SELF_TRAINING" || (pendingRes.Slot != null && pendingRes.Slot.SlotStartTime.Hours >= 18))
+                {
+                    pendingHeader = "Self Training";
+                    pendingTypeText = "Please clear self training session payment.";
+                }
+                else
+                {
+                    pendingHeader = "Target Session";
+                    pendingTypeText = "Please clear target booking payment.";
+                }
             }
         }
     }
@@ -205,7 +246,18 @@
     </style>
 }
 
-@if (ViewBag.ClassRegistrations == null || !((IEnumerable<dynamic>)ViewBag.ClassRegistrations).Any())
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="background-color: rgba(255, 77, 77, 0.15); border: 1px solid rgba(255, 77, 77, 0.3); color: #FF4D4D; border-radius: var(--radius-md); padding: 18px 25px; margin-bottom: 25px; font-weight: 600; display: flex; align-items: center; justify-content: space-between;">
+        <div>
+            <i class="bi bi-exclamation-triangle-fill me-2" style="font-size: 1.1rem;"></i>
+            @TempData["ErrorMessage"]
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.8rem; box-shadow: none;"></button>
+    </div>
+}
+
+@if (!activeClassRegs.Any())
 {
     <div class="banner-premium" style="background: linear-gradient(135deg, #131924, #1a1e28); border-radius: var(--radius-md); padding: 30px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 30px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 15px 35px rgba(0,0,0,0.4);">
         <div>
@@ -400,8 +452,8 @@
                 <div style="background: rgba(255,255,255,0.2); padding: 12px 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px;">
                     <i class="bi bi-exclamation-circle-fill" style="font-size: 1.2rem;"></i>
                     <div>
-                        <div style="font-size: 0.8rem; font-weight: 700;">Pending Payment</div>
-                        <div style="font-size: 0.65rem; opacity: 0.8;">Please clear outstanding dues.</div>
+                        <div style="font-size: 0.8rem; font-weight: 700;">@pendingHeader</div>
+                        <div style="font-size: 0.65rem; opacity: 0.8;">@pendingTypeText</div>
                     </div>
                 </div>
                 <button onclick="window.location.href='/Account/MemberPayment'" style="width: 100%; padding: 12px; border-radius: 10px; border: none; background: #fff; color: #000; font-weight: 800; font-size: 0.9rem; margin-top: 20px; cursor: pointer; transition: 0.3s;">

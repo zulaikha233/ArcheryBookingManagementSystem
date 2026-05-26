@@ -789,8 +789,8 @@
                                             <i class="bi bi-credit-card text-white" style="font-size:1.1rem;"></i>
                                         </div>
                                         <div style="flex:1;">
-                                            <span class="text-white fw-bold d-block" style="font-size:0.87rem; letter-spacing:0.5px;">•••• •••• •••• @last4</span>
-                                            <span class="text-dim" style="font-size:0.72rem;">Expires @cExp</span>
+                                            <span class="text-white fw-bold d-block card-number-text" style="font-size:0.87rem; letter-spacing:0.5px;">•••• •••• •••• @last4</span>
+                                            <span class="text-dim card-expiry-text" style="font-size:0.72rem;">Expires @cExp</span>
                                         </div>
 
                                     </label>
@@ -909,9 +909,18 @@
                                     </td>
                                     <!-- Transaction Type -->
                                     <td>
-                                        <span class="badge-session badge-class">
-                                            <i class="bi bi-mortarboard"></i> Class Registration
-                                        </span>
+                                        @if (c.PackageType == "Annual Membership")
+                                        {
+                                            <span class="badge-session badge-self-train" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">
+                                                <i class="bi bi-shield-check"></i> Annual Membership
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge-session badge-class">
+                                                <i class="bi bi-mortarboard"></i> Class Registration
+                                            </span>
+                                        }
                                     </td>
                                     <!-- For Archer -->
                                     <td>
@@ -937,7 +946,7 @@
                                     </td>
                                     <!-- Actions -->
                                     <td class="text-end">
-                                        <button class="btn btn-sm btn-outline-light rounded-pill px-3" style="font-size: 0.75rem; border-color: rgba(255,255,255,0.15); color: var(--text-dim); font-weight: 700; transition: 0.2s;" onmouseover="this.style.color='#fff'; this.style.borderColor='var(--primary)';" onmouseout="this.style.color='var(--text-dim)'; this.style.borderColor='rgba(255,255,255,0.15)';" onclick="openViewDetailsModal({ type: 'Class Registration', date: '@c.RegistrationDate.ToString("ddd, MMM dd, yyyy")', time: '@c.RegistrationDate.ToString("hh:mm tt")', archer: '@archerName', amount: 'RM @c.TotalPrice.ToString("F2")', status: '@statusText', method: '@(c.PaymentMethod ?? "Online (FPX)")', refId: '@c.TransactionId', package: '@c.PackageType' })">
+                                        <button class="btn btn-sm btn-outline-light rounded-pill px-3" style="font-size: 0.75rem; border-color: rgba(255,255,255,0.15); color: var(--text-dim); font-weight: 700; transition: 0.2s;" onmouseover="this.style.color='#fff'; this.style.borderColor='var(--primary)';" onmouseout="this.style.color='var(--text-dim)'; this.style.borderColor='rgba(255,255,255,0.15)';" onclick="openViewDetailsModal({ type: '@(c.PackageType == "Annual Membership" ? "Annual Membership" : "Class Registration")', date: '@c.RegistrationDate.ToString("ddd, MMM dd, yyyy")', time: '@c.RegistrationDate.ToString("hh:mm tt")', archer: '@archerName', amount: 'RM @c.TotalPrice.ToString("F2")', status: '@statusText', method: '@(c.PaymentMethod ?? "Online (FPX)")', refId: '@c.TransactionId', package: '@c.PackageType' })">
                                             View
                                         </button>
                                         @if (!isPaid)
@@ -1075,12 +1084,16 @@
                     <div style="display: flex; flex-direction: column; gap: 12px; max-height: 180px; overflow-y: auto; padding-right: 5px;">
                         @foreach (var c in classRegs.Where(r => r.PaymentStatus == "Pending"))
                         {
+                            var isAnnualMembership = c.PackageType == "Annual Membership";
                             <div class="d-flex justify-content-between align-items-start border-bottom pb-2 modal-breakdown-item class-reg-item" data-id="@c.RegistrationId" data-amount="@c.TotalPrice" style="border-color: rgba(255,255,255,0.05) !important;">
                                 <div style="flex: 1; padding-right: 10px;">
-                                    <span class="text-white fw-bold d-block" style="font-size: 0.82rem;">Class Registration Fee</span>
+                                    <span class="text-white fw-bold d-block" style="font-size: 0.82rem;">@(isAnnualMembership ? "Annual Membership Fee" : "Class Registration Fee")</span>
                                     <span class="text-dim d-block" style="font-size: 0.7rem; margin-top: 2px;">Archer: <strong class="text-white">@c.CustomerName</strong></span>
-                                    <span class="text-dim d-block" style="font-size: 0.7rem;">Package: <strong class="text-white">@c.PackageType</strong></span>
-                                    <span class="text-dim d-block" style="font-size: 0.7rem;">Annual Fee: <strong class="text-white">RM 80.00</strong></span>
+                                    @if (!isAnnualMembership)
+                                    {
+                                        <span class="text-dim d-block" style="font-size: 0.7rem;">Package: <strong class="text-white">@c.PackageType</strong></span>
+                                        <span class="text-dim d-block" style="font-size: 0.7rem;">Annual Fee: <strong class="text-white">RM 80.00</strong></span>
+                                    }
                                 </div>
                                 <span class="text-white fw-bold" style="font-size: 0.85rem;">RM @c.TotalPrice.ToString("N2")</span>
                             </div>
@@ -1131,13 +1144,13 @@
                             var actNum = activeCardObj.ContainsKey("number") ? activeCardObj["number"] : "";
                             var actExp = activeCardObj.ContainsKey("expiry") ? activeCardObj["expiry"] : "";
                             var last4 = actNum.Replace(" ", "").Length >= 4 ? actNum.Replace(" ", "").Substring(actNum.Replace(" ", "").Length - 4) : "••••";
-                            <div class="d-flex align-items-center gap-3 p-2" style="border: 1px solid rgba(16,185,129,0.3); background: rgba(16,185,129,0.05); border-radius: 10px;">
-                                <i class="bi bi-credit-card text-success" style="font-size: 1.5rem;"></i>
-                                <div>
-                                    <span class="text-white fw-bold d-block" style="font-size: 0.85rem;">•••• •••• •••• @last4</span>
-                                    <span class="text-dim d-block" style="font-size: 0.72rem;">Expires @actExp</span>
+                            <div class="d-flex align-items-center p-2" style="display: flex; align-items: center; border: 1px solid rgba(16,185,129,0.3); background: rgba(16,185,129,0.05); border-radius: 10px; width: 100%;">
+                                <i class="bi bi-credit-card text-success" style="font-size: 1.5rem; color: #10B981 !important; margin-right: 15px; flex-shrink: 0; display: inline-block;"></i>
+                                <div style="flex-grow: 1;">
+                                    <span class="text-white fw-bold d-block card-number-text" style="font-size: 0.85rem; display: block; color: #ffffff; font-weight: bold;">•••• •••• •••• @last4</span>
+                                    <span class="text-dim d-block card-expiry-text" style="font-size: 0.72rem; display: block; color: var(--text-dim, #a0aec0);">Expires @actExp</span>
                                 </div>
-                                <span class="badge bg-success bg-opacity-10 text-success ms-auto" style="font-size: 0.65rem; border: 1px solid rgba(16,185,129,0.2);">SELECTED</span>
+                                <span style="font-size: 0.68rem; font-weight: 700; color: #10B981; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; margin-left: auto; flex-shrink: 0; display: inline-block;">SELECTED</span>
                             </div>
                         }
                         else
@@ -1226,17 +1239,8 @@
             }
             toggleModalPaymentUI();
 
-            // Sync card input fields from settings to modal using active card resolved in Razor
-            const defaultCardNumber = "@savedCardNumber";
-            const defaultCardExpiry = "@savedCardExpiry";
-            const defaultCardCvv = "@savedCardCvv";
-
-            const modalInputs = document.getElementById("modalCardUI").querySelectorAll("input");
-            if (modalInputs.length >= 3) {
-                modalInputs[0].value = defaultCardNumber;
-                modalInputs[1].value = defaultCardExpiry;
-                modalInputs[2].value = defaultCardCvv;
-            }
+            // Sync the card preview inside the modal dynamically based on currently selected card above
+            syncModalCardUI();
 
             // Filter breakdown items dynamically based on the payment selection
             let calculatedTotal = 0;
@@ -1414,6 +1418,39 @@
             });
         });
 
+        // ─── Sync card preview inside checkout modal dynamically ──────────────
+        function syncModalCardUI() {
+            const activeRow = document.querySelector('.saved-card-row.card-row-active');
+            const modalCardUI = document.getElementById("modalCardUI");
+            if (!modalCardUI) return;
+
+            if (activeRow) {
+                const numSpan = activeRow.querySelector('.card-number-text');
+                const expSpan = activeRow.querySelector('.card-expiry-text');
+                const numText = numSpan ? numSpan.innerText : "•••• •••• •••• ••••";
+                const expText = expSpan ? expSpan.innerText : "Expires --/--";
+                const last4 = numText.replace(/\s+/g, '').slice(-4) || "••••";
+
+                modalCardUI.innerHTML = `
+                    <div class="d-flex align-items-center p-2" style="display: flex; align-items: center; border: 1px solid rgba(16,185,129,0.3); background: rgba(16,185,129,0.05); border-radius: 10px; width: 100%;">
+                        <i class="bi bi-credit-card text-success" style="font-size: 1.5rem; color: #10B981 !important; margin-right: 15px; flex-shrink: 0; display: inline-block;"></i>
+                        <div style="flex-grow: 1;">
+                            <span class="text-white fw-bold d-block card-number-text" style="font-size: 0.85rem; display: block; color: #ffffff; font-weight: bold;">•••• •••• •••• ${last4}</span>
+                            <span class="text-dim d-block card-expiry-text" style="font-size: 0.72rem; display: block; color: var(--text-dim, #a0aec0);">${expText}</span>
+                        </div>
+                        <span style="font-size: 0.68rem; font-weight: 700; color: #10B981; background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; margin-left: auto; flex-shrink: 0; display: inline-block;">SELECTED</span>
+                    </div>
+                `;
+            } else {
+                modalCardUI.innerHTML = `
+                    <div class="text-center py-2">
+                        <p class="text-dim small mb-2" style="font-size: 0.8rem;">No saved cards found.</p>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="closeModal(); showAddCardForm(); document.getElementById('btnShowAddCard').scrollIntoView({ behavior: 'smooth' });" style="border-radius: 20px; font-size: 0.75rem; border: 1px solid rgba(255,77,77,0.3); background: rgba(255,77,77,0.05); color: #fff; padding: 4px 12px; transition: all 0.2s;">Add Card First</button>
+                    </div>
+                `;
+            }
+        }
+
         // ─── Multi-card: Select active card ───────────────────────────────────
         async function selectCard(cardId) {
             try {
@@ -1427,6 +1464,7 @@
                         row.classList.remove('card-row-active');
                     }
                 });
+                syncModalCardUI();
             } catch(err) {
                 console.error('Error selecting card:', err);
             }
@@ -1457,9 +1495,10 @@
                         const firstId = firstRow.getAttribute('data-card-id');
                         if (!document.querySelector('.saved-card-row.card-row-active')) {
                             firstRow.querySelector('input[type=radio]').checked = true;
-                            selectCard(firstId);
+                            await selectCard(firstId);
                         }
                     }
+                    syncModalCardUI();
                 } else {
                     alert('Failed to delete card: ' + result.message);
                 }
@@ -1578,8 +1617,8 @@
                                 <i class="bi bi-credit-card text-white" style="font-size:1.1rem;"></i>
                             </div>
                             <div style="flex:1;">
-                                <span class="text-white fw-bold d-block" style="font-size:0.87rem;letter-spacing:0.5px;">•••• •••• •••• ${last4}</span>
-                                <span class="text-dim" style="font-size:0.72rem;">Expires ${cardExpiry}</span>
+                                <span class="text-white fw-bold d-block card-number-text" style="font-size:0.87rem;letter-spacing:0.5px;">•••• •••• •••• ${last4}</span>
+                                <span class="text-dim card-expiry-text" style="font-size:0.72rem;">Expires ${cardExpiry}</span>
                             </div>
 
                         </label>
@@ -1588,6 +1627,9 @@
                             <i class="bi bi-trash"></i> Delete
                         </button>`;
                     document.getElementById('savedCardsList').appendChild(newRow);
+
+                    // Sync card preview inside the checkout modal dynamically
+                    syncModalCardUI();
 
                     // Hide form, show button
                     cancelAddCard();
@@ -1625,6 +1667,8 @@
                         <span class="text-white fw-bold small">${data.package}</span>
                     </div>
                 `;
+            } else if (data.type === "Annual Membership") {
+                // No package plan or target & lane for Annual Membership
             } else {
                 listHtml += `
                     <div class="d-flex justify-content-between pb-2 border-bottom" style="border-color: rgba(255,255,255,0.05) !important;">

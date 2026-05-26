@@ -699,6 +699,15 @@ namespace ArcheryAlley
                 pc.PaymentStatus = "Success";
                 pc.PaymentMethod = "Online (FPX)";
                 pc.TransactionId = "TXN-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
+
+                if (pc.PackageType == "Annual Membership")
+                {
+                    var customer = _context.Customers.FirstOrDefault(c => c.Email.ToLower() == email.ToLower());
+                    if (customer != null)
+                    {
+                        customer.Status = "Active";
+                    }
+                }
             }
 
             // Reservations
@@ -735,6 +744,25 @@ namespace ArcheryAlley
             }
 
             _context.SaveChanges();
+        }
+
+        public List<Reservations> GetReservationsByDate(DateTime date)
+        {
+            return _context.Reservations
+                .Include(r => r.Slot)
+                .Include(r => r.Student)
+                .Where(r => r.ReservedOn.Date == date.Date && r.Status != 2)
+                .ToList();
+        }
+
+        public void UpdateAttendance(int reservationId, bool attended)
+        {
+            var reservation = _context.Reservations.FirstOrDefault(r => r.ReservationId == reservationId);
+            if (reservation != null)
+            {
+                reservation.Attended = attended;
+                _context.SaveChanges();
+            }
         }
     }
 }

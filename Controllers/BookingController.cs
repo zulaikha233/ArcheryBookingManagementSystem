@@ -37,9 +37,9 @@ namespace ArcheryAlley.Controllers
 
             bool isParentActive = HttpContext.Session.GetString("CustomerStatus") == "Active";
             
-            // Bypass block if parent is inactive but has registered students
-            if (!isParentActive && !students.Any())
+            if (!isParentActive)
             {
+                TempData["ErrorMessage"] = "Your account is Inactive. Please pay your Annual Membership fee (RM 80.00) in the Fee/Payment section to activate your account and access target bookings.";
                 return RedirectToAction("MemberDashboard", "Account");
             }
 
@@ -56,13 +56,27 @@ namespace ArcheryAlley.Controllers
 
         public IActionResult ClassBooking()
         {
-            if (HttpContext.Session.GetString("CustomerStatus") == "Inactive")
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email))
+                return RedirectToAction("CustomerLogin", "Account");
+
+            if (HttpContext.Session.GetString("CustomerStatus") != "Active")
             {
+                TempData["ErrorMessage"] = "Your account is Inactive. Please pay your Annual Membership fee (RM 80.00) in the Fee/Payment section to activate your account and access class bookings.";
                 return RedirectToAction("MemberDashboard", "Account");
             }
+
+            var classRegs = _repository.GetClassRegistrationsByEmail(email);
+            bool hasClassReg = classRegs.Any(cr => cr.PaymentStatus == "Success" && cr.PackageType != "Annual Membership");
+            if (!hasClassReg)
+            {
+                TempData["ErrorMessage"] = "You must register for a class before you can book class sessions.";
+                return RedirectToAction("MemberDashboard", "Account");
+            }
+
             _repository.SeedFixedSlots();
             HttpContext.Session.SetString("IsGuest", "false");
-            ViewBag.CustomerEmail = HttpContext.Session.GetString("CustomerEmail");
+            ViewBag.CustomerEmail = email;
             ViewBag.CustomerName = HttpContext.Session.GetString("CustomerName");
             ViewBag.CustomerPhone = HttpContext.Session.GetString("CustomerPhone");
             return View("~/Views/Booking/MemberClassBooking.cshtml");
@@ -97,7 +111,7 @@ namespace ArcheryAlley.Controllers
                 } : null
             }).ToList();
 
-            return View("~/Views/Booking/MemberCalendar.cshtml");
+            return View("~/Views/Calendar/MemberCalendar.cshtml");
         }
 
         [HttpPost]
@@ -617,7 +631,7 @@ namespace ArcheryAlley.Controllers
                 packageType = r.RateCode ?? "General",
                 time = r.Slot != null
                                 ? $"{r.Slot.SlotStartTime.ToString(@"hh\:mm")} - {r.Slot.SlotEndTime.ToString(@"hh\:mm")}"
-                                : "—",
+                                : "ï¿½",
                 attended = r.Attended  // the column you added earlier
             });
 
