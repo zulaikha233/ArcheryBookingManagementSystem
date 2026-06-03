@@ -77,5 +77,8 @@ namespace ArcheryAlley
         public void UpdateStudentStatus(int studentId, string status);
         public List<ClassRegistrations> GetPendingPaymentsByEmail(string email);
         public void ClearPendingPaymentsByEmail(string email, string? type = null, int? id = null);
+
+        List<Reservations> GetReservationsByDate(DateTime date);
+        void UpdateAttendance(int reservationId, bool attended);
     }
 }
