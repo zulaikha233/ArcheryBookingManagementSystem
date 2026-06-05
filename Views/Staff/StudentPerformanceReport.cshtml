@@ -1,0 +1,916 @@
+﻿@using Microsoft.AspNetCore.Http
+@{
+    ViewData["Title"] = "Student Performance Report";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Report — Archery Alley</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        /* ════════════════════════════════════════════════
+           THEME VARIABLES — matches MemberCalendar dark glass
+        ════════════════════════════════════════════════ */
+        :root {
+            --primary: #FF4D4D;
+            --primary-dark: #D63031;
+            --primary-glow: rgba(255,77,77,0.2);
+            --primary-subtle: rgba(255,77,77,0.08);
+            --bg: #0d0f14;
+            --sidebar-bg: #111318;
+            --card-bg: rgba(34,38,48,0.6);
+            --card-border: rgba(255,255,255,0.05);
+            --sidebar-width: 260px;
+            --topbar-height: 60px;
+            --text-light: #f1f5f9;
+            --text-dim: #8892a4;
+            --text-white: #ffffff;
+            --input-bg: rgba(255,255,255,0.04);
+            --input-border: rgba(255,255,255,0.08);
+            --radius-sm: 12px;
+            --radius-md: 20px;
+            --shadow-card: 0 20px 40px rgba(0,0,0,0.3);
+            --shadow-primary: 0 10px 25px rgba(255,77,77,0.25);
+            --transition: all 0.25s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text-light);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            position: fixed; top: 0; left: 0;
+            display: flex; flex-direction: column;
+            z-index: 200;
+            border-right: 1px solid var(--card-border);
+            transition: transform 0.3s ease, width 0.3s ease;
+        }
+        .sidebar.collapsed { width: 68px; }
+        .sidebar.collapsed .sidebar-logo span,
+        .sidebar.collapsed .staff-badge,
+        .sidebar.collapsed .nav-label,
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .logout-text { display: none; }
+        .sidebar.collapsed .sidebar-logo { font-size: 0; }
+        .sidebar.collapsed .sidebar-logo::before { content: '🏹'; font-size: 1.4rem; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding: 14px; }
+        .sidebar.collapsed .nav-item i { width: auto; font-size: 1.3rem; }
+        .sidebar.collapsed .logout-btn { justify-content: center; padding: 14px; }
+        .sidebar.collapsed .sidebar-header { justify-content: center; padding: 20px 10px; }
+
+        .sidebar-header {
+            padding: 24px 20px 20px;
+            border-bottom: 1px solid rgba(255,77,77,0.15);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .sidebar-logo {
+            font-size: 1.1rem; font-weight: 800; color: var(--primary);
+            letter-spacing: 1px; text-transform: uppercase;
+            white-space: nowrap; overflow: hidden;
+        }
+        .sidebar-logo span {
+            display: block; font-size: 0.68rem; color: rgba(255,255,255,0.3);
+            font-weight: 400; letter-spacing: 2px; margin-top: 2px;
+        }
+        .sidebar-toggle-btn {
+            background: none; border: none; color: rgba(255,255,255,0.35);
+            font-size: 1.2rem; cursor: pointer; padding: 4px;
+            border-radius: 6px; transition: var(--transition); flex-shrink: 0;
+        }
+        .sidebar-toggle-btn:hover { color: var(--primary); }
+
+        .staff-badge {
+            margin: 14px 16px; padding: 12px 14px;
+            background: var(--primary-subtle);
+            border: 1px solid rgba(255,77,77,0.2);
+            border-radius: var(--radius-sm); overflow: hidden; white-space: nowrap;
+        }
+        .staff-badge p { font-size: 0.62rem; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 3px; }
+        .staff-badge h6 { font-size: 0.9rem; color: #fff; font-weight: 600; }
+
+        .sidebar-nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; }
+        .nav-label { font-size: 0.6rem; color: rgba(255,255,255,0.18); text-transform: uppercase; letter-spacing: 2px; padding: 10px 8px 5px; font-weight: 600; white-space: nowrap; }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 14px; border-radius: var(--radius-sm);
+            color: rgba(255,255,255,0.45); text-decoration: none;
+            font-size: 0.88rem; font-weight: 500; transition: var(--transition);
+            white-space: nowrap; overflow: hidden;
+        }
+        .nav-item:hover { background: var(--primary-subtle); color: var(--primary); }
+        .nav-item.active { background: rgba(255,77,77,0.12); color: var(--primary); border-left: 3px solid var(--primary); }
+        .nav-item i { font-size: 1.1rem; width: 20px; text-align: center; flex-shrink: 0; }
+
+        .sidebar-footer { padding: 12px 10px; border-top: 1px solid var(--card-border); }
+        .logout-btn {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 14px; border-radius: var(--radius-sm);
+            color: rgba(220,38,38,0.65); text-decoration: none;
+            font-size: 0.88rem; font-weight: 500; transition: var(--transition);
+            white-space: nowrap; overflow: hidden;
+        }
+        .logout-btn:hover { background: rgba(220,38,38,0.08); color: #ef4444; }
+
+        /* ── OVERLAY + TOPBAR ── */
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 199; backdrop-filter: blur(4px); }
+        .sidebar-overlay.active { display: block; }
+
+        .topbar {
+            display: none; position: fixed;
+            top: 0; left: 0; right: 0; height: var(--topbar-height);
+            background: var(--sidebar-bg);
+            border-bottom: 1px solid rgba(255,77,77,0.15);
+            align-items: center; justify-content: space-between;
+            padding: 0 16px; z-index: 150;
+        }
+        .topbar-logo { font-size: 1rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+        .topbar-menu-btn { background: none; border: none; color: rgba(255,255,255,0.65); font-size: 1.5rem; cursor: pointer; padding: 6px; border-radius: 8px; }
+        .topbar-menu-btn:hover { color: var(--primary); }
+
+        /* ── MAIN ── */
+        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 40px; min-height: 100vh; transition: margin-left 0.3s ease; }
+        .main-content.sidebar-collapsed { margin-left: 68px; }
+
+        .page-header { margin-bottom: 32px; }
+        .page-header p { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 6px; }
+        .page-header h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; color: var(--text-white); }
+        .page-header h1 span { color: var(--primary); }
+
+        /* ── GLASS CARD ── */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-card);
+        }
+
+        /* ════════════════════════════════════════════════
+           LEVEL CATEGORY TABS
+        ════════════════════════════════════════════════ */
+        .level-tabs-card { padding: 20px 24px; margin-bottom: 20px; }
+
+        .level-tabs-label {
+            font-size: 0.65rem; color: var(--text-dim);
+            text-transform: uppercase; letter-spacing: 2px;
+            font-weight: 700; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .level-tabs-label i { color: var(--primary); }
+
+        .level-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        /* ── THEME NOTE: Level tab button style ── */
+        .level-tab {
+            padding: 8px 18px; border-radius: 20px;
+            border: 1px solid var(--input-border);
+            background: transparent; color: var(--text-dim);
+            font-size: 0.8rem; font-weight: 600;
+            cursor: pointer; font-family: 'Outfit', sans-serif;
+            transition: var(--transition);
+        }
+        .level-tab:hover { border-color: var(--primary); color: var(--primary); }
+        .level-tab.active {
+            background: var(--primary-subtle);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* ════════════════════════════════════════════════
+           SEARCH BAR
+        ════════════════════════════════════════════════ */
+        .search-card { padding: 20px 24px; margin-bottom: 20px; }
+
+        .search-row { display: flex; gap: 10px; align-items: center; }
+
+        .search-input {
+            flex: 1;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: var(--radius-sm);
+            padding: 12px 18px;
+            color: var(--text-white);
+            font-size: 0.9rem;
+            font-family: 'Outfit', sans-serif;
+            transition: var(--transition);
+        }
+        .search-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+        .search-input::placeholder { color: rgba(255,255,255,0.2); }
+
+        .btn-search {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none; border-radius: var(--radius-sm);
+            padding: 12px 20px; color: #fff;
+            font-size: 0.88rem; font-weight: 700;
+            cursor: pointer; font-family: 'Outfit', sans-serif;
+            transition: var(--transition); display: flex; align-items: center; gap: 7px;
+            box-shadow: var(--shadow-primary); white-space: nowrap;
+        }
+        .btn-search:hover { transform: translateY(-2px); box-shadow: 0 14px 28px var(--primary-glow); }
+
+        /* ════════════════════════════════════════════════
+           EMPTY STATE
+        ════════════════════════════════════════════════ */
+        .empty-panel { padding: 70px 40px; text-align: center; color: var(--text-dim); }
+        .empty-panel i { font-size: 3rem; color: rgba(255,77,77,0.2); margin-bottom: 16px; display: block; }
+        .empty-panel h4 { font-size: 1rem; color: rgba(255,255,255,0.4); font-weight: 700; margin-bottom: 8px; }
+        .empty-panel p { font-size: 0.82rem; line-height: 1.6; }
+
+        /* ════════════════════════════════════════════════
+           STUDENT RESULT CARD
+        ════════════════════════════════════════════════ */
+        .student-header-card { padding: 22px 26px; margin-bottom: 20px; }
+
+        .student-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+        .student-identity { display: flex; align-items: center; gap: 14px; }
+
+        .student-avatar {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; font-weight: 800; color: #fff; flex-shrink: 0;
+            box-shadow: var(--shadow-primary);
+        }
+
+        .student-name  { font-size: 1.1rem; font-weight: 800; color: var(--text-white); }
+        .student-meta  { font-size: 0.75rem; color: var(--text-dim); margin-top: 3px; display: flex; align-items: center; gap: 8px; }
+
+        /* ── THEME NOTE: Level badge ── */
+        .level-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+            background: var(--primary-subtle); color: var(--primary);
+            border: 1px solid rgba(255,77,77,0.25);
+        }
+
+        /* ── Performance button ── */
+        .btn-performance {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 20px; border-radius: var(--radius-sm);
+            background: var(--primary-subtle); border: 1px solid rgba(255,77,77,0.3);
+            color: var(--primary); font-size: 0.82rem; font-weight: 700;
+            cursor: pointer; font-family: 'Outfit', sans-serif; transition: var(--transition);
+        }
+        .btn-performance:hover { background: rgba(255,77,77,0.15); transform: translateY(-1px); }
+        .btn-performance.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+        /* ════════════════════════════════════════════════
+           REPORTS PANEL
+        ════════════════════════════════════════════════ */
+        .reports-panel { display: none; }
+        .reports-panel.visible { display: block; }
+
+        /* ── Report list header ── */
+        .reports-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--card-border);
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 12px;
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
+        }
+        .reports-header-title { font-size: 0.92rem; font-weight: 700; color: var(--text-white); }
+        .reports-header-sub   { font-size: 0.7rem; color: var(--text-dim); margin-top: 2px; }
+
+        /* ── THEME NOTE: Add new report button ── */
+        .btn-add-report {
+            display: flex; align-items: center; gap: 7px;
+            padding: 9px 18px; border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none; color: #fff;
+            font-size: 0.8rem; font-weight: 700;
+            cursor: pointer; font-family: 'Outfit', sans-serif; transition: var(--transition);
+            box-shadow: var(--shadow-primary);
+        }
+        .btn-add-report:hover { transform: translateY(-2px); box-shadow: 0 14px 28px var(--primary-glow); }
+
+        /* ── Individual report row ── */
+        .report-item {
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            transition: var(--transition);
+        }
+        .report-item:last-child { border-bottom: none; }
+        .report-item:hover { background: rgba(255,255,255,0.015); }
+
+        /* Collapsed header row — always visible */
+        .report-item-header {
+            padding: 16px 24px;
+            display: flex; align-items: center; gap: 16px;
+            cursor: pointer;
+        }
+
+        .report-date-block {
+            display: flex; flex-direction: column; align-items: center;
+            background: var(--input-bg); border: 1px solid var(--card-border);
+            border-radius: 10px; padding: 8px 14px; min-width: 60px; text-align: center; flex-shrink: 0;
+        }
+        .report-date-block .day   { font-size: 1.2rem; font-weight: 800; color: var(--primary); line-height: 1; }
+        .report-date-block .month { font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+        .report-date-block .year  { font-size: 0.58rem; color: rgba(255,255,255,0.2); margin-top: 1px; }
+
+        .report-summary { flex: 1; min-width: 0; }
+        .report-time  { font-size: 0.78rem; color: var(--text-dim); display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+        .report-time i { color: var(--primary); font-size: 0.72rem; }
+        .report-coach { font-size: 0.82rem; font-weight: 600; color: var(--text-white); display: flex; align-items: center; gap: 6px; }
+        .report-coach i { color: var(--primary); font-size: 0.78rem; }
+
+        /* Expand chevron */
+        .report-chevron {
+            color: var(--text-dim); font-size: 0.9rem;
+            transition: transform 0.25s ease; flex-shrink: 0;
+        }
+        .report-item.expanded .report-chevron { transform: rotate(180deg); }
+
+        /* Full report body — hidden until expanded */
+        .report-body {
+            display: none;
+            padding: 0 24px 18px 24px;
+            border-top: 1px solid rgba(255,255,255,0.03);
+        }
+        .report-item.expanded .report-body { display: block; }
+
+        .report-text {
+            font-size: 0.9rem; color: var(--text-light);
+            line-height: 1.7; padding-top: 14px;
+            border-left: 3px solid rgba(255,77,77,0.3);
+            padding-left: 16px;
+            font-style: italic;
+        }
+
+        /* ════════════════════════════════════════════════
+           ADD REPORT FORM
+        ════════════════════════════════════════════════ */
+        .add-report-form {
+            display: none;
+            padding: 22px 24px;
+            border-top: 1px solid var(--card-border);
+            background: rgba(255,77,77,0.03);
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
+        }
+        .add-report-form.visible { display: block; }
+
+        .form-label {
+            font-size: 0.65rem; color: var(--text-dim);
+            text-transform: uppercase; letter-spacing: 2px;
+            font-weight: 700; display: block; margin-bottom: 10px;
+        }
+
+        /* ── THEME NOTE: Report textarea ── */
+        .report-textarea {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: var(--radius-sm);
+            padding: 14px 18px;
+            color: var(--text-white);
+            font-size: 0.9rem;
+            font-family: 'Outfit', sans-serif;
+            resize: none; height: 110px;
+            transition: var(--transition);
+            margin-bottom: 8px;
+        }
+        .report-textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+        .report-textarea::placeholder { color: rgba(255,255,255,0.18); }
+
+        /* Word count indicator */
+        .word-count {
+            font-size: 0.7rem; color: var(--text-dim);
+            text-align: right; margin-bottom: 14px;
+        }
+        .word-count.warning { color: #FBBF24; }
+        .word-count.over    { color: var(--primary); }
+
+        .form-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+        .btn-cancel-report {
+            padding: 10px 18px; border-radius: var(--radius-sm);
+            border: 1px solid var(--input-border);
+            background: transparent; color: var(--text-dim);
+            font-size: 0.82rem; font-weight: 600;
+            cursor: pointer; font-family: 'Outfit', sans-serif; transition: var(--transition);
+        }
+        .btn-cancel-report:hover { border-color: rgba(255,255,255,0.2); color: var(--text-white); }
+
+        .btn-submit-report {
+            padding: 10px 22px; border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none; color: #fff;
+            font-size: 0.82rem; font-weight: 700;
+            cursor: pointer; font-family: 'Outfit', sans-serif; transition: var(--transition);
+            display: flex; align-items: center; gap: 7px;
+            box-shadow: var(--shadow-primary);
+        }
+        .btn-submit-report:hover { transform: translateY(-1px); box-shadow: 0 12px 24px var(--primary-glow); }
+        .btn-submit-report:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        /* ── TOAST ── */
+        .toast-notif {
+            position: fixed; bottom: 28px; right: 28px;
+            background: rgba(20,22,30,0.95);
+            border: 1px solid rgba(255,77,77,0.35);
+            border-radius: 16px; padding: 13px 20px;
+            display: flex; align-items: center; gap: 12px;
+            font-size: 0.85rem; font-weight: 600; color: var(--text-white);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+            transform: translateY(80px); opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275); z-index: 9999;
+        }
+        .toast-notif.show { transform: translateY(0); opacity: 1; }
+        .toast-notif i { color: var(--primary); font-size: 1.1rem; }
+
+        /* ── ANIMATIONS ── */
+        @@keyframes fadeInUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        .student-header-card { animation: fadeInUp 0.35s ease both; }
+        .reports-panel.visible { animation: fadeInUp 0.4s ease both; }
+
+        /* ── RESPONSIVE ── */
+        @@media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); width: var(--sidebar-width) !important; }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .sidebar-toggle-btn { display: none; }
+            .topbar { display: flex; }
+            .main-content { margin-left: 0 !important; padding: 76px 14px 24px; }
+            .page-header h1 { font-size: 1.45rem; }
+            .search-row { flex-direction: column; }
+            .btn-search { width: 100%; justify-content: center; }
+            .student-row { flex-direction: column; align-items: flex-start; }
+            .level-tabs { gap: 6px; }
+            .level-tab { font-size: 0.72rem; padding: 6px 12px; }
+            .form-actions { flex-direction: column; }
+            .btn-submit-report, .btn-cancel-report { width: 100%; justify-content: center; }
+        }
+        @@media (max-width: 380px) {
+            .report-item-header { gap: 10px; }
+            .report-date-block { padding: 6px 10px; min-width: 50px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <div class="topbar">
+        <div class="topbar-logo">Archery Alley</div>
+        <button class="topbar-menu-btn" onclick="openSidebar()"><i class="bi bi-list"></i></button>
+    </div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                Archery Alley
+                <span>Staff Portal</span>
+            </div>
+            <button class="sidebar-toggle-btn" id="desktopToggle" onclick="toggleDesktopSidebar()">
+                <i class="bi bi-layout-sidebar-reverse" id="toggleIcon"></i>
+            </button>
+        </div>
+        <div class="staff-badge">
+            <p>Logged in as</p>
+            <h6>@(ViewBag.StaffName ?? "Staff")</h6>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-label">Menu</div>
+            <a href="/Booking/StaffDashboard" class="nav-item">
+                <i class="bi bi-grid-fill"></i><span class="nav-text">Dashboard</span>
+            </a>
+            <a href="/Account/Profile" class="nav-item">
+                <i class="bi bi-person-circle"></i><span class="nav-text">Profile</span>
+            </a>
+            <a href="/Booking/StudentAttendance" class="nav-item">
+                <i class="bi bi-calendar-check"></i><span class="nav-text">Student Attendance</span>
+            </a>
+            <a href="/Report/StudentPerformance" class="nav-item active">
+                <i class="bi bi-bar-chart-line"></i><span class="nav-text">Performance Report</span>
+            </a>
+            <a href="/Booking/StaffBooking" class="nav-item">
+                <i class="bi bi-bullseye"></i><span class="nav-text">Slot Booking</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="/Account/Logout" class="logout-btn">
+                <i class="bi bi-box-arrow-left"></i>
+                <span class="logout-text">Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content" id="mainContent">
+
+        <div class="page-header">
+            <p>Coach Tools</p>
+            <h1>Student <span>Performance</span></h1>
+        </div>
+
+        <!-- ── LEVEL CATEGORY TABS ── -->
+        <div class="glass-card level-tabs-card">
+            <div class="level-tabs-label">
+                <i class="bi bi-trophy-fill"></i> Select Level Category
+            </div>
+            <div class="level-tabs">
+                <button class="level-tab active" data-level="GrassRoots"     onclick="selectLevel(this)">🌱 GrassRoots</button>
+                <button class="level-tab"        data-level="Beginner 1"     onclick="selectLevel(this)">⭐ Beginner 1</button>
+                <button class="level-tab"        data-level="Beginner 2"     onclick="selectLevel(this)">⭐⭐ Beginner 2</button>
+                <button class="level-tab"        data-level="Intermediate 1" onclick="selectLevel(this)">🎯 Intermediate 1</button>
+                <button class="level-tab"        data-level="Intermediate 2" onclick="selectLevel(this)">🎯🎯 Intermediate 2</button>
+                <button class="level-tab"        data-level="Expert"         onclick="selectLevel(this)">🏆 Expert</button>
+            </div>
+        </div>
+
+        <!-- ── SEARCH BAR ── -->
+        <div class="glass-card search-card">
+            <div class="search-row">
+                <input
+                    type="text"
+                    class="search-input"
+                    id="searchInput"
+                    placeholder="Search student by name..."
+                    onkeydown="if(event.key==='Enter') searchStudent()"
+                >
+                <button class="btn-search" onclick="searchStudent()">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </div>
+
+        <!-- ── DEFAULT EMPTY STATE ── -->
+        <div class="glass-card" id="emptyCard">
+            <div class="empty-panel">
+                <i class="bi bi-person-lines-fill"></i>
+                <h4>Search for a Student</h4>
+                <p>Select a level category above then search for a student by name to view and add performance reports.</p>
+            </div>
+        </div>
+
+        <!-- ── STUDENT RESULT ── -->
+        <div id="studentSection" style="display:none;">
+
+            <!-- Student header -->
+            <div class="glass-card student-header-card">
+                <div class="student-row">
+                    <div class="student-identity">
+                        <div class="student-avatar" id="studentAvatar">—</div>
+                        <div>
+                            <div class="student-name" id="studentName">—</div>
+                            <div class="student-meta">
+                                <span class="level-badge" id="studentLevel">—</span>
+                                <span id="reportCount" style="color:var(--text-dim); font-size:0.75rem;"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-performance" id="performanceBtn" onclick="toggleReports()">
+                        <i class="bi bi-clipboard-data"></i> Performance
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reports panel -->
+            <div class="glass-card reports-panel" id="reportsPanel">
+
+                <div class="reports-header">
+                    <div>
+                        <div class="reports-header-title">Performance Reports</div>
+                        <div class="reports-header-sub" id="reportsSubtitle">—</div>
+                    </div>
+                    <button class="btn-add-report" onclick="showAddForm()">
+                        <i class="bi bi-plus-lg"></i> Add New Report
+                    </button>
+                </div>
+
+                <!-- Report list -->
+                <div id="reportList"></div>
+
+                <!-- Add new report form -->
+                <div class="add-report-form" id="addReportForm">
+                    <label class="form-label">New Performance Report</label>
+                    <textarea
+                        class="report-textarea"
+                        id="reportTextarea"
+                        placeholder="Write your performance remarks here... (max 40 words)"
+                        oninput="updateWordCount()"
+                    ></textarea>
+                    <div class="word-count" id="wordCount">0 / 40 words</div>
+                    <div class="form-actions">
+                        <button class="btn-cancel-report" onclick="hideAddForm()">Cancel</button>
+                        <button class="btn-submit-report" id="submitReportBtn" onclick="submitReport()">
+                            <i class="bi bi-check-lg"></i> Save Report
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <div class="toast-notif" id="toast">
+        <i class="bi bi-check-circle-fill"></i>
+        <span id="toastMsg">Report saved!</span>
+    </div>
+
+    <script>
+        /* ── SIDEBAR ── */
+        const sidebar     = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const overlay     = document.getElementById('sidebarOverlay');
+        const toggleIcon  = document.getElementById('toggleIcon');
+
+        function toggleDesktopSidebar() {
+            const collapsed = sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('sidebar-collapsed', collapsed);
+            toggleIcon.className = collapsed ? 'bi bi-layout-sidebar' : 'bi bi-layout-sidebar-reverse';
+            localStorage.setItem('sidebarCollapsed', collapsed);
+        }
+        function openSidebar() {
+            sidebar.classList.add('mobile-open');
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeSidebar() {
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.innerWidth > 768 && localStorage.getItem('sidebarCollapsed') === 'true') {
+                sidebar.classList.add('collapsed');
+                mainContent.classList.add('sidebar-collapsed');
+                toggleIcon.className = 'bi bi-layout-sidebar';
+            }
+        });
+        window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+
+        /* ════════════════════════════════════════════════
+           MOCK DATA
+           ── DATA NOTE: Replace with real AJAX fetch when
+              backend is ready:
+              fetch(`/Report/GetStudentReports?name=${name}&level=${selectedLevel}`)
+           ──
+        ════════════════════════════════════════════════ */
+        const mockStudents = {
+            "GrassRoots": [
+                {
+                    name: "Ahmad Faris",
+                    reports: [
+                        { date: "2026-05-10", time: "09:15", coach: "Coach Zad", text: "Ahmad shows great enthusiasm during sessions. His stance is improving steadily and he is beginning to develop consistent form in his draw." },
+                        { date: "2026-04-22", time: "10:00", coach: "Coach Rina", text: "First session went well. Ahmad is eager to learn and follows instructions carefully. Needs to work on grip consistency." }
+                    ]
+                },
+                {
+                    name: "Nurul Aina",
+                    reports: [
+                        { date: "2026-05-15", time: "14:30", coach: "Coach Zad", text: "Nurul is progressing well. Her release technique has improved significantly this week. Recommended to move to Beginner 1 next month." }
+                    ]
+                }
+            ],
+            "Beginner 1": [
+                {
+                    name: "Haziq Danial",
+                    reports: [
+                        { date: "2026-05-20", time: "09:00", coach: "Coach Zad", text: "Haziq is showing consistent groupings at 10m. His anchor point is now reliable and breathing control is good." }
+                    ]
+                }
+            ],
+            "Beginner 2": [],
+            "Intermediate 1": [],
+            "Intermediate 2": [],
+            "Expert": []
+        };
+
+        /* ── STATE ── */
+        let selectedLevel   = 'GrassRoots';
+        let currentStudent  = null;
+        let reportsVisible  = false;
+        const coachName     = '@(ViewBag.StaffName ?? "Coach")';
+
+        /* ── LEVEL TAB SELECTION ── */
+        function selectLevel(tab) {
+            document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            selectedLevel = tab.dataset.level;
+
+            // Reset search if level changes
+            document.getElementById('searchInput').value = '';
+            resetStudentSection();
+        }
+
+        function resetStudentSection() {
+            document.getElementById('emptyCard').style.display       = '';
+            document.getElementById('studentSection').style.display  = 'none';
+            document.getElementById('reportsPanel').classList.remove('visible');
+            document.getElementById('performanceBtn').classList.remove('active');
+            reportsVisible  = false;
+            currentStudent  = null;
+        }
+
+        /* ── SEARCH ── */
+        function searchStudent() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            if (!query) return;
+
+            const levelStudents = mockStudents[selectedLevel] || [];
+            const student = levelStudents.find(s => s.name.toLowerCase().includes(query));
+
+            if (!student) {
+                document.getElementById('emptyCard').innerHTML = `
+                    <div class="empty-panel">
+                        <i class="bi bi-person-x-fill"></i>
+                        <h4>Student Not Found</h4>
+                        <p>No student named "<strong style="color:var(--text-white)">${document.getElementById('searchInput').value}</strong>" found in <strong style="color:var(--primary)">${selectedLevel}</strong>.</p>
+                    </div>`;
+                document.getElementById('emptyCard').style.display      = '';
+                document.getElementById('studentSection').style.display = 'none';
+                return;
+            }
+
+            currentStudent = student;
+            reportsVisible = false;
+            renderStudent(student);
+        }
+
+        function renderStudent(student) {
+            document.getElementById('emptyCard').style.display      = 'none';
+            document.getElementById('studentSection').style.display = '';
+            document.getElementById('reportsPanel').classList.remove('visible');
+            document.getElementById('performanceBtn').classList.remove('active');
+            document.getElementById('addReportForm').classList.remove('visible');
+
+            document.getElementById('studentAvatar').textContent = student.name.charAt(0).toUpperCase();
+            document.getElementById('studentName').textContent   = student.name;
+            document.getElementById('studentLevel').textContent  = selectedLevel;
+            document.getElementById('reportCount').textContent   = `${student.reports.length} report${student.reports.length !== 1 ? 's' : ''}`;
+        }
+
+        /* ── TOGGLE REPORTS PANEL ── */
+        function toggleReports() {
+            reportsVisible = !reportsVisible;
+            const panel = document.getElementById('reportsPanel');
+            const btn   = document.getElementById('performanceBtn');
+
+            if (reportsVisible) {
+                panel.classList.add('visible');
+                btn.classList.add('active');
+                btn.innerHTML = `<i class="bi bi-x-lg"></i> Close`;
+                renderReports();
+            } else {
+                panel.classList.remove('visible');
+                btn.classList.remove('active');
+                btn.innerHTML = `<i class="bi bi-clipboard-data"></i> Performance`;
+                document.getElementById('addReportForm').classList.remove('visible');
+            }
+        }
+
+        /* ── RENDER REPORTS LIST ── */
+        function renderReports() {
+            const list = document.getElementById('reportList');
+            document.getElementById('reportsSubtitle').textContent = `${currentStudent.reports.length} report${currentStudent.reports.length !== 1 ? 's' : ''} for ${currentStudent.name}`;
+
+            if (currentStudent.reports.length === 0) {
+                list.innerHTML = `
+                    <div style="padding:36px; text-align:center; color:var(--text-dim); font-size:0.85rem;">
+                        No reports yet. Click <strong style="color:var(--text-white)">Add New Report</strong> to write the first one.
+                    </div>`;
+                return;
+            }
+
+            list.innerHTML = '';
+
+            // Sort by date descending — most recent first
+            const sorted = [...currentStudent.reports].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            sorted.forEach((r, idx) => {
+                const dateObj = new Date(r.date + 'T00:00:00');
+                const day     = dateObj.getDate();
+                const month   = dateObj.toLocaleDateString('en-MY', { month: 'short' });
+                const year    = dateObj.getFullYear();
+
+                const item = document.createElement('div');
+                item.className = 'report-item';
+                item.id = `report-${idx}`;
+
+                item.innerHTML = `
+                    <div class="report-item-header" onclick="toggleReportItem(${idx})">
+                        <div class="report-date-block">
+                            <div class="day">${day}</div>
+                            <div class="month">${month}</div>
+                            <div class="year">${year}</div>
+                        </div>
+                        <div class="report-summary">
+                            <div class="report-time">
+                                <i class="bi bi-clock"></i> ${r.time}
+                            </div>
+                            <div class="report-coach">
+                                <i class="bi bi-patch-check-fill"></i> ${r.coach}
+                            </div>
+                        </div>
+                        <i class="bi bi-chevron-down report-chevron"></i>
+                    </div>
+                    <div class="report-body">
+                        <div class="report-text">${r.text}</div>
+                    </div>`;
+
+                list.appendChild(item);
+            });
+        }
+
+        /* ── TOGGLE INDIVIDUAL REPORT ── */
+        function toggleReportItem(idx) {
+            const item = document.getElementById(`report-${idx}`);
+            item.classList.toggle('expanded');
+        }
+
+        /* ── ADD REPORT FORM ── */
+        function showAddForm() {
+            document.getElementById('addReportForm').classList.add('visible');
+            document.getElementById('reportTextarea').value = '';
+            document.getElementById('wordCount').textContent = '0 / 40 words';
+            document.getElementById('wordCount').className = 'word-count';
+            document.getElementById('submitReportBtn').disabled = false;
+            document.getElementById('reportTextarea').focus();
+        }
+
+        function hideAddForm() {
+            document.getElementById('addReportForm').classList.remove('visible');
+        }
+
+        /* ── WORD COUNT ── */
+        function updateWordCount() {
+            const text  = document.getElementById('reportTextarea').value.trim();
+            const words = text === '' ? 0 : text.split(/\s+/).length;
+            const wc    = document.getElementById('wordCount');
+            const btn   = document.getElementById('submitReportBtn');
+
+            wc.textContent = `${words} / 40 words`;
+
+            if (words > 40) {
+                wc.className = 'word-count over';
+                btn.disabled = true;
+            } else if (words >= 30) {
+                wc.className = 'word-count warning';
+                btn.disabled = false;
+            } else {
+                wc.className = 'word-count';
+                btn.disabled = false;
+            }
+        }
+
+        /* ── SUBMIT REPORT ── */
+        function submitReport() {
+            const text  = document.getElementById('reportTextarea').value.trim();
+            const words = text === '' ? 0 : text.split(/\s+/).length;
+
+            if (!text) {
+                document.getElementById('reportTextarea').style.borderColor = 'var(--primary)';
+                setTimeout(() => document.getElementById('reportTextarea').style.borderColor = '', 1500);
+                return;
+            }
+            if (words > 40) return;
+
+            const now  = new Date();
+            const date = now.toISOString().split('T')[0];
+            const time = now.toLocaleTimeString('en-MY', { hour: '2-digit', minute: '2-digit' });
+
+            /* ── DATA NOTE: When backend is ready replace this with:
+               await fetch('/Report/AddReport', {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                 body: `studentName=${currentStudent.name}&level=${selectedLevel}&reportText=${text}&coachName=${coachName}`
+               });
+            ── */
+            currentStudent.reports.push({ date, time, coach: coachName, text });
+
+            document.getElementById('reportCount').textContent = `${currentStudent.reports.length} report${currentStudent.reports.length !== 1 ? 's' : ''}`;
+            document.getElementById('reportsSubtitle').textContent = `${currentStudent.reports.length} report${currentStudent.reports.length !== 1 ? 's' : ''} for ${currentStudent.name}`;
+
+            hideAddForm();
+            renderReports();
+            showToast('Report saved successfully!');
+        }
+
+        /* ── TOAST ── */
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+    </script>
+
+</body>
+</html>
