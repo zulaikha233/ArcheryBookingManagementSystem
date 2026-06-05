@@ -1,6 +1,6 @@
+using System.IO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using System.IO;
 
 namespace ArcheryAlley.Models
 {
@@ -25,6 +25,7 @@ namespace ArcheryAlley.Models
         public  DbSet<Targets> Targets { get; set; }
         public  DbSet<ClassRegistrations> ClassRegistrations { get; set; }
         public  DbSet<Students> Students { get; set; }
+        public DbSet<PerformanceReports> PerformanceReports { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -170,6 +171,12 @@ namespace ArcheryAlley.Models
                       .HasForeignKey(e => e.StudentId)
                       .IsRequired(false)
                       .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<PerformanceReports>(entity =>
+            {
+                entity.HasKey(e => e.ReportId);
+                entity.Property(e => e.ReportDate).HasColumnType("datetime");
             });
         }
 

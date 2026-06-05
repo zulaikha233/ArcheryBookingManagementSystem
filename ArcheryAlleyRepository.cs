@@ -1,10 +1,11 @@
-using Azure;
-using ArcheryAlley.Models;
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Logging;
+using ArcheryAlley.Models;
+using Azure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace ArcheryAlley
 {
@@ -750,7 +751,6 @@ namespace ArcheryAlley
         {
             return _context.Reservations
                 .Include(r => r.Slot)
-                .Include(r => r.Student)
                 .Where(r => r.ReservedOn.Date == date.Date && r.Status != 2)
                 .ToList();
         }
@@ -764,5 +764,21 @@ namespace ArcheryAlley
                 _context.SaveChanges();
             }
         }
+        public List<PerformanceReports> GetReportsByStudent(string studentName, string level)
+        {
+            return _context.PerformanceReports
+                .Where(r => r.StudentName.ToLower() == studentName.ToLower()
+                         && r.LevelCategory == level)
+                .OrderByDescending(r => r.ReportDate)
+                .ToList();
+        }
+
+        public void AddPerformanceReport(PerformanceReports report)
+        {
+            report.ReportDate = DateTime.Now;
+            _context.PerformanceReports.Add(report);
+            _context.SaveChanges();
+        }
+
     }
 }

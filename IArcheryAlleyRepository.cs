@@ -1,6 +1,6 @@
-using ArcheryAlley.Models;
 using System;
 using System.Collections.Generic;
+using ArcheryAlley.Models;
 
 namespace ArcheryAlley
 {
@@ -81,5 +81,9 @@ namespace ArcheryAlley
         // Attendance Management
         public List<Reservations> GetReservationsByDate(DateTime date);
         public void UpdateAttendance(int reservationId, bool attended);
+
+        //Performance Reporting
+        List<PerformanceReports> GetReportsByStudent(string studentName, string level);
+        void AddPerformanceReport(PerformanceReports report);
     }
 }
