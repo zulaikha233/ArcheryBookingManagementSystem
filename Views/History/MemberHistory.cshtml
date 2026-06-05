@@ -366,6 +366,12 @@
         <p class="page-subtitle">All your past and upcoming reservations in one place.</p>
     </div>
 
+    <!-- INLINE ERROR ALERT -->
+    <div id="bookingErrorAlert" class="alert alert-danger d-none align-items-center mb-4" style="background: rgba(255, 77, 77, 0.1); border: 1px solid rgba(255, 77, 77, 0.2); color: #FF4D4D; border-radius: 12px; padding: 12px 20px; font-size: 0.9rem; font-weight: 600;">
+        <i class="bi bi-exclamation-triangle-fill me-2" style="font-size: 1.1rem;"></i>
+        <span>You must be an active member and pay the annual fee before you can book a session.</span>
+    </div>
+
     <!-- Filter Bar -->
     <div class="filter-bar">
         <div class="search-box">
@@ -417,7 +423,7 @@
                             string sessionIcon = "bi-bullseye";
                             string sessionBadge = "badge-game";
 
-                            if (item.RateCode == "CLASS")
+                            if (item.RateCode == "CLASS" || item.RateCode == "Class Session")
                             {
                                 sessionType = "class";
                                 sessionLabel = "Class Session";
@@ -536,12 +542,24 @@
 </div>
 
 @section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     const customerStatus = "@Context.Session.GetString("CustomerStatus")" || "Inactive";
 
     function handleBookingClick(url) {
         if (customerStatus === "Inactive") {
-            alert("Please complete your class registration to activate your account and access booking features.");
+            const errAlert = document.getElementById("bookingErrorAlert");
+            if (errAlert) {
+                errAlert.classList.remove("d-none");
+                errAlert.classList.add("d-flex");
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    errAlert.classList.add("d-none");
+                    errAlert.classList.remove("d-flex");
+                }, 5000);
+            }
         } else {
             window.location.href = url;
         }
@@ -552,7 +570,7 @@
     let visibleRows = [];
 
     function getSessionTypeFromCode(code, slotIsNight) {
-        if (code === 'CLASS') return 'class';
+        if (code === 'CLASS' || code === 'Class Session') return 'class';
         if (code === 'SELF_TRAINING' || slotIsNight) return 'self_training';
         return 'game';
     }

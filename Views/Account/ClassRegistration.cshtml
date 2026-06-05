@@ -1,3 +1,4 @@
+@model ArcheryAlley.Models.Customers
 @{
     ViewBag.Title = "Member Registration & Class Onboarding";
     Layout = "_MemberLayout";
@@ -390,10 +391,7 @@
                 <span class="text-dim small">CLASS PACKAGE:</span>
                 <span class="text-white fw-bold small" id="resPackage">6 Slots</span>
             </div>
-            <div class="d-flex justify-content-between mb-2">
-                <span class="text-dim small">MEMBERSHIP FEE:</span>
-                <span class="text-white fw-bold small" id="resAnnualFee">RM 80.00 (Annual)</span>
-            </div>
+                <!-- Removed Membership Fee -->
             <div class="d-flex justify-content-between pt-2 border-top border-secondary">
                 <span class="text-dim small font-weight-bold">TOTAL PAID:</span>
                 <span class="text-primary fw-extrabold" id="resTotal">RM 450.00</span>
@@ -401,7 +399,7 @@
         </div>
 
         <button class="btn-premium w-100 justify-content-center" onclick="window.location.href='/Account/MemberDashboard'" style="padding: 15px;">
-            ENTER MEMBER PORTAL <i class="bi bi-arrow-right ms-2"></i>
+            OK <i class="bi bi-check-lg ms-2"></i>
         </button>
     </div>
 </div>
@@ -452,61 +450,112 @@
                     <div class="row g-3">
                         <div class="col-md-6 mb-2">
                             <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Full Name</label>
-                            <input type="text" id="regFullName" class="form-control" placeholder="e.g. Aminah Talib" required />
+                            <input type="text" id="regFullName" class="form-control" value="@(Model?.FullName ?? "")" placeholder="e.g. Aminah Talib" readonly style="background-color: #e9ecef !important; color: #6c757d !important; pointer-events: none;" required />
                         </div>
                         <div class="col-md-6 mb-2">
                             <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Phone Number</label>
-                            <input type="text" id="regPhoneNumber" class="form-control" placeholder="0123456789" required />
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-6 mb-2">
-                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Identification Card (IC)</label>
-                            <input type="text" id="regICNumber" class="form-control" placeholder="e.g. 900101145123" maxlength="12" required />
-                        </div>
-                        <div class="col-md-6 mb-2">
-                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">House / Unit No</label>
-                            <input type="text" id="regHouseNo" class="form-control" placeholder="e.g. No. 12-A" required />
+                            <input type="text" id="regPhoneNumber" class="form-control" value="@(Model?.PhoneNumber ?? "")" placeholder="0123456789" readonly style="background-color: #e9ecef !important; color: #6c757d !important; pointer-events: none;" required />
                         </div>
                     </div>
 
                     <div class="row g-3 mt-2">
                         <div class="col-md-12 mb-2">
+                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Identification Card (IC)</label>
+                            <input type="text" id="regICNumber" class="form-control" value="@(Model?.ICNumber ?? "")" placeholder="e.g. 900101145123" maxlength="12" readonly style="background-color: #e9ecef !important; color: #6c757d !important; pointer-events: none;" required />
+                        </div>
+                    </div>
+
+                    @{
+                        string savedStreet = "";
+                        string savedPostcode = "";
+                        string savedCity = "";
+                        string savedState = "";
+
+                        if (!string.IsNullOrEmpty(Model?.Address))
+                        {
+                            var parts = Model.Address.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                                                     .Select(p => p.Trim())
+                                                     .ToArray();
+                            if (parts.Length >= 4)
+                            {
+                                savedState = parts[parts.Length - 1];
+                                savedCity = parts[parts.Length - 2];
+                                savedPostcode = parts[parts.Length - 3];
+                                savedStreet = string.Join(", ", parts.Take(parts.Length - 3));
+                            }
+                            else
+                            {
+                                savedStreet = Model.Address;
+                            }
+                        }
+                    }
+
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-12 mb-2">
                             <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Street</label>
-                            <input type="text" id="regStreet" class="form-control" placeholder="e.g. Jalan Sentosa 4, Taman Sentosa" required />
+                            <input type="text" id="regStreet" class="form-control" value="@savedStreet" placeholder="e.g. Jalan Sentosa 4, Taman Sentosa" readonly style="background-color: #e9ecef !important; color: #6c757d !important; pointer-events: none;" required />
                         </div>
                     </div>
 
                     <div class="row g-3 mt-2">
                         <div class="col-md-4 mb-2">
                             <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Postcode</label>
-                            <input type="text" id="regPostcode" class="form-control" placeholder="e.g. 76000" maxlength="5" required />
+                            <input type="text" id="regPostcode" class="form-control" value="@savedPostcode" placeholder="e.g. 76000" maxlength="5" readonly style="background-color: #e9ecef !important; color: #6c757d !important; pointer-events: none;" required />
                         </div>
                         <div class="col-md-4 mb-2">
                             <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">City</label>
-                            <input type="text" id="regCity" class="form-control" placeholder="e.g. Raub" required />
+                            <input type="text" id="regCity" class="form-control" value="@savedCity" placeholder="e.g. Raub" readonly style="background-color: #e9ecef !important; color: #6c757d !important; pointer-events: none;" required />
                         </div>
                         <div class="col-md-4 mb-2">
                             <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">State</label>
-                            <select id="regState" class="form-select form-control text-dark" required>
-                                <option value="" disabled selected>Select State</option>
-                                <option value="Johor">Johor</option>
-                                <option value="Kedah">Kedah</option>
-                                <option value="Kelantan">Kelantan</option>
-                                <option value="Melaka">Melaka</option>
-                                <option value="Negeri Sembilan">Negeri Sembilan</option>
-                                <option value="Pahang">Pahang</option>
-                                <option value="Penang">Penang</option>
-                                <option value="Perak">Perak</option>
-                                <option value="Perlis">Perlis</option>
-                                <option value="Sabah">Sabah</option>
-                                <option value="Sarawak">Sarawak</option>
-                                <option value="Selangor">Selangor</option>
-                                <option value="Terengganu">Terengganu</option>
-                                <option value="Wilayah Persekutuan Kuala Lumpur">W.P. Kuala Lumpur</option>
-                                <option value="Wilayah Persekutuan Labuan">W.P. Labuan</option>
-                                <option value="Wilayah Persekutuan Putrajaya">W.P. Putrajaya</option>
+                            <select id="regState" class="form-select form-control" style="background-color: #e9ecef !important; color: #6c757d !important; pointer-events: none;" required>
+                                @if (string.IsNullOrEmpty(savedState))
+                                {
+                                    <option value="" disabled selected>Select State</option>
+                                }
+                                else
+                                {
+                                    <option value="" disabled>Select State</option>
+                                }
+                                @{
+                                    var stateOptions = new Dictionary<string, string>
+                                    {
+                                        { "Johor", "Johor" },
+                                        { "Kedah", "Kedah" },
+                                        { "Kelantan", "Kelantan" },
+                                        { "Melaka", "Melaka" },
+                                        { "Negeri Sembilan", "Negeri Sembilan" },
+                                        { "Pahang", "Pahang" },
+                                        { "Penang", "Penang" },
+                                        { "Perak", "Perak" },
+                                        { "Perlis", "Perlis" },
+                                        { "Sabah", "Sabah" },
+                                        { "Sarawak", "Sarawak" },
+                                        { "Selangor", "Selangor" },
+                                        { "Terengganu", "Terengganu" },
+                                        { "Wilayah Persekutuan Kuala Lumpur", "W.P. Kuala Lumpur" },
+                                        { "Wilayah Persekutuan Labuan", "W.P. Labuan" },
+                                        { "Wilayah Persekutuan Putrajaya", "W.P. Putrajaya" }
+                                    };
+
+                                    foreach (var kvp in stateOptions)
+                                    {
+                                        bool isSelected = !string.IsNullOrEmpty(savedState) && 
+                                                          (savedState.Contains(kvp.Key, StringComparison.OrdinalIgnoreCase) || 
+                                                           savedState.Contains(kvp.Value, StringComparison.OrdinalIgnoreCase) ||
+                                                           (kvp.Key == "Penang" && savedState.Contains("Pulau Pinang", StringComparison.OrdinalIgnoreCase)) ||
+                                                           (kvp.Key == "Negeri Sembilan" && savedState.Contains("Sembilan", StringComparison.OrdinalIgnoreCase)));
+
+                                        if (isSelected)
+                                        {
+                                            <option value="@kvp.Key" selected>@kvp.Value</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@kvp.Key">@kvp.Value</option>
+                                        }
+                                    }
+                                }
                             </select>
                         </div>
                     </div>
@@ -530,7 +579,7 @@
                     <p class="text-dim small mb-4">Weekend coaching class sessions require active members to choose one starter package.</p>
                     
                     <div class="package-grid">
-                        <div class="selection-card pricing-card text-center h-100 selected" id="opt-pkg-4slots" onclick="selectWizardPackage('4slots', 150.00, '4 Slot'">
+                        <div class="selection-card pricing-card text-center h-100 selected" id="opt-pkg-4slots" onclick="selectWizardPackage('4slots', 150.00, '4 Slots Package')">
                             <h2 class="fw-900 mb-2">4 Slots Package</h2>
                             <div class="price-display">
                                 <span class="currency">RM</span>
@@ -544,7 +593,7 @@
                             </ul>
                         </div>
 
-                        <div class="selection-card pricing-card text-center h-100" id="opt-pkg-6slots" onclick="selectWizardPackage('6slots', 210.00, '6 Slots')">
+                        <div class="selection-card pricing-card text-center h-100" id="opt-pkg-6slots" onclick="selectWizardPackage('6slots', 210.00, '6 Slots Package')">
                             <h2 class="fw-900 mb-2">6 Slots Package</h2>
                             <div class="price-display">
                                 <span class="currency">RM</span>
@@ -622,19 +671,15 @@
         <!-- Right Side: Sticky Checkout / Summary Details -->
         <div class="col-lg-5 d-none" id="wizSummaryCol" style="transition: all 0.3s ease;">
             <div class="live-summary-card">
-                <h3 class="fw-bold text-white mb-4" style="font-size: 1.25rem; letter-spacing: 0.3px;">LIVE ORDER SUMMARY</h3>
+                <h3 class="fw-bold text-white mb-4" style="font-size: 1.25rem; letter-spacing: 0.3px;">REGISTRATION DETAILS</h3>
 
-                <div class="summary-row">
-                    <span class="summary-label">Annual Registration Fee</span>
-                    <span class="summary-val text-white" id="wizSummaryAnnualFee">RM 80.00</span>
-                </div>
                 <div class="summary-row">
                     <span class="summary-label" id="wizSummaryPackageLabel">4 Slots Package</span>
                     <span class="summary-val text-white" id="wizSummaryPackagePrice">RM 150.00</span>
                 </div>
                 <div class="summary-row mt-4 pt-3 border-top" style="border-color: rgba(255,255,255,0.1) !important;">
                     <span class="text-white fw-extrabold" style="font-size: 1.05rem;">TOTAL CHARGE</span>
-                    <span class="text-primary fw-extrabold" style="font-size: 2rem;" id="wizSummaryTotalPrice">RM 230.00</span>
+                    <span class="text-primary fw-extrabold" style="font-size: 2rem;" id="wizSummaryTotalPrice">RM 150.00</span>
                 </div>
 
                 <!-- Step Completion Helper -->
@@ -645,12 +690,7 @@
                     </div>
                 </div>
 
-                <div class="text-center pt-4 mt-4 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
-                    <p class="text-dim mb-2 small">Already have a membership?</p>
-                    <a href="@Url.Action("CustomerLogin", "Account")" class="text-decoration-none fw-bold" style="color: var(--primary); font-size: 0.8rem; letter-spacing: 0.5px;">
-                        LOGIN HERE <i class="bi bi-chevron-right ms-1"></i>
-                    </a>
-                </div>
+                
             </div>
         </div>
     </div>
@@ -668,7 +708,7 @@
     // Step 3 variables
     let hasPaidAnnualFee = '@ViewBag.HasPaidAnnualFee' === 'True';
     let isChildReg = @(ViewBag.StudentId != null ? "true" : "false");
-    let annualFee = (hasPaidAnnualFee && !isChildReg) ? 0.00 : 80.00;
+    let annualFee = 0.00; // Annual fee is paid during member signup
     let totalDuePrice = annualFee + 150.00;
     let selPayment = 'fpx';
 
@@ -683,76 +723,97 @@
     }
 
     function goToStep(step) {
-        hideWizardAlert();
+        try {
+            hideWizardAlert();
 
-        // If trying to move forward from Step 1, perform simple validations
-        if (step > 1 && currentStep === 1) {
-            const fullName = document.getElementById('regFullName').value.trim();
-            const phone = document.getElementById('regPhoneNumber').value.trim();
-            const icNumber = document.getElementById('regICNumber').value.trim();
-            
-            const houseNo = document.getElementById('regHouseNo').value.trim();
-            const street = document.getElementById('regStreet').value.trim();
-            const postcode = document.getElementById('regPostcode').value.trim();
-            const city = document.getElementById('regCity').value.trim();
-            const state = document.getElementById('regState').value;
+            // If trying to move forward from Step 1, perform simple validations
+            if (step > 1 && currentStep === 1) {
+                const fullName = document.getElementById('regFullName').value.trim();
+                const phone = document.getElementById('regPhoneNumber').value.trim();
+                const icNumber = document.getElementById('regICNumber').value.trim();
+                
+                const street = document.getElementById('regStreet').value.trim();
+                const postcode = document.getElementById('regPostcode').value.trim();
+                const city = document.getElementById('regCity').value.trim();
+                const state = document.getElementById('regState').value;
 
-            if (!fullName || !phone || !icNumber || !houseNo || !street || !postcode || !city || !state) {
-                showWizardAlert("Please fill in all details before proceeding.");
-                return;
-            }
+                let missing = [];
+                if (!fullName) missing.push("Full Name");
+                if (!phone) missing.push("Phone");
+                if (!icNumber) missing.push("IC");
+                if (!street) missing.push("Street");
+                if (!postcode) missing.push("Postcode");
+                if (!city) missing.push("City");
+                if (!state) missing.push("State");
 
-            const icRegex = /^\d{12}$/;
-            if (!icRegex.test(icNumber)) {
-                showWizardAlert("Invalid IC Number format. Please enter a 12-digit number.");
-                return;
-            }
+                if (missing.length > 0) {
+                    showWizardAlert("Please fill in missing fields: " + missing.join(", "));
+                    return;
+                }
 
-            const postcodeRegex = /^\d{5}$/;
-            if (!postcodeRegex.test(postcode)) {
-                showWizardAlert("Invalid Postcode format. Please enter a 5-digit postcode.");
-                return;
-            }
-        }
+                const icRegex = /^\d{12}$/;
+                if (!icRegex.test(icNumber)) {
+                    showWizardAlert("Invalid IC Number format. Please enter a 12-digit number.");
+                    return;
+                }
 
-        // Deactivate current section and activate next
-        document.querySelectorAll('.wizard-step-section').forEach(s => s.classList.remove('active'));
-        document.getElementById(`stepSection-${step}`).classList.add('active');
-
-        // Update Tracker UI (Standardized)
-        for (let i = 1; i <= 3; i++) {
-            const stepEl = document.getElementById(`trackStep-${i}`);
-            if (i <= step) {
-                stepEl.classList.add('active');
-            } else {
-                stepEl.classList.remove('active');
-            }
-
-            if (i < 3) {
-                const lineEl = document.getElementById(`trackLine-${i}`);
-                if (i < step) {
-                    lineEl.classList.add('active');
-                } else {
-                    lineEl.classList.remove('active');
+                const postcodeRegex = /^\d{5}$/;
+                if (!postcodeRegex.test(postcode)) {
+                    showWizardAlert("Invalid Postcode format. Please enter a 5-digit postcode.");
+                    return;
                 }
             }
-        }
 
-        // Update Columns layout dynamically
-        const formCol = document.getElementById('wizFormCol');
-        const summaryCol = document.getElementById('wizSummaryCol');
-        if (step === 3) {
-            formCol.classList.remove('col-lg-12');
-            formCol.classList.add('col-lg-7');
-            summaryCol.classList.remove('d-none');
-        } else {
-            formCol.classList.remove('col-lg-7');
-            formCol.classList.add('col-lg-12');
-            summaryCol.classList.add('d-none');
-        }
+            // Deactivate current section and activate next
+            document.querySelectorAll('.wizard-step-section').forEach(s => s.classList.remove('active'));
+            const nextStep = document.getElementById(`stepSection-${step}`);
+            if (nextStep) nextStep.classList.add('active');
 
-        currentStep = step;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Update Tracker UI (Standardized)
+            for (let i = 1; i <= 3; i++) {
+                const stepEl = document.getElementById(`trackStep-${i}`);
+                if (stepEl) {
+                    if (i <= step) {
+                        stepEl.classList.add('active');
+                    } else {
+                        stepEl.classList.remove('active');
+                    }
+                }
+
+                if (i < 3) {
+                    const lineEl = document.getElementById(`trackLine-${i}`);
+                    if (lineEl) {
+                        if (i < step) {
+                            lineEl.classList.add('active');
+                        } else {
+                            lineEl.classList.remove('active');
+                        }
+                    }
+                }
+            }
+
+            // Update Columns layout dynamically
+            const formCol = document.getElementById('wizFormCol');
+            const summaryCol = document.getElementById('wizSummaryCol');
+            if (step === 3) {
+                if (formCol) {
+                    formCol.classList.remove('col-lg-12');
+                    formCol.classList.add('col-lg-7');
+                }
+                if (summaryCol) summaryCol.classList.remove('d-none');
+            } else {
+                if (formCol) {
+                    formCol.classList.remove('col-lg-7');
+                    formCol.classList.add('col-lg-12');
+                }
+                if (summaryCol) summaryCol.classList.add('d-none');
+            }
+
+            currentStep = step;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (err) {
+            alert("System Error: " + err.message);
+        }
     }
 
     // Step 2 selector
@@ -783,16 +844,9 @@
 
     function updateWizardSummary() {
         document.getElementById('wizSummaryPackageLabel').innerText = selPackageName;
-        document.getElementById('wizSummaryPackagePrice').innerText = RM ;
+        document.getElementById('wizSummaryPackagePrice').innerText = `RM ${selPackagePrice.toFixed(2)}`;
 
-        totalDuePrice = annualFee + selPackagePrice;
-        document.getElementById('wizSummaryTotalPrice').innerText = RM ;
-        if (document.getElementById('wizSummaryAnnualFee')) {
-            document.getElementById('wizSummaryAnnualFee').innerText = annualFee === 0 ? 'RM 0.00 (Waived)' : RM ;
-        }
-    }`;
-
-        totalDuePrice = annualFee + selPackagePrice;
+        totalDuePrice = selPackagePrice;
         document.getElementById('wizSummaryTotalPrice').innerText = `RM ${totalDuePrice.toFixed(2)}`;
     }
 
@@ -823,14 +877,13 @@
         const phone = document.getElementById('regPhoneNumber').value.trim();
         const icNumber = document.getElementById('regICNumber').value.trim();
         
-        const houseNo = document.getElementById('regHouseNo').value.trim();
         const street = document.getElementById('regStreet').value.trim();
         const postcode = document.getElementById('regPostcode').value.trim();
         const city = document.getElementById('regCity').value.trim();
         const state = document.getElementById('regState').value;
 
-        // Combine into a beautifully structured, modern single address string
-        const address = `${houseNo}, ${street}, ${postcode} ${city}, ${state}`;
+        // Combine into address string identical to Member Profile format
+        const address = `${street}, ${postcode}, ${city}, ${state}`;
 
         // Gather Class data
         const formData = new FormData();
@@ -844,7 +897,7 @@
         formData.append('LearningMethod', 'N/A');
         formData.append('LearningMethodPax', 0);
         formData.append('LearningMethodPrice', 0);
-        formData.append('AnnualFee', annualFee);
+        formData.append('AnnualFee', 0);
         formData.append('TotalPrice', totalDuePrice);
         formData.append('PaymentMethod', selPayment);
 
@@ -859,9 +912,7 @@
                 document.getElementById('resTxId').innerText = result.transactionId;
                 document.getElementById('resPackage').innerText = selPackageName;
                 document.getElementById('resTotal').innerText = `RM ${totalDuePrice.toFixed(2)}`;
-                if (document.getElementById('resAnnualFee')) {
-                    document.getElementById('resAnnualFee').innerText = annualFee === 0 ? 'RM 0.00 (Waived)' : 'RM 80.00 (Annual)';
-                }
+                <!-- Removed resAnnualFee update -->
                 
                 // Show gorgeous fullscreen overlay success modal
                 const modal = document.getElementById('registrationSuccessModal');
@@ -877,4 +928,5 @@
             payBtn.innerHTML = `SECURE PAYMENT NOW <i class="bi bi-shield-lock-fill ms-2"></i>`;
         }
     }
+
 </script>

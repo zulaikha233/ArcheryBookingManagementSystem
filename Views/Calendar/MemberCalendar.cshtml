@@ -8,7 +8,7 @@
     <style>
         .dashboard-container {
             display: grid;
-            grid-template-columns: 1fr 380px;
+            grid-template-columns: 1fr;
             gap: 30px;
             min-height: calc(100vh - 80px);
             animation: fadeIn 0.8s ease;
@@ -115,7 +115,6 @@
         .calendar-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px;
             table-layout: fixed;
         }
 
@@ -215,12 +214,12 @@
         /* ─── BOOKED APPOINTMENT CARDS ─── */
         .scheduled-card {
             border-radius: 12px;
-            padding: 12px;
+            padding: 4px; /* Reduced padding */
             text-align: center;
             font-size: 0.75rem;
             color: #fff;
-            margin: 4px;
-            height: calc(100% - 8px);
+            margin: 2px; /* Reduced margin */
+            height: calc(100% - 4px);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -230,6 +229,7 @@
             border-left: 4px solid transparent;
             cursor: default;
             box-sizing: border-box;
+            overflow: hidden; /* Hide overflow */
         }
 
         .scheduled-card:hover {
@@ -262,30 +262,32 @@
         .card-title {
             font-weight: 800;
             text-transform: uppercase;
-            font-size: 0.65rem;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
+            font-size: 0.6rem; /* Smaller font */
+            letter-spacing: 0px;
+            margin-bottom: 2px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 2px;
+            white-space: nowrap;
         }
 
         .card-time {
             font-weight: 800;
-            font-size: 1.05rem;
+            font-size: 0.85rem; /* Smaller time font */
             color: #fff;
-            margin: 4px 0 8px 0;
+            margin: 2px 0 4px 0;
             text-align: center;
         }
 
         .card-meta {
             color: var(--text-dim);
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             display: flex;
+            flex-direction: column; /* Stack vertically to save horizontal space */
             justify-content: center;
             align-items: center;
-            gap: 8px;
+            gap: 2px;
             width: 100%;
         }
 
@@ -439,6 +441,12 @@
 <div class="dashboard-container">
     <!-- LEFT COLUMN: WEEKLY CALENDAR -->
     <div class="calendar-card">
+        <!-- INLINE ERROR ALERT -->
+        <div id="bookingErrorAlert" class="alert alert-danger d-none align-items-center mb-4" style="background: rgba(255, 77, 77, 0.1); border: 1px solid rgba(255, 77, 77, 0.2); color: #FF4D4D; border-radius: 12px; padding: 12px 20px; font-size: 0.9rem; font-weight: 600;">
+            <i class="bi bi-exclamation-triangle-fill me-2" style="font-size: 1.1rem;"></i>
+            <span>You must be an active member and pay the annual fee before you can book a session.</span>
+        </div>
+
         <div class="calendar-header">
             <div class="calendar-title-group">
                 <div class="calendar-month-year" id="monthYearDisplay">May 2026</div>
@@ -465,22 +473,11 @@
         </div>
     </div>
 
-    <!-- RIGHT COLUMN: DYNAMIC PANEL (UPCOMING APPOINTMENTS) -->
-    <div class="right-column-panel">
-        <div class="panel-card">
-            <h3 class="panel-title">
-                <span>🏹 Upcoming Appointments</span>
-                <span class="badge bg-danger rounded-pill small" id="appointmentsCount">0</span>
-            </h3>
-
-            <div class="appointments-list" id="upcomingList">
-                <!-- Dynamic cards or empty state in JS -->
-            </div>
-        </div>
-    </div>
+    <!-- Calendar now takes full width -->
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Parse database reservations from ViewBag
         const rawReservations = @Html.Raw(Json.Serialize(ViewBag.Reservations));
@@ -489,7 +486,18 @@
 
         function handleBookingClick(url) {
             if (customerStatus === "Inactive") {
-                alert("Please complete your class registration to activate your account and access booking features.");
+                const errAlert = document.getElementById("bookingErrorAlert");
+                if (errAlert) {
+                    errAlert.classList.remove("d-none");
+                    errAlert.classList.add("d-flex");
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    
+                    // Auto-hide after 5 seconds
+                    setTimeout(() => {
+                        errAlert.classList.add("d-none");
+                        errAlert.classList.remove("d-flex");
+                    }, 5000);
+                }
             } else {
                 window.location.href = url;
             }
@@ -505,9 +513,14 @@
             { label: "09:00", startTime: "09:15:00", endTime: "10:15:00", isNightSlot: false },
             { label: "10:00", startTime: "10:15:00", endTime: "11:15:00", isNightSlot: false },
             { label: "11:00", startTime: "11:15:00", endTime: "12:15:00", isNightSlot: false },
+            { label: "12:00", startTime: "12:15:00", endTime: "13:15:00", isNightSlot: false },
             { label: "13:00", startTime: "13:15:00", endTime: "14:15:00", isNightSlot: false },
             { label: "14:00", startTime: "14:15:00", endTime: "15:15:00", isNightSlot: false },
             { label: "15:00", startTime: "15:15:00", endTime: "16:15:00", isNightSlot: false },
+            { label: "16:00", startTime: "16:15:00", endTime: "17:15:00", isNightSlot: false },
+            { label: "17:00", startTime: "17:15:00", endTime: "18:15:00", isNightSlot: false },
+            { label: "18:00", startTime: "18:15:00", endTime: "19:15:00", isNightSlot: false },
+            { label: "19:00", startTime: "19:15:00", endTime: "20:00:00", isNightSlot: false },
             { label: "20:00", startTime: "20:00:00", endTime: "21:00:00", isNightSlot: true },
             { label: "21:00", startTime: "21:00:00", endTime: "22:00:00", isNightSlot: true },
             { label: "22:00", startTime: "22:00:00", endTime: "23:00:00", isNightSlot: true },
@@ -543,7 +556,6 @@
         function renderDashboard() {
             renderCalendarHeader();
             renderCalendarBody();
-            renderUpcomingPanel();
         }
 
         function renderCalendarHeader() {
@@ -559,7 +571,7 @@
 
             // Render table header columns
             const headersRow = document.getElementById("calendarHeaders");
-            headersRow.innerHTML = `<th class="th-time-col">Time</th>`;
+            headersRow.innerHTML = `<th class="th-time-col" style="width: 80px;">Time</th>`;
             
             const daysNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
             for (let i = 0; i < 7; i++) {
@@ -579,128 +591,151 @@
         }
 
         function isMatchingSlot(resSlotStartTime, calendarSlotStartTime) {
-            const resHours = parseInt(resSlotStartTime.split(':')[0], 10);
-            const resMins = parseInt(resSlotStartTime.split(':')[1], 10);
-            const calHours = parseInt(calendarSlotStartTime.split(':')[0], 10);
-            const calMins = parseInt(calendarSlotStartTime.split(':')[1], 10);
-            
-            const resTime = resHours * 60 + resMins;
-            const calTime = calHours * 60 + calMins;
-            
-            // Match if start times are within 20 minutes (e.g. 10:30 matches 10:15)
-            return Math.abs(resTime - calTime) <= 20;
+            return false;
         }
 
         function renderCalendarBody() {
             const gridBody = document.getElementById("calendarGridBody");
             gridBody.innerHTML = "";
 
-            // Keep track of spanned rows to skip rendering cells in lower rows
-            let skipCells = [0, 0, 0, 0, 0, 0, 0];
-
-            timeSlots.forEach((slot, slotIndex) => {
+            timeSlots.forEach(time => {
                 const row = document.createElement("tr");
 
-                // Time label column
-                const timeTd = document.createElement("td");
-                timeTd.className = "td-time-label";
-                timeTd.innerText = slot.label;
-                row.appendChild(timeTd);
+                // Time column
+                row.innerHTML = `<td class="td-time-label" style="border-right: 1px solid rgba(255,255,255,0.05);">
+                    <div>${time.label}</div>
+                </td>`;
 
                 // Mon-Sun columns
                 for (let i = 0; i < 7; i++) {
-                    // If this column has active rowspan from a previous row, decrement and skip
-                    if (skipCells[i] > 0) {
-                        skipCells[i]--;
-                        continue;
-                    }
-
                     const dayDate = new Date(weekStartDate);
                     dayDate.setDate(dayDate.getDate() + i);
                     const dateStr = formatDateStr(dayDate);
                     
                     const cellTd = document.createElement("td");
-                    
-                    // Filter matching reservations
-                    const matchingRes = rawReservations.find(res => {
-                        const resDate = res.reservedOn.split('T')[0];
-                        if (resDate !== dateStr) return false;
+                    cellTd.style.verticalAlign = "top";
+                    cellTd.style.padding = "0"; // No padding for absolute children
+                    cellTd.style.height = "60px"; // Compact height
+                    cellTd.style.border = "1px solid rgba(255,255,255,0.05)";
+                    cellTd.style.position = "relative"; // Important for absolute stacking
 
-                        if (res.slot && res.slot.slotStartTime) {
-                            return isMatchingSlot(res.slot.slotStartTime, slot.startTime);
-                        }
-                        return false;
+                    // Filter matching reservations for this day AND time slot
+                    const dayReservations = rawReservations.filter(res => {
+                        const resDate = res.reservedOn.split('T')[0];
+                        const resTime = res.slot && res.slot.slotStartTime ? res.slot.slotStartTime : "00:00:00";
+                        
+                        // Extract hour to match regardless of minutes (e.g. 14:30 falls into 14:00 row)
+                        const resHour = resTime.substring(0, 2);
+                        const slotHour = time.label.substring(0, 2);
+
+                        return resDate === dateStr && resHour === slotHour;
                     });
 
-                    if (matchingRes) {
-                        // Every row represents 1 hour, so rowSpan is equal to durationHours
-                        const numSlots = Math.max(1, Math.round(matchingRes.durationHours));
-                        
-                        cellTd.rowSpan = numSlots;
-                        skipCells[i] = numSlots - 1; // Mark subsequent cells to skip
+                    if (dayReservations.length > 0) {
+                        const cardsContainer = document.createElement("div");
+                        cardsContainer.style.position = "relative";
+                        cardsContainer.style.width = "100%";
+                        cardsContainer.style.height = "100%";
 
-                        cellTd.style.cursor = "default";
-                        cellTd.style.padding = "4px";
+                        // Group by identical time and type
+                        const groupedRes = [];
+                        dayReservations.forEach(res => {
+                            const resTime = res.slot && res.slot.slotStartTime ? res.slot.slotStartTime : "00:00:00";
+                            const match = groupedRes.find(g => {
+                                const gTime = g.slot && g.slot.slotStartTime ? g.slot.slotStartTime : "00:00:00";
+                                return gTime === resTime && g.rateCode === res.rateCode;
+                            });
+                            if (match) {
+                                match.grouped.push(res);
+                            } else {
+                                groupedRes.push({
+                                    ...res,
+                                    grouped: [res]
+                                });
+                            }
+                        });
 
-                        let typeClass = "card-game";
-                        let typeTitle = "Game Session";
-                        let typeIcon = "bi-bullseye";
+                        groupedRes.sort((a, b) => {
+                            const timeA = a.slot && a.slot.slotStartTime ? a.slot.slotStartTime : "00:00:00";
+                            const timeB = b.slot && b.slot.slotStartTime ? b.slot.slotStartTime : "00:00:00";
+                            return timeA.localeCompare(timeB);
+                        });
 
-                        if (matchingRes.rateCode === "CLASS") {
-                            typeClass = "card-class";
-                            typeTitle = "Class Session";
-                            typeIcon = "bi-mortarboard";
-                        } else if (matchingRes.rateCode === "SELF_TRAINING" || (matchingRes.slot && matchingRes.slot.isNight)) {
-                            typeClass = "card-self-train";
-                            typeTitle = "Self Training";
-                            typeIcon = "bi-moon-stars";
-                        }
+                        groupedRes.forEach((matchingRes, index) => {
+                            let typeClass = "card-game";
+                            let typeTitle = "Game Session";
+                            let typeIcon = "bi-bullseye";
+                            let rateCodeUpper = matchingRes.rateCode ? matchingRes.rateCode.toUpperCase() : "";
 
-                        // Calculate actual end time dynamically based on spanned slots
-                        const startIndex = slotIndex;
-                        const endIndex = Math.min(startIndex + numSlots - 1, timeSlots.length - 1);
-                        
-                        // Use reservation's own start/end if available, else project from timeSlots
-                        const startStr = matchingRes.slot ? matchingRes.slot.slotStartTime.substring(0, 5) : slot.startTime.substring(0, 5);
-                        const endStr = timeSlots[endIndex].endTime.substring(0, 5);
+                            if (rateCodeUpper === "CLASS SESSION" || rateCodeUpper === "CLASS") {
+                                typeClass = "card-class";
+                                typeTitle = "Class Session";
+                                typeIcon = "bi-mortarboard";
+                            } else if (rateCodeUpper === "SELF_TRAINING" || (matchingRes.slot && matchingRes.slot.isNight)) {
+                                typeClass = "card-self-train";
+                                typeTitle = "Self Training";
+                                typeIcon = "bi-moon-stars";
+                            }
 
-                        const totalSlotsLabel = slot.isNightSlot 
-                            ? Math.max(1, Math.round(matchingRes.durationHours / 2))
-                            : Math.max(1, Math.round(matchingRes.durationHours));
+                            let startStr = matchingRes.slot && matchingRes.slot.slotStartTime ? matchingRes.slot.slotStartTime.substring(0, 5) : "";
+                            let timeText = startStr;
 
-                        let metaHtml = "";
-                        if (matchingRes.rateCode === "CLASS") {
-                            metaHtml = `<span>${totalSlotsLabel} ${totalSlotsLabel === 1 ? 'Slot' : 'Slots'}</span>`;
-                        } else {
-                            metaHtml = `
-                                <span>Target ${matchingRes.targetNo}</span>
-                                <span>•</span>
-                                <span>${totalSlotsLabel} ${totalSlotsLabel === 1 ? 'Slot' : 'Slots'}</span>
-                            `;
-                        }
+                            if (startStr && matchingRes.durationHours) {
+                                let parts = startStr.split(':');
+                                let hours = parseInt(parts[0], 10);
+                                let mins = parseInt(parts[1], 10);
+                                hours += Math.floor(matchingRes.durationHours);
+                                mins += (matchingRes.durationHours % 1) * 60;
+                                if (mins >= 60) {
+                                    hours += Math.floor(mins / 60);
+                                    mins = mins % 60;
+                                }
+                                let endStr = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+                                timeText = `${startStr} - ${endStr}`;
+                            }
 
-                        cellTd.innerHTML = `
-                            <div class="scheduled-card ${typeClass}" style="height: 100%; min-height: ${95 * matchingRes.durationHours - 8}px;">
-                                <div class="card-title"><i class="bi ${typeIcon}"></i> ${typeTitle}</div>
-                                <div class="card-time">${startStr} - ${endStr}</div>
-                                <div class="card-meta">
-                                    ${metaHtml}
+                            let namesStr = matchingRes.grouped.length > 1 ? `${matchingRes.grouped.length} Archers` : matchingRes.customerName;
+
+                            let metaHtml = "";
+                            if (rateCodeUpper === "CLASS SESSION" || rateCodeUpper === "CLASS") {
+                                metaHtml = `<span style="font-weight: 700; color: #fff;">${namesStr}</span>`;
+                            } else {
+                                let tgts = matchingRes.grouped.map(r => r.targetNo).join(', ');
+                                metaHtml = `
+                                    <span style="font-weight: 700; color: #fff; margin-bottom: 2px;">${namesStr}</span>
+                                    <span style="opacity: 0.9;">• Tgt ${tgts}</span>
+                                `;
+                            }
+
+                            // Calculate dynamic positioning
+                            const duration = matchingRes.durationHours || 1;
+                            const heightPx = duration * 60; // 60px per hour row
+                            const totalEvents = groupedRes.length;
+                            const widthPercent = totalEvents > 1 ? (100 / totalEvents) : 95; // 95% if single to leave a tiny right margin
+                            const leftOffset = index * (100 / totalEvents);
+                            const zIndex = 10 + index;
+
+                            const cardHtml = `
+                                <div class="scheduled-card ${typeClass}" style="position: absolute; top: 0; left: ${leftOffset}%; width: ${widthPercent}%; height: ${heightPx}px; z-index: ${zIndex}; border-radius: 8px; padding: 8px 10px; cursor: default; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); overflow: hidden;">
+                                    <div class="card-title" style="font-size: 0.7rem; margin-bottom: 4px; display: flex; gap: 4px; align-items: center; justify-content: center;"><i class="bi ${typeIcon}"></i> ${typeTitle}</div>
+                                    ${timeText ? `<div class="card-time" style="font-size: 0.85rem; margin: 0 0 6px 0;">${timeText}</div>` : ''}
+                                    <div class="card-meta" style="font-size: 0.75rem; display: flex; flex-direction: column; gap: 2px; align-items: center;">
+                                        ${metaHtml}
+                                    </div>
                                 </div>
-                            </div>
-                        `;
+                            `;
+                            cardsContainer.insertAdjacentHTML('beforeend', cardHtml);
+                        });
+                        
+                        cellTd.appendChild(cardsContainer);
                     } else {
-                        if (slot.label === "00:00") {
-                            cellTd.style.background = "rgba(255, 255, 255, 0.01)";
-                            cellTd.style.cursor = "default";
-                        } else {
-                            // Empty interactive cell -> Redirects to booking forms
-                            cellTd.className = "grid-cell-interactive";
-                            cellTd.onclick = () => {
-                                const isWeekend = dayDate.getDay() === 0 || dayDate.getDay() === 6;
-                                const targetUrl = isWeekend ? `/Booking/ClassBooking?date=${dateStr}` : `/Booking/GetFreeSlots?date=${dateStr}`;
-                                handleBookingClick(targetUrl);
-                            };
-                        }
+                        // Interactive cell for empty slots
+                        cellTd.className = "grid-cell-interactive";
+                        cellTd.onclick = (e) => {
+                            const isWeekend = dayDate.getDay() === 0 || dayDate.getDay() === 6;
+                            const targetUrl = isWeekend ? `/Booking/ClassBooking?date=${dateStr}` : `/Booking/GetFreeSlots?date=${dateStr}`;
+                            handleBookingClick(targetUrl);
+                        };
                     }
                     row.appendChild(cellTd);
                 }
@@ -744,7 +779,7 @@
                 let typeTitle = "Game Session";
                 let typeIcon = "bi-bullseye";
 
-                if (res.rateCode === "CLASS") {
+                if (res.rateCode === "CLASS" || res.rateCode === "Class Session") {
                     badgeClass = "badge-class";
                     typeTitle = "Class Session";
                     typeIcon = "bi-mortarboard";

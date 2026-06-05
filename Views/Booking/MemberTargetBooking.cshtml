@@ -17,19 +17,9 @@
                     <input type="hidden" id="customerEmail" value="@ViewBag.CustomerEmail">
                     <input type="hidden" id="customerPhone" value="@ViewBag.CustomerPhone">
 
-                    <div class="mb-4">
-                        <label class="form-label-premium">Who is Shooting?</label>
-                        <select id="shooterSelect" class="form-control">
-                            @if (ViewBag.ParentActive)
-                            {
-                                <option value="" data-name="@ViewBag.CustomerName" data-email="@ViewBag.CustomerEmail" data-phone="@ViewBag.CustomerPhone">Myself (@ViewBag.CustomerName)</option>
-                            }
-                            @foreach (var student in ViewBag.Students)
-                            {
-                                <option value="@student.StudentId" data-name="@student.FullName" data-email="@ViewBag.CustomerEmail" data-phone="@ViewBag.CustomerPhone">@student.FullName (Archer)</option>
-                            }
-                        </select>
-                    </div>
+                    <!-- Number of Archers -->
+                    <input type="hidden" id="numberOfPax" value="1">
+                    <input type="hidden" id="savedSlotIds" value="">
 
                     <div class="mb-4">
                         <label class="form-label-premium">Session Type</label>
@@ -52,9 +42,6 @@
                             </select>
                         </div>
                     </div>
-
-                    <!-- Number of Archers -->
-                    <input type="hidden" id="numberOfPax" value="1">
 
                     <div id="game-session-banner" class="p-4" style="display: none; background: rgba(255, 77, 77, 0.05); border: 1px dashed rgba(255, 77, 77, 0.2); border-radius: 20px;">
                         <h5 class="text-white fw-bold mb-3 d-flex align-items-center gap-2">
@@ -345,6 +332,27 @@
 
             if (morningGrid.innerHTML === "") morningGrid.innerHTML = "<p class='text-dim small'>No morning slots available</p>";
             if (nightGrid.innerHTML === "") nightGrid.innerHTML = "<p class='text-dim small'>No night slots available</p>";
+
+            // Restore from hidden input if we came from history.back()
+            const saved = document.getElementById("savedSlotIds").value;
+            if (saved) {
+                const arr = saved.split(',').map(Number).filter(n => n);
+                // Only restore if length matches
+                if (arr.length > 0) {
+                    bookingData.selectedSlotIds = arr;
+                    bookingData.slotId = arr[0];
+                    arr.forEach(id => {
+                        const el = document.getElementById(`slot-${id}`);
+                        if (el) el.classList.add("selected");
+                    });
+                    const hint = document.getElementById("slot-hint");
+                    const maxSlots = bookingData.duration / 2;
+                    if (arr.length >= maxSlots && hint) {
+                        hint.style.display = "block";
+                        hint.innerText = "All slots selected.";
+                    }
+                }
+            }
         } catch (err) {
             console.error(err);
         }
@@ -389,6 +397,7 @@
             bookingData.selectedSlotIds.sort((a,b)=>a-b);
             bookingData.slotId = bookingData.selectedSlotIds[0];
         }
+        document.getElementById("savedSlotIds").value = bookingData.selectedSlotIds.join(',');
     }
 
     function adjustPax(change) {

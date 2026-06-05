@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "PAYMENT";
+    Layout = "_Layout";
 }
 
 <div class="booking-wizard-container py-5" data-aos="fade-up">
@@ -19,7 +20,7 @@
                         <div class="summary-list">
                             <div class="summary-item">
                                 <span class="label">Service</span>
-                                <span class="value">@(ViewBag.ServiceName ?? "Archery Class Trial")</span>
+                                <span class="value">@(ViewBag.ServiceName ?? "Archery Game Session")</span>
                             </div>
                             <div class="summary-item">
                                 <span class="label">Date</span>
@@ -59,63 +60,60 @@
                     <div class="col-lg-7 p-5">
                         <h4 class="mb-4 text-dim fw-bold" style="font-size: 0.8rem; letter-spacing: 2px;">SELECT PAYMENT METHOD</h4>
                         
-                        <div class="row g-4 mb-4">
-                            <div class="col-md-4">
-                                <label class="payment-method-card">
-                                    <input type="radio" name="paymentMethod" value="fpx" checked onchange="togglePaymentUI()">
-                                    <div class="method-card-content">
-                                        <div class="icon-box"><i class="bi bi-bank"></i></div>
-                                        <div class="title mt-2">Online Banking</div>
-                                        <small class="text-dim">FPX</small>
-                                    </div>
-                                </label>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="payment-method-card">
-                                    <input type="radio" name="paymentMethod" value="card" onchange="togglePaymentUI()">
-                                    <div class="method-card-content">
-                                        <div class="icon-box"><i class="bi bi-credit-card"></i></div>
-                                        <div class="title mt-2">Credit / Card</div>
-                                        <small class="text-dim">Visa/Master</small>
-                                    </div>
-                                </label>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="payment-method-card">
-                                    <input type="radio" name="paymentMethod" value="counter" onchange="togglePaymentUI()">
-                                    <div class="method-card-content">
-                                        <div class="icon-box"><i class="bi bi-cash-stack"></i></div>
-                                        <div class="title mt-2">At Counter</div>
-                                        <small class="text-dim">Cash/QR</small>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
+                        <div class="payment-methods mb-4">
+                            <label class="payment-radio mb-3">
+                                <input type="radio" name="paymentMethod" value="fpx" checked onchange="togglePaymentUI()"> FPX Online Banking
+                            </label>
 
-                        <!-- Payment Detail Boxes -->
-                        <div id="fpxUI" class="payment-detail-box p-4 mb-4">
-                            <label class="form-label-premium mb-2">Select Your Bank</label>
-                            <select id="bankSelection" class="form-select">
-                                <option value="">-- Choose Retail Bank --</option>
-                                <option value="Maybank2U">Maybank2U</option>
-                                <option value="CIMB Clicks">CIMB Clicks</option>
-                                <option value="Public Bank">Public Bank</option>
-                                <option value="RHB Now">RHB Now</option>
-                                <option value="Bank Islam">Bank Islam</option>
-                                <option value="AmBank">AmBank</option>
-                            </select>
-                            <p class="text-dim small mt-3 mb-0"><i class="bi bi-shield-lock me-1"></i> Redirecting to secure bank portal.</p>
-                        </div>
+                            <!-- Payment Detail Boxes -->
+                            <div id="fpxUI" class="payment-ui-box p-4 mb-4" style="display: block;">
+                                <select id="bankSelection" class="form-select mb-3" style="border-radius: 50px; font-size: 0.8rem; padding: 4px 16px; height: 36px; cursor: pointer;">
+                                    <option value="">Select Retail Bank</option>
+                                    <option value="Maybank2U">Maybank2U</option>
+                                    <option value="CIMB Clicks">CIMB Clicks</option>
+                                    <option value="Public Bank">Public Bank</option>
+                                    <option value="RHB Now">RHB Now</option>
+                                    <option value="Bank Islam">Bank Islam</option>
+                                    <option value="AmBank">AmBank</option>
+                                </select>
+                                <p class="text-dim small mb-0"><i class="bi bi-shield-lock me-1"></i> Redirecting to secure bank portal.</p>
+                            </div>
 
-                        <div id="cardUI" class="payment-detail-box p-4 mb-4" style="display: none;">
-                            <label class="form-label-premium mb-2">Card Details</label>
-                            <input type="text" class="form-control mb-3" placeholder="Card Number (0000 0000 0000 0000)">
-                            <div class="row g-3">
-                                <div class="col-6">
-                                    <input type="text" class="form-control" placeholder="MM/YY">
+                            <label class="payment-radio mb-3">
+                                <input type="radio" name="paymentMethod" value="card" onchange="togglePaymentUI()"> Credit / Debit Card
+                            </label>
+
+                            <div id="cardUI" class="payment-ui-box p-4 mb-4" style="display: none;">
+                                <label class="form-label-premium mb-2">Card Details</label>
+                                <input type="text" class="form-control mb-3" placeholder="Card Number (0000 0000 0000 0000)" style="padding: 4px 12px; height: 36px; font-size: 0.85rem;">
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <input type="text" class="form-control" placeholder="MM/YY" style="padding: 4px 12px; height: 36px; font-size: 0.85rem;">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="text" class="form-control" placeholder="CVV" style="padding: 4px 12px; height: 36px; font-size: 0.85rem;">
+                                    </div>
                                 </div>
-                                <div class="col-6">
-                                    <input type="text" class="form-control" placeholder="CVV">
+                            </div>
+                            
+                            <label class="payment-radio mb-3">
+                                <input type="radio" name="paymentMethod" value="counter" onchange="togglePaymentUI()"> At Counter (Cash/QR)
+                            </label>
+                        </div>
+
+
+
+                        <!-- Customer Details -->
+                        <div class="payment-detail-box p-4 mb-4">
+                            <h5 class="fw-bold mb-3" style="font-size: 0.9rem;">Customer Details <span class="text-dim fw-normal">(Optional)</span></h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label-premium">Customer Name</label>
+                                    <input type="text" id="guestName" class="form-control" placeholder="Full Name" style="padding: 4px 12px; height: 36px; font-size: 0.85rem;">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-premium">Contact Number</label>
+                                    <input type="text" id="guestPhone" class="form-control" placeholder="Phone Number" style="padding: 4px 12px; height: 36px; font-size: 0.85rem;">
                                 </div>
                             </div>
                         </div>
@@ -136,9 +134,14 @@
                             <h2 class="m-0" style="color: var(--primary); font-weight: 800;">RM @Model.TotalPrice.ToString("0.00")</h2>
                         </div>
 
-                        <button class="btn-premium w-100 mt-4 justify-content-center" id="confirmBtn" onclick="generateKioskCode()">
-                            CONFIRM & PAY
-                        </button>
+                        <div class="d-flex gap-3 mt-4">
+                            <button class="btn-premium-outline w-50 justify-content-center text-center" onclick="cancelBooking()">
+                                CANCEL
+                            </button>
+                            <button class="btn-premium w-50 justify-content-center text-center" id="confirmBtn" onclick="generateKioskCode()">
+                                CONFIRM & PAY
+                            </button>
+                        </div>
                     </div>
                 </div>
     </div>
@@ -184,59 +187,13 @@
     .summary-item .label { color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase; font-weight: 600; }
     .summary-item .value { color: #fff; font-weight: 700; }
 
-    .payment-method-card { cursor: pointer; display: block; height: 100%; }
-    .payment-method-card input { display: none; }
+    .payment-radio { display: flex; align-items: center; gap: 12px; color: #fff; font-weight: 600; cursor: pointer; }
+    .payment-radio input { accent-color: var(--primary); width: 18px; height: 18px; }
     
-    .method-card-content {
+    .payment-ui-box {
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid var(--card-border);
-        border-radius: 24px;
-        padding: 25px 15px;
-        text-align: center;
-        transition: var(--transition-smooth);
-        height: 100%;
-        display: flex;
-        flex-column: column;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .payment-method-card:hover .method-card-content { border-color: var(--primary); transform: translateY(-5px); background: rgba(255, 255, 255, 0.05); }
-    
-    .payment-method-card input:checked + .method-card-content {
-        border-color: var(--primary);
-        background: var(--primary);
-        box-shadow: 0 10px 20px var(--primary-glow);
-    }
-
-    .payment-method-card input:checked + .method-card-content .icon-box,
-    .payment-method-card input:checked + .method-card-content .title,
-    .payment-method-card input:checked + .method-card-content .text-dim {
-        color: #000 !important;
-        opacity: 1;
-    }
-    
-    .icon-box {
-        width: 50px;
-        height: 50px;
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.6rem;
-        color: var(--primary);
-        transition: var(--transition-smooth);
-    }
-    
-    .method-card-content .title { display: block; font-weight: 800; color: #fff; font-size: 0.85rem; letter-spacing: 0.5px; transition: var(--transition-smooth); }
-    .method-card-content small { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; transition: var(--transition-smooth); }
-    
-    .payment-detail-box {
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid var(--card-border);
-        border-radius: 20px;
+        border-radius: 16px;
         animation: fadeInDown 0.3s ease;
     }
 
@@ -255,8 +212,8 @@
     }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Fallback notification system if globalNotif is not available
     const originalShowNotif = window.showNotif;
     window.showNotif = function(message, type = 'info') {
         const overlay = document.getElementById('globalNotifOverlay');
@@ -271,6 +228,25 @@
         const method = document.querySelector('input[name="paymentMethod"]:checked').value;
         document.getElementById("fpxUI").style.display = (method === "fpx") ? "block" : "none";
         document.getElementById("cardUI").style.display = (method === "card") ? "block" : "none";
+    }
+
+    function cancelBooking() {
+        Swal.fire({
+            title: 'Cancel Booking?',
+            text: "Are you sure you want to cancel the booking?",
+            icon: 'warning',
+            background: '#0f172a',
+            color: '#ffffff',
+            showCancelButton: true,
+            confirmButtonColor: '#ff4d4d',
+            cancelButtonColor: '#475569',
+            confirmButtonText: 'Yes, cancel it!',
+            cancelButtonText: 'No, proceed'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/Booking/GuestBooking';
+            }
+        });
     }
 
     async function generateKioskCode() {
@@ -288,9 +264,13 @@
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> PROCESSING...';
 
+        const nameInput = document.getElementById("guestName").value.trim() || "Guest User";
+        const phoneInput = document.getElementById("guestPhone").value.trim() || "0000000000";
+
         const formData = new FormData();
         formData.append("SlotId", "@Model.SlotId");
-        formData.append("CustomerName", "@Model.CustomerName");
+        formData.append("CustomerName", nameInput);
+        formData.append("PhoneNumber", phoneInput);
         formData.append("CustomerEmail", "@Model.CustomerEmail");
         const firstLane = "@Model.SelectedLanes".split(',')[0].trim();
         formData.append("TargetNo", firstLane);

@@ -195,6 +195,13 @@ namespace ArcheryAlley.Controllers
                 return RedirectToAction("CustomerLogin");
 
             var parent = _repository.GetCustomerByEmail(email);
+            
+            if (parent != null && parent.Status != "Active")
+            {
+                TempData["ErrorMessage"] = "You must be an active member and pay the annual fee before you can register for a class.";
+                return RedirectToAction("MemberDashboard");
+            }
+
             ViewBag.HasPaidAnnualFee = parent != null && parent.Status == "Active";
 
             // If registering for a student, validate the student belongs to this parent
@@ -209,7 +216,7 @@ namespace ArcheryAlley.Controllers
                 ViewBag.StudentIC = student.ICNumber;
             }
 
-            return View("~/Views/Account/ClassRegistration.cshtml");
+            return View("~/Views/Account/ClassRegistration.cshtml", parent);
         }
 
 
@@ -401,11 +408,11 @@ namespace ArcheryAlley.Controllers
             if (customer == null)
                 return RedirectToAction("CustomerLogin");
 
-            return View("~/Views/Account/MemberProfile.cshtml", customer);
+            return View("~/Views/Profile/MemberProfile.cshtml", customer);
         }
 
         [HttpPost]
-        public IActionResult MemberProfile(string FullName, string PhoneNumber, string ICNumber, string Address)
+        public IActionResult MemberProfile(string FullName, string PhoneNumber, string ICNumber, string Address, string Username)
         {
             string email = HttpContext.Session.GetString("CustomerEmail");
             if (string.IsNullOrEmpty(email))
@@ -418,13 +425,17 @@ namespace ArcheryAlley.Controllers
             if (string.IsNullOrEmpty(FullName) || string.IsNullOrEmpty(PhoneNumber) || string.IsNullOrEmpty(ICNumber) || string.IsNullOrEmpty(Address))
             {
                 ViewBag.ErrorMessage = "Please fill in all profile details.";
-                return View("~/Views/Account/MemberProfile.cshtml", customer);
+                return View("~/Views/Profile/MemberProfile.cshtml", customer);
             }
 
             customer.FullName = FullName;
             customer.PhoneNumber = PhoneNumber;
             customer.ICNumber = ICNumber;
             customer.Address = Address;
+            if (!string.IsNullOrEmpty(Username))
+            {
+                customer.Username = Username;
+            }
 
             if (!string.IsNullOrEmpty(ICNumber) && ICNumber.Length == 12)
             {
@@ -450,6 +461,7 @@ namespace ArcheryAlley.Controllers
                 _repository.UpdateCustomer(customer);
 
                 HttpContext.Session.SetString("CustomerName", customer.FullName ?? customer.Username);
+                HttpContext.Session.SetString("CustomerUsername", customer.Username);
                 HttpContext.Session.SetString("CustomerPhone", customer.PhoneNumber ?? "");
 
                 ViewBag.SuccessMessage = "Profile updated successfully!";
@@ -459,7 +471,7 @@ namespace ArcheryAlley.Controllers
                 ViewBag.ErrorMessage = "An error occurred: " + ex.Message;
             }
 
-            return View("~/Views/Account/MemberProfile.cshtml", customer);
+            return View("~/Views/Profile/MemberProfile.cshtml", customer);
         }
 
         [HttpGet]
@@ -473,7 +485,7 @@ namespace ArcheryAlley.Controllers
             if (customer == null)
                 return RedirectToAction("CustomerLogin");
 
-            return View("~/Views/Account/MemberSettings.cshtml", customer);
+            return View("~/Views/Profile/MemberSettings.cshtml", customer);
         }
 
         [HttpPost]
@@ -490,13 +502,13 @@ namespace ArcheryAlley.Controllers
             if (string.IsNullOrEmpty(CurrentPassword) || string.IsNullOrEmpty(NewPassword))
             {
                 ViewBag.ErrorMessage = "Please fill in all password fields.";
-                return View("~/Views/Account/MemberSettings.cshtml", customer);
+                return View("~/Views/Profile/MemberSettings.cshtml", customer);
             }
 
             if (customer.Password != CurrentPassword)
             {
                 ViewBag.ErrorMessage = "The current password you entered is incorrect.";
-                return View("~/Views/Account/MemberSettings.cshtml", customer);
+                return View("~/Views/Profile/MemberSettings.cshtml", customer);
             }
 
             try
@@ -510,7 +522,7 @@ namespace ArcheryAlley.Controllers
                 ViewBag.ErrorMessage = "An error occurred: " + ex.Message;
             }
 
-            return View("~/Views/Account/MemberSettings.cshtml", customer);
+            return View("~/Views/Profile/MemberSettings.cshtml", customer);
         }
 
         [HttpGet]

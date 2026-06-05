@@ -74,12 +74,88 @@ namespace ArcheryAlley.Controllers
                 return RedirectToAction("MemberDashboard", "Account");
             }
 
+            var parent = _repository.GetCustomerByEmail(email);
+            var students = parent != null ? _repository.GetStudentsByParentId(parent.CustomerId).Where(s => {
+                var classReg = _repository.GetClassRegistrationByStudentId(s.StudentId);
+                return classReg != null && classReg.PaymentStatus == "Success" && classReg.PackageType != "Annual Membership";
+            }).ToList() : new List<Students>();
+
+            bool parentHasClass = classRegs.Any(cr => cr.PaymentStatus == "Success" && cr.PackageType != "Annual Membership" && cr.StudentId == null);
+
             _repository.SeedFixedSlots();
             HttpContext.Session.SetString("IsGuest", "false");
             ViewBag.CustomerEmail = email;
             ViewBag.CustomerName = HttpContext.Session.GetString("CustomerName");
             ViewBag.CustomerPhone = HttpContext.Session.GetString("CustomerPhone");
+            ViewBag.ParentHasClass = parentHasClass;
+            ViewBag.Students = students;
             return View("~/Views/Booking/MemberClassBooking.cshtml");
+        }
+
+        [HttpPost]
+        public IActionResult CreateClassBooking(int slotId, string date, int duration = 2, [FromForm] List<int> studentIds = null)
+        {
+            try
+            {
+                string email = HttpContext.Session.GetString("CustomerEmail");
+                string name = HttpContext.Session.GetString("CustomerName");
+
+                if (string.IsNullOrEmpty(email))
+                    return Json(new { success = false, message = "User not logged in." });
+
+                if (studentIds == null || !studentIds.Any())
+                    return Json(new { success = false, message = "No archers selected." });
+
+                DateTime bookingDate;
+                if (!DateTime.TryParse(date, out bookingDate))
+                    return Json(new { success = false, message = "Invalid date format." });
+
+                var slots = _repository.GetBookingSlots();
+                var slot = slots.FirstOrDefault(s => s.SlotId == slotId);
+                var slotTime = slot != null ? slot.SlotStartTime : TimeSpan.Zero;
+                DateTime finalReservedOn = bookingDate.Date.Add(slotTime);
+
+                string transactionId = "CLASS-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
+
+                foreach (var sId in studentIds)
+                {
+                    int? targetStudentId = sId == 0 ? (int?)null : sId;
+                    
+                    var reservation = new Reservations
+                    {
+                        SlotId = slotId,
+                        CustomerName = name,
+                        CustomerEmail = email,
+                        ReservedBy = email,
+                        DurationHours = duration,
+                        TotalPrice = 0, // Classes are pre-paid
+                        ReservedOn = finalReservedOn,
+                        NumberOfPax = 1,
+                        Status = 1,
+                        RateCode = "Class Session",
+                        StudentId = targetStudentId
+                    };
+
+                    _repository.CreateReservation(reservation);
+
+                    var payment = new Payments
+                    {
+                        ReservationId = reservation.ReservationId,
+                        Amount = 0,
+                        PaymentMethod = "Class Package",
+                        PaymentDate = DateTime.Now,
+                        Status = "Success",
+                        TransactionId = transactionId
+                    };
+                    _repository.AddPayment(payment);
+                }
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         public IActionResult MemberCalendar()
@@ -114,56 +190,12 @@ namespace ArcheryAlley.Controllers
             return View("~/Views/Calendar/MemberCalendar.cshtml");
         }
 
-        [HttpPost]
-        public IActionResult CreateClassBooking(int slotId, string date, int duration = 2)
-        {
-            try
-            {
-                string email = HttpContext.Session.GetString("CustomerEmail") ?? "member@archery.com";
-                string name = HttpContext.Session.GetString("CustomerName") ?? "Member";
-                
-                var slots = _repository.GetBookingSlots();
-                var slot = slots.FirstOrDefault(s => s.SlotId == slotId);
-                var slotTime = slot != null ? slot.SlotStartTime : TimeSpan.Zero;
-                
-                DateTime bookingDate = DateTime.Now;
-                if (!string.IsNullOrEmpty(date))
-                {
-                    DateTime.TryParse(date, out bookingDate);
-                }
-                DateTime finalReservedOn = bookingDate.Date.Add(slotTime);
-
-                var reservation = new Reservations
-                {
-                    SlotId        = slotId,
-                    CustomerName  = name,
-                    CustomerEmail = email,
-                    ReservedBy    = email,
-                    TargetNo      = 1,
-                    RangeNo       = 1,
-                    DurationHours = duration,
-                    TotalPrice    = 0,
-                    RateCode      = "CLASS",
-                    ReservedOn    = finalReservedOn,
-                    NumberOfPax   = 1,
-                    Status        = 1
-                };
-                _repository.CreateReservation(reservation);
-                
-                string bookingCode = "AC" + new Random().Next(1000, 9999);
-                return Json(new { success = true, bookingCode = bookingCode });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
 
         public IActionResult GuestBooking()
         {
             _repository.SeedFixedSlots();
             HttpContext.Session.SetString("IsGuest", "true");
-            return View();
+            return View("~/Views/Guest/GuestBooking.cshtml");
         }
 
         [HttpGet]
@@ -187,6 +219,10 @@ namespace ArcheryAlley.Controllers
             ViewBag.Duration = duration;
             ViewBag.NumberOfPax = numberOfPax;
             ViewBag.StudentId = studentId;
+
+            if (ViewBag.IsGuest)
+                return View("~/Views/Guest/SelectTarget.cshtml");
+
             return View();
         }
 
@@ -207,6 +243,10 @@ namespace ArcheryAlley.Controllers
             ViewBag.SessionType  = HttpContext.Session.GetString("SessionType") ?? "game";
 
             ViewBag.EnableLaneSelection = SystemSettings.EnableLaneSelection;
+
+            if (ViewBag.IsGuest)
+                return View("~/Views/Guest/SelectLane.cshtml");
+
             return View();
         }
 
@@ -416,9 +456,9 @@ namespace ArcheryAlley.Controllers
                 }
             }
 
-            ViewBag.ServiceName = "Archery Class Trial";
+            ViewBag.ServiceName = "Archery Game Session";
             ViewBag.EnableLaneSelection = SystemSettings.EnableLaneSelection;
-            return View("~/Views/Payment/PaymentGuest.cshtml", model);
+            return View("~/Views/Guest/PaymentGuest.cshtml", model);
         }
 
         [HttpPost]

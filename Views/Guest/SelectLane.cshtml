@@ -1,6 +1,6 @@
 @{
     ViewData["Title"] = "Select Your Lane";
-    Layout = ViewBag.IsGuest == true ? "_Layout" : "_MemberLayout";
+    Layout = "_Layout";
     var slotId       = ViewBag.SlotId;
     var name         = ViewBag.Name;
     var email        = ViewBag.Email;
@@ -9,7 +9,7 @@
     var duration     = ViewBag.Duration;
     var targetSize   = ViewBag.TargetSize;
     var targetAmount = ViewBag.TargetAmount;
-    var isGuest      = ViewBag.IsGuest;
+    var isGuest      = true;
     var enableLaneSelection = ViewBag.EnableLaneSelection ?? false;
     var studentId    = ViewBag.StudentId;
     var sessionType  = ViewBag.SessionType;
@@ -118,7 +118,7 @@
         duration:           "@duration",
         targetSize:         "@targetSize",
         targetAmount:       parseInt("@targetAmount") || 1,
-        isGuest:            "@isGuest".toLowerCase() === "true",
+        isGuest:            true,
         enableLaneSelection: "@enableLaneSelection".toLowerCase() === "true",
         pax:                1,
         selectedTargetIds:  [],
@@ -267,7 +267,7 @@
 
         const form   = document.createElement("form");
         form.method  = "POST";
-        form.action  = bookingData.isGuest ? "/Booking/PaymentGuest" : "/Booking/Payment";
+        form.action  = "/Booking/PaymentGuest";
 
         const fields = {
             SlotId:            bookingData.slotId,

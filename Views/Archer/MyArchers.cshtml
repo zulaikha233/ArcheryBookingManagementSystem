@@ -37,9 +37,14 @@
         <h1 class="text-white">MY <span style="color: var(--primary);">ARCHERS</span></h1>
         <p>Manage your archers' profiles and class registrations.</p>
     </div>
-    <a href="/Archer/AddArcher" class="btn-premium" style="padding: 10px 20px; font-size: 0.85rem; text-decoration: none;">
-        <i class="bi bi-plus-circle me-2"></i> ADD ARCHER
-    </a>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn-premium-outline" onclick="alert('This feature is coming soon!')" style="padding: 10px 20px; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.02); color: #fff;">
+            <i class="bi bi-file-earmark-spreadsheet me-2"></i> UPLOAD
+        </button>
+        <a href="/Archer/AddArcher" class="btn-premium" style="padding: 10px 20px; font-size: 0.85rem; text-decoration: none;">
+            <i class="bi bi-plus-circle me-2"></i> ADD ARCHER
+        </a>
+    </div>
 </div>
 
     @if (TempData["ErrorMessage"] != null)
@@ -48,7 +53,7 @@
              style="border-radius: 14px; padding: 15px 20px; font-weight: 600; font-size: 0.88rem; margin-top: 20px; 
                     background: rgba(255, 77, 77, 0.1) !important; color: #ff4d4d !important; border: 1px solid rgba(255, 77, 77, 0.2) !important;">
             <i class="bi bi-exclamation-triangle-fill" style="font-size: 1.1rem; color: #ff4d4d !important;"></i>
-            <div>@TempData["ErrorMessage"]</div>
+            <div>@Html.Raw(TempData["ErrorMessage"])</div>
         </div>
     }
 
@@ -130,3 +135,64 @@
         </div>
     }
 </div>
+
+<!-- Bulk Upload Modal -->
+<div id="bulkUploadModal" class="success-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 12, 18, 0.8); backdrop-filter: blur(8px); z-index: 999; justify-content: center; align-items: center;">
+    <div class="success-modal-content" style="background: var(--bg-card); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 30px; max-width: 450px; width: 90%; text-align: center; position: relative;">
+        <button type="button" onclick="document.getElementById('bulkUploadModal').style.display='none'" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: #fff; font-size: 1.5rem; opacity: 0.5;">&times;</button>
+        
+        <i class="bi bi-cloud-arrow-up text-primary" style="font-size: 3rem; margin-bottom: 15px; display: block;"></i>
+        <h3 class="text-white fw-bold mb-2">Bulk Upload Archers</h3>
+        <p class="text-dim small mb-4">Upload a CSV file containing multiple archers. <br> Download the template below to see the required format.</p>
+        
+        <a href="/Archer/DownloadTemplate" class="btn btn-sm mb-4" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
+            <i class="bi bi-download me-2"></i> Download CSV Template
+        </a>
+        
+        <form id="bulkUploadForm">
+            <input type="file" id="csvFile" accept=".csv" class="form-control mb-3" style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: #fff;" required>
+            <button type="button" class="btn-premium w-100 mt-2" onclick="submitBulkUpload()" id="btnUploadCsv">
+                UPLOAD & IMPORT
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function submitBulkUpload() {
+            const fileInput = document.getElementById('csvFile');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert("Please select a CSV file to upload.");
+                return;
+            }
+            
+            const btn = document.getElementById('btnUploadCsv');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> UPLOADING...';
+            
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+            
+            try {
+                const response = await fetch('/Archer/BulkUpload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert(result.message);
+                    window.location.reload();
+                } else {
+                    alert("Upload failed: " + result.message);
+                    btn.disabled = false;
+                    btn.innerHTML = 'UPLOAD & IMPORT';
+                }
+            } catch (err) {
+                alert("Connection error. Please try again.");
+                btn.disabled = false;
+                btn.innerHTML = 'UPLOAD & IMPORT';
+            }
+        }
+    </script>
+}

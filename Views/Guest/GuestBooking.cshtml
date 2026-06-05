@@ -11,40 +11,25 @@
         <div class="premium-card p-0 overflow-hidden">
             <div class="p-5 border-bottom" style="background: rgba(255, 77, 77, 0.08); border-color: var(--card-border) !important; box-shadow: inset 0 0 40px rgba(255, 77, 77, 0.05);">
 
-                <div class="row g-4">
-                    <div class="col-md-4">
+                <div class="d-flex flex-wrap">
+                    <div style="width: 220px; margin-right: 24px;">
                         <label class="form-label-premium">Booking Date</label>
                         <input type="text" id="bookingDate" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" placeholder="Select Date">
                     </div>
-                    <div class="col-md-4">
+                    <div style="width: 220px;">
                         <label class="form-label-premium">Select Slots</label>
                         <select id="duration" class="form-control">
                             <option value="2">1 Slot</option>
                             <option value="4">2 Slots</option>
                         </select>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label-premium">Age Group</label>
-                        <select id="ageGroup" class="form-control">
-                            <option value="Adult">Adult (18+)</option>
-                            <option value="Junior">Junior (12-17)</option>
-                            <option value="Child">Child (Under 12)</option>
-                        </select>
-                    </div>
                 </div>
-                <input type="hidden" id="customerName" value="Guest User">
-                <input type="hidden" id="customerEmail" value="guest@archery.com">
             </div>
 
             <div class="p-5">
                 <div class="session-group mb-5">
                     <h5 class="session-label">&#9728; Morning Session</h5>
                     <div id="morning-slots" class="slots-grid"></div>
-                </div>
-
-                <div class="session-group">
-                    <h5 class="session-label">&#127769; Night Session</h5>
-                    <div id="night-slots" class="slots-grid"></div>
                 </div>
             </div>
 
@@ -145,8 +130,9 @@
 
 <script>
     let bookingData = {
-        name: "Guest User",
-        email: "guest@archery.com",
+        name: "",
+        email: "",
+        phone: "",
         date: "@DateTime.Today.ToString("yyyy-MM-dd")",
         duration: 2,
         selectedSlotIds: [],
@@ -160,18 +146,17 @@
             minDate: "today",
             disableMobile: "true",
             static: true,
-            closeOnSelect: false,
-            clickOpens: false, // We will handle opening/closing manually
+            disable: [
+                function(date) {
+                    // Disable weekends (0 is Sunday, 6 is Saturday)
+                    return (date.getDay() === 0 || date.getDay() === 6);
+                }
+            ],
             onChange: function(selectedDates, dateStr) {
                 bookingData.date = dateStr;
                 bookingData.selectedSlotIds = [];
                 loadSlots();
             }
-        });
-
-        // Clean Toggle behavior
-        document.getElementById("bookingDate").addEventListener("click", (e) => {
-            fp.toggle();
         });
 
         loadSlots();
@@ -186,21 +171,19 @@
 
     async function loadSlots() {
         const morningGrid = document.getElementById("morning-slots");
-        const nightGrid = document.getElementById("night-slots");
-        if (!morningGrid || !nightGrid) return;
+        if (!morningGrid) return;
         
         morningGrid.innerHTML = "<div class='text-dim small'>Loading...</div>";
-        nightGrid.innerHTML = "<div class='text-dim small'>Loading...</div>";
         
         try {
             const response = await fetch(`/Booking/GetAvailableSlotsAjax?date=${bookingData.date}`);
             const slots = await response.json();
             
             morningGrid.innerHTML = "";
-            nightGrid.innerHTML = "";
             bookingData.allAvailableSlots = slots;
 
             slots.forEach(slot => {
+                if (slot.isNight) return; // Guests cannot book night sessions
                 const card = document.createElement("div");
                 card.className = "slot-card";
                 card.id = `slot-${slot.slotId}`;
@@ -209,12 +192,10 @@
                     <span class="slot-number">${slot.label}</span>
                     <span class="slot-time">${slot.slotStartTime} - ${slot.slotEndTime}</span>
                 `;
-                if (slot.isNight) nightGrid.appendChild(card);
-                else morningGrid.appendChild(card);
+                morningGrid.appendChild(card);
             });
 
             if (morningGrid.innerHTML === "") morningGrid.innerHTML = "<p class='text-dim small'>No morning slots available</p>";
-            if (nightGrid.innerHTML === "") nightGrid.innerHTML = "<p class='text-dim small'>No night slots available</p>";
         } catch (err) {
             console.error(err);
         }
@@ -262,14 +243,17 @@
     }
 
     function proceedToConfigure() {
+        bookingData.name = "Guest User";
+        bookingData.email = "guest@archery.com";
+        bookingData.phone = "0000000000";
+
         const maxSlots = bookingData.duration / 2;
         if (bookingData.selectedSlotIds.length < maxSlots) {
             alert("Please select your time slots first.");
             return;
         }
         
-        const ageGroup = document.getElementById("ageGroup").value;
-        const url = `/Booking/SelectTarget?slotId=${bookingData.slotId}&name=${encodeURIComponent(bookingData.name)}&email=${encodeURIComponent(bookingData.email)}&date=${bookingData.date}&duration=${bookingData.duration}&ageGroup=${ageGroup}`;
+        const url = `/Booking/SelectTarget?slotId=${bookingData.slotId}&name=${encodeURIComponent(bookingData.name)}&email=${encodeURIComponent(bookingData.email)}&phone=${encodeURIComponent(bookingData.phone)}&date=${bookingData.date}&duration=${bookingData.duration}`;
         window.location.href = url;
     }
 </script>

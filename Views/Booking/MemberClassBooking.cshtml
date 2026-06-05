@@ -27,6 +27,40 @@
                         <div class="fw-bold text-white fs-5" style="letter-spacing: 0.5px;">Archery Class Session</div>
                     </div>
 
+                    <div class="mb-4">
+                        <label class="form-label-premium d-flex justify-content-between align-items-center mb-3">
+                            <span>Student</span>
+                            <button type="button" class="btn btn-sm btn-outline-primary" style="border-radius: 50px; padding: 4px 16px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.5px;" onclick="selectAllShooters()">Select All</button>
+                        </label>
+                        <div class="p-4" style="background: rgba(255, 77, 77, 0.05); border: 1px dashed rgba(255, 77, 77, 0.2); border-radius: 20px; max-height: 250px; overflow-y: auto;" id="shooterCheckboxes">
+                            @if (ViewBag.ParentHasClass != null && (bool)ViewBag.ParentHasClass)
+                            {
+                                <div class="form-check mb-2 border-bottom pb-2" style="border-color: rgba(255, 77, 77, 0.1) !important;">
+                                    <input class="form-check-input shooter-checkbox" type="checkbox" value="0" id="shooter_0">
+                                    <label class="form-check-label text-white" for="shooter_0">
+                                        Myself (@ViewBag.CustomerName)
+                                    </label>
+                                </div>
+                            }
+                            @if (ViewBag.Students != null && ((IEnumerable<dynamic>)ViewBag.Students).Any())
+                            {
+                                foreach (var student in ViewBag.Students)
+                                {
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input shooter-checkbox" type="checkbox" value="@student.StudentId" id="shooter_@student.StudentId">
+                                        <label class="form-check-label text-white" for="shooter_@student.StudentId">
+                                            @student.FullName
+                                        </label>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-dim small mb-0">No eligible archers found.</p>
+                            }
+                        </div>
+                    </div>
+
                     <div class="row g-4 mb-4">
                         <div class="col-md-6">
                             <label class="form-label-premium">Select Weekend Date</label>
@@ -354,6 +388,17 @@
         formData.append("slotId", bookingData.slotId);
         formData.append("date", bookingData.date);
         formData.append("duration", bookingData.duration);
+        
+        const selectedShooters = [];
+        document.querySelectorAll('.shooter-checkbox:checked').forEach(chk => {
+            formData.append("studentIds", chk.value);
+            selectedShooters.push(chk.value);
+        });
+
+        if (selectedShooters.length === 0) {
+            alert("Please select at least one archer.");
+            return;
+        }
 
         try {
             const response = await fetch('/Booking/CreateClassBooking', {
@@ -374,6 +419,11 @@
             btn.disabled = false;
             btn.innerHTML = 'CONFIRM CLASS BOOKING <i class="bi bi-check2-circle ms-2"></i>';
         }
+    }
+    function selectAllShooters() {
+        const checkboxes = document.querySelectorAll('.shooter-checkbox');
+        const allChecked = Array.from(checkboxes).every(chk => chk.checked);
+        checkboxes.forEach(chk => chk.checked = !allChecked);
     }
 </script>
 }

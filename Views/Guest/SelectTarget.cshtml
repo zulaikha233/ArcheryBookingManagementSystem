@@ -1,6 +1,6 @@
 @{
     ViewData["Title"] = "Choose Target Size";
-    Layout = ViewBag.IsGuest == true ? "_Layout" : "_MemberLayout";
+    Layout = "_Layout";
     var slotId      = ViewBag.SlotId;
     var name        = ViewBag.Name;
     var email       = ViewBag.Email;
@@ -66,17 +66,6 @@
                         </div>
                     </div>
                 </div>
-                <!--<div class="col-md-3">
-                    <div class="target-size-card" id="size-Small" onclick="selectTargetSize('Small')">
-                        <div class="size-img-wrapper" style="padding: 28px;">
-                            <img src="/images/target_size.png" alt="Small">
-                        </div>
-                        <div class="size-info">
-                            <span class="size-name">Small (40cm)</span>
-                            <small>Precision</small>
-                        </div>
-                    </div>
-                </div>-->
             </div>
 
             <!-- Target Amount -->
