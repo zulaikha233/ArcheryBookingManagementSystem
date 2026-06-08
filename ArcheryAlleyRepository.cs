@@ -780,5 +780,9 @@ namespace ArcheryAlley
             _context.SaveChanges();
         }
 
+        public List<Students> GetAllArchers()
+        {
+            return _context.Students.OrderBy(s => s.FullName).ToList();
+        }
     }
 }

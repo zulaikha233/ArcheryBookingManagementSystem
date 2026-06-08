@@ -31,5 +31,7 @@ namespace ArcheryAlley.Models
         public string Status { get; set; } = "Pending";
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        public string LevelCategory { get; set; }
     }
 }

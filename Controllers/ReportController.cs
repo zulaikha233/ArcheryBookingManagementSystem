@@ -66,5 +66,18 @@ namespace ArcheryAlley.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+        [HttpGet]
+        public JsonResult GetAllArchers()
+        {
+            var archers = _repository.GetAllArchers();
+
+            var result = archers.Select(a => new {
+                studentId = a.StudentId,
+                fullName = a.FullName,
+                levelCategory = a.LevelCategory
+            });
+            return Json(result);
+        }
     }
 }

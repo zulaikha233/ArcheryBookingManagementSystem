@@ -85,5 +85,7 @@ namespace ArcheryAlley
         //Performance Reporting
         List<PerformanceReports> GetReportsByStudent(string studentName, string level);
         void AddPerformanceReport(PerformanceReports report);
+
+        List <Students> GetAllArchers();
     }
 }

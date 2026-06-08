@@ -452,11 +452,11 @@
                 <i class="bi bi-person-circle"></i>
                 <span class="nav-text">Profile</span>
             </a>
-            <a href="/Booking/StudentAttendance" class="nav-item">
+            <a href="/Attendance/Index" class="nav-item">
                 <i class="bi bi-calendar-check"></i>
                 <span class="nav-text">Student Attendance</span>
             </a>
-            <a href="/Booking/StudentPerformance" class="nav-item">
+            <a href="/Report/StudentPerformance" class="nav-item">
                 <i class="bi bi-bar-chart-line"></i>
                 <span class="nav-text">Performance Report</span>
             </a>
@@ -477,91 +477,252 @@
     <!-- ── MAIN CONTENT ── -->
     <main class="main-content" id="mainContent">
 
-        <div class="page-header">
-            <p>Welcome back</p>
-            <h1>Hello, <span>@(ViewBag.StaffName ?? "Staff")</span> 👋</h1>
+        <!-- ── 4 NAV BUTTONS IN A ROW ── -->
+        <div class="nav-row">
+
+            <a href="/Account/Profile" class="nav-btn-card nav-btn--orange">
+                <div class="nav-btn-icon card-icon--orange"><i class="bi bi-person-fill"></i></div>
+                <div class="nav-btn-text">
+                    <div class="nav-btn-label">Account</div>
+                    <div class="nav-btn-title">My Profile</div>
+                </div>
+                <i class="bi bi-arrow-right nav-btn-arrow nav-btn-arrow--orange"></i>
+            </a>
+
+            <a href="/Booking/StudentAttendance" class="nav-btn-card nav-btn--red">
+                <div class="nav-btn-icon card-icon--red"><i class="bi bi-calendar-check-fill"></i></div>
+                <div class="nav-btn-text">
+                    <div class="nav-btn-label">Records</div>
+                    <div class="nav-btn-title">Attendance</div>
+                </div>
+                <i class="bi bi-arrow-right nav-btn-arrow nav-btn-arrow--red"></i>
+            </a>
+
+            <a href="/Report/StudentPerformance" class="nav-btn-card nav-btn--white">
+                <div class="nav-btn-icon card-icon--white"><i class="bi bi-bar-chart-fill"></i></div>
+                <div class="nav-btn-text">
+                    <div class="nav-btn-label">Analytics</div>
+                    <div class="nav-btn-title">Performance</div>
+                </div>
+                <i class="bi bi-arrow-right nav-btn-arrow nav-btn-arrow--white"></i>
+            </a>
+
+            <a href="/Booking/StaffBooking" class="nav-btn-card nav-btn--orange">
+                <div class="nav-btn-icon card-icon--fire"><i class="bi bi-bullseye"></i></div>
+                <div class="nav-btn-text">
+                    <div class="nav-btn-label">Reservations</div>
+                    <div class="nav-btn-title">Slot Booking</div>
+                </div>
+                <i class="bi bi-arrow-right nav-btn-arrow nav-btn-arrow--orange"></i>
+            </a>
+
         </div>
 
-        <div class="status-bar">
-            <div class="status-chip">
-                <div class="status-dot"></div>
-                System Online
+        <!-- ── MAIN INFO CONTAINER ── -->
+        <div class="info-container">
+
+            <!-- Greeting block -->
+            <div class="info-greeting">
+                <div class="greeting-icon">👋</div>
+                <div>
+                    <div class="greeting-sub">Welcome back, Coach</div>
+                    <div class="greeting-name">@(ViewBag.StaffName ?? "Staff")</div>
+                </div>
             </div>
-            <div class="status-chip">
-                <i class="bi bi-calendar3"></i>
-                @DateTime.Today.ToString("dddd, dd MMM yyyy")
+
+            <div class="info-divider"></div>
+
+            <!-- Date block -->
+            <div class="info-date-block">
+                <div class="info-date-day">@DateTime.Today.ToString("dddd")</div>
+                <div class="info-date-full">@DateTime.Today.ToString("dd MMMM yyyy")</div>
+                <div class="info-status-row">
+                    <div class="status-dot-pulse"></div>
+                    <span>System Online</span>
+                </div>
             </div>
-        </div>
-
-        <!-- 2x2 Dashboard Grid -->
-        <div class="dashboard-grid">
-
-            <!-- Profile -->
-            <a href="/Account/Profile" class="dash-card dash-card--orange">
-                <div class="card-icon card-icon--orange">
-                    <i class="bi bi-person-fill"></i>
-                </div>
-                <div>
-                    <div class="card-label">Account</div>
-                    <div class="card-title">My Profile</div>
-                    <div class="card-desc">View and update your staff profile and account details.</div>
-                </div>
-                <div class="card-footer-row">
-                    <span class="card-tag card-tag--orange">Staff Info</span>
-                    <i class="bi bi-arrow-right card-arrow card-arrow--orange"></i>
-                </div>
-            </a>
-
-            <!-- Student Attendance -->
-            <a href="/Booking/StudentAttendance" class="dash-card dash-card--red">
-                <div class="card-icon card-icon--red">
-                    <i class="bi bi-calendar-check-fill"></i>
-                </div>
-                <div>
-                    <div class="card-label">Records</div>
-                    <div class="card-title">Student Attendance</div>
-                    <div class="card-desc">Track and manage daily student attendance records.</div>
-                </div>
-                <div class="card-footer-row">
-                    <span class="card-tag card-tag--red">Daily Tracking</span>
-                    <i class="bi bi-arrow-right card-arrow card-arrow--red"></i>
-                </div>
-            </a>
-
-            <!-- Performance Report -->
-            <a href="/Report/StudentPerformance" class="dash-card dash-card--white">
-                <div class="card-icon card-icon--white">
-                    <i class="bi bi-bar-chart-fill"></i>
-                </div>
-                <div>
-                    <div class="card-label">Analytics</div>
-                    <div class="card-title">Performance Report</div>
-                    <div class="card-desc">Review student performance scores and progress over time.</div>
-                </div>
-                <div class="card-footer-row">
-                    <span class="card-tag card-tag--white">Analytics</span>
-                    <i class="bi bi-arrow-right card-arrow card-arrow--white"></i>
-                </div>
-            </a>
-
-            <!-- Staff Booking -->
-            <a href="/Booking/StaffBooking" class="dash-card dash-card--orange">
-                <div class="card-icon card-icon--fire">
-                    <i class="bi bi-bullseye"></i>
-                </div>
-                <div>
-                    <div class="card-label">Reservations</div>
-                    <div class="card-title">Slot Booking</div>
-                    <div class="card-desc">Create and manage archery lane slot reservations for customers.</div>
-                </div>
-                <div class="card-footer-row">
-                    <span class="card-tag card-tag--orange">Lane Management</span>
-                    <i class="bi bi-arrow-right card-arrow card-arrow--orange"></i>
-                </div>
-            </a>
 
         </div>
+
     </main>
+
+    <style>
+        /* ── NAV ROW — 4 buttons in a single horizontal row ── */
+        .nav-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn-card {
+            flex: 1;
+            min-width: 140px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px 18px;
+            text-decoration: none;
+            color: var(--text-light);
+            border: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn-card:hover { transform: translateY(-3px); color: var(--text-light); }
+
+        /* colour variants — reuse existing card colours */
+        .nav-btn--orange { border-color: rgba(249,115,22,0.2); }
+        .nav-btn--orange:hover { border-color: var(--primary); box-shadow: 0 10px 28px rgba(249,115,22,0.18); }
+        .nav-btn--red    { border-color: rgba(220,38,38,0.2); }
+        .nav-btn--red:hover    { border-color: var(--red);     box-shadow: 0 10px 28px rgba(220,38,38,0.18); }
+        .nav-btn--white  { border-color: rgba(255,255,255,0.08); }
+        .nav-btn--white:hover  { border-color: rgba(255,255,255,0.35); box-shadow: 0 10px 28px rgba(255,255,255,0.05); }
+
+        .nav-btn-icon {
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; color: #fff; flex-shrink: 0;
+        }
+
+        .nav-btn-text { flex: 1; min-width: 0; }
+        .nav-btn-label { font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
+        .nav-btn-title { font-size: 0.9rem; font-weight: 700; color: var(--white); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .nav-btn-arrow { font-size: 0.9rem; flex-shrink: 0; transition: 0.2s; }
+        .nav-btn-card:hover .nav-btn-arrow { transform: translateX(3px); }
+        .nav-btn-arrow--orange { color: var(--primary); }
+        .nav-btn-arrow--red    { color: var(--red); }
+        .nav-btn-arrow--white  { color: rgba(255,255,255,0.4); }
+
+        /* ── INFO CONTAINER ── */
+        .info-container {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 40px 48px;
+            display: flex;
+            align-items: center;
+            gap: 48px;
+            min-height: 200px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeUp 0.5s ease both;
+        }
+
+        /* subtle background glow */
+        .info-container::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 220px; height: 220px;
+            background: radial-gradient(circle, rgba(249,115,22,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Greeting */
+        .info-greeting {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .greeting-icon {
+            font-size: 3rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .greeting-sub {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .greeting-name {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--white);
+            letter-spacing: -0.5px;
+        }
+
+        .greeting-name::first-letter {
+            color: var(--primary);
+        }
+
+        /* Divider */
+        .info-divider {
+            width: 1px;
+            height: 80px;
+            background: rgba(255,255,255,0.08);
+            flex-shrink: 0;
+        }
+
+        /* Date block */
+        .info-date-block {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .info-date-day {
+            font-size: 0.75rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+
+        .info-date-full {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--white);
+            letter-spacing: -0.3px;
+        }
+
+        .info-status-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .status-dot-pulse {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: pulse 2s infinite;
+            flex-shrink: 0;
+        }
+
+        /* ── RESPONSIVE ── */
+        @@media (max-width: 768px) {
+            .nav-row { gap: 10px; }
+            .nav-btn-card { padding: 12px 14px; min-width: 0; }
+            .nav-btn-title { font-size: 0.78rem; }
+            .nav-btn-label { display: none; }
+            .nav-btn-arrow { display: none; }
+            .info-container { flex-direction: column; align-items: flex-start; gap: 20px; padding: 24px; min-height: auto; }
+            .info-divider { width: 60px; height: 1px; }
+            .greeting-name { font-size: 1.5rem; }
+            .info-date-full { font-size: 1.1rem; }
+        }
+
+        @@media (max-width: 380px) {
+            .nav-btn-icon { width: 34px; height: 34px; font-size: 0.95rem; }
+            .nav-btn-title { font-size: 0.7rem; }
+        }
+    </style>
 
     <script>
         const sidebar     = document.getElementById('sidebar');

@@ -534,7 +534,7 @@
         </div>
 
         <!-- ── SEARCH BAR ── -->
-        <div class="glass-card search-card">
+        <div class="glass-card search-card" id="searchCard">
             <div class="search-row">
                 <input
                     type="text"
@@ -704,14 +704,28 @@
             document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
             tab.classList.add('active');
             selectedLevel = tab.dataset.level;
-
-            // Reset search if level changes
             document.getElementById('searchInput').value = '';
-            resetStudentSection();
+
+            // Show/hide search bar based on selected level
+            const searchCard = document.getElementById('searchCard');
+            if (selectedLevel === 'All') {
+                searchCard.style.display = 'none';
+                showAllArchers();
+            } else {
+                searchCard.style.display = '';
+                resetStudentSection();
+            }
         }
 
         function resetStudentSection() {
-            document.getElementById('emptyCard').style.display       = '';
+            const emptyCard = document.getElementById('emptyCard');
+            emptyCard.style.display = '';
+            emptyCard.innerHTML = `
+                <div class="empty-panel">
+                    <i class="bi bi-person-lines-fill"></i>
+                    <h4>Search for a Student</h4>
+                    <p>Select a level category above then search for a student by name to view and add performance reports.</p>
+                </div>`;
             document.getElementById('studentSection').style.display  = 'none';
             document.getElementById('reportsPanel').classList.remove('visible');
             document.getElementById('performanceBtn').classList.remove('active');
@@ -719,8 +733,64 @@
             currentStudent  = null;
         }
 
+        /* ── ALL ARCHERS TABLE ── */
+        async function showAllArchers() {
+            const emptyCard     = document.getElementById('emptyCard');
+            const studentSection = document.getElementById('studentSection');
+            studentSection.style.display = 'none';
+            emptyCard.style.display = '';
+            emptyCard.innerHTML = `<div style="padding:36px; text-align:center; color:var(--text-dim);">Loading archers...</div>`;
+
+            try {
+                const response   = await fetch('/Report/GetAllArchers');
+                const allArchers = await response.json();
+
+                emptyCard.innerHTML = `
+                    <div style="padding:0; overflow:hidden;">
+                        <div style="padding:20px 24px; border-bottom:1px solid var(--card-border); display:flex; align-items:center; justify-content:space-between;">
+                            <div>
+                                <div style="font-size:0.92rem; font-weight:700; color:var(--text-white);">All Registered Archers</div>
+                                <div style="font-size:0.7rem; color:var(--text-dim); margin-top:2px;">${allArchers.length} archer${allArchers.length !== 1 ? 's' : ''} — sorted A to Z</div>
+                            </div>
+                        </div>
+                        <table style="width:100%; border-collapse:collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="padding:11px 20px; font-size:0.62rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.5px; font-weight:700; text-align:left; background:rgba(255,255,255,0.015); border-bottom:1px solid var(--card-border);">#</th>
+                                    <th style="padding:11px 20px; font-size:0.62rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.5px; font-weight:700; text-align:left; background:rgba(255,255,255,0.015); border-bottom:1px solid var(--card-border);">Name</th>
+                                    <th style="padding:11px 20px; font-size:0.62rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.5px; font-weight:700; text-align:left; background:rgba(255,255,255,0.015); border-bottom:1px solid var(--card-border);">Category</th>
+                                    <th style="padding:11px 20px; font-size:0.62rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.5px; font-weight:700; text-align:left; background:rgba(255,255,255,0.015); border-bottom:1px solid var(--card-border);">Age</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${allArchers.length === 0
+                                    ? `<tr><td colspan="4" style="padding:36px; text-align:center; color:var(--text-dim);">No archers registered yet.</td></tr>`
+                                    : allArchers.map((a, i) => `
+                                        <tr style="border-bottom:1px solid rgba(255,255,255,0.03);" onmouseover="this.style.background='rgba(255,255,255,0.015)'" onmouseout="this.style.background=''">
+                                            <td style="padding:13px 20px; font-size:0.78rem; color:var(--text-dim);">${i + 1}</td>
+                                            <td style="padding:13px 20px; font-size:0.88rem; font-weight:600; color:var(--text-white);">${a.name}</td>
+                                            <td style="padding:13px 20px;">
+                                                <span style="font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; padding:3px 10px; border-radius:20px; background:var(--primary-subtle); color:var(--primary); border:1px solid rgba(255,77,77,0.25);">
+                                                    ${a.level}
+                                                </span>
+                                            </td>
+                                            <td style="padding:13px 20px; font-size:0.88rem; color:var(--text-dim);">${a.age}</td>
+                                        </tr>`
+                                    ).join('')
+                                }
+                            </tbody>
+                        </table>
+                    </div>`;
+            } catch (err) {
+                emptyCard.innerHTML = `<div style="padding:36px; text-align:center; color:var(--text-dim);">Failed to load archers. Please try again.</div>`;
+                console.error('GetAllArchers error:', err);
+            }
+        }
+
         /* ── SEARCH ── */
         function searchStudent() {
+            if (selectedLevel === 'All') return; // search disabled on All tab
+
             const query = document.getElementById('searchInput').value.trim().toLowerCase();
             if (!query) return;
 
