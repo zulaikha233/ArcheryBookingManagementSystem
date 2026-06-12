@@ -107,255 +107,6 @@
         white-space: nowrap;
     }
 
-    /* ── TABLE CARD ── */
-    .table-card {
-        background: rgba(34, 38, 48, 0.6);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 20px;
-        overflow: hidden;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-    }
-
-    .history-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.83rem;
-    }
-
-    .history-table thead tr {
-        background: rgba(255, 255, 255, 0.02);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .history-table thead th {
-        padding: 14px 18px;
-        text-align: center;
-        font-size: 0.68rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-        color: var(--text-dim);
-        white-space: nowrap;
-    }
-
-    .history-table tbody tr {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-        transition: background 0.15s ease;
-    }
-
-    .history-table tbody tr:last-child { border-bottom: none; }
-
-    .history-table tbody tr:hover {
-        background: rgba(255, 255, 255, 0.02);
-    }
-
-    .history-table tbody td {
-        padding: 16px 18px;
-        vertical-align: middle;
-        color: #fff;
-        text-align: center;
-    }
-
-    /* ── COLUMN STYLES ── */
-    .col-ref {
-        font-weight: 800;
-        font-size: 0.82rem;
-        color: var(--text-dim);
-        font-family: 'Courier New', monospace;
-        letter-spacing: 0.5px;
-    }
-
-    .col-session { white-space: nowrap; }
-
-    .col-date {
-        color: var(--text-dim);
-        white-space: nowrap;
-        font-size: 0.82rem;
-    }
-
-    .col-date .date-main { color: #fff; font-weight: 600; }
-    .col-date .date-time { font-size: 0.72rem; color: var(--text-dim); }
-
-    .col-time { white-space: nowrap; font-weight: 700; }
-
-    .col-lane {
-        font-size: 0.8rem;
-        white-space: nowrap;
-    }
-
-    .col-amount {
-        font-weight: 800;
-        white-space: nowrap;
-    }
-
-    .col-status { text-align: center; white-space: nowrap; }
-
-    /* ── SESSION TYPE BADGES ── */
-    .badge-session {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 0.68rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        white-space: nowrap;
-    }
-
-    .badge-game {
-        background: rgba(255, 77, 77, 0.12);
-        color: #FF4D4D;
-        border: 1px solid rgba(255, 77, 77, 0.25);
-    }
-
-    .badge-self-train {
-        background: rgba(168, 85, 247, 0.12);
-        color: #C084FC;
-        border: 1px solid rgba(168, 85, 247, 0.25);
-    }
-
-    .badge-class {
-        background: rgba(59, 130, 246, 0.12);
-        color: #60A5FA;
-        border: 1px solid rgba(59, 130, 246, 0.25);
-    }
-
-    /* ── STATUS BADGES ── */
-    .badge-status {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 5px 14px;
-        border-radius: 20px;
-        font-size: 0.68rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .status-confirmed {
-        background: rgba(16, 185, 129, 0.1);
-        color: #10B981;
-        border: 1px solid rgba(16, 185, 129, 0.25);
-    }
-
-    .status-cancelled {
-        background: rgba(239, 68, 68, 0.1);
-        color: #EF4444;
-        border: 1px solid rgba(239, 68, 68, 0.25);
-    }
-
-    .status-pending {
-        background: rgba(250, 204, 21, 0.1);
-        color: #FBBF24;
-        border: 1px solid rgba(250, 204, 21, 0.25);
-    }
-
-    /* ── AMOUNT ── */
-    .amount-value { color: #fff; }
-    .amount-foc   { color: #FBBF24; }
-
-    /* ── LANE CHIPS ── */
-    .lane-chip {
-        display: inline-block;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 6px;
-        padding: 2px 8px;
-        font-size: 0.72rem;
-        font-weight: 700;
-        margin: 2px;
-        color: #fff;
-    }
-
-    /* ── EMPTY STATE ── */
-    .empty-state {
-        text-align: center;
-        padding: 80px 20px;
-    }
-
-    .empty-state > i {
-        font-size: 3.5rem;
-        color: rgba(255, 255, 255, 0.1);
-        display: block;
-        margin-bottom: 20px;
-    }
-
-    .empty-state h5 {
-        color: #fff;
-        font-weight: 800;
-        margin-bottom: 8px;
-    }
-
-    .empty-state p {
-        color: var(--text-dim);
-        font-size: 0.85rem;
-        margin-bottom: 24px;
-    }
-
-    /* ── PAGINATION ── */
-    .pagination-bar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 16px 20px;
-        border-top: 1px solid rgba(255, 255, 255, 0.04);
-        flex-wrap: wrap;
-        gap: 12px;
-    }
-
-    .page-info {
-        font-size: 0.8rem;
-        color: var(--text-dim);
-    }
-
-    .page-controls {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .page-btn {
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        background: rgba(255, 255, 255, 0.03);
-        color: var(--text-dim);
-        font-size: 0.8rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.15s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .page-btn:hover:not(:disabled) {
-        background: rgba(255, 255, 255, 0.08);
-        color: #fff;
-        border-color: rgba(255, 255, 255, 0.15);
-    }
-
-    .page-btn.active {
-        background: var(--primary);
-        color: #000;
-        border-color: var(--primary);
-        font-weight: 800;
-    }
-
-    .page-btn:disabled {
-        opacity: 0.3;
-        cursor: not-allowed;
-    }
-
-    @@keyframes fadeIn {
-        from { opacity: 0; transform: translateY(12px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
 </style>
 }
 
@@ -458,8 +209,15 @@
                                 </td>
 
                                 <!-- SHOOTER -->
-                                <td style="font-weight: 700; white-space: nowrap;">
-                                    @(string.IsNullOrEmpty(item.ShooterName) ? "Myself" : item.ShooterName)
+                                <td style="font-weight: 700; line-height: 1.3;">
+                                    @if (string.IsNullOrEmpty(item.ShooterName))
+                                    {
+                                        @:Myself
+                                    }
+                                    else
+                                    {
+                                        @Html.Raw(item.ShooterName.Replace(" BIN ", "<br/>BIN ").Replace(" BINTI ", "<br/>BINTI ").Replace(" A/L ", "<br/>A/L ").Replace(" A/P ", "<br/>A/P "))
+                                    }
                                 </td>
 
                                 <!-- DATE -->
@@ -523,7 +281,7 @@
                                     <h5>No Bookings Yet</h5>
                                     <p>You haven't made any bookings. Start your archery journey today!</p>
                                     <a href="javascript:void(0)" onclick="handleBookingClick('/Booking/GetFreeSlots')" class="btn-premium mt-3" style="text-decoration: none; display: inline-flex; align-items: center; gap: 10px; padding: 12px 25px; box-shadow: 0 0 20px rgba(255,77,77,0.4);">
-                                        BOOK A SESSION <i class="bi bi-arrow-right"></i>
+                                        BOOK A SESSION
                                     </a>
                                 </div>
                             </td>

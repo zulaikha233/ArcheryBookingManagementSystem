@@ -498,6 +498,10 @@ namespace ArcheryAlley.Controllers
                 var slotTime = slot != null ? slot.SlotStartTime : TimeSpan.Zero;
                 DateTime finalReservedOn = bookingDate.Date.Add(slotTime);
 
+                string sharedTxnId = (PaymentMethod == "counter") 
+                    ? "PENDING-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper() 
+                    : "TXN-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
+
                 int? firstId = null;
                 foreach (var lane in laneNumbers)
                 {
@@ -539,7 +543,7 @@ namespace ArcheryAlley.Controllers
                         PaymentMethod = actualMethod,
                         PaymentDate = DateTime.Now,
                         Status = paymentStatus,
-                        TransactionId = (PaymentMethod == "counter") ? null : Guid.NewGuid().ToString().Substring(0, 8).ToUpper()
+                        TransactionId = sharedTxnId
                     };
                     _repository.AddPayment(payment);
                 }
@@ -597,6 +601,8 @@ namespace ArcheryAlley.Controllers
 
             return View(grouped);
         }
+
+
 
         public IActionResult MemberHistory()
         {
@@ -725,8 +731,6 @@ namespace ArcheryAlley.Controllers
             ViewBag.StaffName = HttpContext.Session.GetString("UserName");
             return View("~/Views/Staff/StaffDashboard.cshtml");
         }
-
-        
     }
 
 }

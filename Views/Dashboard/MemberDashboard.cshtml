@@ -3,10 +3,21 @@
     Layout = "_MemberLayout";
 
     var classRegs = ViewBag.ClassRegistrations as IEnumerable<ArcheryAlley.Models.ClassRegistrations> ?? new List<ArcheryAlley.Models.ClassRegistrations>();
+    var membershipPayments = ViewBag.MembershipPayments as IEnumerable<ArcheryAlley.Models.MembershipPayments> ?? new List<ArcheryAlley.Models.MembershipPayments>();
     var reservations = ViewBag.Reservations as IEnumerable<dynamic> ?? new List<dynamic>();
-    var parentClassRegs = classRegs.Where(cr => cr.PackageType != "Annual Membership" && cr.StudentId == null);
+    var parentClassRegs = classRegs.Where(cr => cr.StudentId == null);
 
     decimal actualPending = 0;
+    if (membershipPayments != null)
+    {
+        foreach(var mp in membershipPayments)
+        {
+            if (mp.Status == "Pending")
+            {
+                actualPending += mp.Amount;
+            }
+        }
+    }
     if (classRegs != null)
     {
         foreach (var r in classRegs)
@@ -34,35 +45,36 @@
 
     if (actualPending > 0)
     {
-        var pendingClass = classRegs.FirstOrDefault(cr => cr.PaymentStatus == "Pending");
-        if (pendingClass != null)
+        var pendingMembership = membershipPayments.FirstOrDefault(mp => mp.Status == "Pending");
+        if (pendingMembership != null)
         {
-            if (pendingClass.PackageType == "Annual Membership")
-            {
-                pendingHeader = "Annual Membership";
-                pendingTypeText = "Please pay your Annual Membership fee.";
-            }
-            else
+            pendingHeader = "Annual Membership";
+            pendingTypeText = "Please pay your Annual Membership fee.";
+        }
+        else
+        {
+            var pendingClass = classRegs.FirstOrDefault(cr => cr.PaymentStatus == "Pending");
+            if (pendingClass != null)
             {
                 pendingHeader = "Class Registration";
                 pendingTypeText = "Please clear class registration payment.";
             }
-        }
-        else
-        {
-            var pendingRes = reservations.FirstOrDefault(r => r.Status == 0);
-            if (pendingRes != null)
+            else
             {
-                string rateCode = pendingRes.RateCode ?? "";
-                if (rateCode == "SELF_TRAINING" || (pendingRes.Slot != null && pendingRes.Slot.SlotStartTime.Hours >= 18))
+                var pendingRes = reservations.FirstOrDefault(r => r.Status == 0);
+                if (pendingRes != null)
                 {
-                    pendingHeader = "Self Training";
-                    pendingTypeText = "Please clear self training session payment.";
-                }
-                else
-                {
-                    pendingHeader = "Target Session";
-                    pendingTypeText = "Please clear target booking payment.";
+                    string rateCode = pendingRes.RateCode ?? "";
+                    if (rateCode == "SELF_TRAINING" || (pendingRes.Slot != null && pendingRes.Slot.IsNight))
+                    {
+                        pendingHeader = "Self Training";
+                        pendingTypeText = "Please clear self training session payment.";
+                    }
+                    else
+                    {
+                        pendingHeader = "Lane Booking";
+                        pendingTypeText = "Please clear lane booking payment.";
+                    }
                 }
             }
         }
@@ -134,7 +146,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            max-height: 380px;
+            height: 340px; /* Fixed height to fit exactly 2 appointments */
             overflow-y: auto;
             padding-right: 5px;
         }
@@ -267,7 +279,7 @@
         </div>
         <div>
             <a href="@Url.Action("ClassRegistration", "Account")" class="btn-premium" style="padding: 12px 25px; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 0 20px rgba(255,77,77,0.4);">
-                REGISTER <i class="bi bi-arrow-right"></i>
+                REGISTER
             </a>
         </div>
     </div>
@@ -362,7 +374,7 @@
         <div class="card-premium" style="padding: 20px 25px;">
             @if (students != null && ((IEnumerable<dynamic>)students).Any())
             {
-                <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="display: flex; flex-direction: column; gap: 14px; max-height: 290px; overflow-y: auto; padding-right: 8px;">
                     @foreach (var s in students)
                     {
                         bool hasReg = s.ClassReg != null;
@@ -410,9 +422,19 @@
                             }
                             else
                             {
-                                <span style="flex-shrink: 0; font-size: 0.72rem; font-weight: 700; color: #10B981; white-space: nowrap;">
-                                    <i class="bi bi-check-circle-fill me-1"></i> Active
-                                </span>
+                                var isPaid = s.ClassReg.PaymentStatus == "Paid" || s.ClassReg.PaymentStatus == "Success";
+                                if (isPaid)
+                                {
+                                    <span style="flex-shrink: 0; font-size: 0.72rem; font-weight: 700; color: #10B981; white-space: nowrap;">
+                                        <i class="bi bi-check-circle-fill me-1"></i> Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span style="flex-shrink: 0; font-size: 0.72rem; font-weight: 700; color: #F59E0B; white-space: nowrap;">
+                                        <i class="bi bi-clock-fill me-1"></i> Pending
+                                    </span>
+                                }
                             }
                         </div>
                     }
@@ -434,14 +456,6 @@
 
     <!-- RIGHT COLUMN: APPOINTMENTS & ACCOUNT BILLING -->
     <div class="right-col">
-        <!-- Upcoming Appointments -->
-        <h3 class="section-title">🏹 Upcoming Appointments <span class="badge bg-danger rounded-pill ms-2" id="appointmentsCount">0</span></h3>
-        <div class="card-premium" style="margin-bottom: 0px;">
-            <div class="appointments-list" id="upcomingList">
-                <!-- Dynamic cards filled in JS -->
-            </div>
-        </div>
-
         <!-- Fee / Payment Section -->
         <h3 class="section-title">FEE STATUS <i class="bi bi-three-dots"></i></h3>
         @if (actualPending > 0)
@@ -478,6 +492,14 @@
                 </button>
             </div>
         }
+
+        <!-- Upcoming Appointments -->
+        <h3 class="section-title">🏹 Upcoming Appointments <span class="badge bg-danger rounded-pill ms-2" id="appointmentsCount">0</span></h3>
+        <div class="card-premium" style="margin-bottom: 0px;">
+            <div class="appointments-list" id="upcomingList">
+                <!-- Dynamic cards filled in JS -->
+            </div>
+        </div>
 
         <!-- Attendance Summary -->
         <h3 class="section-title">ATTENDANCE SUMMARY</h3>
@@ -531,10 +553,21 @@
             const formatDateStr = (date) => date.toISOString().split('T')[0];
             const nowStr = formatDateStr(new Date());
             
-            const activeReservations = rawReservations.filter(res => {
+            const activeReservationsRaw = rawReservations.filter(res => {
                 const resDate = res.reservedOn.split('T')[0];
                 return resDate >= nowStr && res.status !== 2;
             }).sort((a, b) => new Date(a.reservedOn) - new Date(b.reservedOn));
+
+            const activeReservations = [];
+            const seenKeys = new Set();
+            activeReservationsRaw.forEach(res => {
+                const startStr = res.slot ? res.slot.slotStartTime : "";
+                const key = res.reservedOn + "_" + startStr + "_" + res.rateCode;
+                if (!seenKeys.has(key)) {
+                    seenKeys.add(key);
+                    activeReservations.push(res);
+                }
+            });
 
             countDisplay.innerText = activeReservations.length;
 

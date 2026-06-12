@@ -32,34 +32,37 @@
         padding: 35px 30px;
     }
 
-    .form-label {
-        font-size: 0.7rem;
-        letter-spacing: 1px;
+    .form-label-premium {
+        font-size: 0.72rem;
         font-weight: 700;
         color: var(--text-dim);
         text-transform: uppercase;
+        letter-spacing: 1px;
         margin-bottom: 8px;
+        display: inline-block;
     }
 
-    .form-control {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        color: #fff;
-        padding: 12px 16px;
-        font-size: 0.95rem;
-        transition: 0.3s;
+    .form-control-premium {
+        background: rgba(255, 255, 255, 0.02) !important;
+        border: 1px solid rgba(255, 255, 255, 0.07) !important;
+        border-radius: 14px !important;
+        color: #fff !important;
+        padding: 12px 18px !important;
+        font-size: 0.88rem !important;
+        font-weight: 600 !important;
+        transition: all 0.25s ease !important;
+        outline: none !important;
+        width: 100%;
+        display: block;
     }
 
-    .form-control:focus {
-        background: rgba(255,255,255,0.06);
-        border-color: rgba(255, 77, 77, 0.5);
-        box-shadow: 0 0 0 3px rgba(255, 77, 77, 0.12);
-        color: #fff;
-        outline: none;
+    .form-control-premium:focus {
+        border-color: #ff4d4d !important;
+        box-shadow: 0 0 15px rgba(255, 77, 77, 0.15) !important;
+        background: rgba(255, 255, 255, 0.08) !important;
     }
 
-    .form-control::placeholder { color: rgba(255,255,255,0.2); }
+    .form-control-premium::placeholder { color: rgba(255,255,255,0.2) !important; }
 
     .error-alert {
         background: rgba(239, 68, 68, 0.1);
@@ -98,9 +101,9 @@
         margin-top: 6px;
     }
 
-    .form-control[readonly] {
-        background: rgba(255, 255, 255, 0.02) !important;
-        border-color: rgba(255, 255, 255, 0.05) !important;
+    .form-control-premium[readonly] {
+        background: rgba(255, 255, 255, 0.01) !important;
+        border-color: rgba(255, 255, 255, 0.04) !important;
         color: rgba(255, 255, 255, 0.4) !important;
         cursor: not-allowed;
     }
@@ -122,13 +125,13 @@
     <div class="form-card">
         <form method="post" action="/Archer/AddArcher" id="addArcherForm">
             <div class="mb-4">
-                <label class="form-label">Archer's Full Name</label>
-                <input type="text" name="FullName" class="form-control" placeholder="e.g. Ahmad bin Ali" required />
+                <label class="form-label-premium">Archer's Full Name</label>
+                <input type="text" name="FullName" class="form-control-premium" placeholder="e.g. Ahmad bin Ali" required />
             </div>
 
             <div class="mb-4">
-                <label class="form-label">IC Number</label>
-                <input type="text" id="icInput" name="ICNumber" class="form-control" placeholder="e.g. 050403-10-1234" required />
+                <label class="form-label-premium">IC Number</label>
+                <input type="text" id="icInput" name="ICNumber" class="form-control-premium" placeholder="e.g. 050403-10-1234" required />
                 <div id="icFeedback" class="mt-2" style="font-size: 0.75rem;"></div>
             </div>
 
@@ -136,13 +139,13 @@
             <input type="hidden" id="dobDisplay" name="Birthday" required />
 
             <div class="mb-4">
-                <label class="form-label">Age</label>
-                <input type="number" id="ageDisplay" name="Age" class="form-control" placeholder="Age" min="1" max="99" readonly required />
+                <label class="form-label-premium">Age</label>
+                <input type="number" id="ageDisplay" name="Age" class="form-control-premium" placeholder="Age" min="1" max="99" readonly required />
             </div>
 
             <div class="d-flex justify-content-between gap-3 mt-4">
                 <a href="/Archer/MyArchers" class="btn-premium-outline">
-                    <i class="bi bi-arrow-left me-2"></i> BACK
+                    BACK
                 </a>
                 <button type="submit" class="btn-premium" id="saveBtn" disabled>
                     SAVE ARCHER <i class="bi bi-person-plus-fill ms-2"></i>
@@ -203,12 +206,8 @@
                     return false;
                 }
 
-                // Calculate age
+                // Calculate age strictly by year difference (ikut tahun) as standard for classes/sports
                 let age = currentYear - year;
-                const m = new Date().getMonth() - (month - 1);
-                if (m < 0 || (m === 0 && new Date().getDate() < day)) {
-                    age--;
-                }
 
                 dobDisplay.value = isoDateStr;
                 ageDisplay.value = age >= 0 ? age : 0;
@@ -218,12 +217,23 @@
             }
 
             icInput.addEventListener('input', function() {
-                parseIC(this.value);
+                // Strip non-digits and restrict to max 12 digits
+                let val = this.value.replace(/[^0-9]/g, '');
+                if (val.length > 12) {
+                    val = val.substring(0, 12);
+                }
+                // Update input value so user cannot type more
+                this.value = val;
+
+                parseIC(val);
             });
 
             // If IC is already filled on reload, parse it
             if (icInput.value) {
-                parseIC(icInput.value);
+                let val = icInput.value.replace(/[^0-9]/g, '');
+                if (val.length > 12) val = val.substring(0, 12);
+                icInput.value = val;
+                parseIC(val);
             }
         });
     </script>

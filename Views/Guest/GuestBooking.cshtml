@@ -77,8 +77,13 @@
     }
     .slots-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         gap: 15px;
+    }
+    @@media (max-width: 768px) {
+        .slots-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
     .slot-card {
         background: rgba(255, 255, 255, 0.03);

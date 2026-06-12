@@ -643,7 +643,7 @@
                             const resTime = res.slot && res.slot.slotStartTime ? res.slot.slotStartTime : "00:00:00";
                             const match = groupedRes.find(g => {
                                 const gTime = g.slot && g.slot.slotStartTime ? g.slot.slotStartTime : "00:00:00";
-                                return gTime === resTime && g.rateCode === res.rateCode;
+                                return gTime === resTime && g.rateCode === res.rateCode && g.customerName === res.customerName;
                             });
                             if (match) {
                                 match.grouped.push(res);
@@ -694,7 +694,14 @@
                                 timeText = `${startStr} - ${endStr}`;
                             }
 
-                            let namesStr = matchingRes.grouped.length > 1 ? `${matchingRes.grouped.length} Archers` : matchingRes.customerName;
+                            let totalPax = 0;
+                            if (rateCodeUpper === "CLASS SESSION" || rateCodeUpper === "CLASS") {
+                                totalPax = matchingRes.grouped.reduce((sum, r) => sum + (r.numberOfPax || 1), 0);
+                            } else {
+                                totalPax = matchingRes.grouped[0].numberOfPax || 1;
+                            }
+
+                            let namesStr = totalPax > 1 ? `${totalPax} Archers` : matchingRes.customerName;
 
                             let metaHtml = "";
                             if (rateCodeUpper === "CLASS SESSION" || rateCodeUpper === "CLASS") {

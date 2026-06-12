@@ -131,8 +131,15 @@
     }
     .slots-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         gap: 15px;
+        min-height: 120px;
+        align-items: start;
+    }
+    @@media (max-width: 768px) {
+        .slots-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
     .slot-card {
         background: rgba(255, 255, 255, 0.03);
@@ -157,6 +164,33 @@
     .slot-number { display: block; font-size: 0.65rem; font-weight: 800; opacity: 0.6; margin-bottom: 5px; text-transform: uppercase; }
     .slot-time { display: block; font-size: 1.1rem; font-weight: 800; }
 
+    .form-control {
+        background-color: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 12px !important;
+        padding: 12px 16px !important;
+        color: #fff !important;
+        font-size: 0.9rem !important;
+        box-shadow: none !important;
+        outline: none !important;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus {
+        border-color: var(--primary) !important;
+        background-color: rgba(255, 255, 255, 0.06) !important;
+        color: #fff !important;
+        box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.2) !important;
+    }
+    select.form-control {
+        appearance: none;
+        -webkit-appearance: none;
+        padding-right: 32px !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23a1a1aa' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 14px center !important;
+        cursor: pointer;
+    }
+    
     /* Dropdown visibility fix */
     select.form-control option {
         background-color: #1a1f26 !important;
@@ -195,6 +229,14 @@
                 bookingData.date = dateStr;
                 bookingData.selectedSlotIds = [];
                 loadSlots();
+            }
+        });
+
+        document.getElementById("bookingDate").addEventListener("mousedown", function(e) {
+            if (fpInstance && fpInstance.isOpen) {
+                e.preventDefault();
+                e.stopPropagation();
+                fpInstance.close();
             }
         });
 

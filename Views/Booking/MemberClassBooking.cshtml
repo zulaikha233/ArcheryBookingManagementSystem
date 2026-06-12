@@ -23,35 +23,34 @@
                     <input type="hidden" id="customerPhone" value="@ViewBag.CustomerPhone">
 
                     <div class="mb-4">
-                        <label class="form-label-premium">Booking Service</label>
-                        <div class="fw-bold text-white fs-5" style="letter-spacing: 0.5px;">Archery Class Session</div>
+                        <div class="fw-bold fs-5" style="letter-spacing: 0.5px; color: var(--text-dim);">Archery Class Session</div>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label-premium d-flex justify-content-between align-items-center mb-3">
+                        <div class="session-label d-flex justify-content-between align-items-center mb-3">
                             <span>Student</span>
-                            <button type="button" class="btn btn-sm btn-outline-primary" style="border-radius: 50px; padding: 4px 16px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.5px;" onclick="selectAllShooters()">Select All</button>
-                        </label>
-                        <div class="p-4" style="background: rgba(255, 77, 77, 0.05); border: 1px dashed rgba(255, 77, 77, 0.2); border-radius: 20px; max-height: 250px; overflow-y: auto;" id="shooterCheckboxes">
+                            <button type="button" class="btn btn-sm" style="border-radius: 50px; padding: 4px 16px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.5px; color: #10B981; border: 1px solid #10B981; background: rgba(16, 185, 129, 0.1);" onclick="selectAllShooters()">Select All</button>
+                        </div>
+                        <div class="p-3" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 16px; max-height: 160px; overflow-y: auto;" id="shooterCheckboxes">
                             @if (ViewBag.ParentHasClass != null && (bool)ViewBag.ParentHasClass)
                             {
-                                <div class="form-check mb-2 border-bottom pb-2" style="border-color: rgba(255, 77, 77, 0.1) !important;">
-                                    <input class="form-check-input shooter-checkbox" type="checkbox" value="0" id="shooter_0">
-                                    <label class="form-check-label text-white" for="shooter_0">
-                                        Myself (@ViewBag.CustomerName)
-                                    </label>
-                                </div>
+                                <label class="d-flex align-items-center mb-2 p-3" style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; cursor: pointer; transition: all 0.2s ease;">
+                                    <div style="width: 24px; height: 24px; margin-right: 15px; display: flex; align-items: center; justify-content: center;">
+                                        <input class="shooter-checkbox" type="checkbox" value="0" id="shooter_0" style="accent-color: #10B981; width: 20px; height: 20px; cursor: pointer; margin: 0;">
+                                    </div>
+                                    <span class="text-white fw-bold" style="font-size: 0.9rem;">Myself (@ViewBag.CustomerName)</span>
+                                </label>
                             }
                             @if (ViewBag.Students != null && ((IEnumerable<dynamic>)ViewBag.Students).Any())
                             {
                                 foreach (var student in ViewBag.Students)
                                 {
-                                    <div class="form-check mb-2">
-                                        <input class="form-check-input shooter-checkbox" type="checkbox" value="@student.StudentId" id="shooter_@student.StudentId">
-                                        <label class="form-check-label text-white" for="shooter_@student.StudentId">
-                                            @student.FullName
-                                        </label>
-                                    </div>
+                                    <label class="d-flex align-items-center mb-2 p-3" style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; cursor: pointer; transition: all 0.2s ease;">
+                                        <div style="width: 24px; height: 24px; margin-right: 15px; display: flex; align-items: center; justify-content: center;">
+                                            <input class="shooter-checkbox" type="checkbox" value="@student.StudentId" id="shooter_@student.StudentId" style="accent-color: #10B981; width: 20px; height: 20px; cursor: pointer; margin: 0;">
+                                        </div>
+                                        <span class="text-white fw-bold" style="font-size: 0.9rem;">@student.FullName</span>
+                                    </label>
                                 }
                             }
                             else
@@ -63,11 +62,11 @@
 
                     <div class="row g-4 mb-4">
                         <div class="col-md-6">
-                            <label class="form-label-premium">Select Weekend Date</label>
-                            <input type="text" id="bookingDate" class="form-control" placeholder="Select Weekend Date">
+                            <h5 class="session-label">Select Date</h5>
+                            <input type="text" id="bookingDate" class="form-control" placeholder="Select Date">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label-premium">Select Slots</label>
+                            <h5 class="session-label">Select Slots</h5>
                             <select id="duration" class="form-control">
                                 <option value="2">1 Slot</option>
                                 <option value="4">2 Slots</option>
@@ -177,6 +176,7 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
         gap: 15px;
+        min-height: 120px;
     }
     
     .slot-card {
@@ -223,6 +223,38 @@
         font-size: 0.9rem;
         line-height: 1.5;
     }
+
+    .form-control {
+        background-color: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 12px !important;
+        padding: 12px 16px !important;
+        color: #fff !important;
+        font-size: 0.9rem !important;
+        box-shadow: none !important;
+        outline: none !important;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus {
+        border-color: var(--primary) !important;
+        background-color: rgba(255, 255, 255, 0.06) !important;
+        color: #fff !important;
+        box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.2) !important;
+    }
+    select.form-control {
+        appearance: none;
+        -webkit-appearance: none;
+        padding-right: 32px !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23a1a1aa' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 14px center !important;
+        cursor: pointer;
+    }
+    select.form-control option {
+        background-color: #1a1f26 !important;
+        color: #fff !important;
+        padding: 10px !important;
+    }
 </style>
 }
 
@@ -263,6 +295,14 @@
                 bookingData.date = dateStr;
                 bookingData.selectedSlotIds = [];
                 loadSlots();
+            }
+        });
+
+        document.getElementById("bookingDate").addEventListener("mousedown", function(e) {
+            if (fpInstance && fpInstance.isOpen) {
+                e.preventDefault();
+                e.stopPropagation();
+                fpInstance.close();
             }
         });
 
@@ -397,6 +437,8 @@
 
         if (selectedShooters.length === 0) {
             alert("Please select at least one archer.");
+            btn.disabled = false;
+            btn.innerHTML = 'CONFIRM CLASS BOOKING <i class="bi bi-check2-circle ms-2"></i>';
             return;
         }
 

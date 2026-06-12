@@ -1,4 +1,5 @@
 @model ArcheryAlley.Models.Customers
+@using Microsoft.AspNetCore.Http
 @{
     ViewBag.Title = "Member Registration & Class Onboarding";
     Layout = "_MemberLayout";
@@ -247,6 +248,51 @@
         border-color: rgba(0,0,0,0.15) !important;
     }
 
+    .form-label-premium {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+        display: inline-block;
+    }
+
+    .form-control-premium {
+        background: rgba(255, 255, 255, 0.02) !important;
+        border: 1px solid rgba(255, 255, 255, 0.07) !important;
+        border-radius: 14px !important;
+        color: #fff !important;
+        padding: 12px 18px !important;
+        font-size: 0.88rem !important;
+        font-weight: 600 !important;
+        transition: all 0.25s ease !important;
+        outline: none !important;
+        width: 100%;
+        display: block;
+        height: 48px !important;
+    }
+
+    .form-control-premium:focus {
+        border-color: #ff4d4d !important;
+        box-shadow: 0 0 15px rgba(255, 77, 77, 0.15) !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .form-control-premium::placeholder { color: rgba(255,255,255,0.2) !important; }
+    
+    .form-select.form-control-premium {
+        padding-right: 36px !important;
+    }
+    
+    .form-control-premium[readonly],
+    .form-control-premium.is-readonly {
+        background: rgba(255, 255, 255, 0.01) !important;
+        border-color: rgba(255, 255, 255, 0.04) !important;
+        color: rgba(255, 255, 255, 0.4) !important;
+        cursor: not-allowed;
+    }
+
     .pax-btn {
         width: 44px;
         height: 44px;
@@ -359,9 +405,9 @@
     }
 
     .success-badge-icon {
-        width: 88px; height: 88px; border-radius: 28px; background: var(--primary);
+        width: 88px; height: 88px; border-radius: 28px; background: #10B981;
         color: #000; font-size: 2.8rem; display: flex; align-items: center; justify-content: center;
-        margin: 0 auto 25px; box-shadow: 0 20px 40px var(--primary-glow);
+        margin: 0 auto 25px; box-shadow: 0 20px 40px rgba(16, 185, 129, 0.4);
     }
 
     @@keyframes fadeIn {
@@ -447,21 +493,31 @@
                         <span class="text-dim small fw-bold">Step 1 of 4</span>
                     </div>
 
+                    @{
+                        bool isProfileComplete = !string.IsNullOrEmpty(Model?.Address) && !string.IsNullOrEmpty(Model?.ICNumber) && !string.IsNullOrEmpty(Model?.PhoneNumber);
+                        string readOnlyAttr = isProfileComplete ? "readonly" : "";
+                        string disabledStyle = isProfileComplete ? "pointer-events: none;" : "";
+                        string readOnlyClass = isProfileComplete ? "is-readonly" : "";
+                    }
+
                     <div class="row g-3">
                         <div class="col-md-6 mb-2">
-                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Full Name</label>
-                            <input type="text" id="regFullName" class="form-control" value="@(Model?.FullName ?? "")" placeholder="e.g. Aminah Talib" readonly style="background-color: #e9ecef !important; color: #6c757d !important; pointer-events: none;" required />
+                            <label class="form-label-premium">Full Name</label>
+                            <input type="text" id="regFullName" class="form-control-premium" value="@(Model?.FullName ?? "")" placeholder="e.g. Aminah Talib" @readOnlyAttr style="@disabledStyle" required />
                         </div>
                         <div class="col-md-6 mb-2">
-                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Phone Number</label>
-                            <input type="text" id="regPhoneNumber" class="form-control" value="@(Model?.PhoneNumber ?? "")" placeholder="0123456789" readonly style="background-color: #e9ecef !important; color: #6c757d !important; pointer-events: none;" required />
+                            <label class="form-label-premium">Phone Number</label>
+                            <input type="text" id="regPhoneNumber" class="form-control-premium" value="@(Model?.PhoneNumber ?? "")" placeholder="0123456789" @readOnlyAttr style="@disabledStyle" required />
                         </div>
                     </div>
 
                     <div class="row g-3 mt-2">
                         <div class="col-md-12 mb-2">
-                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Identification Card (IC)</label>
-                            <input type="text" id="regICNumber" class="form-control" value="@(Model?.ICNumber ?? "")" placeholder="e.g. 900101145123" maxlength="12" readonly style="background-color: #e9ecef !important; color: #6c757d !important; pointer-events: none;" required />
+                            <label class="form-label-premium">Identification Card (IC)</label>
+                            <input type="text" id="regICNumber" class="form-control-premium" value="@(Model?.ICNumber ?? "")" placeholder="e.g. 900101145123" maxlength="12" @readOnlyAttr style="@disabledStyle" required />
+                            <div id="icFormatError" style="display: none; color: #ef4444; font-size: 0.75rem; margin-top: 5px; text-align: left; width: 100%;">
+                                <i class="bi bi-exclamation-triangle-fill"></i> Please enter a valid 12-digit IC Number without spaces or dashes.
+                            </div>
                         </div>
                     </div>
 
@@ -492,23 +548,23 @@
 
                     <div class="row g-3 mt-2">
                         <div class="col-md-12 mb-2">
-                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Street</label>
-                            <input type="text" id="regStreet" class="form-control" value="@savedStreet" placeholder="e.g. Jalan Sentosa 4, Taman Sentosa" readonly style="background-color: #e9ecef !important; color: #6c757d !important; pointer-events: none;" required />
+                            <label class="form-label-premium">Street</label>
+                            <input type="text" id="regStreet" class="form-control-premium" value="@savedStreet" placeholder="e.g. Jalan Sentosa 4, Taman Sentosa" @readOnlyAttr style="@disabledStyle" required />
                         </div>
                     </div>
 
                     <div class="row g-3 mt-2">
                         <div class="col-md-4 mb-2">
-                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">Postcode</label>
-                            <input type="text" id="regPostcode" class="form-control" value="@savedPostcode" placeholder="e.g. 76000" maxlength="5" readonly style="background-color: #e9ecef !important; color: #6c757d !important; pointer-events: none;" required />
+                            <label class="form-label-premium">Postcode</label>
+                            <input type="text" id="regPostcode" class="form-control-premium" value="@savedPostcode" placeholder="e.g. 76000" maxlength="5" @readOnlyAttr style="@disabledStyle" required />
                         </div>
                         <div class="col-md-4 mb-2">
-                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">City</label>
-                            <input type="text" id="regCity" class="form-control" value="@savedCity" placeholder="e.g. Raub" readonly style="background-color: #e9ecef !important; color: #6c757d !important; pointer-events: none;" required />
+                            <label class="form-label-premium">City</label>
+                            <input type="text" id="regCity" class="form-control-premium" value="@savedCity" placeholder="e.g. Raub" @readOnlyAttr style="@disabledStyle" required />
                         </div>
                         <div class="col-md-4 mb-2">
-                            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 1px;">State</label>
-                            <select id="regState" class="form-select form-control" style="background-color: #e9ecef !important; color: #6c757d !important; pointer-events: none;" required>
+                            <label class="form-label-premium">State</label>
+                            <select id="regState" class="form-select form-control-premium @readOnlyClass" style="@disabledStyle" required>
                                 @if (string.IsNullOrEmpty(savedState))
                                 {
                                     <option value="" disabled selected>Select State</option>
@@ -573,18 +629,18 @@
             <div class="wizard-step-section" id="stepSection-2">
                 <div class="step-card">
                     <div class="step-header d-flex align-items-center justify-content-between">
-                        <h3 class="step-title">SELECT CLASS SESSION PACKAGE</h3>
+                        <h3 class="step-title">SELECT CLASS PACKAGE</h3>
                         <span class="text-dim small fw-bold">Step 2 of 4</span>
                     </div>
                     <p class="text-dim small mb-4">Weekend coaching class sessions require active members to choose one starter package.</p>
                     
                     <div class="package-grid">
-                        <div class="selection-card pricing-card text-center h-100 selected" id="opt-pkg-4slots" onclick="selectWizardPackage('4slots', 150.00, '4 Slots Package')">
-                            <h2 class="fw-900 mb-2">4 Slots Package</h2>
+                        <div class="selection-card pricing-card text-center h-100 selected" id="opt-pkg-4slots" onclick="selectWizardPackage('4slots', 150.00, 'Starter Tier')">
+                            <h2 class="fw-900 mb-2">Starter Tier</h2>
                             <div class="price-display">
                                 <span class="currency">RM</span>
                                 <span class="amount">150</span>
-                                <span class="period">/ Starter</span>
+                                <span class="period">/ Archer</span>
                             </div>
                             <p class="text-dim mt-3" style="font-size: 0.85rem;">Comprises 8 total instruction hours scheduled across 2 weekend slots. Perfect for beginners.</p>
                             <ul class="benefit-list text-start mt-4 mb-0" style="padding-left: 20px;">
@@ -593,12 +649,12 @@
                             </ul>
                         </div>
 
-                        <div class="selection-card pricing-card text-center h-100" id="opt-pkg-6slots" onclick="selectWizardPackage('6slots', 210.00, '6 Slots Package')">
-                            <h2 class="fw-900 mb-2">6 Slots Package</h2>
+                        <div class="selection-card pricing-card text-center h-100" id="opt-pkg-6slots" onclick="selectWizardPackage('6slots', 210.00, 'Progressive Tier')">
+                            <h2 class="fw-900 mb-2">Progressive Tier</h2>
                             <div class="price-display">
                                 <span class="currency">RM</span>
                                 <span class="amount">210</span>
-                                <span class="period">/ Best Value</span>
+                                <span class="period">/ Archer</span>
                             </div>
                             <p class="text-dim mt-3" style="font-size: 0.85rem;">Unlocks 12 instruction hours with certified coaches on weekends. Excellent value.</p>
                             <ul class="benefit-list text-start mt-4 mb-0" style="padding-left: 20px;">
@@ -631,15 +687,16 @@
                         </div>
                     </div>
 
-                    <div id="wizFpxBankSelect" class="p-3 mb-4" style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px;">
-                        <select class="form-select form-control" id="wizSelectedBank" style="background-color: transparent; border: none; color: #fff; font-weight: 700;">
-                            <option value="" style="background-color: #ffffff; color: #000000;">-- Choose Retail Bank --</option>
-                            <option value="Maybank2U" style="background-color: #ffffff; color: #000000;">Maybank2U</option>
-                            <option value="CIMB Clicks" style="background-color: #ffffff; color: #000000;">CIMB Clicks</option>
-                            <option value="Public Bank" style="background-color: #ffffff; color: #000000;">Public Bank</option>
-                            <option value="RHB Now" style="background-color: #ffffff; color: #000000;">RHB Now</option>
-                            <option value="Bank Islam" style="background-color: #ffffff; color: #000000;">Bank Islam</option>
+                    <div id="wizFpxBankSelect" class="payment-ui-box p-3 mb-4" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px;">
+                        <select class="form-select mb-2" id="wizSelectedBank" style="background: #ffffff; color: #000000; font-size: 0.85rem; font-weight: 500; border-radius: 50px; padding: 8px 16px; height: auto; cursor: pointer; width: auto; min-width: 200px; display: inline-block;">
+                            <option value="" disabled selected>Select Retail Bank</option>
+                            <option value="Maybank2U">Maybank2U</option>
+                            <option value="CIMB Clicks">CIMB Clicks</option>
+                            <option value="Public Bank">Public Bank</option>
+                            <option value="RHB Now">RHB Now</option>
+                            <option value="Bank Islam">Bank Islam</option>
                         </select>
+                        <p class="text-dim small mb-0 mt-3" style="font-size: 0.8rem; color: #a0aec0;"><i class="bi bi-shield-lock me-1"></i> Redirecting to secure bank portal.</p>
                     </div>
 
                     <div class="pay-card-option" id="wiz-pay-card" onclick="selectWizardPayment('card')">
@@ -651,11 +708,32 @@
                     </div>
 
                     <div id="wizCardDetails" class="p-3 mb-4" style="background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 12px; display: none;">
-                        <input type="text" class="form-control mb-3" placeholder="Card Number" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff;" />
-                        <div class="row g-2">
-                            <div class="col-6"><input type="text" class="form-control" placeholder="MM/YY" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff;" /></div>
-                            <div class="col-6"><input type="text" class="form-control" placeholder="CVV" style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); color: #fff;" /></div>
-                        </div>
+                        @{
+                            var savedCardsJson = Context.Session.GetString("SavedCards") ?? "[]";
+                            var savedCards = System.Text.Json.JsonSerializer.Deserialize<List<Dictionary<string, string>>>(savedCardsJson) ?? new List<Dictionary<string, string>>();
+                        }
+                        @if (savedCards.Count > 0)
+                        {
+                            <select class="form-select mb-3" id="wizSavedCardSelect" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 0.85rem; border-radius: 50px; padding: 12px 20px;">
+                                @foreach (var card in savedCards)
+                                {
+                                    var cId = card.ContainsKey("id") ? card["id"] : "";
+                                    var cNum = card.ContainsKey("number") ? card["number"] : "";
+                                    var last4 = cNum.Replace(" ", "").Length >= 4 ? cNum.Replace(" ", "").Substring(cNum.Replace(" ", "").Length - 4) : "••••";
+                                    <option value="@cId" style="background-color: #1a1e28; color: #fff;">
+                                        •••• •••• •••• @last4
+                                    </option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4" style="border: 1px dashed rgba(255,255,255,0.08); border-radius: 12px; background: rgba(0,0,0,0.1);">
+                                <i class="bi bi-credit-card text-dim" style="font-size: 1.8rem; margin-bottom: 10px;"></i>
+                                <p class="text-dim small mb-0">No saved cards found.</p>
+                                <p class="text-dim small mb-0" style="font-size: 0.75rem;">Please add a card in your payment settings.</p>
+                            </div>
+                        }
                     </div>
 
                     <div class="d-flex justify-content-between gap-3 mt-5">
@@ -751,10 +829,24 @@
                     return;
                 }
 
-                const icRegex = /^\d{12}$/;
-                if (!icRegex.test(icNumber)) {
-                    showWizardAlert("Invalid IC Number format. Please enter a 12-digit number.");
+                function isValidMalaysianIC(ic) {
+                    if (!/^\d{12}$/.test(ic)) return false;
+                    const month = parseInt(ic.substring(2, 4), 10);
+                    const day = parseInt(ic.substring(4, 6), 10);
+                    if (month < 1 || month > 12) return false;
+                    const daysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+                    if (day < 1 || day > daysInMonth[month - 1]) return false;
+                    return true;
+                }
+
+                if (!isValidMalaysianIC(icNumber)) {
+                    showWizardAlert("Invalid IC Number format or Date. Please enter a valid 12-digit number.");
+                    document.getElementById('icFormatError').style.display = 'block';
+                    document.getElementById('regICNumber').style.borderColor = '#ef4444';
                     return;
+                } else {
+                    document.getElementById('icFormatError').style.display = 'none';
+                    document.getElementById('regICNumber').style.borderColor = '';
                 }
 
                 const postcodeRegex = /^\d{5}$/;
@@ -894,10 +986,6 @@
 
         formData.append('PackageType', selPackageName);
         formData.append('PackagePrice', selPackagePrice);
-        formData.append('LearningMethod', 'N/A');
-        formData.append('LearningMethodPax', 0);
-        formData.append('LearningMethodPrice', 0);
-        formData.append('AnnualFee', 0);
         formData.append('TotalPrice', totalDuePrice);
         formData.append('PaymentMethod', selPayment);
 
@@ -912,7 +1000,7 @@
                 document.getElementById('resTxId').innerText = result.transactionId;
                 document.getElementById('resPackage').innerText = selPackageName;
                 document.getElementById('resTotal').innerText = `RM ${totalDuePrice.toFixed(2)}`;
-                <!-- Removed resAnnualFee update -->
+                // Removed resAnnualFee update
                 
                 // Show gorgeous fullscreen overlay success modal
                 const modal = document.getElementById('registrationSuccessModal');
@@ -928,5 +1016,33 @@
             payBtn.innerHTML = `SECURE PAYMENT NOW <i class="bi bi-shield-lock-fill ms-2"></i>`;
         }
     }
+    document.addEventListener('DOMContentLoaded', function() {
+        const icInput = document.getElementById('regICNumber');
+        const icError = document.getElementById('icFormatError');
 
+        function isValidMalaysianIC(ic) {
+            if (!/^\d{12}$/.test(ic)) return false;
+            const month = parseInt(ic.substring(2, 4), 10);
+            const day = parseInt(ic.substring(4, 6), 10);
+            if (month < 1 || month > 12) return false;
+            const daysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            if (day < 1 || day > daysInMonth[month - 1]) return false;
+            return true;
+        }
+
+        if (icInput) {
+            icInput.addEventListener('input', function () {
+                const val = this.value;
+                // Allow empty so it doesn't show red immediately when empty, or show error if they started typing
+                const isValid = isValidMalaysianIC(val);
+                if (val.length > 0 && !isValid) {
+                    icError.style.display = 'block';
+                    icInput.style.borderColor = '#ef4444';
+                } else {
+                    icError.style.display = 'none';
+                    icInput.style.borderColor = ''; // reset
+                }
+            });
+        }
+    });
 </script>

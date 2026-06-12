@@ -15,7 +15,9 @@
     <!-- Custom Premium Styles -->
     <link href="~/css/archery_modern.css" rel="stylesheet" />
     <!-- Flatpickr (Modern Calendar) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+    <!-- SweetAlert2 Dark Theme -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@sweetalert2/theme-dark@4/dark.css">
     
     <style>
         :root {
@@ -277,6 +279,60 @@
             font-size: 1rem;
             transition: 0.2s ease-in-out;
         }
+
+        /* ─── MOBILE RESPONSIVENESS ─── */
+        .mobile-header {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 25px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 998;
+        }
+        .mobile-toggle-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            color: var(--primary);
+        }
+        .sidebar-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 999;
+            display: none;
+            backdrop-filter: blur(3px);
+        }
+
+        @@media (max-width: 992px) {
+            .app-wrapper {
+                flex-direction: column;
+            }
+            .mobile-header {
+                display: flex;
+            }
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -320px;
+                height: 100vh;
+                transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 5px 0 25px rgba(0,0,0,0.5);
+                z-index: 1000;
+            }
+            .sidebar.show {
+                left: 0;
+            }
+            .sidebar-overlay.show {
+                display: block;
+            }
+            .main-content {
+                padding: 20px;
+                height: calc(100vh - 70px);
+                overflow-y: auto;
+            }
+
     </style>
     @RenderSection("Styles", required: false)
 </head>
@@ -284,6 +340,16 @@
 
     <div class="app-wrapper">
         
+        <!-- Mobile Header -->
+        <div class="mobile-header">
+            <h5 class="m-0 fw-900 text-white" style="letter-spacing: 1px;"><i class="bi bi-bullseye text-primary me-2"></i> ARCHERY ALLEY</h5>
+            <button class="mobile-toggle-btn" onclick="toggleMobileSidebar()">
+                <i class="bi bi-list fs-1 text-white"></i>
+            </button>
+        </div>
+        
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+
         <!-- ─── LEFT SIDEBAR ─── -->
         <aside class="sidebar">
             <div class="profile-section">
@@ -366,6 +432,13 @@
     <!-- AOS JS -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
+        function toggleMobileSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+
         function toggleBookingMenu() {
             const submenu = document.getElementById("booking-submenu");
             const arrow = document.getElementById("menu-arrow");
@@ -399,6 +472,9 @@
     <!-- Flatpickr JS -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     @RenderSection("Scripts", required: false)
 </body>
 </html>
