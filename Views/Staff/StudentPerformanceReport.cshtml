@@ -1,4 +1,4 @@
-@using Microsoft.AspNetCore.Http
+﻿@using Microsoft.AspNetCore.Http
 @{
     ViewData["Title"] = "Student Performance Report";
     Layout = null;
@@ -8,12 +8,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Performance Report � Archery Alley</title>
+    <title>Performance Report ï¿½ Archery Alley</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         /* ------------------------------------------------
-           THEME VARIABLES � matches MemberCalendar dark glass
+           THEME VARIABLES ï¿½ matches MemberCalendar dark glass
         ------------------------------------------------ */
         :root {
             --primary: #FF4D4D;
@@ -309,7 +309,7 @@
         .report-item:last-child { border-bottom: none; }
         .report-item:hover { background: rgba(255,255,255,0.015); }
 
-        /* Collapsed header row � always visible */
+        /* Collapsed header row ï¿½ always visible */
         .report-item-header {
             padding: 16px 24px;
             display: flex; align-items: center; gap: 16px;
@@ -338,7 +338,7 @@
         }
         .report-item.expanded .report-chevron { transform: rotate(180deg); }
 
-        /* Full report body � hidden until expanded */
+        /* Full report body ï¿½ hidden until expanded */
         .report-body {
             display: none;
             padding: 0 24px 18px 24px;
@@ -524,12 +524,12 @@
                 <button class="level-tab active" data-level="All"            onclick="selectLevel(this)">🏹 All</button>
             </div>
             <div class="level-tabs">
-                <button class="level-tab active" data-level="GrassRoots"     onclick="selectLevel(this)">?? GrassRoots</button>
-                <button class="level-tab"        data-level="Beginner 1"     onclick="selectLevel(this)">? Beginner 1</button>
-                <button class="level-tab"        data-level="Beginner 2"     onclick="selectLevel(this)">?? Beginner 2</button>
-                <button class="level-tab"        data-level="Intermediate 1" onclick="selectLevel(this)">?? Intermediate 1</button>
-                <button class="level-tab"        data-level="Intermediate 2" onclick="selectLevel(this)">???? Intermediate 2</button>
-                <button class="level-tab"        data-level="Expert"         onclick="selectLevel(this)">?? Expert</button>
+                <button class="level-tab active" data-level="GrassRoots"     onclick="selectLevel(this)">🌱 GrassRoots</button>
+                <button class="level-tab"        data-level="Beginner 1"     onclick="selectLevel(this)">🥉 Beginner 1</button>
+                <button class="level-tab"        data-level="Beginner 2"     onclick="selectLevel(this)">🥈 Beginner 2</button>
+                <button class="level-tab"        data-level="Intermediate 1" onclick="selectLevel(this)">🥇 Intermediate 1</button>
+                <button class="level-tab"        data-level="Intermediate 2" onclick="selectLevel(this)">🏅 Intermediate 2</button>
+                <button class="level-tab"        data-level="Expert"         onclick="selectLevel(this)">🏆 Expert</button>
             </div>
         </div>
 
@@ -565,11 +565,11 @@
             <div class="glass-card student-header-card">
                 <div class="student-row">
                     <div class="student-identity">
-                        <div class="student-avatar" id="studentAvatar">�</div>
+                        <div class="student-avatar" id="studentAvatar">ï¿½</div>
                         <div>
-                            <div class="student-name" id="studentName">�</div>
+                            <div class="student-name" id="studentName">ï¿½</div>
                             <div class="student-meta">
-                                <span class="level-badge" id="studentLevel">�</span>
+                                <span class="level-badge" id="studentLevel">ï¿½</span>
                                 <span id="reportCount" style="color:var(--text-dim); font-size:0.75rem;"></span>
                             </div>
                         </div>
@@ -586,7 +586,7 @@
                 <div class="reports-header">
                     <div>
                         <div class="reports-header-title">Performance Reports</div>
-                        <div class="reports-header-sub" id="reportsSubtitle">�</div>
+                        <div class="reports-header-sub" id="reportsSubtitle">ï¿½</div>
                     </div>
                     <button class="btn-add-report" onclick="showAddForm()">
                         <i class="bi bi-plus-lg"></i> Add New Report
@@ -660,7 +660,8 @@
            MOCK DATA
            -- DATA NOTE: Replace with real AJAX fetch when
               backend is ready:
-              fetch(`/Report/GetStudentReports?name=${name}&level=${selectedLevel}`)
+              fetch(`/Report/GetStudentReports
+              name=${name}&level=${selectedLevel}`)
            --
         ------------------------------------------------ */
         const mockStudents = {
@@ -888,7 +889,7 @@
 
     list.innerHTML = '';
 
-            // Sort by date descending � most recent first
+            // Sort by date descending ï¿½ most recent first
             const sorted = [...currentStudent.reports].sort((a, b) => new Date(b.date) - new Date(a.date));
 
     sorted.forEach((r, idx) => {
@@ -1011,3 +1012,4 @@
 
 </body>
 </html>
+

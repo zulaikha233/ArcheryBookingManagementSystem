@@ -1,4 +1,4 @@
-@model ArcheryAlley.Models.PaymentViewModel
+﻿@model ArcheryAlley.Models.PaymentViewModel
 @using Microsoft.AspNetCore.Http
 
 @{
@@ -168,10 +168,10 @@
 
         <div class="row g-5">
             <div class="col-md-7">
-                <h3 class="fw-bold mb-4" style="color: var(--secondary);">Promo Code</h3>
+                <h3 class="fw-bold mb-4" style="color: var(--primary);">Promo Code</h3>
                 <div class="d-flex mb-3" style="gap: 15px !important;">
-                    <input type="text" id="promoCodeInput" class="form-control" placeholder="ENTER CODE" oninput="this.value=this.value.toUpperCase(); clearPromo()">
-                    <button class="btn-premium" onclick="applyPromo()" style="background: var(--secondary); padding: 0 25px;">APPLY</button>
+                    <input type="text" id="promoCodeInput" class="form-control" placeholder="ENTER CODE" style="background-color: rgba(255, 255, 255, 0.04) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; color: #fff !important;" oninput="this.value=this.value.toUpperCase(); clearPromo()">
+                    <button class="btn-premium" onclick="applyPromo()" style="background: var(--primary); padding: 0 25px; color: #fff; border: none;">APPLY</button>
                 </div>
                 <div id="promoMsg" class="small mb-5" style="display:none;"></div>
 
@@ -208,7 +208,7 @@
                                 var cExp  = card.ContainsKey("expiry") ? card["expiry"] : "";
                                 var cCvv  = card.ContainsKey("cvv")    ? card["cvv"]    : "";
                                 var isSelected = cId == selectedCardId;
-                                var last4 = cNum.Replace(" ", "").Length >= 4 ? cNum.Replace(" ", "").Substring(cNum.Replace(" ", "").Length - 4) : "••••";
+                                var last4 = cNum.Replace(" ", "").Length >= 4 ? cNum.Replace(" ", "").Substring(cNum.Replace(" ", "").Length - 4) : "â€¢â€¢â€¢â€¢";
                                 <label class="checkout-card-item" onclick="selectCheckoutCard('@cId', this)"
                                        style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px;
                                               border:1px solid @(isSelected ? "rgba(16,185,129,0.4)" : "rgba(255,255,255,0.07)");
@@ -218,7 +218,7 @@
                                            style="accent-color:var(--primary); width:16px; height:16px; flex-shrink:0;">
                                     <i class="bi bi-credit-card text-white" style="font-size:1rem; flex-shrink:0;"></i>
                                     <div style="flex:1;">
-                                        <span class="text-white fw-bold d-block" style="font-size:0.83rem;">•••• •••• •••• @last4</span>
+                                        <span class="text-white fw-bold d-block" style="font-size:0.83rem;">â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ â€¢â€¢â€¢â€¢ @last4</span>
                                         <span class="text-dim" style="font-size:0.7rem;">Expires @cExp</span>
                                     </div>
                                 </label>
@@ -226,7 +226,7 @@
                         }
                         else
                         {
-                            <!-- No saved cards — link to add card in member settings -->
+                            <!-- No saved cards â€” link to add card in member settings -->
                             <div class="text-center py-4 px-3" style="background: rgba(255,255,255,0.01); border: 1px dashed rgba(255,255,255,0.1); border-radius: 16px;">
                                 <i class="bi bi-credit-card text-dim mb-3 d-block" style="font-size: 2.2rem;"></i>
                                 <h6 class="text-white fw-bold mb-1" style="font-size: 0.9rem;">No Saved Cards Found</h6>
@@ -263,10 +263,10 @@
                     </div>
 
                     <div class="d-flex gap-3 mt-4">
-                        <button class="btn-premium-outline w-50 justify-content-center text-center" onclick="cancelBooking()">
+                        <button class="btn-premium-outline flex-fill justify-content-center text-center" onclick="cancelBooking()">
                             CANCEL
                         </button>
-                        <button class="btn-premium w-50 justify-content-center text-center" id="payConfirmBtn" onclick="finalizeBooking()">
+                        <button class="btn-premium flex-fill justify-content-center text-center" id="payConfirmBtn" onclick="finalizeBooking()">
                             PAY NOW
                         </button>
                     </div>
@@ -483,4 +483,5 @@
         window.location.href = "/Booking/MemberCalendar";
     }
 </script>
+
 

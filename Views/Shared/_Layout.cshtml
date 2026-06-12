@@ -1,4 +1,4 @@
-@using Microsoft.AspNetCore.Http
+﻿@using Microsoft.AspNetCore.Http
 @{
     var userRole = Context.Session.GetString("UserRole");
     var userName = Context.Session.GetString("UserName");
@@ -22,7 +22,7 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- Flatpickr (Modern Calendar) -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
     <style>
         .logout-btn-premium {
             color: #ff6b6b !important;
@@ -315,6 +315,7 @@
     </script>
 </body>
 </html>
+
 
 
 

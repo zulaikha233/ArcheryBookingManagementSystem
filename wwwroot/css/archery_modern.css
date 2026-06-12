@@ -553,3 +553,29 @@ body {
 .flatpickr-month { fill: var(--primary) !important; } /* arrows */
 .flatpickr-weekday { color: #aaa !important; font-weight: bold !important; }
 
+
+/* Standardize .form-select dark theme across all pages */
+.form-select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23a1a1aa' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 14px center !important;
+    padding-right: 32px !important;
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #fff !important;
+}
+
+.form-select:focus {
+    border-color: #ff4d4d !important;
+    background-color: rgba(255, 255, 255, 0.06) !important;
+    color: #fff !important;
+    box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.2) !important;
+}
+
+.form-select option {
+    background-color: #1a1f26 !important;
+    color: #fff !important;
+    padding: 10px !important;
+}
