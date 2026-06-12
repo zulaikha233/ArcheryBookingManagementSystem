@@ -54,7 +54,7 @@ namespace ArcheryAlley.Controllers
                     LevelCategory = level,
                     ReportText = reportText,
                     CoachName = HttpContext.Session.GetString("UserName") ?? "Coach",
-                    CoachEmpId = HttpContext.Session.GetString("EmpId") ?? "",
+                    CoachID = HttpContext.Session.GetString("EmpId") ?? "",
                     ReportDate = DateTime.Now
                 };
 
@@ -73,11 +73,27 @@ namespace ArcheryAlley.Controllers
             var archers = _repository.GetAllArchers();
 
             var result = archers.Select(a => new {
-                studentId = a.StudentId,
-                fullName = a.FullName,
-                levelCategory = a.LevelCategory
+                name = a.FullName,
+                level = a.LevelCategory ?? "Unassigned",
+                age = a.Age ?? 0
             });
             return Json(result);
+        }
+
+        [HttpGet]
+        public JsonResult GetStudentByName(string name, string level)
+        {
+            var archers = _repository.GetAllArchers()
+                .Where(a => a.FullName.ToLower().Contains(name.ToLower())
+                         && a.LevelCategory == level)
+                .Select(a => new {
+                    name = a.FullName,
+                    level = a.LevelCategory ?? "Unassigned",
+                    age = a.Age ?? 0
+                })
+                .ToList();
+
+            return Json(archers);
         }
     }
 }

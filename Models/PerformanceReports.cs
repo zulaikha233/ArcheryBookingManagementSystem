@@ -9,7 +9,7 @@ namespace ArcheryAlley.Models
         public string LevelCategory { get; set; }
         public string ReportText { get; set; }
         public string CoachName { get; set; }
-        public string CoachEmpId { get; set; }
+        public string CoachID { get; set; }
         public DateTime ReportDate { get; set; }
 
 

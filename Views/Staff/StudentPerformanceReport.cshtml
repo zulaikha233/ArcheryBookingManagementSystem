@@ -520,8 +520,8 @@
 
         <!-- ── LEVEL CATEGORY TABS ── -->
         <div class="glass-card level-tabs-card">
-            <div class="level-tabs-label">
-                <i class="bi bi-trophy-fill"></i> Select Level Category
+            <div class="level-tabs">
+                <button class="level-tab active" data-level="All"            onclick="selectLevel(this)">🏹 All</button>
             </div>
             <div class="level-tabs">
                 <button class="level-tab active" data-level="GrassRoots"     onclick="selectLevel(this)">🌱 GrassRoots</button>
@@ -663,35 +663,7 @@
               fetch(`/Report/GetStudentReports?name=${name}&level=${selectedLevel}`)
            ──
         ════════════════════════════════════════════════ */
-        const mockStudents = {
-            "GrassRoots": [
-                {
-                    name: "Ahmad Faris",
-                    reports: [
-                        { date: "2026-05-10", time: "09:15", coach: "Coach Zad", text: "Ahmad shows great enthusiasm during sessions. His stance is improving steadily and he is beginning to develop consistent form in his draw." },
-                        { date: "2026-04-22", time: "10:00", coach: "Coach Rina", text: "First session went well. Ahmad is eager to learn and follows instructions carefully. Needs to work on grip consistency." }
-                    ]
-                },
-                {
-                    name: "Nurul Aina",
-                    reports: [
-                        { date: "2026-05-15", time: "14:30", coach: "Coach Zad", text: "Nurul is progressing well. Her release technique has improved significantly this week. Recommended to move to Beginner 1 next month." }
-                    ]
-                }
-            ],
-            "Beginner 1": [
-                {
-                    name: "Haziq Danial",
-                    reports: [
-                        { date: "2026-05-20", time: "09:00", coach: "Coach Zad", text: "Haziq is showing consistent groupings at 10m. His anchor point is now reliable and breathing control is good." }
-                    ]
-                }
-            ],
-            "Beginner 2": [],
-            "Intermediate 1": [],
-            "Intermediate 2": [],
-            "Expert": []
-        };
+        
 
         /* ── STATE ── */
         let selectedLevel   = 'GrassRoots';
@@ -788,31 +760,40 @@
         }
 
         /* ── SEARCH ── */
-        function searchStudent() {
-            if (selectedLevel === 'All') return; // search disabled on All tab
+        async function searchStudent() {
+    if (selectedLevel === 'All') return;
 
-            const query = document.getElementById('searchInput').value.trim().toLowerCase();
-            if (!query) return;
+    const query = document.getElementById('searchInput').value.trim();
+    if (!query) return;
 
-            const levelStudents = mockStudents[selectedLevel] || [];
-            const student = levelStudents.find(s => s.name.toLowerCase().includes(query));
+    try {
+        const response = await fetch(`/Report/GetStudentByName?name=${encodeURIComponent(query)}&level=${encodeURIComponent(selectedLevel)}`);
+        const results  = await response.json();
 
-            if (!student) {
-                document.getElementById('emptyCard').innerHTML = `
-                    <div class="empty-panel">
-                        <i class="bi bi-person-x-fill"></i>
-                        <h4>Student Not Found</h4>
-                        <p>No student named "<strong style="color:var(--text-white)">${document.getElementById('searchInput').value}</strong>" found in <strong style="color:var(--primary)">${selectedLevel}</strong>.</p>
-                    </div>`;
-                document.getElementById('emptyCard').style.display      = '';
-                document.getElementById('studentSection').style.display = 'none';
-                return;
-            }
-
-            currentStudent = student;
-            reportsVisible = false;
-            renderStudent(student);
+        if (results.length === 0) {
+            document.getElementById('emptyCard').innerHTML = `
+                <div class="empty-panel">
+                    <i class="bi bi-person-x-fill"></i>
+                    <h4>Student Not Found</h4>
+                    <p>No student named "<strong style="color:var(--text-white)">${query}</strong>" found in <strong style="color:var(--primary)">${selectedLevel}</strong>.</p>
+                </div>`;
+            document.getElementById('emptyCard').style.display      = '';
+            document.getElementById('studentSection').style.display = 'none';
+            return;
         }
+
+        const archer = results[0];
+        currentStudent = {
+            name:    archer.name,
+            reports: []
+        };
+        reportsVisible = false;
+        renderStudent(currentStudent);
+
+    } catch (err) {
+        console.error('Search error:', err);
+    }
+}
 
         function renderStudent(student) {
             document.getElementById('emptyCard').style.display      = 'none';
@@ -828,7 +809,7 @@
         }
 
         /* ── TOGGLE REPORTS PANEL ── */
-        function toggleReports() {
+        async function toggleReports() {
             reportsVisible = !reportsVisible;
             const panel = document.getElementById('reportsPanel');
             const btn   = document.getElementById('performanceBtn');
@@ -837,7 +818,7 @@
                 panel.classList.add('visible');
                 btn.classList.add('active');
                 btn.innerHTML = `<i class="bi bi-x-lg"></i> Close`;
-                renderReports();
+                await renderReports(); 
             } else {
                 panel.classList.remove('visible');
                 btn.classList.remove('active');
@@ -847,57 +828,67 @@
         }
 
         /* ── RENDER REPORTS LIST ── */
-        function renderReports() {
-            const list = document.getElementById('reportList');
-            document.getElementById('reportsSubtitle').textContent = `${currentStudent.reports.length} report${currentStudent.reports.length !== 1 ? 's' : ''} for ${currentStudent.name}`;
+       async function renderReports() {
+    const list = document.getElementById('reportList');
+    list.innerHTML = `<div style="padding:24px; text-align:center; color:var(--text-dim);">Loading reports...</div>`;
 
-            if (currentStudent.reports.length === 0) {
-                list.innerHTML = `
-                    <div style="padding:36px; text-align:center; color:var(--text-dim); font-size:0.85rem;">
-                        No reports yet. Click <strong style="color:var(--text-white)">Add New Report</strong> to write the first one.
-                    </div>`;
-                return;
-            }
+    try {
+        const response = await fetch(`/Report/GetStudentReports?name=${encodeURIComponent(currentStudent.name)}&level=${encodeURIComponent(selectedLevel)}`);
+        const data = await response.json();
+        currentStudent.reports = data || [];
+    } catch (err) {
+        console.error('Load reports error:', err);
+        currentStudent.reports = [];
+    }
 
-            list.innerHTML = '';
+    document.getElementById('reportsSubtitle').textContent = `${currentStudent.reports.length} report${currentStudent.reports.length !== 1 ? 's' : ''} for ${currentStudent.name}`;
 
-            // Sort by date descending — most recent first
-            const sorted = [...currentStudent.reports].sort((a, b) => new Date(b.date) - new Date(a.date));
+    if (currentStudent.reports.length === 0) {
+        list.innerHTML = `
+            <div style="padding:36px; text-align:center; color:var(--text-dim); font-size:0.85rem;">
+                No reports yet. Click <strong style="color:var(--text-white)">Add New Report</strong> to write the first one.
+            </div>`;
+        return;
+    }
 
-            sorted.forEach((r, idx) => {
-                const dateObj = new Date(r.date + 'T00:00:00');
-                const day     = dateObj.getDate();
-                const month   = dateObj.toLocaleDateString('en-MY', { month: 'short' });
-                const year    = dateObj.getFullYear();
+    list.innerHTML = '';
 
-                const item = document.createElement('div');
-                item.className = 'report-item';
-                item.id = `report-${idx}`;
+    const sorted = [...currentStudent.reports].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-                item.innerHTML = `
-                    <div class="report-item-header" onclick="toggleReportItem(${idx})">
-                        <div class="report-date-block">
-                            <div class="day">${day}</div>
-                            <div class="month">${month}</div>
-                            <div class="year">${year}</div>
-                        </div>
-                        <div class="report-summary">
-                            <div class="report-time">
-                                <i class="bi bi-clock"></i> ${r.time}
-                            </div>
-                            <div class="report-coach">
-                                <i class="bi bi-patch-check-fill"></i> ${r.coach}
-                            </div>
-                        </div>
-                        <i class="bi bi-chevron-down report-chevron"></i>
+    sorted.forEach((r, idx) => {
+        const dateObj = new Date(r.date + 'T00:00:00');
+        const day     = dateObj.getDate();
+        const month   = dateObj.toLocaleDateString('en-MY', { month: 'short' });
+        const year    = dateObj.getFullYear();
+
+        const item = document.createElement('div');
+        item.className = 'report-item';
+        item.id = `report-${idx}`;
+
+        item.innerHTML = `
+            <div class="report-item-header" onclick="toggleReportItem(${idx})">
+                <div class="report-date-block">
+                    <div class="day">${day}</div>
+                    <div class="month">${month}</div>
+                    <div class="year">${year}</div>
+                </div>
+                <div class="report-summary">
+                    <div class="report-time">
+                        <i class="bi bi-clock"></i> ${r.time}
                     </div>
-                    <div class="report-body">
-                        <div class="report-text">${r.text}</div>
-                    </div>`;
+                    <div class="report-coach">
+                        <i class="bi bi-patch-check-fill"></i> ${r.coach}
+                    </div>
+                </div>
+                <i class="bi bi-chevron-down report-chevron"></i>
+            </div>
+            <div class="report-body">
+                <div class="report-text">${r.text}</div>
+            </div>`;
 
-                list.appendChild(item);
-            });
-        }
+        list.appendChild(item);
+    });
+}
 
         /* ── TOGGLE INDIVIDUAL REPORT ── */
         function toggleReportItem(idx) {
