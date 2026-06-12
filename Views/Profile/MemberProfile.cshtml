@@ -243,6 +243,17 @@
         font-weight: 600;
     }
 
+    /* Form Validation Feedback */
+    .was-validated .form-control-premium:invalid ~ .invalid-feedback,
+    .was-validated .form-control-premium:invalid ~ div > .invalid-feedback {
+        display: block !important;
+    }
+
+    .was-validated .form-control-premium:invalid {
+        border-color: #ff4d4d !important;
+        background-image: none !important;
+    }
+
     /* Back & Save Button */
     .btn-premium-edit {
         background: var(--primary);
@@ -439,7 +450,7 @@
             
             <div class="d-flex justify-content-start">
                 <a href="/Account/MemberDashboard" class="btn-outline-premium">
-                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    Back to Dashboard
                 </a>
             </div>
 
@@ -459,7 +470,11 @@
                 text: '@Html.Raw(ViewBag.SuccessMessage)',
                 background: '#1a1d24',
                 color: '#fff',
-                confirmButtonColor: '#ff4d4d'
+                confirmButtonText: 'OK',
+                customClass: {
+                    confirmButton: 'btn btn-danger px-4'
+                },
+                buttonsStyling: false
             });
             </text>
         }
@@ -473,7 +488,11 @@
                 text: '@Html.Raw(ViewBag.ErrorMessage)',
                 background: '#1a1d24',
                 color: '#fff',
-                confirmButtonColor: '#ff4d4d'
+                confirmButtonText: 'OK',
+                customClass: {
+                    confirmButton: 'btn btn-danger px-4'
+                },
+                buttonsStyling: false
             });
             </text>
         }
@@ -505,6 +524,19 @@
                 if (!form.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
+                    
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Incomplete Profile',
+                        text: 'Please complete all required fields to update your profile.',
+                        background: '#1a1d24',
+                        color: '#fff',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'btn btn-danger px-4'
+                        },
+                        buttonsStyling: false
+                    });
                 }
                 form.classList.add('was-validated');
             }, false);

@@ -63,18 +63,25 @@ namespace ArcheryAlley
         // Payment Management
         public void AddPayment(Payments payment);
         public List<Payments> GetPaymentsByEmail(string email);
+        
+        // Membership Management
+        public IEnumerable<MembershipPayments> GetMembershipPaymentsByEmail(string email);
+        public void AddMembershipPayment(MembershipPayments mp);
 
         // Class Session Registration
         public void RegisterClassSession(ClassRegistrations registration);
         public List<ClassRegistrations> GetClassRegistrationsByEmail(string email);
         public List<Reservations> GetReservationsByEmail(string email);
+        public void RemoveClassRegistration(int classRegId);
 
         // Student (Child) Management
         public void AddStudent(Students student);
         public List<Students> GetStudentsByParentId(int customerId);
         public Students GetStudentById(int studentId);
+        public void RemoveStudent(int studentId);
         public ClassRegistrations GetClassRegistrationByStudentId(int studentId);
         public void UpdateStudentStatus(int studentId, string status);
+        public void UpdateStudentProfile(int studentId, string fullName);
         public List<ClassRegistrations> GetPendingPaymentsByEmail(string email);
         public void ClearPendingPaymentsByEmail(string email, string? type = null, int? id = null);
 

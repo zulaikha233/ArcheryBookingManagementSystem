@@ -154,22 +154,15 @@ namespace ArcheryAlley.Controllers
                 _repository.RegisterCustomer(newCustomer);
 
                 // Create pending Annual Membership payment immediately
-                var annualMembership = new ClassRegistrations
+                var annualMembership = new MembershipPayments
                 {
                     CustomerEmail = newCustomer.Email,
-                    CustomerName = newCustomer.Username,
-                    PackageType = "Annual Membership",
-                    PackagePrice = 0.00m,
-                    LearningMethod = "None",
-                    LearningMethodPax = 0,
-                    LearningMethodPrice = 0.00m,
-                    AnnualFee = 80.00m,
-                    TotalPrice = 80.00m,
+                    Amount = 80.00m,
                     PaymentMethod = "None",
-                    PaymentStatus = "Pending",
+                    Status = "Pending",
                     TransactionId = "MEM-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper()
                 };
-                _repository.RegisterClassSession(annualMembership);
+                _repository.AddMembershipPayment(annualMembership);
                 
                 HttpContext.Session.SetString("CustomerEmail", newCustomer.Email);
                 HttpContext.Session.SetString("CustomerName", newCustomer.Username);
@@ -261,8 +254,8 @@ namespace ArcheryAlley.Controllers
         [HttpPost]
         public IActionResult CompleteClassRegistration(
             string FullName, string PhoneNumber, string ICNumber, string Address,
-            string PackageType, decimal PackagePrice, string LearningMethod, int LearningMethodPax, decimal LearningMethodPrice,
-            decimal AnnualFee, decimal TotalPrice, string PaymentMethod, int? StudentId = null)
+            string PackageType, decimal PackagePrice,
+            decimal TotalPrice, string PaymentMethod, int? StudentId = null)
         {
             string email = HttpContext.Session.GetString("CustomerEmail");
             if (string.IsNullOrEmpty(email))
@@ -306,13 +299,12 @@ namespace ArcheryAlley.Controllers
                 }
             }
 
-            decimal finalAnnualFee = AnnualFee;
             decimal finalTotalPrice = TotalPrice;
 
+            // If registering parent who is ALREADY ACTIVE, override to 0 annual fee
             if (!StudentId.HasValue && customer.Status == "Active")
             {
-                finalAnnualFee = 0.00m;
-                finalTotalPrice = PackagePrice + LearningMethodPrice;
+                finalTotalPrice = PackagePrice;
             }
 
             var registration = new ClassRegistrations
@@ -321,10 +313,6 @@ namespace ArcheryAlley.Controllers
                 CustomerName = FullName,
                 PackageType = PackageType,
                 PackagePrice = PackagePrice,
-                LearningMethod = LearningMethod,
-                LearningMethodPax = LearningMethodPax,
-                LearningMethodPrice = LearningMethodPrice,
-                AnnualFee = finalAnnualFee,
                 TotalPrice = finalTotalPrice,
                 PaymentMethod = PaymentMethod == "fpx" ? "Online (FPX)" : "Credit/Debit Card",
                 PaymentStatus = "Success",
@@ -378,6 +366,7 @@ namespace ArcheryAlley.Controllers
             }).ToList();
 
             ViewBag.ClassRegistrations = _repository.GetClassRegistrationsByEmail(email);
+            ViewBag.MembershipPayments = _repository.GetMembershipPaymentsByEmail(email);
 
             // Pass students (children) list
             var parent = _repository.GetCustomerByEmail(email);
@@ -537,10 +526,12 @@ namespace ArcheryAlley.Controllers
                 return RedirectToAction("CustomerLogin");
 
             var classRegs = _repository.GetClassRegistrationsByEmail(email) ?? new List<ClassRegistrations>();
+            var membershipPayments = _repository.GetMembershipPaymentsByEmail(email) ?? new List<MembershipPayments>();
             var reservations = _repository.GetReservationsByEmail(email) ?? new List<Reservations>();
             var payments = _repository.GetPaymentsByEmail(email) ?? new List<Payments>();
 
             ViewBag.ClassRegs = classRegs;
+            ViewBag.MembershipPayments = membershipPayments;
             ViewBag.Reservations = reservations;
             ViewBag.Payments = payments;
 

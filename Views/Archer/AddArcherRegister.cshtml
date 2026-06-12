@@ -1,31 +1,309 @@
+@model ArcheryAlley.Models.Students
 @{
     ViewBag.Title = "Archer Class Registration";
     Layout = "~/Views/Shared/_MemberLayout.cshtml";
+    
+    var unregisteredStudents = ViewBag.UnregisteredStudents as List<ArcheryAlley.Models.Students>;
+    int defaultStudentId = ViewBag.PreSelectedStudentId != null ? (int)ViewBag.PreSelectedStudentId : (unregisteredStudents?.FirstOrDefault()?.StudentId ?? 0);
 }
 
 @section Styles {
     <style>
         .wizard-container { max-width: 900px; margin: 0 auto; }
         .page-header { margin-bottom: 30px; }
-        .archer-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 15px 20px;
-            margin-bottom: 12px;
-            transition: all 0.2s;
+
+        /* Standardized Stepper */
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
         }
-        .archer-card:hover { border-color: rgba(255,255,255,0.2); }
-        .archer-card.selected {
-            background: rgba(16,185,129,0.05);
+
+        .step {
+            text-align: center;
+            opacity: 0.4;
+            transition: all 0.3s ease;
+        }
+
+        .step.active { opacity: 1; }
+
+        .step span {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            font-weight: 800;
+            color: var(--text-dim);
+            transition: all 0.3s ease;
+        }
+
+        .step.active span {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            box-shadow: 0 0 25px var(--primary-glow);
+        }
+
+        .step p { 
+            font-size: 0.7rem; 
+            text-transform: uppercase; 
+            margin: 0; 
+            letter-spacing: 2px; 
+            color: var(--text-dim); 
+            font-weight: 700; 
+            transition: all 0.3s ease;
+        }
+        
+        .step.active p { color: var(--primary); }
+
+        .step-line {
+            width: 80px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.08);
+            margin-top: -25px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .step-line.active {
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        /* Wizard Step Visibility */
+        .wizard-step-section {
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .wizard-step-section.active {
+            display: block;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Package & Method Selection */
+        .package-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .selection-card {
+            background: rgba(255, 255, 255, 0.01);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px 25px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .selection-card:hover {
+            border-color: rgba(255, 77, 77, 0.3);
+            background: rgba(255, 255, 255, 0.03);
+            transform: translateY(-3px);
+        }
+
+        .selection-card.selected {
+            border-color: var(--primary) !important;
+            background: var(--primary) !important;
+            color: #000 !important;
+            box-shadow: 0 15px 35px var(--primary-glow) !important;
+            transform: translateY(-5px);
+        }
+
+        .selection-card.selected::after {
+            content: '\e272';
+            font-family: 'bootstrap-icons';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #000 !important;
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .selection-card.selected h2,
+        .selection-card.selected h4,
+        .selection-card.selected .price-display,
+        .selection-card.selected .currency,
+        .selection-card.selected .amount,
+        .selection-card.selected .period,
+        .selection-card.selected p,
+        .selection-card.selected .text-dim,
+        .selection-card.selected .benefit-list li,
+        .selection-card.selected .benefit-list i {
+            color: #000 !important;
+            text-shadow: none !important;
+        }
+
+        .pricing-card {
+            padding: 40px 30px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .price-display {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .currency {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dim);
+        }
+
+        .amount {
+            font-size: 3.2rem;
+            font-weight: 900;
+            line-height: 1;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+
+        .period {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        .benefit-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .benefit-list li {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        .fw-900 { font-weight: 900; }
+
+        .live-summary-card {
+            background: linear-gradient(145deg, #131924, #080c11);
+            border-radius: var(--radius-md);
+            padding: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            margin-top: 30px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .summary-label {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .summary-val {
+            font-weight: 750;
+            color: #fff;
+        }
+
+        .archer-card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .archer-select-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 2px solid var(--border-color);
+            border-radius: 14px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .archer-select-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .archer-select-card.selected {
+            background: rgba(16, 185, 129, 0.08);
             border-color: #10B981;
         }
-        .summary-card {
-            background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(0,0,0,0.2));
-            border-radius: var(--radius-md);
-            padding: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            margin-top: 30px;
+
+        .archer-select-card.selected::after {
+            content: '\F26A'; /* bi-check-circle-fill */
+            font-family: 'bootstrap-icons';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            right: 20px;
+            color: #10B981;
+            font-size: 1.5rem;
+        }
+
+        .archer-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            transition: all 0.2s;
+        }
+
+        .archer-select-card.selected .archer-avatar {
+            background: #10B981;
+            color: #000;
+        }
+
+        .archer-info {
+            padding-right: 35px;
+        }
+
+        .archer-info h5 {
+            margin: 0;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+        }
+
+        .archer-info p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-top: 3px;
         }
     </style>
 }
@@ -33,7 +311,25 @@
 <div class="wizard-container py-3">
     <div class="text-center mb-5 page-header">
         <h1 class="text-white fw-extrabold mb-2" style="font-size: 2.2rem; letter-spacing: -0.5px;">CLASS <span style="color: var(--primary);">REGISTRATION</span></h1>
-        <p class="text-dim">Select packages for your archers. You can register multiple archers at once.</p>
+        <p class="text-dim">Select one or more archers and choose a package for them.</p>
+    </div>
+
+    <!-- Step Tracker Header -->
+    <div class="step-indicator mb-5">
+        <div class="step active" id="trackStep-1">
+            <span>1</span>
+            <p>Add Archer</p>
+        </div>
+        <div class="step-line active" id="trackLine-1"></div>
+        <div class="step active" id="trackStep-2">
+            <span>2</span>
+            <p>Class Package</p>
+        </div>
+        <div class="step-line" id="trackLine-2"></div>
+        <div class="step" id="trackStep-3">
+            <span>3</span>
+            <p>Payment</p>
+        </div>
     </div>
 
     <!-- Alert Box -->
@@ -41,158 +337,262 @@
         <i class="bi bi-exclamation-circle me-2"></i> <span id="wizardAlertMessage"></span>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3 p-3" style="background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
-        <div>
-            <button type="button" class="btn btn-sm btn-outline-light me-2" onclick="selectAllArchers(true)">Select All</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="selectAllArchers(false)">Deselect All</button>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <span class="text-dim small fw-bold">APPLY TO ALL:</span>
-            <select class="form-select form-select-sm bg-dark text-white border-secondary" style="width: auto; border-radius: 8px;" onchange="applyToAll(this.value)">
-                <option value="">-- Choose Package --</option>
-                <option value="4slots" data-price="150" data-name="2 Session (4 Slots)">4 Slots (RM 150)</option>
-                <option value="6slots" data-price="210" data-name="6 Slots">6 Slots (RM 210)</option>
-            </select>
-        </div>
-    </div>
-
-    <div id="archersList">
-        @if (ViewBag.UnregisteredStudents != null)
-        {
-            foreach (var archer in ViewBag.UnregisteredStudents)
-            {
-                bool isPreSelected = ViewBag.PreSelectedStudentId != null && ViewBag.PreSelectedStudentId == archer.StudentId;
-                <div class="archer-card d-flex justify-content-between align-items-center @(isPreSelected ? "selected" : "")" id="card_@archer.StudentId">
-                    <div class="form-check d-flex align-items-center mb-0">
-                        <input class="form-check-input archer-checkbox" type="checkbox" value="@archer.StudentId" id="chk_@archer.StudentId" onchange="updateSelection()" @(isPreSelected ? "checked" : "") style="width: 20px; height: 20px; cursor: pointer;">
-                        <label class="form-check-label text-white ms-3" for="chk_@archer.StudentId" style="cursor: pointer;">
-                            <span class="fw-bold d-block" style="font-size: 1.05rem;">@archer.FullName</span>
-                            <span class="text-dim small">@(archer.Age != null ? $"{archer.Age} years old" : "")</span>
-                        </label>
-                    </div>
-                    <div>
-                        <select class="form-select form-select-sm bg-dark text-white border-secondary pkg-select" id="pkg_@archer.StudentId" onchange="updateSelection()" style="min-width: 200px; border-radius: 8px;">
-                            <option value="4slots" data-price="150" data-name="2 Session (4 Slots)">4 Slots Package (RM 150)</option>
-                            <option value="6slots" data-price="210" data-name="6 Slots">6 Slots Package (RM 210)</option>
-                        </select>
-                    </div>
+    <!-- WIZARD STEP 1: Selection -->
+    <div class="wizard-step-section active" id="stepSection-1">
+        <div class="mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label text-dim fw-bold small text-uppercase m-0" style="font-size: 0.8rem; letter-spacing: 1px;">Select Archer(s)</label>
+                <button type="button" class="btn btn-sm" style="border-radius: 50px; padding: 4px 16px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.5px; color: #10B981; border: 1px solid #10B981; background: rgba(16, 185, 129, 0.1);" onclick="selectAllArchers()">Select All</button>
+            </div>
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 20px; max-height: 300px; overflow-y: auto;">
+                <div class="archer-card-grid">
+                    @if (unregisteredStudents != null)
+                    {
+                        foreach (var archer in unregisteredStudents)
+                        {
+                            bool isSelected = archer.StudentId == defaultStudentId;
+                            <div class="archer-select-card @(isSelected ? "selected" : "")" id="archer-card-@archer.StudentId" onclick="toggleArcher(@archer.StudentId, '@archer.FullName.Replace("'", "\\'")')">
+                                <div class="archer-avatar"><i class="bi bi-person-fill"></i></div>
+                                <div class="archer-info">
+                                    <h5>@Html.Raw(archer.FullName.Replace(" BIN ", "<br/>BIN ").Replace(" BINTI ", "<br/>BINTI ").Replace(" A/L ", "<br/>A/L ").Replace(" A/P ", "<br/>A/P "))</h5>
+                                    <p>@archer.Age years old</p>
+                                </div>
+                            </div>
+                        }
+                    }
                 </div>
-            }
-        }
-    </div>
-
-    <div class="summary-card">
-        <h4 class="fw-bold text-white mb-4" style="font-size: 1.1rem; letter-spacing: 0.3px;">
-            <i class="bi bi-receipt me-2" style="color: var(--primary);"></i>REGISTRATION SUMMARY
-        </h4>
-        
-        <div id="summaryDetails">
-            <p class="text-dim small">No archers selected.</p>
-        </div>
-
-        <div class="summary-row mt-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.1) !important; display: flex; justify-content: space-between;">
-            <span class="text-white fw-extrabold" style="font-size: 1.05rem;">TOTAL DUE</span>
-            <span class="text-primary fw-extrabold" style="font-size: 2rem;" id="summaryTotal">RM 0.00</span>
-        </div>
-
-        <div class="mt-4 p-3" style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 12px;">
-            <div class="d-flex align-items-center gap-3">
-                <i class="bi bi-clock-fill" style="color: #F59E0B; font-size: 1.25rem;"></i>
-                <p class="m-0 small" style="color: #F59E0B; font-size: 0.8rem; line-height: 1.4;">
-                    <strong>Payment Pending</strong> — This amount will be added to your Fee / Payment section for settlement as a single combined invoice.
-                </p>
             </div>
         </div>
+
+        <div class="mb-4">
+            <label class="form-label text-dim fw-bold small text-uppercase mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">Select Class Package</label>
+            <div class="package-grid">
+                <div class="selection-card pricing-card text-center h-100 selected" id="opt-pkg-4slots" onclick="selectPackage('2 Session (4 Slots)', 150.00, 'Starter Tier', 'opt-pkg-4slots')">
+                    <h2 class="fw-900 mb-2">Starter Tier</h2>
+                    <div class="price-display">
+                        <span class="currency">RM</span>
+                        <span class="amount">150</span>
+                        <span class="period">/ Archer</span>
+                    </div>
+                    <p class="text-dim mt-3" style="font-size: 0.85rem;">Comprises 8 total instruction hours scheduled across 2 weekend slots.</p>
+                    <ul class="benefit-list text-start mt-4 mb-0" style="padding-left: 20px;">
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> 8 Instruction Hours</li>
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> Certified Coaching</li>
+                    </ul>
+                </div>
+
+                <div class="selection-card pricing-card text-center h-100" id="opt-pkg-6slots" onclick="selectPackage('6 Slots', 210.00, 'Progressive Tier', 'opt-pkg-6slots')">
+                    <h2 class="fw-900 mb-2">Progressive Tier</h2>
+                    <div class="price-display">
+                        <span class="currency">RM</span>
+                        <span class="amount">210</span>
+                        <span class="period">/ Archer</span>
+                    </div>
+                    <p class="text-dim mt-3" style="font-size: 0.85rem;">Unlocks 12 instruction hours with certified coaches on weekends.</p>
+                    <ul class="benefit-list text-start mt-4 mb-0" style="padding-left: 20px;">
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> 12 Instruction Hours</li>
+                        <li><i class="bi bi-check-circle-fill text-primary"></i> Best Value For Progression</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between gap-3 mt-5">
+            <button type="button" class="btn-premium-outline" onclick="window.location.href='/Archer/MyArchers'">
+                CANCEL
+            </button>
+            <button type="button" class="btn-premium" onclick="goToStep(2)">
+                PROCEED TO PAYMENT
+            </button>
+        </div>
     </div>
 
-    <div class="d-flex justify-content-between gap-3 mt-5">
-        <button type="button" class="btn-premium-outline" onclick="window.location.href='/Archer/MyArchers'">
-            <i class="bi bi-arrow-left me-2"></i> BACK TO ARCHERS
-        </button>
-        <button type="button" class="btn-premium" id="confirmBtn" onclick="submitRegistration()">
-            CONFIRM REGISTRATION <i class="bi bi-check-circle-fill ms-2"></i>
-        </button>
+    <!-- WIZARD STEP 2: Summary & Payment -->
+    <div class="wizard-step-section" id="stepSection-2">
+        <div class="live-summary-card mt-0" style="padding: 0; overflow: hidden;">
+            <div style="padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <h3 class="fw-bold text-white mb-0" style="font-size: 1.25rem; letter-spacing: 0.3px;">REGISTRATION SUMMARY</h3>
+            </div>
+
+            <div style="padding: 24px;">
+                <!-- Package Box -->
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 20px;">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-white fw-extrabold" id="summaryPackageNameBox" style="font-size: 1.15rem;">Starter Tier</span>
+                    </div>
+                    <div class="text-dim mb-3" style="font-size: 0.85rem;" id="summaryPackageDetailsBox">
+                        0 archer(s)
+                    </div>
+                    
+                    <!-- Scrollable Archer List -->
+                    <div id="scrollableArcherList" style="max-height: 180px; overflow-y: auto; padding-right: 10px; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                        <!-- JS POPULATED -->
+                    </div>
+                </div>
+
+                <!-- Payment Summary Breakdown -->
+                <div class="mt-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-white fw-semibold" id="summaryArchersRegLabel" style="font-size: 0.95rem;">Archers Registration (0 pax)</span>
+                        <span class="text-white fw-semibold" id="summaryCalculationBreakdownText" style="font-size: 0.95rem;">RM 0.00 &times; 0</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-white fw-semibold" style="font-size: 0.95rem; opacity: 0.8;">Service Fee</span>
+                        <span class="text-white fw-semibold" style="font-size: 0.95rem; opacity: 0.8;">RM 0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-white fw-semibold" style="font-size: 0.95rem; opacity: 0.8;">Tax</span>
+                        <span class="text-white fw-semibold" style="font-size: 0.95rem; opacity: 0.8;">RM 0.00</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
+                        <span class="text-white fw-bold" style="font-size: 1.05rem;">Total</span>
+                        <span class="text-white fw-bold" style="font-size: 1.05rem;" id="summaryTotalBox">RM 0.00</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 rounded-lg" style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 12px;">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="bi bi-clock-fill" style="color: #F59E0B; font-size: 1.25rem;"></i>
+                        <p class="m-0 small" style="color: #F59E0B; font-size: 0.8rem; line-height: 1.4;">
+                            <strong>Payment Pending</strong> — This amount will be added to your Fee / Payment section for settlement.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between gap-3 mt-5">
+            <button type="button" class="btn-premium-outline" onclick="goToStep(1)">
+                BACK
+            </button>
+            <button type="button" class="btn-premium" id="confirmBtn" onclick="submitRegistration()">
+                CONFIRM REGISTRATION & PAY <i class="bi bi-check-circle-fill ms-2"></i>
+            </button>
+        </div>
     </div>
 </div>
 
 <!-- Success Modal -->
 <div id="registrationSuccessModal" class="success-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(10,12,18,0.8); backdrop-filter:blur(8px); z-index:999; justify-content:center; align-items:center;">
     <div class="success-modal-content" style="background: #0d121c; border: 1px solid rgba(255,255,255,0.05); border-radius: 30px; padding: 50px 40px; text-align: center; max-width: 500px; width: 90%; box-shadow: 0 45px 120px rgba(0,0,0,0.9);">
-        <div style="width: 80px; height: 80px; border-radius: 25px; background: var(--primary); color: #000; font-size: 2.5rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-            <i class="bi bi-check-lg"></i>
+        <div style="width: 80px; height: 80px; border-radius: 25px; background: #10B981; color: #fff; font-size: 2.5rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);">
+            <i class="bi bi-check-lg" style="font-weight: 900;"></i>
         </div>
         <h3 class="fw-extrabold text-white mb-2" style="font-size: 1.8rem;">REGISTRATION SUCCESS!</h3>
         <p class="text-dim mb-4" style="font-size: 0.95rem;">
-            <span id="resArcherCount" style="color: var(--primary); font-weight: 700;"></span> archers have been successfully registered. The invoice has been grouped into your fee summary.
+            <span id="resArcherName" style="color: var(--primary); font-weight: 700;"></span> archer(s) successfully registered. The invoice has been added to your fee summary.
         </p>
-        <button class="btn-premium w-100 mt-3" onclick="window.location.href='/Archer/MyArchers'" style="padding: 15px;">
-            PROCEED TO PAYMENT <i class="bi bi-arrow-right ms-2"></i>
+        <button class="btn-premium w-100 mt-3" onclick="window.location.href='/Account/MemberPayment'" style="padding: 15px; justify-content: center; display: flex; align-items: center;">
+            PROCEED TO PAYMENT
         </button>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        const annualFee = 80.00;
+        let selectedPackageType = '2 Session (4 Slots)';
+        let selectedPackageName = '4 Slots Package';
+        let selectedPackagePrice = 150.00;
+        let selectedArchers = [];
 
-        function updateSelection() {
-            const checkboxes = document.querySelectorAll('.archer-checkbox');
-            const summaryDiv = document.getElementById('summaryDetails');
-            let total = 0;
-            let summaryHTML = '';
+        // Initialize selected archers based on DOM
+        document.querySelectorAll('.archer-select-card.selected').forEach(el => {
+            const id = parseInt(el.id.replace('archer-card-', ''));
+            const name = el.querySelector('h5').innerText;
+            selectedArchers.push({ id, name });
+        });
 
-            checkboxes.forEach(chk => {
-                const card = document.getElementById('card_' + chk.value);
-                if (chk.checked) {
+        function toggleArcher(id, name) {
+            const card = document.getElementById('archer-card-' + id);
+            const index = selectedArchers.findIndex(a => a.id === id);
+            
+            if (index > -1) {
+                selectedArchers.splice(index, 1);
+                card.classList.remove('selected');
+            } else {
+                selectedArchers.push({ id, name });
+                card.classList.add('selected');
+            }
+            updateSummary();
+        }
+
+        function selectAllArchers() {
+            const allCards = document.querySelectorAll('.archer-select-card');
+            const allSelected = selectedArchers.length === allCards.length;
+            
+            selectedArchers = [];
+            allCards.forEach(card => {
+                const id = parseInt(card.id.replace('archer-card-', ''));
+                const name = card.querySelector('h5').innerText;
+                if (!allSelected) {
+                    selectedArchers.push({ id, name });
                     card.classList.add('selected');
-                    const pkgSelect = document.getElementById('pkg_' + chk.value);
-                    const pkgOption = pkgSelect.options[pkgSelect.selectedIndex];
-                    const price = parseFloat(pkgOption.dataset.price);
-                    const name = pkgOption.dataset.name;
-                    const archerName = chk.nextElementSibling.querySelector('.fw-bold').innerText;
-
-                    total += (annualFee + price);
-
-                    summaryHTML += `
-                        <div class="mb-3 pb-3 border-bottom" style="border-color: rgba(255,255,255,0.05) !important;">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="text-white fw-bold small">${archerName}</span>
-                                <span class="text-white small">RM ${(annualFee + price).toFixed(2)}</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <span class="text-dim" style="font-size: 0.75rem;">Registration (RM 80) + ${name} (RM ${price})</span>
-                            </div>
-                        </div>
-                    `;
                 } else {
                     card.classList.remove('selected');
                 }
             });
+            updateSummary();
+        }
 
-            if (total === 0) {
-                summaryDiv.innerHTML = '<p class="text-dim small">No archers selected.</p>';
-                document.getElementById('confirmBtn').disabled = true;
-            } else {
-                summaryDiv.innerHTML = summaryHTML;
-                document.getElementById('confirmBtn').disabled = false;
+        function goToStep(stepNumber) {
+            document.getElementById('wizardAlertBox').style.display = 'none';
+
+            if (stepNumber === 2 && selectedArchers.length === 0) {
+                showAlert("Please select at least one archer to proceed.");
+                return;
             }
 
-            document.getElementById('summaryTotal').innerText = `RM ${total.toFixed(2)}`;
+            // Hide all steps
+            document.querySelectorAll('.wizard-step-section').forEach(s => s.classList.remove('active'));
+            // Show target step
+            document.getElementById(`stepSection-${stepNumber}`).classList.add('active');
+
+            // Update tracker
+            if (stepNumber === 1) {
+                document.getElementById('trackStep-3').classList.remove('active');
+                document.getElementById('trackLine-2').classList.remove('active');
+            } else if (stepNumber === 2) {
+                document.getElementById('trackStep-3').classList.add('active');
+                document.getElementById('trackLine-2').classList.add('active');
+            }
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function selectAllArchers(select) {
-            document.querySelectorAll('.archer-checkbox').forEach(chk => {
-                chk.checked = select;
-            });
-            updateSelection();
+        function selectPackage(pkgType, price, displayName, elementId) {
+            document.querySelectorAll('.selection-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById(elementId).classList.add('selected');
+
+            selectedPackageType = pkgType;
+            selectedPackagePrice = price;
+            selectedPackageName = displayName;
+
+            updateSummary();
         }
 
-        function applyToAll(val) {
-            if (!val) return;
-            document.querySelectorAll('.pkg-select').forEach(sel => {
-                sel.value = val;
+        function updateSummary() {
+            const count = selectedArchers.length;
+            const price = selectedPackagePrice;
+            const total = count * price;
+
+            document.getElementById('summaryPackageNameBox').innerText = selectedPackageName;
+            document.getElementById('summaryPackageDetailsBox').innerText = `${count} archer${count > 1 ? 's' : ''}`;
+
+            let archerHtml = '';
+            selectedArchers.forEach(a => {
+                archerHtml += `
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="text-white fw-semibold" style="font-size: 0.95rem;">${a.name}</div>
+                        <div class="text-white fw-bold">RM ${price.toFixed(2)}</div>
+                    </div>
+                `;
             });
-            updateSelection();
+            document.getElementById('scrollableArcherList').innerHTML = archerHtml;
+
+            document.getElementById('summaryArchersRegLabel').innerText = `Archers Registration (${count} pax)`;
+            document.getElementById('summaryCalculationBreakdownText').innerHTML = `RM ${price.toFixed(2)} &times; ${count}`;
+            document.getElementById('summaryTotalBox').innerText = `RM ${total.toFixed(2)}`;
         }
 
         function showAlert(msg) {
@@ -204,20 +604,8 @@
         async function submitRegistration() {
             document.getElementById('wizardAlertBox').style.display = 'none';
             
-            const selected = [];
-            document.querySelectorAll('.archer-checkbox:checked').forEach(chk => {
-                const id = chk.value;
-                const pkgSelect = document.getElementById('pkg_' + id);
-                const pkgOption = pkgSelect.options[pkgSelect.selectedIndex];
-                selected.push({
-                    StudentId: parseInt(id),
-                    PackageType: pkgOption.dataset.name,
-                    PackagePrice: parseFloat(pkgOption.dataset.price)
-                });
-            });
-
-            if (selected.length === 0) {
-                showAlert("Please select at least one archer.");
+            if (selectedArchers.length === 0) {
+                showAlert("Please select at least one archer to register.");
                 return;
             }
 
@@ -225,18 +613,22 @@
             btn.disabled = true;
             btn.innerHTML = `Processing... <div class="spinner-border spinner-border-sm text-light ms-2"></div>`;
 
+            const payload = selectedArchers.map(a => ({
+                StudentId: a.id,
+                PackageType: selectedPackageName,
+                PackagePrice: selectedPackagePrice
+            }));
+
             try {
                 const resp = await fetch('/Archer/ConfirmBulkClassRegistration', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(selected)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
                 const result = await resp.json();
 
                 if (result.success) {
-                    document.getElementById('resArcherCount').innerText = result.totalCount;
+                    document.getElementById('resArcherName').innerText = result.totalCount;
                     document.getElementById('registrationSuccessModal').style.display = 'flex';
                 } else {
                     showAlert('Registration failed: ' + result.message);
@@ -251,6 +643,6 @@
         }
 
         // Initialize on load
-        document.addEventListener('DOMContentLoaded', updateSelection);
+        document.addEventListener('DOMContentLoaded', updateSummary);
     </script>
 }

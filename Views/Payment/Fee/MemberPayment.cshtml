@@ -5,21 +5,68 @@
     Layout = "~/Views/Shared/_MemberLayout.cshtml";
 
     var classRegs = ViewBag.ClassRegs as IEnumerable<ArcheryAlley.Models.ClassRegistrations> ?? new List<ArcheryAlley.Models.ClassRegistrations>();
+    var membershipPayments = ViewBag.MembershipPayments as IEnumerable<ArcheryAlley.Models.MembershipPayments> ?? new List<ArcheryAlley.Models.MembershipPayments>();
     var reservations = ViewBag.Reservations as IEnumerable<ArcheryAlley.Models.Reservations> ?? new List<ArcheryAlley.Models.Reservations>();
     var paymentsList = ViewBag.Payments as IEnumerable<ArcheryAlley.Models.Payments> ?? new List<ArcheryAlley.Models.Payments>();
 
+    // Group reservations to prevent duplicate target rows
+    var groupedReservations = reservations
+        .Select(r => {
+            var p = paymentsList.FirstOrDefault(pay => pay.ReservationId == r.ReservationId);
+            string txnKey = !string.IsNullOrEmpty(p?.TransactionId) 
+                ? p.TransactionId 
+                : $"FALLBACK-{r.CustomerName}-{r.SlotId}-{r.ReservedOn.Date:yyyyMMdd}-{r.ReservedBy}-{r.StudentId}-{r.TotalPrice}";
+            return new { Reservation = r, TxnKey = txnKey };
+        })
+        .GroupBy(x => x.TxnKey)
+        .Select(g => {
+            var first = g.First().Reservation;
+            var targetNos = g.Select(x => x.Reservation.TargetNo).OrderBy(t => t).ToList();
+            var rangeNos = g.Select(x => x.Reservation.RangeNo).Distinct().OrderBy(r => r).ToList();
+            
+            var targetListStr = string.Join(", ", targetNos);
+            var rangeListStr = string.Join(", ", rangeNos);
+
+            // Get payment record
+            var pRecord = paymentsList.FirstOrDefault(p => g.Any(x => x.Reservation.ReservationId == p.ReservationId));
+            
+            return new {
+                ReservationId = g.Min(x => x.Reservation.ReservationId),
+                CustomerName = first.CustomerName,
+                CustomerEmail = first.CustomerEmail,
+                ReservedBy = first.ReservedBy,
+                ReservedOn = first.ReservedOn,
+                Slot = first.Slot,
+                TargetNo = first.TargetNo, 
+                RangeNo = first.RangeNo,   
+                LanesDisplay = "Lane " + rangeListStr,
+                TargetsDisplay = "Target " + targetListStr,
+                DurationHours = first.DurationHours,
+                TotalPrice = g.Sum(x => x.Reservation.TotalPrice), 
+                RateCode = first.RateCode,
+                NumberOfPax = (first.RateCode == "CLASS" || first.RateCode == "Class Session") ? g.Sum(x => x.Reservation.NumberOfPax) : first.NumberOfPax,
+                Status = first.Status,
+                StudentId = first.StudentId,
+                Student = first.Student,
+                PaymentRecord = pRecord
+            };
+        }).ToList();
+
     // Calculate dynamic totals from actual DB data (or default simulated if none)
     decimal actualPaid = classRegs.Where(r => r.PaymentStatus == "Paid" || r.PaymentStatus == "Success").Sum(r => r.TotalPrice) + 
-                         reservations.Where(r => r.Status == 1).Sum(r => r.TotalPrice); // status 1 = Paid/Confirmed
+                         reservations.Where(r => r.Status == 1).Sum(r => r.TotalPrice) +
+                         membershipPayments.Where(m => m.Status == "Success").Sum(m => m.Amount); // status 1 = Paid/Confirmed
                          
     decimal actualPending = classRegs.Where(r => r.PaymentStatus == "Pending").Sum(r => r.TotalPrice) + 
-                           reservations.Where(r => r.Status == 0).Sum(r => r.TotalPrice); // status 0 = Pending
+                            reservations.Where(r => r.Status == 0).Sum(r => r.TotalPrice) +
+                            membershipPayments.Where(m => m.Status == "Pending").Sum(m => m.Amount); // status 0 = Pending
 
     decimal totalTransactions = actualPaid + actualPending;
 
-    // Calculate last transaction amount dynamically
-    var lastTrans = classRegs.Select(c => new { Date = c.RegistrationDate, Amount = c.TotalPrice })
-                        .Concat(reservations.Select(r => new { Date = r.ReservedOn, Amount = r.TotalPrice }))
+    // Calculate last transaction amount dynamically (excluding free RM0.00 items)
+    var lastTrans = classRegs.Where(c => c.TotalPrice > 0).Select(c => new { Date = c.RegistrationDate, Amount = c.TotalPrice })
+                        .Concat(reservations.Where(r => r.TotalPrice > 0).Select(r => new { Date = r.ReservedOn, Amount = r.TotalPrice }))
+                        .Concat(membershipPayments.Where(m => m.Amount > 0).Select(m => new { Date = m.PaymentDate, Amount = m.Amount }))
                         .OrderByDescending(x => x.Date)
                         .FirstOrDefault();
     decimal lastTransactionAmt = lastTrans?.Amount ?? 0;
@@ -727,7 +774,7 @@
             }
 
             <!-- Payment Methods Card -->
-            <div class="payment-methods-card mb-4" data-aos="fade-up">
+            <div class="payment-methods-card mb-4 mb-lg-0" data-aos="fade-up">
                 <h5 class="section-title mb-2 text-white"><i class="bi bi-wallet2 me-2" style="color: #10B981;"></i> Default Payment Method</h5>
                 <p class="text-dim small mb-4">Set your preferred default payment method for lane bookings, class memberships, and renewals.</p>
                 
@@ -869,134 +916,181 @@
     <!-- Full Width Row for Transactions -->
     <div class="row mt-4">
         <div class="col-12">
-            <!-- Transaction History Card -->
-            <div class="transactions-card" style="margin-top: 0;">
-                <div class="trans-header-wrap">
-                    <div class="trans-title-area">
-                        <h4>Transaction</h4>
-                        <p>Reserve courts, buy equipment, and pay coaching fees with just a few taps.</p>
-                    </div>
-                    
-                    <div class="filter-controls">
-                        <div class="search-wrapper">
-                            <input type="text" id="transactionSearch" class="search-input-premium" placeholder="Search">
-                            <i class="bi bi-search search-icon-inside"></i>
-                        </div>
-                        
-                        <div class="select-premium-wrapper">
-                            <i class="bi bi-calendar select-icon-left"></i>
-                            <select class="select-premium select-premium-icon" id="dateFilter">
-                                <option value="All">This Week</option>
-                                <option value="All">All Time</option>
-                            </select>
-                            <i class="bi bi-chevron-down select-chevron"></i>
-                        </div>
-
-                        <div class="select-premium-wrapper">
-                            <select class="select-premium" id="statusFilter">
-                                <option value="All">All Transactions</option>
-                                <option value="Paid">Paid</option>
-                                <option value="Pending">Pending</option>
-                            </select>
-                            <i class="bi bi-chevron-down select-chevron"></i>
-                        </div>
-                    </div>
+            <!-- Transaction List -->
+            <div class="page-header mb-4">
+                <h1 class="text-white">Transaction</h1>
+                <p class="text-dim" style="margin-bottom: 0;">Reserve courts, buy equipment, and pay coaching fees with just a few taps.</p>
+            </div>
+            
+            <div class="filter-bar mb-4" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <div class="search-box" style="display: flex; align-items: center; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 10px 16px; gap: 10px; flex: 1; min-width: 220px; max-width: 350px;">
+                    <i class="bi bi-search" style="color: var(--text-dim); font-size: 0.9rem;"></i>
+                    <input type="text" id="transactionSearch" placeholder="Search" style="background: none; border: none; outline: none; color: #fff; font-size: 0.85rem; width: 100%;">
                 </div>
+                
+                <select class="filter-select" id="dateFilter" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 10px 16px; color: #fff; font-size: 0.85rem; outline: none; cursor: pointer; appearance: none; -webkit-appearance: none; padding-right: 32px; background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23a1a1aa' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 12px center;">
+                    <option value="All" style="background: #1a1e28; color: #fff;">This Week</option>
+                    <option value="All" style="background: #1a1e28; color: #fff;">All Time</option>
+                </select>
 
-                <div class="table-responsive">
-                    <table class="table premium-table align-middle" id="transactionTable">
+                <select class="filter-select" id="statusFilter" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 10px 16px; color: #fff; font-size: 0.85rem; outline: none; cursor: pointer; appearance: none; -webkit-appearance: none; padding-right: 32px; background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23a1a1aa' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 12px center;">
+                    <option value="All" style="background: #1a1e28; color: #fff;">All Transactions</option>
+                    <option value="Paid" style="background: #1a1e28; color: #fff;">Paid</option>
+                    <option value="Pending" style="background: #1a1e28; color: #fff;">Pending</option>
+                </select>
+            </div>
+
+            <div class="table-card">
+                <div style="overflow-x: auto;">
+                    <table class="history-table" id="paymentTable">
                         <thead>
                             <tr>
-                                <th class="text-center">Date <i class="bi bi-chevron-expand ms-1" style="font-size: 0.65rem; opacity: 0.5;"></i></th>
-                                <th class="text-center">Transaction Type <i class="bi bi-chevron-expand ms-1" style="font-size: 0.65rem; opacity: 0.5;"></i></th>
-                                <th class="text-center">For Archer <i class="bi bi-chevron-expand ms-1" style="font-size: 0.65rem; opacity: 0.5;"></i></th>
-                                <th class="text-center">Payment <i class="bi bi-chevron-expand ms-1" style="font-size: 0.65rem; opacity: 0.5;"></i></th>
-                                <th class="text-center">Status <i class="bi bi-chevron-expand ms-1" style="font-size: 0.65rem; opacity: 0.5;"></i></th>
-                                <th class="text-center">Action</th>
+                                <th>Date</th>
+                                <th>Transaction Type</th>
+                                <th>Archer</th>
+                                <th>Payment</th>
+                                <th>Status</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @* Dynamic Class Registrations from DB *@
-                            @foreach (var c in classRegs)
+                        <tbody id="paymentTableBody">
+                            @* Dynamic Membership Payments from DB (excluding free/zero-amount) *@
+                            @foreach (var mp in membershipPayments.Where(m => m.Amount > 0))
                             {
-                                var isPaid = c.PaymentStatus == "Paid" || c.PaymentStatus == "Success";
+                                var isPaid = mp.Status == "Paid" || mp.Status == "Success";
                                 var statusText = isPaid ? "Paid" : "Pending";
-                                var archerName = !string.IsNullOrEmpty(c.CustomerName) ? c.CustomerName : "Myself";
-                                <tr class="trans-row" data-status="@statusText">
+                                <tr class="history-row" data-status="@statusText">
                                     <!-- Date -->
-                                    <td class="text-dim text-center">
-                                        <div class="fw-bold text-white">@c.RegistrationDate.ToString("MMM dd, yyyy")</div>
+                                    <td class="col-date">
+                                        <div class="date-main">@mp.PaymentDate.ToString("MMM dd, yyyy")</div>
                                     </td>
                                     <!-- Transaction Type -->
-                                    <td>
-                                        @if (c.PackageType == "Annual Membership")
+                                    <td class="col-session">
+                                        <span class="badge-session badge-self-train">
+                                            <i class="bi bi-shield-check"></i> Annual Membership
+                                        </span>
+                                    </td>
+                                    <!-- Archer -->
+                                    <td style="font-weight: 700; text-align: center;">
+                                        <div style="width: 180px; margin: 0 auto; display: flex; align-items: center; gap: 12px; justify-content: flex-start; text-align: left;">
+                                            <div class="avatar-cell-initial" style="width: 32px; height: 32px; font-size: 0.8rem; flex-shrink: 0;">@Model.Username[0].ToString().ToUpper()</div>
+                                            <span style="line-height: 1.3; word-wrap: break-word; white-space: normal;">@Html.Raw(Model.Username.Replace(" BIN ", " BIN <br/>").Replace(" BINTI ", " BINTI <br/>").Replace(" A/L ", " A/L <br/>").Replace(" A/P ", " A/P <br/>"))</span>
+                                        </div>
+                                    </td>
+                                    <!-- Payment -->
+                                    <td class="col-amount">
+                                        RM @mp.Amount.ToString("F2")
+                                    </td>
+                                    <!-- Status -->
+                                    <td class="col-status">
+                                        @if (isPaid)
                                         {
-                                            <span class="badge-session badge-self-train" style="background: rgba(16, 185, 129, 0.1); color: #10B981;">
-                                                <i class="bi bi-shield-check"></i> Annual Membership
+                                            <span class="badge-status status-confirmed">
+                                                <i class="bi bi-check-circle-fill"></i> @statusText
                                             </span>
                                         }
                                         else
                                         {
-                                            <span class="badge-session badge-class">
-                                                <i class="bi bi-mortarboard"></i> Class Registration
+                                            <span class="badge-status status-pending">
+                                                <i class="bi bi-clock-fill"></i> @statusText
                                             </span>
                                         }
                                     </td>
-                                    <!-- For Archer -->
+                                    <!-- Action -->
                                     <td>
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div class="avatar-cell-initial">@archerName[0].ToString().ToUpper()</div>
-                                            <div class="fw-bold text-white">@archerName</div>
+                                        <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+                                            <button type="button" onclick="openViewDetailsModal({ type: 'Annual Membership', date: '@mp.PaymentDate.ToString("MMM dd, yyyy")', time: '@mp.PaymentDate.ToString("hh:mm tt")', archer: '@Model.Username', amount: 'RM @mp.Amount.ToString("F2")', status: '@statusText', method: '@(mp.PaymentMethod ?? "Online (FPX)")', refId: '@(mp.TransactionId ?? "N/A")', package: 'Annual Membership' })" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--text-dim); border-radius: 10px; height: 34px; padding: 0 14px; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='var(--text-dim)';">
+                                                View
+                                            </button>
+                                            @if (!isPaid)
+                                            {
+                                                <button type="button" onclick="handlePayNow('membership', @mp.PaymentId)" style="background: var(--primary); border: 1px solid rgba(255, 77, 77, 0.3); color: #000; border-radius: 10px; height: 34px; padding: 0 14px; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; transition: 0.3s; box-shadow: 0 4px 10px rgba(255, 77, 77, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 15px rgba(255, 77, 77, 0.35)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 10px rgba(255, 77, 77, 0.2)';">
+                                                    Pay
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+
+                            @* Dynamic Class Registrations from DB (excluding free/zero-amount) *@
+                            @foreach (var c in classRegs.Where(c => c.TotalPrice > 0))
+                            {
+                                var isPaid = c.PaymentStatus == "Paid" || c.PaymentStatus == "Success";
+                                var statusText = isPaid ? "Paid" : "Pending";
+                                var archerName = !string.IsNullOrEmpty(c.CustomerName) ? c.CustomerName : "Myself";
+                                <tr class="history-row" data-status="@statusText">
+                                    <!-- Date -->
+                                    <td class="col-date">
+                                        <div class="date-main">@c.RegistrationDate.ToString("MMM dd, yyyy")</div>
+                                    </td>
+                                    <!-- Transaction Type -->
+                                    <td class="col-session">
+                                        <span class="badge-session badge-class">
+                                            <i class="bi bi-mortarboard"></i> Class Registration
+                                        </span>
+                                    </td>
+                                    <!-- Archer -->
+                                    <td style="font-weight: 700; text-align: center;">
+                                        <div style="width: 180px; margin: 0 auto; display: flex; align-items: center; gap: 12px; justify-content: flex-start; text-align: left;">
+                                            <div class="avatar-cell-initial" style="width: 32px; height: 32px; font-size: 0.8rem; flex-shrink: 0;">@archerName[0].ToString().ToUpper()</div>
+                                            <span style="line-height: 1.3; word-wrap: break-word; white-space: normal;">@Html.Raw(archerName.Replace(" BIN ", " BIN <br/>").Replace(" BINTI ", " BINTI <br/>").Replace(" A/L ", " A/L <br/>").Replace(" A/P ", " A/P <br/>"))</span>
                                         </div>
                                     </td>
                                     <!-- Payment -->
-                                    <td class="text-end fw-bold text-white">
+                                    <td class="col-amount">
                                         RM @c.TotalPrice.ToString("F2")
                                     </td>
                                     <!-- Status -->
-                                    <td class="text-center">
-                                        <span class="@(isPaid ? "badge-paid-pill" : "badge-pending-pill")">
-                                            @if (isPaid) {
-                                                <i class="bi bi-check-lg"></i>
-                                            } else {
-                                                <i class="bi bi-clock"></i>
-                                            }
-                                            @statusText
-                                        </span>
-                                    </td>
-                                    <!-- Actions -->
-                                    <td class="text-end">
-                                        <button class="btn btn-sm btn-outline-light rounded-pill px-3" style="font-size: 0.75rem; border-color: rgba(255,255,255,0.15); color: var(--text-dim); font-weight: 700; transition: 0.2s;" onmouseover="this.style.color='#fff'; this.style.borderColor='var(--primary)';" onmouseout="this.style.color='var(--text-dim)'; this.style.borderColor='rgba(255,255,255,0.15)';" onclick="openViewDetailsModal({ type: '@(c.PackageType == "Annual Membership" ? "Annual Membership" : "Class Registration")', date: '@c.RegistrationDate.ToString("MMM dd, yyyy")', time: '@c.RegistrationDate.ToString("hh:mm tt")', archer: '@archerName', amount: 'RM @c.TotalPrice.ToString("F2")', status: '@statusText', method: '@(c.PaymentMethod ?? "Online (FPX)")', refId: '@c.TransactionId', package: '@c.PackageType' })">
-                                            View
-                                        </button>
-                                        @if (!isPaid)
+                                    <td class="col-status">
+                                        @if (isPaid)
                                         {
-                                            <button type="button" onclick="handlePayNow('class', @c.RegistrationId)" class="btn btn-sm btn-danger rounded-pill px-3 ms-2" style="font-size: 0.75rem; background: var(--primary) !important; color: #000; border: none; font-weight: 800; transition: 0.2s; box-shadow: 0 4px 10px rgba(255, 77, 77, 0.2);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 15px rgba(255, 77, 77, 0.35)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 10px rgba(255, 77, 77, 0.2)';">
-                                                Pay
-                                            </button>
+                                            <span class="badge-status status-confirmed">
+                                                <i class="bi bi-check-circle-fill"></i> @statusText
+                                            </span>
                                         }
+                                        else
+                                        {
+                                            <span class="badge-status status-pending">
+                                                <i class="bi bi-clock-fill"></i> @statusText
+                                            </span>
+                                        }
+                                    </td>
+                                    <!-- Action -->
+                                    <td>
+                                        <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+                                            <button type="button" onclick="openViewDetailsModal({ type: '@(c.PackageType == "Annual Membership" ? "Annual Membership" : "Class Registration")', date: '@c.RegistrationDate.ToString("MMM dd, yyyy")', time: '@c.RegistrationDate.ToString("hh:mm tt")', archer: '@archerName', amount: 'RM @c.TotalPrice.ToString("F2")', status: '@statusText', method: '@(c.PaymentMethod ?? "Online (FPX)")', refId: '@c.TransactionId', package: '@c.PackageType' })" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--text-dim); border-radius: 10px; height: 34px; padding: 0 14px; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='var(--text-dim)';">
+                                                View
+                                            </button>
+                                            @if (!isPaid)
+                                            {
+                                                <button type="button" onclick="handlePayNow('class', @c.RegistrationId)" style="background: var(--primary); border: 1px solid rgba(255, 77, 77, 0.3); color: #000; border-radius: 10px; height: 34px; padding: 0 14px; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; transition: 0.3s; box-shadow: 0 4px 10px rgba(255, 77, 77, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 15px rgba(255, 77, 77, 0.35)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 10px rgba(255, 77, 77, 0.2)';">
+                                                    Pay
+                                                </button>
+                                            }
+                                        </div>
                                     </td>
                                 </tr>
                             }
  
-                            @* Dynamic Bookings from DB *@
-                            @foreach (var r in reservations)
+                            @* Dynamic Bookings from DB (excluding free/zero-amount) *@
+                            @foreach (var r in groupedReservations.Where(r => r.TotalPrice > 0))
                             {
                                 var isPaid = r.Status == 1;
                                 var statusText = isPaid ? "Paid" : "Pending";
                                 var isSelfTraining = r.RateCode == "SELF_TRAINING" || (r.Slot != null && r.Slot.SlotStartTime.Hours >= 18);
                                 var archerName = r.Student != null ? r.Student.FullName : (!string.IsNullOrEmpty(r.CustomerName) ? r.CustomerName : "Myself");
                                 
-                                var pRecord = paymentsList.FirstOrDefault(p => p.ReservationId == r.ReservationId);
+                                var pRecord = r.PaymentRecord;
                                 var txnDate = pRecord?.PaymentDate ?? r.ReservedOn;
 
-                                <tr class="trans-row" data-status="@statusText">
+                                <tr class="history-row" data-status="@statusText">
                                     <!-- Date -->
-                                    <td class="text-dim text-center">
-                                        <div class="fw-bold text-white">@txnDate.ToString("MMM dd, yyyy")</div>
+                                    <td class="col-date">
+                                        <div class="date-main">@txnDate.ToString("MMM dd, yyyy")</div>
                                     </td>
                                     <!-- Transaction Type -->
-                                    <td>
+                                    <td class="col-session">
                                         @if (isSelfTraining) {
                                             <span class="badge-session badge-self-train">
                                                 <i class="bi bi-moon-stars"></i> Self Training
@@ -1007,54 +1101,65 @@
                                             </span>
                                         }
                                     </td>
-                                    <!-- For Archer -->
-                                    <td>
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div class="avatar-cell-initial">@archerName[0].ToString().ToUpper()</div>
-                                            <div class="fw-bold text-white">@archerName</div>
+                                    <!-- Archer -->
+                                    <td style="font-weight: 700; text-align: center;">
+                                        <div style="width: 180px; margin: 0 auto; display: flex; align-items: center; gap: 12px; justify-content: flex-start; text-align: left;">
+                                            <div class="avatar-cell-initial" style="width: 32px; height: 32px; font-size: 0.8rem; flex-shrink: 0;">@archerName[0].ToString().ToUpper()</div>
+                                            <span style="line-height: 1.3; word-wrap: break-word; white-space: normal;">@Html.Raw(archerName.Replace(" BIN ", " BIN <br/>").Replace(" BINTI ", " BINTI <br/>").Replace(" A/L ", " A/L <br/>").Replace(" A/P ", " A/P <br/>"))</span>
                                         </div>
                                     </td>
                                     <!-- Payment -->
-                                    <td class="text-end fw-bold text-white">
+                                    <td class="col-amount">
                                         RM @r.TotalPrice.ToString("F2")
                                     </td>
                                     <!-- Status -->
-                                    <td class="text-center">
-                                        <span class="@(isPaid ? "badge-paid-pill" : "badge-pending-pill")">
-                                            @if (isPaid) {
-                                                <i class="bi bi-check-lg"></i>
-                                            } else {
-                                                <i class="bi bi-clock"></i>
-                                            }
-                                            @statusText
-                                        </span>
-                                    </td>
-                                    <!-- Actions -->
-                                    <td class="text-end">
-                                        <button class="btn btn-sm btn-outline-light rounded-pill px-3" style="font-size: 0.75rem; border-color: rgba(255,255,255,0.15); color: var(--text-dim); font-weight: 700; transition: 0.2s;" onmouseover="this.style.color='#fff'; this.style.borderColor='var(--primary)';" onmouseout="this.style.color='var(--text-dim)'; this.style.borderColor='rgba(255,255,255,0.15)';" onclick="openViewDetailsModal({ type: '@(isSelfTraining ? "Self Training" : "Target Session")', date: '@txnDate.ToString("MMM dd, yyyy")', time: '@txnDate.ToString("hh:mm tt")', archer: '@archerName', amount: 'RM @r.TotalPrice.ToString("F2")', status: '@statusText', method: '@(pRecord?.PaymentMethod ?? "Online (FPX)")', refId: '@(pRecord?.TransactionId ?? "N/A")', lane: 'Lane @r.RangeNo', target: 'Target @r.TargetNo' })">
-                                            View
-                                        </button>
-                                        @if (!isPaid)
+                                    <td class="col-status">
+                                        @if (isPaid)
                                         {
-                                            <button type="button" onclick="handlePayNow('reservation', @r.ReservationId)" class="btn btn-sm btn-danger rounded-pill px-3 ms-2" style="font-size: 0.75rem; background: var(--primary) !important; color: #000; border: none; font-weight: 800; transition: 0.2s; box-shadow: 0 4px 10px rgba(255, 77, 77, 0.2);" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 15px rgba(255, 77, 77, 0.35)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 10px rgba(255, 77, 77, 0.2)';">
-                                                Pay
-                                            </button>
+                                            <span class="badge-status status-confirmed">
+                                                <i class="bi bi-check-circle-fill"></i> @statusText
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge-status status-pending">
+                                                <i class="bi bi-clock-fill"></i> @statusText
+                                            </span>
                                         }
                                     </td>
-                                </tr>
-                            }
-
-                            @if (!classRegs.Any() && !reservations.Any())
-                            {
-                                <tr>
-                                    <td colspan="6" class="text-center py-5 text-dim">
-                                        <i class="bi bi-receipt-cutoff d-block mb-3" style="font-size: 2.5rem; opacity: 0.3;"></i>
-                                        No transaction history found for your account.
+                                    <!-- Action -->
+                                    <td>
+                                        <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+                                            <button type="button" onclick="openViewDetailsModal({ type: '@(isSelfTraining ? "Self Training" : "Target Session")', date: '@txnDate.ToString("MMM dd, yyyy")', time: '@txnDate.ToString("hh:mm tt")', archer: '@archerName', amount: 'RM @r.TotalPrice.ToString("F2")', status: '@statusText', method: '@(pRecord?.PaymentMethod ?? "Online (FPX)")', refId: '@(pRecord?.TransactionId ?? "N/A")', lane: '@r.LanesDisplay', target: '@r.TargetsDisplay' })" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--text-dim); border-radius: 10px; height: 34px; padding: 0 14px; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='var(--text-dim)';">
+                                                View
+                                            </button>
+                                            @if (!isPaid)
+                                            {
+                                                <button type="button" onclick="handlePayNow('reservation', @r.ReservationId)" style="background: var(--primary); border: 1px solid rgba(255, 77, 77, 0.3); color: #000; border-radius: 10px; height: 34px; padding: 0 14px; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; transition: 0.3s; box-shadow: 0 4px 10px rgba(255, 77, 77, 0.2);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 15px rgba(255, 77, 77, 0.35)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 10px rgba(255, 77, 77, 0.2)';">
+                                                    Pay
+                                                </button>
+                                            }
+                                        </div>
                                     </td>
                                 </tr>
                             }
                         </tbody>
                     </table>
+
+                    @if (!classRegs.Any(c => c.TotalPrice > 0) && !groupedReservations.Any(r => r.TotalPrice > 0) && !membershipPayments.Any(m => m.Amount > 0))
+                    {
+                        <div class="empty-state">
+                            <i class="bi bi-receipt-cutoff"></i>
+                            <h5>No transaction history found.</h5>
+                            <p>You have not made any payments yet.</p>
+                        </div>
+                    }
+                </div>
+
+                <!-- Pagination Bar -->
+                <div class="pagination-bar" id="paginationBar">
+                    <span class="page-info" id="pageInfo"></span>
+                    <div class="page-controls" id="pageControls"></div>
                 </div>
             </div>
         </div>
@@ -1063,7 +1168,7 @@
     <!-- Back to Dashboard button -->
     <div class="d-flex justify-content-start mt-4">
         <a href="/Account/MemberDashboard" class="btn-outline-premium">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
+            Back to Dashboard
         </a>
     </div>
 
@@ -1085,24 +1190,34 @@
                 <div class="mb-4 p-3" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 16px;">
                     <h6 class="text-white fw-bold mb-3 small" style="letter-spacing: 0.5px; opacity: 0.8; font-size: 0.75rem;"><i class="bi bi-list-ul me-1 text-primary"></i> PAYMENT BREAKDOWN</h6>
                     <div style="display: flex; flex-direction: column; gap: 12px; max-height: 180px; overflow-y: auto; padding-right: 5px;">
-                        @foreach (var c in classRegs.Where(r => r.PaymentStatus == "Pending"))
+                        @foreach (var mp in membershipPayments.Where(m => m.Status == "Pending" && m.Amount > 0))
                         {
-                            var isAnnualMembership = c.PackageType == "Annual Membership";
+                            <div class="d-flex justify-content-between align-items-start border-bottom pb-2 modal-breakdown-item membership-item" data-id="@mp.PaymentId" data-amount="@mp.Amount" style="border-color: rgba(255,255,255,0.05) !important;">
+                                <div style="flex: 1; padding-right: 10px;">
+                                    <span class="text-white fw-bold d-block" style="font-size: 0.82rem;">Annual Membership Fee</span>
+                                    <span class="text-dim d-block" style="font-size: 0.7rem; margin-top: 2px;">Archer: <strong class="text-white">@Model.Username</strong></span>
+                                </div>
+                                <div class="text-end">
+                                    <span class="text-white fw-bold" style="font-size: 0.9rem;">RM @mp.Amount.ToString("N2")</span>
+                                </div>
+                            </div>
+                        }
+
+                        @foreach (var c in classRegs.Where(r => r.PaymentStatus == "Pending" && r.TotalPrice > 0))
+                        {
                             <div class="d-flex justify-content-between align-items-start border-bottom pb-2 modal-breakdown-item class-reg-item" data-id="@c.RegistrationId" data-amount="@c.TotalPrice" style="border-color: rgba(255,255,255,0.05) !important;">
                                 <div style="flex: 1; padding-right: 10px;">
-                                    <span class="text-white fw-bold d-block" style="font-size: 0.82rem;">@(isAnnualMembership ? "Annual Membership Fee" : "Class Registration Fee")</span>
+                                    <span class="text-white fw-bold d-block" style="font-size: 0.82rem;">Class Registration Fee</span>
                                     <span class="text-dim d-block" style="font-size: 0.7rem; margin-top: 2px;">Archer: <strong class="text-white">@c.CustomerName</strong></span>
-                                    @if (!isAnnualMembership)
-                                    {
-                                        <span class="text-dim d-block" style="font-size: 0.7rem;">Package: <strong class="text-white">@c.PackageType</strong></span>
-                                        <span class="text-dim d-block" style="font-size: 0.7rem;">Annual Fee: <strong class="text-white">RM 80.00</strong></span>
-                                    }
+                                    <span class="text-dim d-block mt-1" style="font-size: 0.65rem;">@c.PackageType</span>
                                 </div>
-                                <span class="text-white fw-bold" style="font-size: 0.85rem;">RM @c.TotalPrice.ToString("N2")</span>
+                                <div class="text-end">
+                                    <span class="text-white fw-bold" style="font-size: 0.9rem;">RM @c.TotalPrice.ToString("N2")</span>
+                                </div>
                             </div>
                         }
                         
-                        @foreach (var r in reservations.Where(r => r.Status == 0))
+                        @foreach (var r in groupedReservations.Where(r => r.Status == 0 && r.TotalPrice > 0))
                         {
                             var isSelfTraining = r.RateCode == "SELF_TRAINING" || (r.Slot != null && r.Slot.SlotStartTime.Hours >= 18);
                             var archerName = r.Student != null ? r.Student.FullName : (!string.IsNullOrEmpty(r.CustomerName) ? r.CustomerName : "Myself");
@@ -1110,7 +1225,7 @@
                                 <div style="flex: 1; padding-right: 10px;">
                                     <span class="text-white fw-bold d-block" style="font-size: 0.82rem;">@(isSelfTraining ? "Self Training" : "Target Session")</span>
                                     <span class="text-dim d-block" style="font-size: 0.7rem; margin-top: 2px;">Archer: <strong class="text-white">@archerName</strong></span>
-                                    <span class="text-dim d-block" style="font-size: 0.7rem;">Lanes: <strong class="text-white">Lane @r.RangeNo | Target @r.TargetNo</strong></span>
+                                    <span class="text-dim d-block" style="font-size: 0.7rem;">Lanes: <strong class="text-white">@r.LanesDisplay | @r.TargetsDisplay</strong></span>
                                 </div>
                                 <span class="text-white fw-bold" style="font-size: 0.85rem;">RM @r.TotalPrice.ToString("N2")</span>
                             </div>
@@ -1125,8 +1240,8 @@
                         <input type="radio" name="modalPaymentOption" value="fpx" @(defaultMethod == "Card" ? "" : "checked") onchange="toggleModalPaymentUI()" style="accent-color: var(--primary); width: 18px; height: 18px;"> FPX Online Banking
                     </label>
                     <div id="modalFpxUI" class="payment-ui-box p-3 mb-3" style="display: @(defaultMethod == "Card" ? "none" : "block"); background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px;">
-                        <select class="form-select bg-dark text-white border-secondary mb-2" id="modalFpxBank" style="font-size: 0.85rem; padding: 6px 12px; border-radius: 8px; cursor: pointer; height: auto;">
-                            <option value="">Select Retail Bank</option>
+                        <select class="form-select mb-2" id="modalFpxBank" style="background: #ffffff; color: #000000; font-size: 0.85rem; font-weight: 500; border-radius: 50px; padding: 8px 16px; height: auto; cursor: pointer; width: auto; min-width: 200px; display: inline-block;">
+                            <option value="" disabled selected>Select Retail Bank</option>
                             <option value="Maybank2U">Maybank2U</option>
                             <option value="CIMB Clicks">CIMB Clicks</option>
                             <option value="Public Bank">Public Bank</option>
@@ -1134,7 +1249,7 @@
                             <option value="Bank Islam">Bank Islam</option>
                             <option value="AmBank">AmBank</option>
                         </select>
-                        <p class="text-dim small mb-0" style="font-size: 0.72rem; color: var(--text-dim);"><i class="bi bi-shield-lock me-1"></i> Redirecting to secure bank portal.</p>
+                        <p class="text-dim small mb-0 mt-2" style="font-size: 0.72rem; color: var(--text-dim);"><i class="bi bi-shield-lock me-1"></i> Redirecting to secure bank portal.</p>
                     </div>
 
                     <label class="payment-radio mb-3" style="display: flex; align-items: center; gap: 10px; color: #fff; font-weight: 600; cursor: pointer;">
@@ -1344,6 +1459,8 @@
                     showItem = true;
                 } else if (type === 'reservation' && item.classList.contains('reservation-item') && itemId === id) {
                     showItem = true;
+                } else if (type === 'membership' && item.classList.contains('membership-item') && itemId === id) {
+                    showItem = true;
                 }
 
                 if (showItem) {
@@ -1447,32 +1564,92 @@
             }
         }
 
+        const ROWS_PER_PAGE = 10;
+        let currentPage = 1;
+        let visibleRows = [];
+
         document.addEventListener("DOMContentLoaded", function () {
             const searchInput = document.getElementById("transactionSearch");
             const statusFilter = document.getElementById("statusFilter");
-            const rows = document.querySelectorAll(".trans-row");
+            const allRows = Array.from(document.querySelectorAll(".history-row"));
 
             function filterTable() {
                 const query = searchInput.value.toLowerCase().trim();
                 const status = statusFilter.value;
 
-                rows.forEach(row => {
+                visibleRows = allRows.filter(row => {
                     const text = row.textContent.toLowerCase();
                     const rowStatus = row.getAttribute("data-status");
                     
                     const matchesQuery = text.includes(query);
                     const matchesStatus = (status === "All") || (rowStatus === status);
 
-                    if (matchesQuery && matchesStatus) {
-                        row.style.display = "";
-                    } else {
-                        row.style.display = "none";
-                    }
+                    row.style.display = "none";
+                    return matchesQuery && matchesStatus;
                 });
+                
+                currentPage = 1;
+                renderPage();
+            }
+
+            function renderPage() {
+                const total = visibleRows.length;
+                const totalPages = Math.max(1, Math.ceil(total / ROWS_PER_PAGE));
+                if (currentPage > totalPages) currentPage = totalPages;
+
+                const start = (currentPage - 1) * ROWS_PER_PAGE;
+                const end   = Math.min(start + ROWS_PER_PAGE, total);
+
+                visibleRows.forEach((r, i) => {
+                    r.style.display = (i >= start && i < end) ? '' : 'none';
+                });
+
+                const pageInfo = document.getElementById('pageInfo');
+                if (pageInfo) {
+                    pageInfo.textContent = total === 0 ? '' : `Page ${currentPage} of ${totalPages}  ·  Showing ${start + 1}–${end} of ${total}`;
+                }
+
+                const controls = document.getElementById('pageControls');
+                if (controls) {
+                    controls.innerHTML = '';
+
+                    const prev = document.createElement('button');
+                    prev.className = 'page-btn';
+                    prev.innerHTML = '<i class="bi bi-chevron-left"></i>';
+                    prev.disabled = currentPage === 1;
+                    prev.onclick = () => { currentPage--; renderPage(); };
+                    controls.appendChild(prev);
+
+                    const range = 2;
+                    for (let p = 1; p <= totalPages; p++) {
+                        if (p === 1 || p === totalPages || Math.abs(p - currentPage) <= range) {
+                            const btn = document.createElement('button');
+                            btn.className = 'page-btn' + (p === currentPage ? ' active' : '');
+                            btn.textContent = p;
+                            btn.onclick = (pp => () => { currentPage = pp; renderPage(); })(p);
+                            controls.appendChild(btn);
+                        } else if (Math.abs(p - currentPage) === range + 1) {
+                            const dots = document.createElement('span');
+                            dots.textContent = '…';
+                            dots.style.cssText = 'color: var(--text-dim); padding: 0 4px; font-size: 0.85rem;';
+                            controls.appendChild(dots);
+                        }
+                    }
+
+                    const next = document.createElement('button');
+                    next.className = 'page-btn';
+                    next.innerHTML = '<i class="bi bi-chevron-right"></i>';
+                    next.disabled = currentPage === totalPages;
+                    next.onclick = () => { currentPage++; renderPage(); };
+                    controls.appendChild(next);
+                }
             }
 
             searchInput.addEventListener("input", filterTable);
             statusFilter.addEventListener("change", filterTable);
+            
+            // Initial render
+            filterTable();
 
             // Handle default payment method change
             const paymentRadios = document.querySelectorAll('input[name="defaultPaymentMethod"]');
@@ -1552,10 +1729,10 @@
                 `;
             } else {
                 modalCardUI.innerHTML = `
-                    <div class="text-center py-3" style="background: rgba(220, 53, 69, 0.08); border: 1px dashed rgba(220, 53, 69, 0.3); border-radius: 12px;">
-                        <p class="text-danger small mb-0" style="font-size: 0.85rem; font-weight: 600;">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i> Please add your card first.
-                        </p>
+                    <div class="text-center py-4" style="border: 1px dashed rgba(255,255,255,0.08); border-radius: 12px; background: rgba(0,0,0,0.1);">
+                        <i class="bi bi-credit-card text-dim" style="font-size: 1.8rem; margin-bottom: 10px;"></i>
+                        <p class="text-dim small mb-0">No saved cards found.</p>
+                        <p class="text-dim small mb-0" style="font-size: 0.75rem;">Please add a card first to proceed.</p>
                     </div>
                 `;
             }
@@ -1581,41 +1758,65 @@
         }
 
         // ─── Multi-card: Delete a card ────────────────────────────────────────
-        async function deleteCard(cardId, btn) {
-            if (!confirm('Delete this saved card?')) return;
-            try {
-                const response = await fetch(`/Account/DeleteSavedCard?cardId=${encodeURIComponent(cardId)}`, { method: 'POST' });
-                const result = await response.json();
-                if (result.success) {
-                    // Remove row from DOM
-                    const row = document.querySelector(`.saved-card-row[data-card-id="${cardId}"]`);
-                    if (row) row.remove();
+        function deleteCard(cardId, btn) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                background: '#1a1e28',
+                color: '#fff',
+                customClass: {
+                    popup: 'border border-secondary border-opacity-25 rounded-4',
+                    confirmButton: 'btn btn-danger fw-bold px-4 py-2 mx-2',
+                    cancelButton: 'btn btn-secondary fw-bold px-4 py-2 mx-2'
+                },
+                buttonsStyling: false
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`/Account/DeleteSavedCard?cardId=${encodeURIComponent(cardId)}`, { method: 'POST' });
+                        const res = await response.json();
+                        if (res.success) {
+                            // Remove row from DOM
+                            const row = document.querySelector(`.saved-card-row[data-card-id="${cardId}"]`);
+                            if (row) row.remove();
 
-                    // If no cards left, show empty message
-                    const remaining = document.querySelectorAll('.saved-card-row');
-                    if (remaining.length === 0) {
-                        document.getElementById('savedCardsList').innerHTML = `
-                            <div class="text-center py-4" style="border:1px dashed rgba(255,255,255,0.08);border-radius:16px;">
-                                <i class="bi bi-credit-card text-dim" style="font-size:2rem;"></i>
-                                <p class="text-dim small mt-2 mb-0">No saved cards yet. Add one below.</p>
-                            </div>`;
-                    } else {
-                        // Auto-select first remaining card if deleted was active
-                        const firstRow = remaining[0];
-                        const firstId = firstRow.getAttribute('data-card-id');
-                        if (!document.querySelector('.saved-card-row.card-row-active')) {
-                            firstRow.querySelector('input[type=radio]').checked = true;
-                            await selectCard(firstId);
+                            // If no cards left, show empty message
+                            const remaining = document.querySelectorAll('.saved-card-row');
+                            if (remaining.length === 0) {
+                                document.getElementById('savedCardsList').innerHTML = `
+                                    <div class="text-center py-4" style="border:1px dashed rgba(255,255,255,0.08);border-radius:16px;">
+                                        <i class="bi bi-credit-card text-dim" style="font-size:2rem;"></i>
+                                        <p class="text-dim small mt-2 mb-0">No saved cards yet. Add one below.</p>
+                                    </div>`;
+                            } else {
+                                // Auto-select first remaining card if deleted was active
+                                const firstRow = remaining[0];
+                                const firstId = firstRow.getAttribute('data-card-id');
+                                if (!document.querySelector('.saved-card-row.card-row-active')) {
+                                    firstRow.querySelector('input[type=radio]').checked = true;
+                                    await selectCard(firstId);
+                                }
+                            }
+                            syncModalCardUI();
+                            
+                            Swal.fire(
+                                'Deleted!',
+                                'Your saved card has been deleted.',
+                                'success'
+                            );
+                        } else {
+                            Swal.fire('Error!', 'Failed to delete card: ' + res.message, 'error');
                         }
+                    } catch(err) {
+                        console.error('Error deleting card:', err);
+                        Swal.fire('Error!', 'An error occurred while deleting the card.', 'error');
                     }
-                    syncModalCardUI();
-                } else {
-                    alert('Failed to delete card: ' + result.message);
                 }
-            } catch(err) {
-                console.error('Error deleting card:', err);
-                alert('An error occurred while deleting the card.');
-            }
+            });
         }
 
         // ─── Show / Hide Add Card Form ─────────────────────────────────────────
@@ -1813,3 +2014,4 @@
         }
     </script>
 }
+

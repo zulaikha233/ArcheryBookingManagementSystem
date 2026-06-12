@@ -45,6 +45,31 @@ namespace ArcheryAlley.Controllers
         }
 
         [HttpGet]
+        public IActionResult RemoveArcher(int studentId)
+        {
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email)) return RedirectToAction("CustomerLogin", "Account");
+            
+            _repository.RemoveStudent(studentId);
+            TempData["SuccessMessage"] = "Archer has been removed.";
+            return RedirectToAction("MyArchers");
+        }
+
+        [HttpGet]
+        public IActionResult CancelRegistration(int regId)
+        {
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email)) return RedirectToAction("CustomerLogin", "Account");
+            
+            _repository.RemoveClassRegistration(regId);
+            // After cancelling the class reg, also remove the invoice/payment from the fee section
+            _repository.ClearPendingPaymentsByEmail(email, "Class", regId);
+
+            TempData["SuccessMessage"] = "Class registration has been cancelled.";
+            return RedirectToAction("MyArchers");
+        }
+
+        [HttpGet]
         public IActionResult AddArcher()
         {
             string email = HttpContext.Session.GetString("CustomerEmail");
@@ -64,7 +89,7 @@ namespace ArcheryAlley.Controllers
 
             if (string.IsNullOrEmpty(parent.PhoneNumber) || string.IsNullOrEmpty(parent.Address))
             {
-                TempData["ErrorMessage"] = "Please complete your profile details before adding an archer. <a href='/Account/MemberProfile' class='rounded-pill' style='background: #ff4d4d; color: #000; border: none; font-size: 0.75rem; font-weight: 800; padding: 6px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; transition: 0.2s; box-shadow: 0 4px 10px rgba(255, 77, 77, 0.2);'>Go to Profile <i class='bi bi-arrow-right'></i></a>";
+                TempData["ErrorMessage"] = "Please complete your profile details before adding an archer. <a href='/Account/MemberProfile' class='rounded-pill' style='background: #ff4d4d; color: #000; border: none; font-size: 0.75rem; font-weight: 800; padding: 6px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; transition: 0.2s; box-shadow: 0 4px 10px rgba(255, 77, 77, 0.2);'>Go to Profile</a>";
                 return RedirectToAction("MyArchers");
             }
 
@@ -96,10 +121,6 @@ namespace ArcheryAlley.Controllers
                             Birthday = parsedDate;
 
                             int calculatedAge = DateTime.Now.Year - year;
-                            if (DateTime.Now.Month < monthPart || (DateTime.Now.Month == monthPart && DateTime.Now.Day < dayPart))
-                            {
-                                calculatedAge--;
-                            }
                             Age = calculatedAge >= 0 ? calculatedAge : 0;
                         }
                         catch
@@ -177,8 +198,7 @@ namespace ArcheryAlley.Controllers
         [HttpPost]
         public IActionResult CompleteArcherRegistration(
             int StudentId, string PackageType, decimal PackagePrice,
-            string LearningMethod, int LearningMethodPax, decimal LearningMethodPrice,
-            decimal AnnualFee, decimal TotalPrice)
+            decimal TotalPrice)
         {
             string email = HttpContext.Session.GetString("CustomerEmail");
             if (string.IsNullOrEmpty(email))
@@ -198,10 +218,6 @@ namespace ArcheryAlley.Controllers
                 CustomerName = student.FullName,
                 PackageType = PackageType,
                 PackagePrice = PackagePrice,
-                LearningMethod = LearningMethod,
-                LearningMethodPax = LearningMethodPax,
-                LearningMethodPrice = LearningMethodPrice,
-                AnnualFee = AnnualFee,
                 TotalPrice = TotalPrice,
                 PaymentMethod = "Pending",
                 PaymentStatus = "Pending",
@@ -254,8 +270,7 @@ namespace ArcheryAlley.Controllers
                     var student = _repository.GetStudentById(reg.StudentId);
                     if (student == null || student.ParentCustomerId != parent.CustomerId) continue;
 
-                    decimal annualFee = 80m;
-                    decimal totalPrice = annualFee + reg.PackagePrice;
+                    decimal totalPrice = reg.PackagePrice;
                     totalAmount += totalPrice;
 
                     var classReg = new ClassRegistrations
@@ -264,10 +279,6 @@ namespace ArcheryAlley.Controllers
                         CustomerName = student.FullName,
                         PackageType = reg.PackageType,
                         PackagePrice = reg.PackagePrice,
-                        LearningMethod = "N/A",
-                        LearningMethodPax = 0,
-                        LearningMethodPrice = 0,
-                        AnnualFee = annualFee,
                         TotalPrice = totalPrice,
                         PaymentMethod = "Pending",
                         PaymentStatus = "Pending",
@@ -347,6 +358,53 @@ namespace ArcheryAlley.Controllers
             {
                 return Json(new { success = false, message = "Failed to parse file: " + ex.Message });
             }
+        }
+
+        [HttpGet]
+        public IActionResult ProfileAddArcher(int studentId)
+        {
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email)) return RedirectToAction("CustomerLogin", "Account");
+
+            var parent = _repository.GetCustomerByEmail(email);
+            if (parent == null) return RedirectToAction("CustomerLogin", "Account");
+
+            var allStudents = _repository.GetStudentsByParentId(parent.CustomerId);
+            var student = allStudents.FirstOrDefault(s => s.StudentId == studentId);
+
+            if (student == null)
+            {
+                TempData["ErrorMessage"] = "Archer not found.";
+                return RedirectToAction("MyArchers");
+            }
+
+            var classReg = _repository.GetClassRegistrationByStudentId(studentId);
+
+            var model = new ArcheryAlley.Models.ArcherViewModel
+            {
+                StudentId = student.StudentId,
+                FullName = student.FullName,
+                Age = student.Age,
+                Birthday = student.Birthday,
+                ICNumber = student.ICNumber,
+                ClassReg = classReg
+            };
+
+            return View(model);
+        }
+        [HttpPost]
+        public IActionResult EditArcher(int StudentId, string FullName)
+        {
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email)) return RedirectToAction("CustomerLogin", "Account");
+
+            if (!string.IsNullOrWhiteSpace(FullName))
+            {
+                _repository.UpdateStudentProfile(StudentId, FullName);
+                TempData["SuccessMessage"] = "Archer profile updated successfully.";
+            }
+
+            return RedirectToAction("ProfileAddArcher", new { studentId = StudentId });
         }
     }
 }

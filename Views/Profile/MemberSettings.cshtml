@@ -304,22 +304,7 @@
                 <h3 class="settings-card-title">Security Options</h3>
             </div>
 
-            <!-- Live Alerts / Notifications -->
-            @if (ViewBag.SuccessMessage != null)
-            {
-                <div class="alert alert-success alert-premium d-flex align-items-center gap-2 border-0 bg-success bg-opacity-10 text-success mb-4" role="alert">
-                    <i class="bi bi-check-circle-fill"></i>
-                    <div>@ViewBag.SuccessMessage</div>
-                </div>
-            }
-
-            @if (ViewBag.ErrorMessage != null)
-            {
-                <div class="alert alert-danger alert-premium d-flex align-items-center gap-2 border-0 bg-danger bg-opacity-10 text-danger mb-4" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                    <div>@ViewBag.ErrorMessage</div>
-                </div>
-            }
+            <!-- Live Alerts / Notifications will be handled by SweetAlert2 in Scripts section -->
 
             <!-- Form: Change Password -->
             <form asp-action="MemberSettings" method="post" id="securityForm" class="needs-validation" novalidate>
@@ -370,7 +355,7 @@
             <!-- Footer Navigation -->
             <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-5" style="border-color: rgba(255,255,255,0.05) !important;">
                 <a href="/Account/MemberDashboard" class="btn-outline-premium">
-                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    Back to Dashboard
                 </a>
             </div>
 
@@ -388,9 +373,52 @@
                 if (!form.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
+                    
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Incomplete Details',
+                        text: 'Please fill in all required password fields.',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'btn btn-danger'
+                        },
+                        buttonsStyling: false
+                    });
                 }
                 form.classList.add('was-validated');
             }, false);
         })();
+
+        @if (ViewBag.SuccessMessage != null)
+        {
+            <text>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '@Html.Raw(ViewBag.SuccessMessage.Replace("'", "\\'"))',
+                confirmButtonText: 'OK',
+                customClass: {
+                    confirmButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+            });
+            </text>
+        }
+
+        @if (ViewBag.ErrorMessage != null)
+        {
+            <text>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: '@Html.Raw(ViewBag.ErrorMessage.Replace("'", "\\'"))',
+                confirmButtonText: 'OK',
+                customClass: {
+                    confirmButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+            });
+            </text>
+        }
     </script>
 }

@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Http
 @{
     ViewData["Title"] = "Student Attendance";
     Layout = null;
@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Attendance — Archery Alley</title>
+    <title>Student Attendance � Archery Alley</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
@@ -52,7 +52,7 @@
             overflow-x: hidden;
         }
 
-        /* ── SIDEBAR ── */
+        /* -- SIDEBAR -- */
         .sidebar {
             width: var(--sidebar-width);
             background: var(--sidebar-bg);
@@ -70,7 +70,7 @@
         .sidebar.collapsed .nav-text,
         .sidebar.collapsed .logout-text { display: none; }
         .sidebar.collapsed .sidebar-logo { font-size: 0; }
-        .sidebar.collapsed .sidebar-logo::before { content: '🏹'; font-size: 1.4rem; }
+        .sidebar.collapsed .sidebar-logo::before { content: '??'; font-size: 1.4rem; }
         .sidebar.collapsed .nav-item { justify-content: center; padding: 14px; }
         .sidebar.collapsed .nav-item i { width: auto; font-size: 1.3rem; }
         .sidebar.collapsed .logout-btn { justify-content: center; padding: 14px; }
@@ -129,7 +129,7 @@
         }
         .logout-btn:hover { background: rgba(220,38,38,0.08); color: #ef4444; }
 
-        /* ── OVERLAY + TOPBAR ── */
+        /* -- OVERLAY + TOPBAR -- */
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 199; backdrop-filter: blur(4px); }
         .sidebar-overlay.active { display: block; }
 
@@ -145,7 +145,7 @@
         .topbar-menu-btn { background: none; border: none; color: rgba(255,255,255,0.65); font-size: 1.5rem; cursor: pointer; padding: 6px; border-radius: 8px; }
         .topbar-menu-btn:hover { color: var(--primary); }
 
-        /* ── MAIN ── */
+        /* -- MAIN -- */
         .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 40px; min-height: 100vh; transition: margin-left 0.3s ease; }
         .main-content.sidebar-collapsed { margin-left: 68px; }
 
@@ -154,10 +154,10 @@
         .page-header h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; color: var(--text-white); }
         .page-header h1 span { color: var(--primary); }
 
-        /* ── LAYOUT ── */
+        /* -- LAYOUT -- */
         .attendance-layout { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
 
-        /* ── GLASS CARD ── */
+        /* -- GLASS CARD -- */
         .glass-card {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
@@ -167,7 +167,7 @@
             box-shadow: var(--shadow-card);
         }
 
-        /* ── CALENDAR ── */
+        /* -- CALENDAR -- */
         .left-panel { display: flex; flex-direction: column; gap: 20px; }
         .calendar-widget { padding: 24px; }
         .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
@@ -207,7 +207,7 @@
         .chip-absent span  { color: #f87171; }
         .chip-total span   { color: var(--primary); }
 
-        /* ── STUDENT LIST ── */
+        /* -- STUDENT LIST -- */
         .empty-panel { padding: 70px 40px; text-align: center; color: var(--text-dim); }
         .empty-panel i { font-size: 3.2rem; color: rgba(255,77,77,0.2); margin-bottom: 18px; display: block; }
         .empty-panel h4 { font-size: 1rem; color: rgba(255,255,255,0.45); font-weight: 700; margin-bottom: 8px; }
@@ -283,7 +283,7 @@
         .attend-time { font-size: 0.65rem; color: var(--present-color); display: none; white-space: nowrap; text-align: right; }
         .attend-time.visible { display: block; }
 
-        /* ── TOAST ── */
+        /* -- TOAST -- */
         .toast-notif {
             position: fixed; bottom: 28px; right: 28px;
             background: rgba(20,22,30,0.95); border: 1px solid rgba(52,211,153,0.3);
@@ -381,7 +381,7 @@
             <div class="left-panel">
                 <div class="glass-card calendar-widget">
                     <div class="cal-header">
-                        <div class="cal-month-label" id="calMonthLabel">—</div>
+                        <div class="cal-month-label" id="calMonthLabel">�</div>
                         <div class="cal-nav-group">
                             <button class="cal-nav-btn" onclick="shiftMonth(-1)"><i class="bi bi-chevron-left"></i></button>
                             <button class="cal-nav-btn" onclick="shiftMonth(1)"><i class="bi bi-chevron-right"></i></button>
@@ -391,7 +391,7 @@
                     <div class="cal-summary" id="calSummary">
                         <div class="cal-summary-date">
                             <i class="bi bi-calendar-event"></i>
-                            <strong id="summaryDateLabel">—</strong>
+                            <strong id="summaryDateLabel">�</strong>
                         </div>
                         <div class="cal-summary-stats">
                             <div class="summary-chip chip-total">
@@ -421,7 +421,7 @@
                     <div class="list-header">
                         <div class="list-header-left">
                             <h3 id="listTitle">Students</h3>
-                            <span id="listSubtitle">—</span>
+                            <span id="listSubtitle">�</span>
                         </div>
                         <div class="list-header-right">
                             <div class="filter-tabs">
@@ -448,7 +448,7 @@
     </div>
 
     <script>
-        /* ── SIDEBAR ── */
+        /* -- SIDEBAR -- */
         const sidebar     = document.getElementById('sidebar');
         const mainContent = document.getElementById('mainContent');
         const overlay     = document.getElementById('sidebarOverlay');
@@ -481,7 +481,7 @@
         });
         window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 
-        /* ── CALENDAR STATE ── */
+        /* -- CALENDAR STATE -- */
         const today  = new Date();
         let calYear  = today.getFullYear();
         let calMonth = today.getMonth();
@@ -489,13 +489,13 @@
         let activeFilter  = 'all';
         let currentStudents = []; // holds students loaded from backend
 
-        // ── DATA NOTE: Replace with real dates from backend to show green dots ──
+        // -- DATA NOTE: Replace with real dates from backend to show green dots --
         const datesWithReports = new Set();
 
         const MONTHS   = ['January','February','March','April','May','June','July','August','September','October','November','December'];
         const DAY_LBLS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
-        /* ── CALENDAR RENDER ── */
+        /* -- CALENDAR RENDER -- */
         function shiftMonth(offset) {
             calMonth += offset;
             if (calMonth > 11) { calMonth = 0; calYear++; }
@@ -541,7 +541,7 @@
             }
         }
 
-        /* ── DATE SELECTION ── */
+        /* -- DATE SELECTION -- */
         async function selectDate(dateStr) {
             selectedDate = dateStr;
             activeFilter = 'all';
@@ -559,7 +559,7 @@
             await renderStudentList();
         }
 
-        /* ── STUDENT LIST — fetches from backend ── */
+        /* -- STUDENT LIST � fetches from backend -- */
         async function renderStudentList() {
             try {
                 const response = await fetch(`/Booking/GetAttendanceByDate?date=${selectedDate}`);
@@ -582,7 +582,7 @@
             }
         }
 
-        /* ── RENDER ROWS ── */
+        /* -- RENDER ROWS -- */
         function renderRows(students) {
             const list = document.getElementById('studentList');
             list.innerHTML = '';
@@ -632,7 +632,7 @@
             });
         }
 
-        /* ── TOGGLE ATTENDANCE ── */
+        /* -- TOGGLE ATTENDANCE -- */
         async function toggleAttendance(id) {
             const student = currentStudents.find(s => s.id === id);
             if (!student) return;
@@ -668,7 +668,7 @@
             updateStats(currentStudents);
         }
 
-        /* ── MARK ALL PRESENT ── */
+        /* -- MARK ALL PRESENT -- */
         async function markAllPresent() {
             for (const s of currentStudents) {
                 if (!s.attended) {
@@ -685,7 +685,7 @@
             showToast('All students marked present', true);
         }
 
-        /* ── FILTER ── */
+        /* -- FILTER -- */
         function applyFilter(tab) {
             activeFilter = tab.dataset.filter;
             document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
@@ -693,7 +693,7 @@
             renderRows(currentStudents);
         }
 
-        /* ── STATS ── */
+        /* -- STATS -- */
         function updateStats(students) {
             const presentCount = students.filter(s => s.attended).length;
             document.getElementById('statTotal').textContent   = students.length;
@@ -701,7 +701,7 @@
             document.getElementById('statAbsent').textContent  = students.length - presentCount;
         }
 
-        /* ── TOAST ── */
+        /* -- TOAST -- */
         function showToast(msg, isPresent) {
             const toast  = document.getElementById('toast');
             const msgEl  = document.getElementById('toastMsg');
