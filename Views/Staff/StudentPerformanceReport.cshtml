@@ -734,10 +734,6 @@
             currentStudent  = null;
         }
 
-        /* -- SEARCH -- */
-        function searchStudent() {
-            if (selectedLevel === 'All') return; // search disabled on All tab
-        /* ── ALL ARCHERS TABLE ── */
         async function showAllArchers() {
             const emptyCard     = document.getElementById('emptyCard');
             const studentSection = document.getElementById('studentSection');
@@ -841,7 +837,7 @@
         }
 
         /* -- TOGGLE REPORTS PANEL -- */
-        function toggleReports() {
+        async function toggleReports() {
             reportsVisible = !reportsVisible;
             const panel = document.getElementById('reportsPanel');
             const btn   = document.getElementById('performanceBtn');
@@ -859,10 +855,6 @@
             }
         }
 
-        /* -- RENDER REPORTS LIST -- */
-        function renderReports() {
-            const list = document.getElementById('reportList');
-            document.getElementById('reportsSubtitle').textContent = `${currentStudent.reports.length} report${currentStudent.reports.length !== 1 ? 's' : ''} for ${currentStudent.name}`;
         /* ── RENDER REPORTS LIST ── */
        async function renderReports() {
     const list = document.getElementById('reportList');
@@ -928,7 +920,7 @@
 }
 
         /* -- TOGGLE INDIVIDUAL REPORT -- */
-        function toggleReportItem(idx) {
+        async function toggleReportItem(idx) {
             const item = document.getElementById(`report-${idx}`);
             item.classList.toggle('expanded');
         }
@@ -969,7 +961,7 @@
         }
 
         /* -- SUBMIT REPORT -- */
-        function submitReport() {
+        async function submitReport() {
             const text  = document.getElementById('reportTextarea').value.trim();
             const words = text === '' ? 0 : text.split(/\s+/).length;
 
