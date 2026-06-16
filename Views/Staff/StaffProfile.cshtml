@@ -573,7 +573,7 @@
 
                 <div class="fields-grid">
 
-                    <!-- Section: Basic Info -->
+<!-- Section: Basic Info -->
                     <div class="section-title">Basic Info</div>
 
                     <!-- Full Name -->
@@ -586,27 +586,27 @@
                     <!-- Gender -->
                     <div class="field-group">
                         <div class="field-label"><i class="bi bi-gender-ambiguous"></i> Gender</div>
-                        <div class="field-value empty" id="val-gender">Not set</div>
+                        <div class="field-value @(string.IsNullOrEmpty(ViewBag.Gender) ? "empty" : "")" id="val-gender">@(string.IsNullOrEmpty(ViewBag.Gender) ? "Not set" : ViewBag.Gender)</div>
                         <select class="field-input" id="inp-gender">
                             <option value="">Select gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Prefer not to say">Prefer not to say</option>
+                            <option value="Male"              selected="@(ViewBag.Gender == "Male")">Male</option>
+                            <option value="Female"            selected="@(ViewBag.Gender == "Female")">Female</option>
+                            <option value="Prefer not to say" selected="@(ViewBag.Gender == "Prefer not to say")">Prefer not to say</option>
                         </select>
                     </div>
 
                     <!-- Email -->
                     <div class="field-group">
                         <div class="field-label"><i class="bi bi-envelope"></i> Email</div>
-                        <div class="field-value empty" id="val-email">Not set</div>
-                        <input class="field-input" id="inp-email" type="email" placeholder="staff@example.com">
+                        <div class="field-value @(string.IsNullOrEmpty(ViewBag.Email) ? "empty" : "")" id="val-email">@(string.IsNullOrEmpty(ViewBag.Email) ? "Not set" : ViewBag.Email)</div>
+                        <input class="field-input" id="inp-email" type="email" placeholder="staff@example.com" value="@(ViewBag.Email ?? "")">
                     </div>
 
                     <!-- Phone -->
                     <div class="field-group">
                         <div class="field-label"><i class="bi bi-phone"></i> Phone Number</div>
-                        <div class="field-value empty" id="val-phone">Not set</div>
-                        <input class="field-input" id="inp-phone" type="tel" placeholder="e.g. 01X-XXXXXXX">
+                        <div class="field-value @(string.IsNullOrEmpty(ViewBag.Phone) ? "empty" : "")" id="val-phone">@(string.IsNullOrEmpty(ViewBag.Phone) ? "Not set" : ViewBag.Phone)</div>
+                        <input class="field-input" id="inp-phone" type="tel" placeholder="e.g. 01X-XXXXXXX" value="@(ViewBag.Phone ?? "")">
                     </div>
 
                     <hr class="section-divider">
@@ -617,15 +617,15 @@
                     <!-- Emergency Contact Name -->
                     <div class="field-group">
                         <div class="field-label"><i class="bi bi-person-exclamation"></i> Contact Name</div>
-                        <div class="field-value empty" id="val-emgname">Not set</div>
-                        <input class="field-input" id="inp-emgname" type="text" placeholder="Emergency contact name">
+                        <div class="field-value @(string.IsNullOrEmpty(ViewBag.EContactName) ? "empty" : "")" id="val-emgname">@(string.IsNullOrEmpty(ViewBag.EContactName) ? "Not set" : ViewBag.EContactName)</div>
+                        <input class="field-input" id="inp-emgname" type="text" placeholder="Emergency contact name" value="@(ViewBag.EContactName ?? "")">
                     </div>
 
                     <!-- Emergency Contact Phone -->
                     <div class="field-group">
                         <div class="field-label"><i class="bi bi-telephone-forward"></i> Contact Phone</div>
-                        <div class="field-value empty" id="val-emgphone">Not set</div>
-                        <input class="field-input" id="inp-emgphone" type="tel" placeholder="e.g. 01X-XXXXXXX">
+                        <div class="field-value @(string.IsNullOrEmpty(ViewBag.EContactPhone) ? "empty" : "")" id="val-emgphone">@(string.IsNullOrEmpty(ViewBag.EContactPhone) ? "Not set" : ViewBag.EContactPhone)</div>
+                        <input class="field-input" id="inp-emgphone" type="tel" placeholder="e.g. 01X-XXXXXXX" value="@(ViewBag.EContactPhone ?? "")">
                     </div>
 
                     <hr class="section-divider">
@@ -767,31 +767,47 @@
             document.getElementById('saveBtn').classList.remove('visible');
         }
 
-        function saveProfile() {
-            // Write input values back to display elements
+       async function saveProfile() {
+    const empName      = document.getElementById('inp-name').value.trim();
+    const gender       = document.getElementById('inp-gender').value;
+    const email        = document.getElementById('inp-email').value.trim();
+    const phone        = document.getElementById('inp-phone').value.trim();
+    const eContactName = document.getElementById('inp-emgname').value.trim();
+    const eContactPhone= document.getElementById('inp-emgphone').value.trim();
+
+    // Get profile picture as base64 if uploaded
+    const avatarImg    = document.getElementById('avatarImg');
+    const profilePicture = avatarImg.style.display !== 'none' ? avatarImg.src : '';
+
+    try {
+        const response = await fetch('/Account/SaveProfile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `empName=${encodeURIComponent(empName)}&gender=${encodeURIComponent(gender)}&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&eContactName=${encodeURIComponent(eContactName)}&eContactPhone=${encodeURIComponent(eContactPhone)}&profilePicture=${encodeURIComponent(profilePicture)}`
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Update display values
             fields.forEach(([valId, inpId]) => {
-                const val = document.getElementById(valId);
-                const inp = document.getElementById(inpId);
+                const val  = document.getElementById(valId);
+                const inp  = document.getElementById(inpId);
                 const text = inp.value.trim();
-
-                val.textContent = text || '—';
+                val.textContent = text || 'Not set';
                 val.className   = text ? 'field-value' : 'field-value empty';
-                if (!text) val.textContent = 'Not set';
-
                 inp.classList.remove('visible');
                 val.style.display = '';
             });
 
-            // Update name in sidebar + top of profile card
-            const newName = document.getElementById('inp-name').value.trim();
-            if (newName) {
-                document.getElementById('displayName').textContent = newName;
-                document.getElementById('sidebarName').textContent = newName;
+            // Update name in sidebar + profile card
+            if (empName) {
+                document.getElementById('displayName').textContent = empName;
+                document.getElementById('sidebarName').textContent = empName;
             }
 
             // Update coach badge
-            const coachVal = document.getElementById('inp-coach').value;
-            updateCoachBadge(coachVal);
+            updateCoachBadge(document.getElementById('inp-coach').value);
 
             document.getElementById('avatarUploadBtn').classList.remove('visible');
             document.getElementById('editBtn').style.display    = '';
@@ -803,6 +819,10 @@
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
+    } catch (err) {
+        console.error('Save profile error:', err);
+    }
+}
 
         function updateCoachBadge(value) {
             const badge     = document.getElementById('coachBadge');

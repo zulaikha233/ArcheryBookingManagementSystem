@@ -894,5 +894,26 @@ namespace ArcheryAlley
         {
             return _context.Students.OrderBy(s => s.FullName).ToList();
         }
+
+        public Roles GetStaffProfile(string empId)
+        {
+            return _context.Roles.FirstOrDefault(r => r.EmpId == empId);
+        }
+
+        public void UpdateStaffProfile(Roles role)
+        {
+            var existing = _context.Roles.FirstOrDefault(r => r.EmpId == role.EmpId);
+            if (existing != null)
+            {
+                existing.EmpName = role.EmpName;
+                existing.Gender = role.Gender;
+                existing.Email = role.Email;
+                existing.PhoneNumber = role.PhoneNumber;
+                existing.EContactName = role.EContactName;
+                existing.EContactNumber = role.EContactNumber;
+                existing.ProfilePicture = role.ProfilePicture;
+                _context.SaveChanges();
+            }
+        }
     }
 }

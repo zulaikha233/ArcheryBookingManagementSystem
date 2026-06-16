@@ -94,5 +94,9 @@ namespace ArcheryAlley
         void AddPerformanceReport(PerformanceReports report);
 
         List <Students> GetAllArchers();
+
+        //staff
+        Roles GetStaffProfile(string empId);
+        void UpdateStaffProfile(Roles role);
     }
 }

@@ -22,11 +22,46 @@ namespace ArcheryAlley.Controllers
         {
             var role = HttpContext.Session.GetString("UserRole");
             if (string.IsNullOrEmpty(role))
-                return RedirectToAction("Login");
+                return RedirectToAction("Login", "Account");
 
-            ViewBag.StaffName = HttpContext.Session.GetString("UserName");
-            ViewBag.EmpId = HttpContext.Session.GetString("EmpId");
+            var empId = HttpContext.Session.GetString("EmpId");
+            var profile = _repository.GetStaffProfile(empId);
+
+            ViewBag.StaffName = profile?.EmpName ?? "";
+            ViewBag.EmpId = empId;
+            ViewBag.Gender = profile?.Gender ?? "";
+            ViewBag.Email = profile?.Email ?? "";
+            ViewBag.Phone = profile?.PhoneNumber ?? "";
+            ViewBag.EContactName = profile?.EContactName ?? "";
+            ViewBag.EContactPhone = profile?.EContactNumber ?? "";
+            ViewBag.Picture = profile?.ProfilePicture ?? "";
+
             return View("~/Views/Staff/StaffProfile.cshtml");
+        }
+        [HttpPost]
+        public IActionResult SaveProfile(string empName, string gender, string email,
+         string phone, string eContactName, string eContactPhone, string profilePicture)
+        {
+            var empId = HttpContext.Session.GetString("EmpId");
+
+            var role = new Roles
+            {
+                EmpId = empId,
+                EmpName = empName,
+                Gender = gender,
+                Email = email,
+                PhoneNumber = phone,
+                EContactName = eContactName,
+                EContactNumber = eContactPhone,
+                ProfilePicture = profilePicture
+            };
+
+            _repository.UpdateStaffProfile(role);
+
+            // Update session name if changed
+            HttpContext.Session.SetString("UserName", empName);
+
+            return Json(new { success = true });
         }
 
         [HttpGet]
