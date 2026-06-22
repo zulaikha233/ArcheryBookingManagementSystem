@@ -534,7 +534,7 @@
         </div>
 
         <!-- -- SEARCH BAR -- -->
-        <div class="glass-card search-card">
+        <div class="glass-card search-card" id"searchCard">
             <div class="search-row">
                 <input
                     type="text"
@@ -653,49 +653,51 @@
                 mainContent.classList.add('sidebar-collapsed');
                 toggleIcon.className = 'bi bi-layout-sidebar';
             }
+            document.getElementById('searchCard').style.display='none';
+            showAllArchers();
         });
         window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 
-        /* ------------------------------------------------
-           MOCK DATA
-           -- DATA NOTE: Replace with real AJAX fetch when
-              backend is ready:
-              fetch(`/Report/GetStudentReports
-              name=${name}&level=${selectedLevel}`)
-           --
-        ------------------------------------------------ */
-        const mockStudents = {
-            "GrassRoots": [
-                {
-                    name: "Ahmad Faris",
-                    reports: [
-                        { date: "2026-05-10", time: "09:15", coach: "Coach Zad", text: "Ahmad shows great enthusiasm during sessions. His stance is improving steadily and he is beginning to develop consistent form in his draw." },
-                        { date: "2026-04-22", time: "10:00", coach: "Coach Rina", text: "First session went well. Ahmad is eager to learn and follows instructions carefully. Needs to work on grip consistency." }
-                    ]
-                },
-                {
-                    name: "Nurul Aina",
-                    reports: [
-                        { date: "2026-05-15", time: "14:30", coach: "Coach Zad", text: "Nurul is progressing well. Her release technique has improved significantly this week. Recommended to move to Beginner 1 next month." }
-                    ]
-                }
-            ],
-            "Beginner 1": [
-                {
-                    name: "Haziq Danial",
-                    reports: [
-                        { date: "2026-05-20", time: "09:00", coach: "Coach Zad", text: "Haziq is showing consistent groupings at 10m. His anchor point is now reliable and breathing control is good." }
-                    ]
-                }
-            ],
-            "Beginner 2": [],
-            "Intermediate 1": [],
-            "Intermediate 2": [],
-            "Expert": []
-        };
+        // ------------------------------------------------
+        //    MOCK DATA
+        //    -- DATA NOTE: Replace with real AJAX fetch when
+        //       backend is ready:
+        //       fetch(`/Report/GetStudentReports
+        //       name=${name}&level=${selectedLevel}`)
+        //    --
+        // ------------------------------------------------
+        // const mockStudents = {
+        //     "GrassRoots": [
+        //         {
+        //             name: "Ahmad Faris",
+        //             reports: [
+        //                 { date: "2026-05-10", time: "09:15", coach: "Coach Zad", text: "Ahmad shows great enthusiasm during sessions. His stance is improving steadily and he is beginning to develop consistent form in his draw." },
+        //                 { date: "2026-04-22", time: "10:00", coach: "Coach Rina", text: "First session went well. Ahmad is eager to learn and follows instructions carefully. Needs to work on grip consistency." }
+        //             ]
+        //         },
+        //         {
+        //             name: "Nurul Aina",
+        //             reports: [
+        //                 { date: "2026-05-15", time: "14:30", coach: "Coach Zad", text: "Nurul is progressing well. Her release technique has improved significantly this week. Recommended to move to Beginner 1 next month." }
+        //             ]
+        //         }
+        //     ],
+        //     "Beginner 1": [
+        //         {
+        //             name: "Haziq Danial",
+        //             reports: [
+        //                 { date: "2026-05-20", time: "09:00", coach: "Coach Zad", text: "Haziq is showing consistent groupings at 10m. His anchor point is now reliable and breathing control is good." }
+        //             ]
+        //         }
+        //     ],
+        //     "Beginner 2": [],
+        //     "Intermediate 1": [],
+        //     "Intermediate 2": [],
+        //     "Expert": []
+        // };
 
         /* -- STATE -- */
-        let selectedLevel   = 'GrassRoots';
+        let selectedLevel   = 'All';
         let currentStudent  = null;
         let reportsVisible  = false;
         const coachName     = '@(ViewBag.StaffName ?? "Coach")';
@@ -972,25 +974,27 @@
             }
             if (words > 40) return;
 
-            const now  = new Date();
-            const date = now.toISOString().split('T')[0];
-            const time = now.toLocaleTimeString('en-MY', { hour: '2-digit', minute: '2-digit' });
+            try {
+                const response = await fetch('/Report/AddReport', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `studentName=${encodeURIComponent(currentStudent.name)}&level=${encodeURIComponent(selectedLevel)}&reportText=${encodeURIComponent(text)}`
+                });
 
-            /* -- DATA NOTE: When backend is ready replace this with:
-               await fetch('/Report/AddReport', {
-                 method: 'POST',
-                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                 body: `studentName=${currentStudent.name}&level=${selectedLevel}&reportText=${text}&coachName=${coachName}`
-               });
-            -- */
-            currentStudent.reports.push({ date, time, coach: coachName, text });
+                const result = await response.json();
 
-            document.getElementById('reportCount').textContent = `${currentStudent.reports.length} report${currentStudent.reports.length !== 1 ? 's' : ''}`;
-            document.getElementById('reportsSubtitle').textContent = `${currentStudent.reports.length} report${currentStudent.reports.length !== 1 ? 's' : ''} for ${currentStudent.name}`;
-
-            hideAddForm();
-            renderReports();
-            showToast('Report saved successfully!');
+                if (result.success) {
+                    hideAddForm();
+                    await renderReports(); // reload reports from database
+                    showToast('Report saved successfully!');
+                } else {
+                    showToast('Failed to save report. Please try again.');
+                    console.error('AddReport error:', result.message);
+                }
+            } catch (err) {
+                console.error('Submit report error:', err);
+                showToast('Failed to save report. Please try again.');
+            }
         }
 
         /* -- TOAST -- */

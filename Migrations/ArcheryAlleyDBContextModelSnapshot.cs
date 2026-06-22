@@ -260,7 +260,7 @@ namespace ArcheryAlley.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReportId"));
 
-                    b.Property<string>("CoachEmpId")
+                    b.Property<string>("EmpId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CoachName")
@@ -282,6 +282,13 @@ namespace ArcheryAlley.Migrations
 
                     b.ToTable("PerformanceReports");
                 });
+
+            modelBuilder.Entity<PerformanceReports>(entity =>
+            {
+                entity.HasKey(e => e.ReportId);
+                entity.Property(e => e.ReportDate).HasColumnType("datetime");
+                entity.Property(e => e.EmpId).HasColumnName("EmpId");
+            });
 
             modelBuilder.Entity("ArcheryAlley.Models.Rates", b =>
                 {

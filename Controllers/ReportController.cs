@@ -54,7 +54,7 @@ namespace ArcheryAlley.Controllers
                     LevelCategory = level,
                     ReportText = reportText,
                     CoachName = HttpContext.Session.GetString("UserName") ?? "Coach",
-                    CoachID = HttpContext.Session.GetString("EmpId") ?? "",
+                    EmpId = HttpContext.Session.GetString("EmpId") ?? "",
                     ReportDate = DateTime.Now
                 };
 
