@@ -95,3 +95,73 @@ body {
     color: #fff !important;
     padding: 10px !important;
 }
+
+/* SweetAlert Global Dark Theme */
+.swal2-popup {
+    background: #0d121c !important;
+    border: 1px solid rgba(255,255,255,0.05) !important;
+    border-radius: 32px !important;
+    box-shadow: 0 45px 120px rgba(0, 0, 0, 0.9) !important;
+    color: #fff !important;
+    padding: 40px 35px !important;
+}
+
+.swal2-title {
+    font-size: 1.6rem !important;
+    letter-spacing: -0.5px !important;
+    text-transform: uppercase !important;
+    font-weight: 800 !important;
+    color: #fff !important;
+    margin-bottom: 8px !important;
+}
+
+.swal2-html-container {
+    color: #a1a1aa !important;
+    font-size: 0.95rem !important;
+}
+
+.swal2-confirm {
+    border-radius: 50px !important;
+    padding: 12px 30px !important;
+    background: #007bff !important;
+    color: #fff !important;
+    font-weight: 800 !important;
+    font-size: 0.9rem !important;
+    border: none !important;
+    box-shadow: none !important;
+    transition: 0.3s !important;
+}
+
+.swal2-confirm:hover {
+    background: #0056b3 !important;
+}
+
+.swal2-cancel {
+    border-radius: 50px !important;
+    padding: 12px 30px !important;
+    background: rgba(255,255,255,0.05) !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    box-shadow: none !important;
+    transition: 0.3s !important;
+}
+
+.swal2-cancel:hover {
+    background: rgba(255,255,255,0.1) !important;
+}
+
+.swal2-input, .swal2-textarea {
+    background: rgba(255,255,255,0.04) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 16px !important;
+    color: #fff !important;
+    padding: 16px !important;
+}
+
+.swal2-input:focus, .swal2-textarea:focus {
+    border-color: #007bff !important;
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15) !important;
+    outline: none !important;
+}

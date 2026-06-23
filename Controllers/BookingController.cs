@@ -93,7 +93,7 @@ namespace ArcheryAlley.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateClassBooking(int slotId, string date, int duration = 2, [FromForm] List<int> studentIds = null)
+        public IActionResult CreateClassBooking([FromForm] List<int> slotIds, string date, [FromForm] List<int> studentIds = null)
         {
             try
             {
@@ -106,48 +106,70 @@ namespace ArcheryAlley.Controllers
                 if (studentIds == null || !studentIds.Any())
                     return Json(new { success = false, message = "No archers selected." });
 
+                if (slotIds == null || !slotIds.Any())
+                    return Json(new { success = false, message = "No slots selected." });
+
                 DateTime bookingDate;
                 if (!DateTime.TryParse(date, out bookingDate))
                     return Json(new { success = false, message = "Invalid date format." });
 
                 var slots = _repository.GetBookingSlots();
-                var slot = slots.FirstOrDefault(s => s.SlotId == slotId);
-                var slotTime = slot != null ? slot.SlotStartTime : TimeSpan.Zero;
-                DateTime finalReservedOn = bookingDate.Date.Add(slotTime);
-
                 string transactionId = "CLASS-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
 
-                foreach (var sId in studentIds)
+                foreach (var sId in slotIds)
                 {
-                    int? targetStudentId = sId == 0 ? (int?)null : sId;
-                    
-                    var reservation = new Reservations
-                    {
-                        SlotId = slotId,
-                        CustomerName = name,
-                        CustomerEmail = email,
-                        ReservedBy = email,
-                        DurationHours = duration,
-                        TotalPrice = 0, // Classes are pre-paid
-                        ReservedOn = finalReservedOn,
-                        NumberOfPax = 1,
-                        Status = 1,
-                        RateCode = "Class Session",
-                        StudentId = targetStudentId
-                    };
+                    var slot = slots.FirstOrDefault(s => s.SlotId == sId);
+                    if (slot == null) continue;
 
-                    _repository.CreateReservation(reservation);
+                    var slotTime = slot.SlotStartTime;
+                    DateTime finalReservedOn = bookingDate.Date.Add(slotTime);
 
-                    var payment = new Payments
+                    var existingReservations = _repository.GetReservationsByEmail(email);
+
+                    foreach (var studentId in studentIds)
                     {
-                        ReservationId = reservation.ReservationId,
-                        Amount = 0,
-                        PaymentMethod = "Class Package",
-                        PaymentDate = DateTime.Now,
-                        Status = "Success",
-                        TransactionId = transactionId
-                    };
-                    _repository.AddPayment(payment);
+                        int? targetStudentId = studentId == 0 ? (int?)null : studentId;
+                        
+                        bool hasConflict = existingReservations.Any(r => 
+                            r.ReservedOn.Date == finalReservedOn.Date && 
+                            r.SlotId == sId && 
+                            r.StudentId == targetStudentId &&
+                            (r.RateCode == "Class Session" || r.RateCode == "CLASS"));
+
+                        if (hasConflict)
+                        {
+                            string archerName = targetStudentId == null ? name : _repository.GetStudentById(targetStudentId.Value)?.FullName ?? "This archer";
+                            return Json(new { success = false, message = $"{archerName} has already booked." });
+                        }
+                        
+                        var reservation = new Reservations
+                        {
+                            SlotId = sId,
+                            CustomerName = name,
+                            CustomerEmail = email,
+                            ReservedBy = email,
+                            DurationHours = 2, // Classes are always 2-hour slots
+                            TotalPrice = 0, // Classes are pre-paid
+                            ReservedOn = finalReservedOn,
+                            NumberOfPax = 1,
+                            Status = 1,
+                            RateCode = "Class Session",
+                            StudentId = targetStudentId
+                        };
+
+                        _repository.CreateReservation(reservation);
+
+                        var payment = new Payments
+                        {
+                            ReservationId = reservation.ReservationId,
+                            Amount = 0,
+                            PaymentMethod = "Class Package",
+                            PaymentDate = DateTime.Now,
+                            Status = "Success",
+                            TransactionId = transactionId
+                        };
+                        _repository.AddPayment(payment);
+                    }
                 }
 
                 return Json(new { success = true });
@@ -179,6 +201,7 @@ namespace ArcheryAlley.Controllers
                 TotalPrice = r.TotalPrice,
                 RateCode = r.RateCode,
                 Status = r.Status,
+                Student = r.Student != null ? new { FullName = r.Student.FullName } : null,
                 Slot = r.Slot != null ? new {
                     SlotId = r.Slot.SlotId,
                     SlotStartTime = r.Slot.SlotStartTime.ToString(@"hh\:mm"),
@@ -651,6 +674,171 @@ namespace ArcheryAlley.Controllers
             return View("~/Views/History/MemberHistory.cshtml", grouped);
         }
 
+        public IActionResult MemberAttendance(string archerName = "")
+        {
+            string email = HttpContext.Session.GetString("CustomerEmail");
+            if (string.IsNullOrEmpty(email))
+                return RedirectToAction("CustomerLogin", "Account");
+
+            var allSlots = _repository.GetBookingSlots();
+            var history  = _repository.GetReservationsByEmail(email)
+                                      .Where(r => r.RateCode == "CLASS" || r.RateCode == "Class Session").ToList();
+            var customer = _repository.GetCustomerByEmail(email);
+            var students = _repository.GetStudentsByParentId(customer.CustomerId);
+
+            var classRegs = _repository.GetClassRegistrationsByEmail(email)
+                                       .Where(cr => (cr.PaymentStatus == "Success" || cr.PaymentStatus == "Paid") && cr.PackageType != "Annual Membership").ToList();
+
+            if (string.IsNullOrEmpty(archerName))
+            {
+                bool mainHasReg = classRegs.Any(cr => cr.StudentId == null);
+                if (!mainHasReg && students.Any())
+                {
+                    var firstRegisteredChild = students.FirstOrDefault(s => classRegs.Any(cr => cr.StudentId == s.StudentId));
+                    if (firstRegisteredChild != null)
+                    {
+                        archerName = firstRegisteredChild.FullName;
+                    }
+                    else
+                    {
+                        archerName = students.First().FullName;
+                    }
+                }
+                else
+                {
+                    archerName = customer.FullName;
+                }
+            }
+
+            foreach (var res in history)
+                res.Slot = allSlots.FirstOrDefault(s => s.SlotId == res.SlotId);
+
+            var grouped = history
+                .GroupBy(r => new
+                {
+                    r.CustomerName,
+                    r.SlotId,
+                    Date = r.ReservedOn.Date,
+                    r.ReservedBy,
+                    r.DurationHours,
+                    r.RateCode,
+                    r.Status,
+                    r.StudentId
+                })
+                .Select(g => new ArcheryAlley.Models.BookingHistoryViewModel
+                {
+                    GroupId       = g.Min(r => r.ReservationId),
+                    CustomerName  = g.Key.CustomerName,
+                    CustomerEmail = g.First().CustomerEmail,
+                    ReservedBy    = g.Key.ReservedBy,
+                    ReservedOn    = g.First().ReservedOn,
+                    Slot          = g.First().Slot,
+                    TargetNos     = g.Select(r => r.TargetNo).OrderBy(t => t).ToList(),
+                    RangeNos      = g.Select(r => r.RangeNo).Distinct().OrderBy(r => r).ToList(),
+                    DurationHours = g.Key.DurationHours,
+                    TotalPrice    = g.Sum(r => r.TotalPrice),
+                    RateCode      = g.Key.RateCode,
+                    NumberOfPax   = g.Sum(r => r.NumberOfPax),
+                    Status        = g.Key.Status,
+                    ShooterName   = g.First().Student != null ? g.First().Student.FullName : g.Key.CustomerName,
+                    Attended      = g.First().Attended,
+                    AbsentReason  = g.First().AbsentReason
+                })
+                .OrderByDescending(g => g.ReservedOn)
+                .ToList();
+
+            // Populate Archer List from their actual children + themselves, BUT only if they have a Success/Paid class registration
+            var archerList = new List<string>();
+            if (classRegs.Any(cr => cr.StudentId == null))
+            {
+                archerList.Add(customer.FullName);
+            }
+            archerList.AddRange(students.Where(s => classRegs.Any(cr => cr.StudentId == s.StudentId)).Select(s => s.FullName));
+            
+            // Fallback if no one is registered (just to prevent empty dropdown errors, though UI can hide it)
+            if (!archerList.Any())
+            {
+                archerList.Add(archerName);
+            }
+
+            ViewBag.ArcherList = archerList.Distinct().ToList();
+            ViewBag.SelectedArcher = archerName;
+
+            // Filter
+            var selectedStudent = students.FirstOrDefault(s => s.FullName == archerName);
+            ViewBag.SelectedStudentId = selectedStudent?.StudentId;
+            
+            grouped = grouped.Where(g => g.ShooterName == archerName).ToList();
+
+            classRegs = classRegs.Where(cr => {
+                string crA = customer.FullName;
+                if (cr.StudentId.HasValue) {
+                    var stu = students.FirstOrDefault(s => s.StudentId == cr.StudentId.Value);
+                    if (stu != null) crA = stu.FullName;
+                }
+                return crA == archerName;
+            }).ToList();
+
+            var latestReg = classRegs.OrderByDescending(cr => cr.RegistrationDate).FirstOrDefault();
+            int totalSlots = 4;
+            int attendedSlots = 0;
+            bool isExpired = false;
+
+            if (latestReg != null)
+            {
+                if (DateTime.Now >= latestReg.RegistrationDate.AddMonths(1))
+                {
+                    isExpired = true;
+                }
+                
+                if (!string.IsNullOrEmpty(latestReg.PackageType))
+                {
+                    if (latestReg.PackageType.Contains("4 Slot", StringComparison.OrdinalIgnoreCase)) totalSlots = 4;
+                    else if (latestReg.PackageType.Contains("6 Slot", StringComparison.OrdinalIgnoreCase)) totalSlots = 6;
+                    else if (latestReg.PackageType.Contains("Progressive", StringComparison.OrdinalIgnoreCase)) totalSlots = 6;
+                }
+
+                int previousCapacity = 0;
+                var previousRegs = classRegs.Where(cr => cr.RegistrationId != latestReg.RegistrationId).ToList();
+                foreach(var pr in previousRegs)
+                {
+                    if (!string.IsNullOrEmpty(pr.PackageType))
+                    {
+                        if (pr.PackageType.Contains("4 Slot", StringComparison.OrdinalIgnoreCase)) previousCapacity += 4;
+                        else if (pr.PackageType.Contains("6 Slot", StringComparison.OrdinalIgnoreCase)) previousCapacity += 6;
+                        else if (pr.PackageType.Contains("Progressive", StringComparison.OrdinalIgnoreCase)) previousCapacity += 6;
+                        else previousCapacity += 4;
+                    }
+                    else
+                    {
+                        previousCapacity += 4;
+                    }
+                }
+
+                int totalAttendedEver = 0;
+                foreach(var r in grouped.Where(r => r.RateCode == "CLASS" || r.RateCode == "Class Session"))
+                {
+                    if (r.Attended) 
+                    {
+                        totalAttendedEver += Math.Max(1, r.DurationHours / 2);
+                    }
+                }
+
+                attendedSlots = Math.Max(0, totalAttendedEver - previousCapacity);
+            }
+
+            var upcomingClass = grouped.Where(g => (g.RateCode == "CLASS" || g.RateCode == "Class Session") && g.ReservedOn.Date >= DateTime.Now.Date && !g.Attended && g.Status == 1)
+                                       .OrderBy(g => g.ReservedOn)
+                                       .FirstOrDefault();
+
+            ViewBag.TotalClassSlots = totalSlots;
+            ViewBag.AttendedClassSlots = attendedSlots;
+            ViewBag.UpcomingClass = upcomingClass;
+            ViewBag.IsExpired = isExpired;
+
+            return View("~/Views/Attendance/MemberAttendance.cshtml", grouped);
+        }
+
         [HttpGet]
         public IActionResult StaffBooking()
         {
@@ -731,6 +919,18 @@ namespace ArcheryAlley.Controllers
             ViewBag.StaffName = HttpContext.Session.GetString("UserName");
             return View("~/Views/Staff/StaffDashboard.cshtml");
         }
+        [HttpPost]
+        public JsonResult SubmitAbsentReason(int groupId, string reason)
+        {
+            try
+            {
+                _repository.UpdateAbsentReason(groupId, reason);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
     }
-
 }

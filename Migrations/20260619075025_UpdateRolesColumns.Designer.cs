@@ -4,6 +4,7 @@ using ArcheryAlley.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ArcheryAlley.Migrations
 {
     [DbContext(typeof(ArcheryAlleyDBContext))]
-    partial class ArcheryAlleyDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260619075025_UpdateRolesColumns")]
+    partial class UpdateRolesColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -260,7 +263,7 @@ namespace ArcheryAlley.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReportId"));
 
-                    b.Property<string>("EmpId")
+                    b.Property<string>("CoachID")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CoachName")
@@ -282,20 +285,6 @@ namespace ArcheryAlley.Migrations
 
                     b.ToTable("PerformanceReports");
                 });
-
-            modelBuilder.Entity<PerformanceReports>(entity =>
-            {
-                entity.HasKey(e => e.ReportId);
-                entity.Property(e => e.ReportDate).HasColumnType("datetime");
-                entity.Property(e => e.EmpId).HasColumnName("EmpId");
-            });
-
-            modelBuilder.Entity<PerformanceReports>(entity =>
-            {
-                entity.HasKey(e => e.ReportId);
-                entity.Property(e => e.ReportDate).HasColumnType("datetime");
-                entity.Property(e => e.EmpId).HasColumnName("EmpId");
-            });
 
             modelBuilder.Entity("ArcheryAlley.Models.Rates", b =>
                 {
@@ -359,9 +348,6 @@ namespace ArcheryAlley.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReservationId"));
-
-                    b.Property<string>("AbsentReason")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("Attended")
                         .HasColumnType("bit");

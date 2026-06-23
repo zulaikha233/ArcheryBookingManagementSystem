@@ -579,3 +579,88 @@ body {
     color: #fff !important;
     padding: 10px !important;
 }
+
+/* SweetAlert Global Dark Theme Override */
+div.swal2-container div.swal2-popup {
+    background: #0d121c !important;
+    border: 1px solid rgba(255,255,255,0.05) !important;
+    border-radius: 32px !important;
+    box-shadow: 0 45px 120px rgba(0, 0, 0, 0.9) !important;
+    color: #fff !important;
+    padding: 40px 35px !important;
+}
+
+div.swal2-container h2.swal2-title {
+    font-size: 1.6rem !important;
+    letter-spacing: -0.5px !important;
+    text-transform: uppercase !important;
+    font-weight: 800 !important;
+    color: #fff !important;
+    margin-bottom: 8px !important;
+}
+
+div.swal2-container div.swal2-html-container {
+    color: #a1a1aa !important;
+    font-size: 0.95rem !important;
+}
+
+div.swal2-container div.swal2-actions button.swal2-confirm,
+div.swal2-container div.swal2-actions button.btn {
+    border-radius: 50px !important;
+    padding: 12px 30px !important;
+    background-color: #007bff !important;
+    color: #fff !important;
+    font-weight: 800 !important;
+    font-size: 0.9rem !important;
+    border: none !important;
+    box-shadow: none !important;
+    transition: 0.3s !important;
+}
+
+div.swal2-container div.swal2-actions button.swal2-confirm:hover,
+div.swal2-container div.swal2-actions button.btn:hover {
+    background-color: #0056b3 !important;
+}
+
+/* Danger actions (e.g. remove, cancel) should be red */
+div.swal2-container div.swal2-actions button.swal2-confirm.btn-danger,
+div.swal2-container div.swal2-actions button.btn.btn-danger {
+    background-color: #ff4d4d !important;
+}
+
+div.swal2-container div.swal2-actions button.swal2-confirm.btn-danger:hover,
+div.swal2-container div.swal2-actions button.btn.btn-danger:hover {
+    background-color: #e60000 !important;
+}
+
+div.swal2-container div.swal2-actions button.swal2-cancel {
+    border-radius: 50px !important;
+    padding: 12px 30px !important;
+    background-color: rgba(255,255,255,0.05) !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    box-shadow: none !important;
+    transition: 0.3s !important;
+}
+
+div.swal2-container div.swal2-actions button.swal2-cancel:hover {
+    background-color: rgba(255,255,255,0.1) !important;
+}
+
+div.swal2-container .swal2-input, 
+div.swal2-container .swal2-textarea {
+    background: rgba(255,255,255,0.04) !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-radius: 16px !important;
+    color: #fff !important;
+    padding: 16px !important;
+}
+
+div.swal2-container .swal2-input:focus, 
+div.swal2-container .swal2-textarea:focus {
+    border-color: #007bff !important;
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15) !important;
+    outline: none !important;
+}

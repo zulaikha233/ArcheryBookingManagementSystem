@@ -476,6 +476,50 @@
     <!-- Calendar now takes full width -->
 </div>
 
+<!-- Session Details Modal -->
+<div class="modal fade" id="sessionDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background: #0d121c; border: 1px solid rgba(255,255,255,0.05); border-radius: 32px; padding: 40px 35px; box-shadow: 0 45px 120px rgba(0, 0, 0, 0.9); margin: auto;">
+            <div class="text-start">
+                <h3 class="text-white fw-extrabold mb-2 text-center" style="font-size: 1.6rem; letter-spacing: -0.5px; font-weight: 800;">BOOKING DETAILS</h3>
+                <p class="text-dim text-center small mb-4" style="color: var(--text-dim);">Information and breakdown of your booked session.</p>
+
+                <div class="p-3 mb-4 text-center" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 18px;">
+                    <span class="text-dim small d-block" style="text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 6px; color: var(--text-dim);">SESSION TYPE</span>
+                    <span class="fw-extrabold" style="font-size: 2.2rem; font-weight: 800;" id="modalSessionTitle">Game Session</span>
+                </div>
+
+                <div class="mb-4 p-3" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 16px;">
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                        <div class="d-flex justify-content-between border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;">
+                            <span class="text-white fw-bold" style="font-size: 0.85rem;">Date</span>
+                            <span class="text-dim text-end" style="font-size: 0.85rem; color: var(--text-dim);" id="modalSessionDate"></span>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;">
+                            <span class="text-white fw-bold" style="font-size: 0.85rem;">Time</span>
+                            <span class="text-dim text-end" style="font-size: 0.85rem; color: var(--text-dim);" id="modalSessionTime"></span>
+                        </div>
+                        <div class="d-flex justify-content-between border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;">
+                            <span class="text-white fw-bold" style="font-size: 0.85rem;">Booked By</span>
+                            <span class="text-dim text-end" style="font-size: 0.85rem; color: var(--text-dim);" id="modalAccountName"></span>
+                        </div>
+                        <div class="d-flex flex-column pb-1 mt-1">
+                            <span class="text-white fw-bold mb-3" style="font-size: 0.85rem;">Archers Attending</span>
+                            <div id="modalArchersList" style="max-height: 150px; overflow-y: auto; padding-right: 5px; display: flex; flex-direction: column; gap: 8px;">
+                                <!-- populated by js -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="w-100 justify-content-center" data-dismiss="modal" style="border-radius: 50px; padding: 12px; background: #FF4D4D; color: #000; font-weight: 800; font-size: 0.95rem; border: none; cursor: pointer; transition: 0.3s; margin-top: 10px;" onmouseover="this.style.background='#ff6666'" onmouseout="this.style.background='#FF4D4D'">
+                    CLOSE
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -503,9 +547,92 @@
             }
         }
 
+        function resetWeek() {
+            weekStartDate = getStartOfWeek(new Date());
+            renderDashboard();
+        }
+
+        function showSessionDetails(eventIndex) {
+            try {
+                const data = window.calendarEventsData[eventIndex];
+                if (!data) return;
+                
+                let title = "Game Session";
+                let themeColor = "#FF4D4D";
+                let titleIcon = "bi-bullseye";
+                
+                if (data.rateCode === "CLASS" || data.rateCode === "Class Session") {
+                    title = "Class Session";
+                    themeColor = "#3B82F6";
+                    titleIcon = "bi-mortarboard";
+                }
+                else if (data.rateCode === "SELF_TRAINING" || (data.slot && data.slot.isNight)) {
+                    title = "Self Training";
+                    themeColor = "#A855F7";
+                    titleIcon = "bi-moon-stars";
+                }
+            
+                document.getElementById("modalSessionTitle").innerText = title;
+                document.getElementById("modalSessionTitle").style.color = themeColor;
+
+            // format time
+            const dateObj = new Date(data.reservedOn);
+            const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            
+            let startStr = data.slot && data.slot.slotStartTime ? data.slot.slotStartTime.substring(0,5) : "";
+            
+            let endStr = startStr;
+            if (startStr && data.durationHours) {
+                let parts = startStr.split(':');
+                let hours = parseInt(parts[0], 10);
+                let mins = parseInt(parts[1], 10);
+                
+                let ampm = hours >= 12 ? 'PM' : 'AM';
+                let startHours12 = hours % 12 || 12;
+                startStr = `${startHours12.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')} ${ampm}`;
+                
+                hours += Math.floor(data.durationHours);
+                mins += (data.durationHours % 1) * 60;
+                if (mins >= 60) {
+                    hours += Math.floor(mins / 60);
+                    mins = mins % 60;
+                }
+                
+                let endAmpm = hours >= 12 ? 'PM' : 'AM';
+                let endHours12 = hours % 12 || 12;
+                endStr = `${endHours12.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')} ${endAmpm}`;
+            }
+            
+            document.getElementById("modalSessionDate").innerText = dateStr;
+            document.getElementById("modalSessionTime").innerText = `${startStr} - ${endStr}`;
+            document.getElementById("modalAccountName").innerText = data.customerName;
+
+            const listEl = document.getElementById("modalArchersList");
+            listEl.innerHTML = "";
+            
+            data.grouped.forEach(r => {
+                let archerName = data.customerName;
+                if (r.student && r.student.fullName) archerName = r.student.fullName;
+                else if (r.Student && r.Student.FullName) archerName = r.Student.FullName;
+                
+                listEl.innerHTML += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 12px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                        <span style="font-size: 0.85rem; color: var(--text-dim);"><i class="bi bi-person-fill" style="color: ${themeColor}; margin-right: 10px; font-size: 1.1rem;"></i>${archerName}</span>
+                    </div>
+                `;
+            });
+
+                $('#sessionDetailsModal').modal('show');
+            } catch (err) {
+                alert("Error opening details: " + err.message);
+                console.error(err);
+            }
+        }
+
         // State variables
         let currentDate = new Date(); // Today
         let weekStartDate = getStartOfWeek(currentDate);
+        window.calendarEventsData = []; // Store events to avoid JSON escaping in HTML
 
         // Fixed Time Rows mapping directly to operational slots
         const timeSlots = [
@@ -597,6 +724,7 @@
         function renderCalendarBody() {
             const gridBody = document.getElementById("calendarGridBody");
             gridBody.innerHTML = "";
+            window.calendarEventsData = []; // Clear previous events
 
             timeSlots.forEach(time => {
                 const row = document.createElement("tr");
@@ -633,9 +761,12 @@
 
                     if (dayReservations.length > 0) {
                         const cardsContainer = document.createElement("div");
-                        cardsContainer.style.position = "relative";
+                        cardsContainer.style.position = "absolute";
+                        cardsContainer.style.top = "0";
+                        cardsContainer.style.bottom = "0";
+                        cardsContainer.style.left = "0";
+                        cardsContainer.style.right = "0";
                         cardsContainer.style.width = "100%";
-                        cardsContainer.style.height = "100%";
 
                         // Group by identical time and type
                         const groupedRes = [];
@@ -701,34 +832,49 @@
                                 totalPax = matchingRes.grouped[0].numberOfPax || 1;
                             }
 
-                            let namesStr = totalPax > 1 ? `${totalPax} Archers` : matchingRes.customerName;
+                            let namesStr = matchingRes.customerName;
+                            let archerCountStr = totalPax > 1 ? `${totalPax} Archers` : `1 Archer`;
 
                             let metaHtml = "";
                             if (rateCodeUpper === "CLASS SESSION" || rateCodeUpper === "CLASS") {
-                                metaHtml = `<span style="font-weight: 700; color: #fff;">${namesStr}</span>`;
-                            } else {
-                                let tgts = matchingRes.grouped.map(r => r.targetNo).join(', ');
                                 metaHtml = `
                                     <span style="font-weight: 700; color: #fff; margin-bottom: 2px;">${namesStr}</span>
-                                    <span style="opacity: 0.9;">• Tgt ${tgts}</span>
+                                    <span style="font-size: 0.65rem; color: rgba(255,255,255,0.8);">${archerCountStr}</span>
+                                `;
+                            } else {
+                                metaHtml = `
+                                    <span style="font-weight: 700; color: #fff; margin-bottom: 2px;">${namesStr}</span>
+                                    <span style="font-size: 0.65rem; color: rgba(255,255,255,0.8);">${archerCountStr}</span>
                                 `;
                             }
-
                             // Calculate dynamic positioning
+                            let topPercentage = 0;
+                            if (startStr) {
+                                let parts = startStr.split(':');
+                                let mins = parseInt(parts[1], 10);
+                                topPercentage = (mins / 60) * 100;
+                            }
+
                             const duration = matchingRes.durationHours || 1;
-                            const heightPx = duration * 60; // 60px per hour row
+                            const heightPercentage = duration * 100;
                             const totalEvents = groupedRes.length;
-                            const widthPercent = totalEvents > 1 ? (100 / totalEvents) : 95; // 95% if single to leave a tiny right margin
+                            const widthPercent = totalEvents > 1 ? (100 / totalEvents) : 95;
+                            
                             const leftOffset = index * (100 / totalEvents);
                             const zIndex = 10 + index;
+                            
+                            // Store the data and pass the index
+                            window.calendarEventsData.push(matchingRes);
+                            const eventIndex = window.calendarEventsData.length - 1;
 
                             const cardHtml = `
-                                <div class="scheduled-card ${typeClass}" style="position: absolute; top: 0; left: ${leftOffset}%; width: ${widthPercent}%; height: ${heightPx}px; z-index: ${zIndex}; border-radius: 8px; padding: 8px 10px; cursor: default; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); overflow: hidden;">
+                                <div onclick="showSessionDetails(${eventIndex})" class="scheduled-card ${typeClass}" style="position: absolute; top: ${topPercentage}%; left: ${leftOffset}%; width: ${widthPercent}%; height: ${heightPercentage}%; z-index: ${zIndex}; border-radius: 8px; padding: 8px 10px; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); overflow: hidden;">
                                     <div class="card-title" style="font-size: 0.7rem; margin-bottom: 4px; display: flex; gap: 4px; align-items: center; justify-content: center;"><i class="bi ${typeIcon}"></i> ${typeTitle}</div>
                                     ${timeText ? `<div class="card-time" style="font-size: 0.85rem; margin: 0 0 6px 0;">${timeText}</div>` : ''}
                                     <div class="card-meta" style="font-size: 0.75rem; display: flex; flex-direction: column; gap: 2px; align-items: center;">
                                         ${metaHtml}
                                     </div>
+
                                 </div>
                             `;
                             cardsContainer.insertAdjacentHTML('beforeend', cardHtml);

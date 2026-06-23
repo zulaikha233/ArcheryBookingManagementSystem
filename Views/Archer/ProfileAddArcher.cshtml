@@ -182,6 +182,22 @@
             .nav-pills { flex-direction: row !important; overflow-x: auto; white-space: nowrap; gap: 10px; padding-bottom: 5px; }
             .nav-pills .nav-link { margin-bottom: 0; }
         }
+
+        /* Custom Scrollbar for History */
+        .history-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .history-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+        }
+        .history-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .history-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
     </style>
 }
 
@@ -215,7 +231,19 @@
                     else
                     {
                         var isPaidProfile = Model.ClassReg.PaymentStatus == "Paid" || Model.ClassReg.PaymentStatus == "Success";
-                        if (isPaidProfile)
+                        if (Model.IsCompleted)
+                        {
+                            <span style="font-size: 0.75rem; font-weight: 700; color: #00C6FF; background: rgba(0, 198, 255, 0.1); border: 1px solid rgba(0, 198, 255, 0.2); padding: 4px 12px; border-radius: 50px;">
+                                <i class="bi bi-award-fill" style="margin-right: 4px;"></i> Completed
+                            </span>
+                        }
+                        else if (Model.IsExpired)
+                        {
+                            <span style="font-size: 0.75rem; font-weight: 700; color: #ff4d4d; background: rgba(255, 77, 77, 0.1); border: 1px solid rgba(255, 77, 77, 0.2); padding: 4px 12px; border-radius: 50px;">
+                                <i class="bi bi-exclamation-octagon-fill" style="margin-right: 4px;"></i> Expired
+                            </span>
+                        }
+                        else if (isPaidProfile)
                         {
                             <span style="font-size: 0.75rem; font-weight: 700; color: #10B981; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 4px 12px; border-radius: 50px;">
                                 <i class="bi bi-check-circle-fill" style="margin-right: 4px;"></i> Active
@@ -315,6 +343,17 @@
                             }
                         </div>
                     </div>
+                    
+                    @if (Model.IsCompleted || Model.IsExpired)
+                    {
+                        <div class="mt-4 p-3" style="background: rgba(255, 77, 77, 0.1); border: 1px solid rgba(255, 77, 77, 0.3); border-radius: 12px;">
+                            <div style="color: #ff4d4d; font-weight: 700; font-size: 0.95rem; margin-bottom: 8px;">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i> @(Model.IsExpired && !Model.IsCompleted ? "Subscription Expired" : "Subscription Completed")
+                            </div>
+                            <p style="font-size: 0.85rem; margin-bottom: 12px; color: rgba(255,255,255,0.8);">Please register for a new class package for this archer to continue attending sessions.</p>
+                            <a href="/Archer/AddArcherRegister?studentId=@Model.StudentId" class="btn" style="background: #ff4d4d; color: #000; font-weight: 800; font-size: 0.8rem; padding: 8px 20px; border-radius: 50px; text-decoration: none; transition: 0.2s;" onmouseover="this.style.background='#ff6666'" onmouseout="this.style.background='#ff4d4d'">Renew Now</a>
+                        </div>
+                    }
                 }
                 else
                 {
@@ -327,7 +366,49 @@
                     </div>
                 }
 
-                <div class="mt-4 pt-3" style="border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: flex-end;">
+                @{
+                    var historyList = ViewBag.ClassHistory as List<ArcheryAlley.Models.ClassRegistrations>;
+                }
+                @if (historyList != null && historyList.Any())
+                {
+                    <h3 class="settings-section-title mt-5" style="font-size: 1.1rem; border-bottom: none; margin-bottom: 15px;">
+                        <i class="bi bi-clock-history"></i> Class Registration History
+                    </h3>
+                    <div style="display: flex; flex-direction: column; gap: 15px; max-height: 320px; overflow-y: auto; padding-right: 5px;" class="history-scroll">
+                        @foreach (var h in historyList)
+                        {
+                            string displayPkgHist = h.PackageType ?? "";
+                            if (displayPkgHist.Contains("4 Slot")) displayPkgHist = "Starter Tier";
+                            else if (displayPkgHist.Contains("6 Slot")) displayPkgHist = "Progressive Tier";
+
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: 700; color: #fff; font-size: 0.95rem; margin-bottom: 4px;">@displayPkgHist</div>
+                                    <div style="color: var(--text-dim); font-size: 0.8rem;">
+                                        Registered on @h.RegistrationDate.ToString("dd MMM yyyy, hh:mm tt")
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: 800; color: #fff; font-size: 0.95rem; margin-bottom: 4px;">RM @h.TotalPrice.ToString("0.00")</div>
+                                    @if (h.PaymentStatus == "Paid" || h.PaymentStatus == "Success")
+                                    {
+                                        <span style="font-size: 0.7rem; font-weight: 700; color: #10B981; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 50px;">
+                                            <i class="bi bi-check-circle-fill"></i> Paid
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span style="font-size: 0.7rem; font-weight: 700; color: #F59E0B; background: rgba(245, 158, 11, 0.1); padding: 2px 8px; border-radius: 50px;">
+                                            <i class="bi bi-clock-fill"></i> @h.PaymentStatus
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <div class="mt-5 pt-3" style="border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: flex-end;">
                     <a href="/Archer/MyArchers" class="btn btn-outline-light" style="border-radius: 10px; font-weight: 600; padding: 10px 24px; border: 1px solid rgba(255,255,255,0.1); color: var(--text-dim); text-decoration: none;">Back</a>
                 </div>
             </div>

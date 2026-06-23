@@ -31,13 +31,62 @@ namespace ArcheryAlley.Controllers
             {
                 var students = _repository.GetStudentsByParentId(parent.CustomerId);
                 var classRegs = _repository.GetClassRegistrationsByEmail(email);
-                ViewBag.Students = students.Select(s => new ArcherViewModel {
-                    StudentId = s.StudentId,
-                    FullName = s.FullName,
-                    ICNumber = s.ICNumber,
-                    Birthday = s.Birthday,
-                    Age = s.Age,
-                    ClassReg = classRegs.FirstOrDefault(cr => cr.StudentId == s.StudentId)
+                var history = _repository.GetReservationsByEmail(email)
+                    .Where(r => r.RateCode == "CLASS" || r.RateCode == "Class Session").ToList();
+
+                ViewBag.Students = students.Select(s => {
+                    var reg = classRegs.Where(cr => cr.StudentId == s.StudentId).OrderByDescending(cr => cr.RegistrationDate).FirstOrDefault();
+                    bool isCompleted = false;
+                    bool isExpired = false;
+
+                    if (reg != null && (reg.PaymentStatus == "Success" || reg.PaymentStatus == "Paid"))
+                    {
+                        if (DateTime.Now >= reg.RegistrationDate.AddMonths(1))
+                        {
+                            isExpired = true;
+                        }
+                        int totalSlots = 4;
+                        if (!string.IsNullOrEmpty(reg.PackageType))
+                        {
+                            if (reg.PackageType.Contains("4 Slot", StringComparison.OrdinalIgnoreCase) || reg.PackageType.Contains("Starter", StringComparison.OrdinalIgnoreCase)) totalSlots = 4;
+                            else if (reg.PackageType.Contains("6 Slot", StringComparison.OrdinalIgnoreCase) || reg.PackageType.Contains("Progressive", StringComparison.OrdinalIgnoreCase)) totalSlots = 6;
+                        }
+
+                        int previousCapacity = 0;
+                        var previousRegs = classRegs.Where(cr => cr.StudentId == s.StudentId && cr.RegistrationId != reg.RegistrationId).ToList();
+                        foreach(var pr in previousRegs)
+                        {
+                            if (!string.IsNullOrEmpty(pr.PackageType))
+                            {
+                                if (pr.PackageType.Contains("4 Slot", StringComparison.OrdinalIgnoreCase) || pr.PackageType.Contains("Starter", StringComparison.OrdinalIgnoreCase)) previousCapacity += 4;
+                                else if (pr.PackageType.Contains("6 Slot", StringComparison.OrdinalIgnoreCase) || pr.PackageType.Contains("Progressive", StringComparison.OrdinalIgnoreCase)) previousCapacity += 6;
+                                else previousCapacity += 4;
+                            }
+                            else
+                            {
+                                previousCapacity += 4;
+                            }
+                        }
+
+                        int totalAttendedEver = history.Where(r => r.StudentId == s.StudentId && r.Attended).Sum(r => Math.Max(1, r.DurationHours / 2));
+                        int attendedSlots = Math.Max(0, totalAttendedEver - previousCapacity);
+                        
+                        if (attendedSlots >= totalSlots)
+                        {
+                            isCompleted = true;
+                        }
+                    }
+
+                    return new ArcherViewModel {
+                        StudentId = s.StudentId,
+                        FullName = s.FullName,
+                        ICNumber = s.ICNumber,
+                        Birthday = s.Birthday,
+                        Age = s.Age,
+                        ClassReg = reg,
+                        IsCompleted = isCompleted,
+                        IsExpired = isExpired
+                    };
                 }).ToList();
             }
 
@@ -173,11 +222,57 @@ namespace ArcheryAlley.Controllers
             }
 
             var allStudents = _repository.GetStudentsByParentId(parent.CustomerId);
+            var history = _repository.GetReservationsByEmail(email)
+                .Where(r => r.RateCode == "CLASS" || r.RateCode == "Class Session").ToList();
+
             var unregisteredStudents = new List<Students>();
+            var classRegs = _repository.GetClassRegistrationsByEmail(email);
+
             foreach (var s in allStudents)
             {
-                var reg = _repository.GetClassRegistrationByStudentId(s.StudentId);
-                if (reg == null)
+                var reg = classRegs.Where(cr => cr.StudentId == s.StudentId).OrderByDescending(cr => cr.RegistrationDate).FirstOrDefault();
+                bool isCompleted = false;
+                bool isExpired = false;
+
+                if (reg != null && (reg.PaymentStatus == "Success" || reg.PaymentStatus == "Paid"))
+                {
+                    if (DateTime.Now >= reg.RegistrationDate.AddMonths(1))
+                    {
+                        isExpired = true;
+                    }
+                    int totalSlots = 4;
+                    if (!string.IsNullOrEmpty(reg.PackageType))
+                    {
+                        if (reg.PackageType.Contains("4 Slot", StringComparison.OrdinalIgnoreCase) || reg.PackageType.Contains("Starter", StringComparison.OrdinalIgnoreCase)) totalSlots = 4;
+                        else if (reg.PackageType.Contains("6 Slot", StringComparison.OrdinalIgnoreCase) || reg.PackageType.Contains("Progressive", StringComparison.OrdinalIgnoreCase)) totalSlots = 6;
+                    }
+
+                    int previousCapacity = 0;
+                    var previousRegs = classRegs.Where(cr => cr.StudentId == s.StudentId && cr.RegistrationId != reg.RegistrationId).ToList();
+                    foreach (var pr in previousRegs)
+                    {
+                        if (!string.IsNullOrEmpty(pr.PackageType))
+                        {
+                            if (pr.PackageType.Contains("4 Slot", StringComparison.OrdinalIgnoreCase) || pr.PackageType.Contains("Starter", StringComparison.OrdinalIgnoreCase)) previousCapacity += 4;
+                            else if (pr.PackageType.Contains("6 Slot", StringComparison.OrdinalIgnoreCase) || pr.PackageType.Contains("Progressive", StringComparison.OrdinalIgnoreCase)) previousCapacity += 6;
+                            else previousCapacity += 4;
+                        }
+                        else
+                        {
+                            previousCapacity += 4;
+                        }
+                    }
+
+                    int totalAttendedEver = history.Where(r => r.StudentId == s.StudentId && r.Attended).Sum(r => Math.Max(1, r.DurationHours / 2));
+                    int attendedSlots = Math.Max(0, totalAttendedEver - previousCapacity);
+
+                    if (attendedSlots >= totalSlots)
+                    {
+                        isCompleted = true;
+                    }
+                }
+
+                if (reg == null || isCompleted || isExpired)
                 {
                     unregisteredStudents.Add(s);
                 }
@@ -379,6 +474,12 @@ namespace ArcheryAlley.Controllers
             }
 
             var classReg = _repository.GetClassRegistrationByStudentId(studentId);
+            var classHistory = _repository.GetClassRegistrationsByEmail(email)
+                .Where(cr => cr.StudentId == studentId && (cr.PaymentStatus == "Paid" || cr.PaymentStatus == "Success"))
+                .OrderByDescending(cr => cr.RegistrationDate)
+                .ToList();
+
+            ViewBag.ClassHistory = classHistory;
 
             var model = new ArcheryAlley.Models.ArcherViewModel
             {
