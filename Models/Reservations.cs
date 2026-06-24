@@ -23,6 +23,7 @@ namespace ArcheryAlley.Models
         
         public BookingSlots Slot { get; set; }
         public bool Attended { get; set; } = false;
+        public string? AbsentReason { get; set; }
 
         // Optional FK — links booking to a specific archer
         public int? StudentId { get; set; }

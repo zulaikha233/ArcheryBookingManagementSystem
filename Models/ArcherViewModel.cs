@@ -10,5 +10,7 @@ namespace ArcheryAlley.Models
         public DateTime? Birthday { get; set; }
         public int? Age { get; set; }
         public ClassRegistrations ClassReg { get; set; }
+        public bool IsCompleted { get; set; }
+        public bool IsExpired { get; set; }
     }
 }

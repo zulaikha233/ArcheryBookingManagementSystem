@@ -140,6 +140,7 @@
     <select id="statusFilter" class="filter-select" onchange="filterArchers()">
         <option value="all">All Statuses</option>
         <option value="active">Active</option>
+        <option value="completed">Completed</option>
         <option value="pending">Pending</option>
         <option value="not_registered">Not Registered</option>
     </select>
@@ -170,7 +171,11 @@
                         string statusStr = "not_registered";
                         if (hasReg) {
                             var isPaid = s.ClassReg.PaymentStatus == "Paid" || s.ClassReg.PaymentStatus == "Success";
-                            statusStr = isPaid ? "active" : "pending";
+                            if (s.IsCompleted) {
+                                statusStr = "completed";
+                            } else {
+                                statusStr = isPaid ? "active" : "pending";
+                            }
                         }
                         
                         int archerAge = s.Age ?? 0;
@@ -234,7 +239,19 @@
                                 else
                                 {
                                     var isPaid = s.ClassReg.PaymentStatus == "Paid" || s.ClassReg.PaymentStatus == "Success";
-                                    if (isPaid)
+                                    if (s.IsCompleted)
+                                    {
+                                        <span class="badge-status" style="background: rgba(0, 198, 255, 0.15); color: #00C6FF; border: 1px solid rgba(0, 198, 255, 0.25);">
+                                            <i class="bi bi-award-fill"></i> Completed
+                                        </span>
+                                    }
+                                    else if (s.IsExpired)
+                                    {
+                                        <span class="badge-status" style="background: rgba(255, 77, 77, 0.15); color: #ff4d4d; border: 1px solid rgba(255, 77, 77, 0.25);">
+                                            <i class="bi bi-exclamation-octagon-fill"></i> Expired
+                                        </span>
+                                    }
+                                    else if (isPaid)
                                     {
                                         <span class="badge-status status-confirmed">
                                             <i class="bi bi-check-circle-fill"></i> Active
@@ -260,9 +277,9 @@
                                             <i class="bi bi-mortarboard-fill me-1"></i> REGISTER
                                         </a>
                                         <button type="button" onclick="confirmRemoveArcher('@s.StudentId', '@Html.Raw(s.FullName)')" 
-                                                style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--text-dim); border-radius: 10px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.3s;"
-                                                onmouseover="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.color='#ef4444'; this.style.borderColor='rgba(239, 68, 68, 0.3)';" 
-                                                onmouseout="this.style.background='transparent'; this.style.color='var(--text-dim)'; this.style.borderColor='rgba(255,255,255,0.1)';">
+                                                style="background: transparent; border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; border-radius: 10px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.3s;"
+                                                onmouseover="this.style.background='rgba(239, 68, 68, 0.1)';" 
+                                                onmouseout="this.style.background='transparent';">
                                             <i class="bi bi-x-lg"></i>
                                         </button>
                                     }
@@ -278,15 +295,27 @@
                                         if (!isPaid)
                                         {
                                             <button type="button" onclick="confirmCancelRegistration('@s.ClassReg.RegistrationId', '@Html.Raw(s.FullName)')" 
-                                                    style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--text-dim); border-radius: 10px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.3s;"
-                                                    onmouseover="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.color='#ef4444'; this.style.borderColor='rgba(239, 68, 68, 0.3)';" 
-                                                    onmouseout="this.style.background='transparent'; this.style.color='var(--text-dim)'; this.style.borderColor='rgba(255,255,255,0.1)';">
+                                                    style="background: transparent; border: 1px solid rgba(239, 68, 68, 0.4); color: #ef4444; border-radius: 10px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.3s;"
+                                                    onmouseover="this.style.background='rgba(239, 68, 68, 0.1)';" 
+                                                    onmouseout="this.style.background='transparent';">
                                                 <i class="bi bi-x-lg"></i>
                                             </button>
                                         }
                                         else
                                         {
-                                            <div style="width: 34px; flex-shrink: 0;"></div>
+                                            if (s.IsCompleted || s.IsExpired)
+                                            {
+                                                <a href="/Archer/AddArcherRegister?studentId=@s.StudentId" title="Renew Package"
+                                                   style="background: transparent; border: 1px solid rgba(0, 198, 255, 0.4); color: #00C6FF; border-radius: 10px; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.3s;"
+                                                   onmouseover="this.style.background='rgba(0, 198, 255, 0.1)';" 
+                                                   onmouseout="this.style.background='transparent';">
+                                                    <i class="bi bi-arrow-repeat"></i>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <div style="width: 34px; flex-shrink: 0;"></div>
+                                            }
                                         }
                                     }
                                 </div>
@@ -380,6 +409,29 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     window.location.href = '/Archer/CancelRegistration?regId=' + id;
+                }
+            });
+        }
+
+        function confirmRenew(id, name) {
+            Swal.fire({
+                title: 'Renew Class?',
+                text: `Are you sure you want to renew the class registration for this archer?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, renew now',
+                cancelButtonText: 'Cancel',
+                background: '#1a1e28',
+                color: '#fff',
+                customClass: {
+                    popup: 'border border-secondary border-opacity-25 rounded-4',
+                    confirmButton: 'btn btn-primary fw-bold px-4 py-2 mx-2',
+                    cancelButton: 'btn btn-secondary fw-bold px-4 py-2 mx-2'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/Archer/AddArcherRegister?studentId=' + id;
                 }
             });
         }

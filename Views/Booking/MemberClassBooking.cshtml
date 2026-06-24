@@ -259,6 +259,7 @@
 }
 
 @section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     // State management
     const bookingData = {
@@ -425,9 +426,10 @@
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> RESERVING...';
 
         const formData = new FormData();
-        formData.append("slotId", bookingData.slotId);
+        bookingData.selectedSlotIds.forEach(id => {
+            formData.append("slotIds", id);
+        });
         formData.append("date", bookingData.date);
-        formData.append("duration", bookingData.duration);
         
         const selectedShooters = [];
         document.querySelectorAll('.shooter-checkbox:checked').forEach(chk => {
@@ -452,12 +454,26 @@
             if (result.success) {
                 document.getElementById("successModal").style.display = "flex";
             } else {
-                alert("Booking failed: " + result.message);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Booking Failed',
+                    text: result.message,
+                    background: '#1a1f26',
+                    color: '#fff',
+                    confirmButtonColor: '#FF4D4D'
+                });
                 btn.disabled = false;
                 btn.innerHTML = 'CONFIRM CLASS BOOKING <i class="bi bi-check2-circle ms-2"></i>';
             }
         } catch (err) {
-            alert("Connection error. Please try again.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Connection Error',
+                text: 'Please try again.',
+                background: '#1a1f26',
+                color: '#fff',
+                confirmButtonColor: '#FF4D4D'
+            });
             btn.disabled = false;
             btn.innerHTML = 'CONFIRM CLASS BOOKING <i class="bi bi-check2-circle ms-2"></i>';
         }

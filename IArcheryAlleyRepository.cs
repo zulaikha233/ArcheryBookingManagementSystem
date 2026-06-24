@@ -88,6 +88,7 @@ namespace ArcheryAlley
         // Attendance Management
         public List<Reservations> GetReservationsByDate(DateTime date);
         public void UpdateAttendance(int reservationId, bool attended);
+        public void UpdateAbsentReason(int groupId, string reason);
 
         //Performance Reporting
         List<PerformanceReports> GetReportsByStudent(string studentName, string level);

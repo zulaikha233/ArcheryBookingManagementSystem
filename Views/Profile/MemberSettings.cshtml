@@ -281,7 +281,10 @@
             <p class="sidebar-subtitle">You can find all settings here.</p>
             
             <nav class="settings-nav">
-                <a href="javascript:void(0)" class="settings-nav-item active" onclick="alert('Security Options are currently active.')">
+                <a href="/Account/MemberProfile" class="settings-nav-item">
+                    <i class="bi bi-person"></i> Profile Information
+                </a>
+                <a href="/Account/MemberSettings" class="settings-nav-item active">
                     <i class="bi bi-shield-lock"></i> Security Options
                 </a>
                 <a href="javascript:void(0)" class="settings-nav-item" onclick="alert('Chat module coming soon!')">
@@ -365,6 +368,24 @@
 </div>
 
 @section Scripts {
+    <style>
+        .swal-custom-popup {
+            border-radius: 32px !important;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .swal-custom-confirm {
+            background-color: #007bff !important;
+            color: #fff !important;
+            border-radius: 50px !important;
+            padding: 10px 30px !important;
+            font-weight: 700 !important;
+            border: none !important;
+            transition: 0.3s;
+        }
+        .swal-custom-confirm:hover {
+            background-color: #0056b3 !important;
+        }
+    </style>
     <script>
         (function () {
             'use strict';
@@ -378,9 +399,12 @@
                         icon: 'warning',
                         title: 'Incomplete Details',
                         text: 'Please fill in all required password fields.',
+                        background: '#0d121c',
+                        color: '#fff',
                         confirmButtonText: 'OK',
                         customClass: {
-                            confirmButton: 'btn btn-danger'
+                            popup: 'swal-custom-popup',
+                            confirmButton: 'swal-custom-confirm'
                         },
                         buttonsStyling: false
                     });
@@ -395,10 +419,13 @@
             Swal.fire({
                 icon: 'success',
                 title: 'Success!',
-                text: '@Html.Raw(ViewBag.SuccessMessage.Replace("'", "\\'"))',
+                text: '@Html.Raw(ViewBag.SuccessMessage?.Replace("'", "\\'"))',
+                background: '#0d121c',
+                color: '#fff',
                 confirmButtonText: 'OK',
                 customClass: {
-                    confirmButton: 'btn btn-danger'
+                    popup: 'swal-custom-popup',
+                    confirmButton: 'swal-custom-confirm'
                 },
                 buttonsStyling: false
             });
@@ -411,10 +438,13 @@
             Swal.fire({
                 icon: 'error',
                 title: 'Error!',
-                text: '@Html.Raw(ViewBag.ErrorMessage.Replace("'", "\\'"))',
+                text: '@Html.Raw(ViewBag.ErrorMessage?.Replace("'", "\\'"))',
+                background: '#0d121c',
+                color: '#fff',
                 confirmButtonText: 'OK',
                 customClass: {
-                    confirmButton: 'btn btn-danger'
+                    popup: 'swal-custom-popup',
+                    confirmButton: 'swal-custom-confirm'
                 },
                 buttonsStyling: false
             });

@@ -38,14 +38,88 @@
 }
 
 <style>
+    /* ── LEFT SIDEBAR ── */
+    .sidebar-card {
+        background: rgba(30, 35, 45, 0.4);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 24px;
+        padding: 30px 20px;
+    }
+
+    .sidebar-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 5px;
+        letter-spacing: -0.5px;
+    }
+
+    .sidebar-subtitle {
+        font-size: 0.78rem;
+        color: var(--text-dim);
+        margin-bottom: 30px;
+    }
+
+    .settings-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .settings-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 18px;
+        border-radius: 14px;
+        color: var(--text-dim);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none !important;
+        transition: all 0.25s ease;
+        border: 1px solid transparent;
+        cursor: pointer;
+    }
+
+    .settings-nav-item:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .settings-nav-item.active {
+        background: linear-gradient(135deg, rgba(255, 77, 77, 0.12), rgba(255, 77, 77, 0.02));
+        border-color: rgba(255, 77, 77, 0.15);
+        color: var(--primary) !important;
+        font-weight: 700;
+        box-shadow: 0 4px 20px rgba(255, 77, 77, 0.05);
+    }
+
+    .settings-nav-item i {
+        font-size: 1.05rem;
+    }
+
     /* ── PROFILE CUSTOM THEME ── */
     .settings-container {
-        max-width: 950px;
+        max-width: 1250px;
         margin: 0 auto;
         animation: fadeIn 0.6s ease;
     }
 
-    /* ── RIGHT CONTENT CARD (FULL WIDTH) ── */
+    .settings-grid {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 30px;
+        align-items: start;
+    }
+
+    @@media (max-width: 992px) {
+        .settings-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ── RIGHT CONTENT CARD ── */
     .profile-card {
         background: rgba(20, 24, 33, 0.6);
         backdrop-filter: blur(20px);
@@ -311,9 +385,32 @@
 </style>
 
 <div class="settings-container py-4">
-    <!-- ─── ONLY THE LARGE DETAILS CARD (NO SIDEBAR) ─── -->
-    <div class="profile-card" data-aos="fade-up">
-        <form asp-action="MemberProfile" method="post" id="profileForm" class="needs-validation" novalidate>
+    <div class="settings-grid">
+        
+        <!-- ─── LEFT SIDEBAR ─── -->
+        <div class="sidebar-card" data-aos="fade-right">
+            <h2 class="sidebar-title">Settings</h2>
+            <p class="sidebar-subtitle">You can find all settings here.</p>
+            
+            <nav class="settings-nav">
+                <a href="javascript:void(0)" class="settings-nav-item active" id="tab-nav-profile" onclick="switchTab('profile')">
+                    <i class="bi bi-person"></i> Profile Information
+                </a>
+                <a href="javascript:void(0)" class="settings-nav-item" id="tab-nav-class" onclick="switchTab('class')">
+                    <i class="bi bi-box-seam-fill"></i> Class Details
+                </a>
+                <a href="/Account/MemberSettings" class="settings-nav-item">
+                    <i class="bi bi-shield-lock"></i> Security Options
+                </a>
+            </nav>
+        </div>
+
+        <!-- ─── RIGHT CONTENT CARD ─── -->
+        <div class="profile-card" data-aos="fade-left">
+            
+            <!-- PROFILE PANE -->
+            <div id="pane-profile" style="display: block;">
+                <form asp-action="MemberProfile" method="post" id="profileForm" class="needs-validation" novalidate>
             
             <!-- Hidden stitched input -->
             <input type="hidden" name="FullName" id="hiddenFullName" value="@Model.FullName" />
@@ -335,6 +432,45 @@
                         <input type="text" name="Username" id="inputUsername" class="form-control-premium m-0" value="@Model.Username" style="font-size: 1.25rem; font-weight: 700; padding: 8px 15px; width: 220px; color: #fff !important; border-radius: 12px !important;" required>
                     </div>
                     <p style="margin-top: 6px;">Archery Club Member &middot; @Model.Email</p>
+                    
+                    <div style="margin-top: 8px;">
+                        @if (ViewBag.MainAccountClassReg == null)
+                        {
+                            <span style="font-size: 0.75rem; font-weight: 700; color: var(--primary); background: rgba(255, 77, 77, 0.1); border: 1px solid rgba(255, 77, 77, 0.2); padding: 4px 12px; border-radius: 50px;">
+                                Not Registered
+                            </span>
+                        }
+                        else
+                        {
+                            var reg = (ArcheryAlley.Models.ClassRegistrations)ViewBag.MainAccountClassReg;
+                            var isPaidProfile = reg.PaymentStatus == "Paid" || reg.PaymentStatus == "Success";
+                            
+                            if (ViewBag.MainAccountIsCompleted == true)
+                            {
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #00C6FF; background: rgba(0, 198, 255, 0.1); border: 1px solid rgba(0, 198, 255, 0.2); padding: 4px 12px; border-radius: 50px;">
+                                    <i class="bi bi-award-fill" style="margin-right: 4px;"></i> Completed
+                                </span>
+                            }
+                            else if (ViewBag.MainAccountIsExpired == true)
+                            {
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #ff4d4d; background: rgba(255, 77, 77, 0.1); border: 1px solid rgba(255, 77, 77, 0.2); padding: 4px 12px; border-radius: 50px;">
+                                    <i class="bi bi-exclamation-octagon-fill" style="margin-right: 4px;"></i> Expired
+                                </span>
+                            }
+                            else if (isPaidProfile)
+                            {
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #10B981; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 4px 12px; border-radius: 50px;">
+                                    <i class="bi bi-check-circle-fill" style="margin-right: 4px;"></i> Active
+                                </span>
+                            }
+                            else
+                            {
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #F59E0B; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); padding: 4px 12px; border-radius: 50px;">
+                                    <i class="bi bi-clock-fill" style="margin-right: 4px;"></i> Pending
+                                </span>
+                            }
+                        }
+                    </div>
                 </div>
             </div>
 
@@ -441,24 +577,138 @@
                 </div>
             </div>
 
-            <!-- Footer Navigation -->
-            <div class="d-flex justify-content-end pt-3 border-top mb-4" style="border-color: rgba(255,255,255,0.05) !important;">
-                <button type="submit" class="btn-premium-edit">
-                    <i class="bi bi-pencil-square"></i> Save Changes
-                </button>
-            </div>
-            
-            <div class="d-flex justify-content-start">
-                <a href="/Account/MemberDashboard" class="btn-outline-premium">
-                    Back to Dashboard
-                </a>
+                    <div class="d-flex justify-content-end pt-3 border-top mb-4" style="border-color: rgba(255,255,255,0.05) !important;">
+                        <button type="submit" class="btn-premium-edit">
+                            <i class="bi bi-pencil-square"></i> Save Changes
+                        </button>
+                    </div>
+                    
+                    <div class="d-flex justify-content-start">
+                        <a href="/Account/MemberDashboard" class="btn-outline-premium">
+                            Back to Dashboard
+                        </a>
+                    </div>
+                </form>
             </div>
 
-        </form>
+            <!-- CLASS DETAILS PANE -->
+            <div id="pane-class" style="display: none; animation: fadeIn 0.4s ease;">
+                <div class="profile-header-wrap">
+                    <h3 class="profile-card-title">Class Details</h3>
+                </div>
+
+                @if (ViewBag.MainAccountClassReg != null)
+                {
+                    var reg = (ArcheryAlley.Models.ClassRegistrations)ViewBag.MainAccountClassReg;
+                    string displayPkg = reg.PackageType ?? "";
+                    if (displayPkg.Contains("4 Slot")) displayPkg = "Starter Tier";
+                    else if (displayPkg.Contains("6 Slot")) displayPkg = "Progressive Tier";
+
+                    <div class="premium-form-grid" style="margin-bottom: 20px;">
+                        <div class="form-group-premium">
+                            <label class="form-label-premium">Package Type</label>
+                            <input type="text" class="form-control-premium" readonly value="@displayPkg" />
+                        </div>
+                        
+                        <div class="form-group-premium">
+                            <label class="form-label-premium">Payment Status</label>
+                            <div style="background: transparent; border: none; padding: 0; padding-top: 10px;">
+                                @{
+                                    var isPaid = reg.PaymentStatus == "Paid" || reg.PaymentStatus == "Success";
+                                }
+                                @if (isPaid)
+                                {
+                                    <span style="font-size: 0.9rem; font-weight: 700; color: #10B981; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 8px 16px; border-radius: 50px; display: inline-flex; align-items: center; gap: 8px;">
+                                        <i class="bi bi-check-circle-fill"></i> Paid
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span style="font-size: 0.9rem; font-weight: 700; color: #F59E0B; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); padding: 8px 16px; border-radius: 50px; display: inline-flex; align-items: center; gap: 8px;">
+                                        <i class="bi bi-clock-fill"></i> Pending
+                                    </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="bi bi-clipboard-x text-dim" style="font-size: 3rem; opacity: 0.5;"></i>
+                        <p class="text-dim mt-3" style="font-size: 1rem; font-weight: 500;">You have not registered for any classes yet.</p>
+                        <a href="/Account/ClassRegistration" class="btn-premium-edit mt-3">
+                            <i class="bi bi-mortarboard-fill me-2"></i> Register Now
+                        </a>
+                    </div>
+                }
+
+                @{
+                    var historyList = ViewBag.ClassHistory as List<ArcheryAlley.Models.ClassRegistrations>;
+                }
+                @if (historyList != null && historyList.Any())
+                {
+                    <div class="form-section-title mt-5" style="border-bottom: none;">
+                        <i class="bi bi-clock-history"></i> Class Registration History
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 15px; max-height: 320px; overflow-y: auto; padding-right: 5px;">
+                        @foreach (var h in historyList)
+                        {
+                            string displayPkgHist = h.PackageType ?? "";
+                            if (displayPkgHist.Contains("4 Slot")) displayPkgHist = "Starter Tier";
+                            else if (displayPkgHist.Contains("6 Slot")) displayPkgHist = "Progressive Tier";
+
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: 700; color: #fff; font-size: 0.95rem; margin-bottom: 4px;">@displayPkgHist</div>
+                                    <div style="color: var(--text-dim); font-size: 0.8rem;">
+                                        Registered on @h.RegistrationDate.ToString("dd MMM yyyy, hh:mm tt")
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: 800; color: #fff; font-size: 0.95rem; margin-bottom: 4px;">RM @h.TotalPrice.ToString("0.00")</div>
+                                    @if (h.PaymentStatus == "Paid" || h.PaymentStatus == "Success")
+                                    {
+                                        <span style="font-size: 0.7rem; font-weight: 700; color: #10B981; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 50px;">
+                                            <i class="bi bi-check-circle-fill"></i> Paid
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span style="font-size: 0.7rem; font-weight: 700; color: #F59E0B; background: rgba(245, 158, 11, 0.1); padding: 2px 8px; border-radius: 50px;">
+                                            <i class="bi bi-clock-fill"></i> @h.PaymentStatus
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+        </div>
     </div>
 </div>
 
 @section Scripts {
+    <style>
+        .swal-custom-popup {
+            border-radius: 32px !important;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .swal-custom-confirm {
+            background-color: #007bff !important;
+            color: #fff !important;
+            border-radius: 50px !important;
+            padding: 10px 30px !important;
+            font-weight: 700 !important;
+            border: none !important;
+            transition: 0.3s;
+        }
+        .swal-custom-confirm:hover {
+            background-color: #0056b3 !important;
+        }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         @if (ViewBag.SuccessMessage != null)
@@ -468,11 +718,12 @@
                 icon: 'success',
                 title: 'Success!',
                 text: '@Html.Raw(ViewBag.SuccessMessage)',
-                background: '#1a1d24',
+                background: '#0d121c',
                 color: '#fff',
                 confirmButtonText: 'OK',
                 customClass: {
-                    confirmButton: 'btn btn-danger px-4'
+                    popup: 'swal-custom-popup',
+                    confirmButton: 'swal-custom-confirm'
                 },
                 buttonsStyling: false
             });
@@ -486,11 +737,12 @@
                 icon: 'error',
                 title: 'Error',
                 text: '@Html.Raw(ViewBag.ErrorMessage)',
-                background: '#1a1d24',
+                background: '#0d121c',
                 color: '#fff',
                 confirmButtonText: 'OK',
                 customClass: {
-                    confirmButton: 'btn btn-danger px-4'
+                    popup: 'swal-custom-popup',
+                    confirmButton: 'swal-custom-confirm'
                 },
                 buttonsStyling: false
             });
@@ -529,11 +781,12 @@
                         icon: 'warning',
                         title: 'Incomplete Profile',
                         text: 'Please complete all required fields to update your profile.',
-                        background: '#1a1d24',
+                        background: '#0d121c',
                         color: '#fff',
                         confirmButtonText: 'OK',
                         customClass: {
-                            confirmButton: 'btn btn-danger px-4'
+                            popup: 'swal-custom-popup',
+                            confirmButton: 'swal-custom-confirm'
                         },
                         buttonsStyling: false
                     });
@@ -625,6 +878,19 @@
                 // Fallback to putting everything in Street if it wasn't stitched properly before
                 document.getElementById('inputStreet').value = fullAddr;
             }
+        }
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            // Update nav items
+            document.getElementById('tab-nav-profile').classList.remove('active');
+            document.getElementById('tab-nav-class').classList.remove('active');
+            document.getElementById('tab-nav-' + tabId).classList.add('active');
+
+            // Update panes
+            document.getElementById('pane-profile').style.display = 'none';
+            document.getElementById('pane-class').style.display = 'none';
+            document.getElementById('pane-' + tabId).style.display = 'block';
         }
     </script>
 }

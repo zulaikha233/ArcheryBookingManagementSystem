@@ -708,7 +708,10 @@ namespace ArcheryAlley
 
         public ClassRegistrations GetClassRegistrationByStudentId(int studentId)
         {
-            return _context.ClassRegistrations.FirstOrDefault(cr => cr.StudentId == studentId);
+            return _context.ClassRegistrations
+                           .Where(cr => cr.StudentId == studentId)
+                           .OrderByDescending(cr => cr.RegistrationDate)
+                           .FirstOrDefault();
         }
 
         public void UpdateStudentStatus(int studentId, string status)
@@ -912,6 +915,24 @@ namespace ArcheryAlley
                 existing.EContactName = role.EContactName;
                 existing.EContactNumber = role.EContactNumber;
                 existing.ProfilePicture = role.ProfilePicture;
+                _context.SaveChanges();
+            }
+        }
+        public void UpdateAbsentReason(int groupId, string reason)
+        {
+            var baseReservation = _context.Reservations.FirstOrDefault(r => r.ReservationId == groupId);
+            if (baseReservation != null)
+            {
+                var groupReservations = _context.Reservations.Where(r => 
+                    r.CustomerEmail == baseReservation.CustomerEmail &&
+                    r.SlotId == baseReservation.SlotId &&
+                    r.ReservedOn.Date == baseReservation.ReservedOn.Date &&
+                    r.RateCode == baseReservation.RateCode).ToList();
+                
+                foreach (var res in groupReservations)
+                {
+                    res.AbsentReason = reason;
+                }
                 _context.SaveChanges();
             }
         }

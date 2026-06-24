@@ -400,15 +400,63 @@ namespace ArcheryAlley.Controllers
                 } : null
             }).ToList();
 
-            ViewBag.ClassRegistrations = _repository.GetClassRegistrationsByEmail(email);
+            var classRegs = _repository.GetClassRegistrationsByEmail(email);
+            ViewBag.ClassRegistrations = classRegs;
             ViewBag.MembershipPayments = _repository.GetMembershipPaymentsByEmail(email);
+
+            var latestMainReg = classRegs?.Where(cr => cr.StudentId == null).OrderByDescending(cr => cr.RegistrationDate).FirstOrDefault();
+            bool mainIsCompleted = false;
+            bool mainIsExpired = false;
+            
+            if (latestMainReg != null && (latestMainReg.PaymentStatus == "Success" || latestMainReg.PaymentStatus == "Paid"))
+            {
+                if (DateTime.Now >= latestMainReg.RegistrationDate.AddMonths(1))
+                {
+                    mainIsExpired = true;
+                }
+                int totalSlots = 4;
+                if (!string.IsNullOrEmpty(latestMainReg.PackageType))
+                {
+                    if (latestMainReg.PackageType.Contains("4 Slot", StringComparison.OrdinalIgnoreCase) || latestMainReg.PackageType.Contains("Starter", StringComparison.OrdinalIgnoreCase)) totalSlots = 4;
+                    else if (latestMainReg.PackageType.Contains("6 Slot", StringComparison.OrdinalIgnoreCase) || latestMainReg.PackageType.Contains("Progressive", StringComparison.OrdinalIgnoreCase)) totalSlots = 6;
+                }
+
+                var classHistory = rawReservations
+                    .Where(r => (r.RateCode == "CLASS" || r.RateCode == "Class Session") && r.StudentId == null).ToList();
+
+                int previousCapacity = 0;
+                var previousRegs = classRegs.Where(cr => cr.StudentId == null && cr.RegistrationId != latestMainReg.RegistrationId).ToList();
+                foreach(var pr in previousRegs)
+                {
+                    if (!string.IsNullOrEmpty(pr.PackageType))
+                    {
+                        if (pr.PackageType.Contains("4 Slot", StringComparison.OrdinalIgnoreCase) || pr.PackageType.Contains("Starter", StringComparison.OrdinalIgnoreCase)) previousCapacity += 4;
+                        else if (pr.PackageType.Contains("6 Slot", StringComparison.OrdinalIgnoreCase) || pr.PackageType.Contains("Progressive", StringComparison.OrdinalIgnoreCase)) previousCapacity += 6;
+                        else previousCapacity += 4;
+                    }
+                    else
+                    {
+                        previousCapacity += 4;
+                    }
+                }
+
+                int totalAttendedEver = classHistory.Where(r => r.Attended).Sum(r => Math.Max(1, r.DurationHours / 2));
+                int attendedSlots = Math.Max(0, totalAttendedEver - previousCapacity);
+
+                if (attendedSlots >= totalSlots)
+                {
+                    mainIsCompleted = true;
+                }
+            }
+            ViewBag.MainAccountIsCompleted = mainIsCompleted;
+            ViewBag.MainAccountIsExpired = mainIsExpired;
 
             // Pass students (children) list
             var parent = _repository.GetCustomerByEmail(email);
             if (parent != null)
             {
                 var students = _repository.GetStudentsByParentId(parent.CustomerId);
-                var classRegs = _repository.GetClassRegistrationsByEmail(email);
+
                 ViewBag.Students = students.Select(s => new {
                     s.StudentId,
                     s.FullName,
@@ -431,6 +479,37 @@ namespace ArcheryAlley.Controllers
             var customer = _repository.GetCustomerByEmail(email);
             if (customer == null)
                 return RedirectToAction("CustomerLogin");
+
+            var classRegs = _repository.GetClassRegistrationsByEmail(email)
+                                      ?.Where(cr => cr.StudentId == null)
+                                      .OrderByDescending(cr => cr.RegistrationDate)
+                                      .ToList();
+                                      
+            var latestReg = classRegs?.FirstOrDefault();
+            bool isCompleted = false;
+            
+            if (latestReg != null && (latestReg.PaymentStatus == "Success" || latestReg.PaymentStatus == "Paid"))
+            {
+                int totalSlots = 4;
+                if (!string.IsNullOrEmpty(latestReg.PackageType))
+                {
+                    if (latestReg.PackageType.Contains("4 Slot", StringComparison.OrdinalIgnoreCase) || latestReg.PackageType.Contains("Starter", StringComparison.OrdinalIgnoreCase)) totalSlots = 4;
+                    else if (latestReg.PackageType.Contains("6 Slot", StringComparison.OrdinalIgnoreCase) || latestReg.PackageType.Contains("Progressive", StringComparison.OrdinalIgnoreCase)) totalSlots = 6;
+                }
+
+                var history = _repository.GetReservationsByEmail(email)
+                    .Where(r => (r.RateCode == "CLASS" || r.RateCode == "Class Session") && r.StudentId == null).ToList();
+
+                int attendedSlots = history.Where(r => r.Attended && r.ReservedOn >= latestReg.RegistrationDate).Sum(r => Math.Max(1, r.DurationHours / 2));
+                if (attendedSlots >= totalSlots)
+                {
+                    isCompleted = true;
+                }
+            }
+
+            ViewBag.MainAccountClassReg = latestReg;
+            ViewBag.ClassHistory = classRegs;
+            ViewBag.MainAccountIsCompleted = isCompleted;
 
             return View("~/Views/Profile/MemberProfile.cshtml", customer);
         }
