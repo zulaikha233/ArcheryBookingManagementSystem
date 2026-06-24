@@ -512,7 +512,7 @@
     </aside>
 
     <main class="main-content" id="mainContent">
-
+        
         <div class="page-header">
             <p>Coach Tools</p>
             <h1>Student <span>Performance</span></h1>
@@ -520,8 +520,6 @@
 
         <!-- -- LEVEL CATEGORY TABS -- -->
         <div class="glass-card level-tabs-card">
-            <div class="level-tabs">
-                <button class="level-tab active" data-level="All"            onclick="selectLevel(this)">🏹 All</button>
             </div>
             <div class="level-tabs">
                 <button class="level-tab active" data-level="GrassRoots"     onclick="selectLevel(this)">🌱 GrassRoots</button>
@@ -623,389 +621,343 @@
         <i class="bi bi-check-circle-fill"></i>
         <span id="toastMsg">Report saved!</span>
     </div>
-
     <script>
-        /* -- SIDEBAR -- */
-        const sidebar     = document.getElementById('sidebar');
-        const mainContent = document.getElementById('mainContent');
-        const overlay     = document.getElementById('sidebarOverlay');
-        const toggleIcon  = document.getElementById('toggleIcon');
+            /* ── SIDEBAR ── */
+    const sidebar     = document.getElementById('sidebar');
+    const mainContent = document.getElementById('mainContent');
+    const overlay     = document.getElementById('sidebarOverlay');
+    const toggleIcon  = document.getElementById('toggleIcon');
 
-        function toggleDesktopSidebar() {
-            const collapsed = sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('sidebar-collapsed', collapsed);
-            toggleIcon.className = collapsed ? 'bi bi-layout-sidebar' : 'bi bi-layout-sidebar-reverse';
-            localStorage.setItem('sidebarCollapsed', collapsed);
+    function toggleDesktopSidebar() {
+        const collapsed = sidebar.classList.toggle('collapsed');
+        mainContent.classList.toggle('sidebar-collapsed', collapsed);
+        toggleIcon.className = collapsed ? 'bi bi-layout-sidebar' : 'bi bi-layout-sidebar-reverse';
+        localStorage.setItem('sidebarCollapsed', collapsed);
+    }
+    function openSidebar() {
+        sidebar.classList.add('mobile-open');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        if (window.innerWidth > 768 && localStorage.getItem('sidebarCollapsed') === 'true') {
+            sidebar.classList.add('collapsed');
+            mainContent.classList.add('sidebar-collapsed');
+            toggleIcon.className = 'bi bi-layout-sidebar';
         }
-        function openSidebar() {
-            sidebar.classList.add('mobile-open');
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-        function closeSidebar() {
-            sidebar.classList.remove('mobile-open');
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-        window.addEventListener('DOMContentLoaded', () => {
-            if (window.innerWidth > 768 && localStorage.getItem('sidebarCollapsed') === 'true') {
-                sidebar.classList.add('collapsed');
-                mainContent.classList.add('sidebar-collapsed');
-                toggleIcon.className = 'bi bi-layout-sidebar';
-            }
-            document.getElementById('searchCard').style.display='none';
-            showAllArchers();
-        });
-        window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+        // Load GrassRoots students on page load
+        loadStudentsByLevel('GrassRoots');
+    });
+    window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
 
-        // ------------------------------------------------
-        //    MOCK DATA
-        //    -- DATA NOTE: Replace with real AJAX fetch when
-        //       backend is ready:
-        //       fetch(`/Report/GetStudentReports
-        //       name=${name}&level=${selectedLevel}`)
-        //    --
-        // ------------------------------------------------
-        // const mockStudents = {
-        //     "GrassRoots": [
-        //         {
-        //             name: "Ahmad Faris",
-        //             reports: [
-        //                 { date: "2026-05-10", time: "09:15", coach: "Coach Zad", text: "Ahmad shows great enthusiasm during sessions. His stance is improving steadily and he is beginning to develop consistent form in his draw." },
-        //                 { date: "2026-04-22", time: "10:00", coach: "Coach Rina", text: "First session went well. Ahmad is eager to learn and follows instructions carefully. Needs to work on grip consistency." }
-        //             ]
-        //         },
-        //         {
-        //             name: "Nurul Aina",
-        //             reports: [
-        //                 { date: "2026-05-15", time: "14:30", coach: "Coach Zad", text: "Nurul is progressing well. Her release technique has improved significantly this week. Recommended to move to Beginner 1 next month." }
-        //             ]
-        //         }
-        //     ],
-        //     "Beginner 1": [
-        //         {
-        //             name: "Haziq Danial",
-        //             reports: [
-        //                 { date: "2026-05-20", time: "09:00", coach: "Coach Zad", text: "Haziq is showing consistent groupings at 10m. His anchor point is now reliable and breathing control is good." }
-        //             ]
-        //         }
-        //     ],
-        //     "Beginner 2": [],
-        //     "Intermediate 1": [],
-        //     "Intermediate 2": [],
-        //     "Expert": []
-        // };
+    /* ── STATE ── */
+    let selectedLevel  = 'GrassRoots';
+    let currentStudent = null;
+    let reportsVisible = false;
+    const coachName    = '@(ViewBag.StaffName ?? "Coach")';
 
-        /* -- STATE -- */
-        let selectedLevel   = 'All';
-        let currentStudent  = null;
-        let reportsVisible  = false;
-        const coachName     = '@(ViewBag.StaffName ?? "Coach")';
+    /* ── LEVEL TAB SELECTION ── */
+    function selectLevel(tab) {
+        document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        selectedLevel = tab.dataset.level;
 
-        /* -- LEVEL TAB SELECTION -- */
-        function selectLevel(tab) {
-            document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            selectedLevel = tab.dataset.level;
-            document.getElementById('searchInput').value = '';
+        // Show search bar for all levels
+        const searchCard = document.getElementById('searchCard');
+        searchCard.style.display = '';
 
-            // Show/hide search bar based on selected level
-            const searchCard = document.getElementById('searchCard');
-            if (selectedLevel === 'All') {
-                searchCard.style.display = 'none';
-                showAllArchers();
-            } else {
-                searchCard.style.display = '';
-                resetStudentSection();
-            }
-        }
+        loadStudentsByLevel(selectedLevel);
+    }
 
-        function resetStudentSection() {
-            const emptyCard = document.getElementById('emptyCard');
-            emptyCard.style.display = '';
-            emptyCard.innerHTML = `
-                <div class="empty-panel">
-                    <i class="bi bi-person-lines-fill"></i>
-                    <h4>Search for a Student</h4>
-                    <p>Select a level category above then search for a student by name to view and add performance reports.</p>
-                </div>`;
-            document.getElementById('studentSection').style.display  = 'none';
-            document.getElementById('reportsPanel').classList.remove('visible');
-            document.getElementById('performanceBtn').classList.remove('active');
-            reportsVisible  = false;
-            currentStudent  = null;
-        }
+    /* ── LOAD STUDENTS BY LEVEL ── */
+    async function loadStudentsByLevel(level) {
+        // Reset right panel
+        document.getElementById('studentSection').style.display = 'none';
+        document.getElementById('reportsPanel').classList.remove('visible');
+        currentStudent = null;
+        reportsVisible = false;
 
-        async function showAllArchers() {
-            const emptyCard     = document.getElementById('emptyCard');
-            const studentSection = document.getElementById('studentSection');
-            studentSection.style.display = 'none';
-            emptyCard.style.display = '';
-            emptyCard.innerHTML = `<div style="padding:36px; text-align:center; color:var(--text-dim);">Loading archers...</div>`;
+        const emptyCard = document.getElementById('emptyCard');
+        emptyCard.style.display = '';
+        emptyCard.innerHTML = `<div style="padding:36px; text-align:center; color:var(--text-dim);">Loading students...</div>`;
 
-            try {
-                const response   = await fetch('/Report/GetAllArchers');
-                const allArchers = await response.json();
+        try {
+            const response = await fetch(`/Report/GetStudentsByLevel?level=${encodeURIComponent(level)}`);
+            const students = await response.json();
 
+            if (students.length === 0) {
                 emptyCard.innerHTML = `
-                    <div style="padding:0; overflow:hidden;">
-                        <div style="padding:20px 24px; border-bottom:1px solid var(--card-border); display:flex; align-items:center; justify-content:space-between;">
-                            <div>
-                                <div style="font-size:0.92rem; font-weight:700; color:var(--text-white);">All Registered Archers</div>
-                                <div style="font-size:0.7rem; color:var(--text-dim); margin-top:2px;">${allArchers.length} archer${allArchers.length !== 1 ? 's' : ''} — sorted A to Z</div>
-                            </div>
-                        </div>
-                        <table style="width:100%; border-collapse:collapse;">
-                            <thead>
-                                <tr>
-                                    <th style="padding:11px 20px; font-size:0.62rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.5px; font-weight:700; text-align:left; background:rgba(255,255,255,0.015); border-bottom:1px solid var(--card-border);">#</th>
-                                    <th style="padding:11px 20px; font-size:0.62rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.5px; font-weight:700; text-align:left; background:rgba(255,255,255,0.015); border-bottom:1px solid var(--card-border);">Name</th>
-                                    <th style="padding:11px 20px; font-size:0.62rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.5px; font-weight:700; text-align:left; background:rgba(255,255,255,0.015); border-bottom:1px solid var(--card-border);">Category</th>
-                                    <th style="padding:11px 20px; font-size:0.62rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.5px; font-weight:700; text-align:left; background:rgba(255,255,255,0.015); border-bottom:1px solid var(--card-border);">Age</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${allArchers.length === 0
-                                    ? `<tr><td colspan="4" style="padding:36px; text-align:center; color:var(--text-dim);">No archers registered yet.</td></tr>`
-                                    : allArchers.map((a, i) => `
-                                        <tr style="border-bottom:1px solid rgba(255,255,255,0.03);" onmouseover="this.style.background='rgba(255,255,255,0.015)'" onmouseout="this.style.background=''">
-                                            <td style="padding:13px 20px; font-size:0.78rem; color:var(--text-dim);">${i + 1}</td>
-                                            <td style="padding:13px 20px; font-size:0.88rem; font-weight:600; color:var(--text-white);">${a.name}</td>
-                                            <td style="padding:13px 20px;">
-                                                <span style="font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; padding:3px 10px; border-radius:20px; background:var(--primary-subtle); color:var(--primary); border:1px solid rgba(255,77,77,0.25);">
-                                                    ${a.level}
-                                                </span>
-                                            </td>
-                                            <td style="padding:13px 20px; font-size:0.88rem; color:var(--text-dim);">${a.age}</td>
-                                        </tr>`
-                                    ).join('')
-                                }
-                            </tbody>
-                        </table>
+                    <div class="empty-panel">
+                        <i class="bi bi-person-lines-fill"></i>
+                        <h4>No Students Found</h4>
+                        <p>There are no registered students in <strong style="color:var(--primary)">${level}</strong> yet.</p>
                     </div>`;
-            } catch (err) {
-                emptyCard.innerHTML = `<div style="padding:36px; text-align:center; color:var(--text-dim);">Failed to load archers. Please try again.</div>`;
-                console.error('GetAllArchers error:', err);
+                return;
             }
+
+            emptyCard.innerHTML = `
+                <div style="padding:0; overflow:hidden;">
+                    <div style="padding:20px 24px; border-bottom:1px solid var(--card-border);">
+                        <div style="font-size:0.92rem; font-weight:700; color:var(--text-white);">${level} Students</div>
+                        <div style="font-size:0.7rem; color:var(--text-dim); margin-top:2px;">${students.length} student${students.length !== 1 ? 's' : ''} — click a name to view reports</div>
+                    </div>
+                    <div id="studentListContainer"></div>
+                </div>`;
+
+            const container = document.getElementById('studentListContainer');
+
+            students.forEach((s) => {
+                const row = document.createElement('div');
+                row.style.cssText = `
+                    display:flex; align-items:center; gap:14px;
+                    padding:14px 24px; border-bottom:1px solid rgba(255,255,255,0.03);
+                    cursor:pointer; transition:0.2s;`;
+                row.onmouseover = () => row.style.background = 'rgba(255,255,255,0.015)';
+                row.onmouseout  = () => row.style.background = '';
+                row.onclick     = () => selectStudent(s);
+
+                row.innerHTML = `
+                    <div style="width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--primary),var(--primary-dark)); display:flex; align-items:center; justify-content:center; font-size:1rem; font-weight:800; color:#fff; flex-shrink:0;">
+                        ${s.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-size:0.9rem; font-weight:700; color:var(--text-white);">${s.name}</div>
+                        <div style="font-size:0.72rem; color:var(--text-dim); margin-top:2px;">Age: ${s.age || '—'}</div>
+                    </div>
+                    <i class="bi bi-chevron-right" style="color:var(--primary); font-size:0.85rem;"></i>`;
+
+                container.appendChild(row);
+            });
+
+        } catch (err) {
+            emptyCard.innerHTML = `<div style="padding:36px; text-align:center; color:var(--text-dim);">Failed to load students. Please try again.</div>`;
+            console.error('LoadStudentsByLevel error:', err);
+        }
+    }
+
+    /* ── SELECT STUDENT FROM LIST ── */
+    function selectStudent(student) {
+        currentStudent = { name: student.name, reports: [] };
+        reportsVisible = false;
+        renderStudent(currentStudent);
+    }
+
+    /* ── SEARCH — finds student by name within selected level ── */
+    async function searchStudent() {
+        if (!selectedLevel) return;
+
+        const query = document.getElementById('searchInput').value.trim();
+        if (!query) return;
+
+        try {
+            const response = await fetch(`/Report/GetStudentByName?name=${encodeURIComponent(query)}&level=${encodeURIComponent(selectedLevel)}`);
+            const results  = await response.json();
+
+            if (results.length === 0) {
+                document.getElementById('emptyCard').innerHTML = `
+                    <div class="empty-panel">
+                        <i class="bi bi-person-x-fill"></i>
+                        <h4>Student Not Found</h4>
+                        <p>No student named "<strong style="color:var(--text-white)">${query}</strong>" found in <strong style="color:var(--primary)">${selectedLevel}</strong>.</p>
+                    </div>`;
+                document.getElementById('emptyCard').style.display      = '';
+                document.getElementById('studentSection').style.display = 'none';
+                return;
+            }
+
+            const archer = results[0];
+            currentStudent = {
+                name:    archer.name,
+                reports: []
+            };
+            reportsVisible = false;
+            renderStudent(currentStudent);
+
+        } catch (err) {
+            console.error('Search error:', err);
+        }
+    }
+
+    /* ── RENDER STUDENT HEADER ── */
+    function renderStudent(student) {
+        document.getElementById('emptyCard').style.display      = 'none';
+        document.getElementById('studentSection').style.display = '';
+        document.getElementById('reportsPanel').classList.remove('visible');
+        document.getElementById('performanceBtn').classList.remove('active');
+        document.getElementById('addReportForm').classList.remove('visible');
+
+        document.getElementById('studentAvatar').textContent = student.name.charAt(0).toUpperCase();
+        document.getElementById('studentName').textContent   = student.name;
+        document.getElementById('studentLevel').textContent  = selectedLevel;
+        document.getElementById('reportCount').textContent   = '';
+    }
+
+    /* ── TOGGLE REPORTS PANEL ── */
+    async function toggleReports() {
+        reportsVisible = !reportsVisible;
+        const panel = document.getElementById('reportsPanel');
+        const btn   = document.getElementById('performanceBtn');
+
+        if (reportsVisible) {
+            panel.classList.add('visible');
+            btn.classList.add('active');
+            btn.innerHTML = `<i class="bi bi-x-lg"></i> Close`;
+            await renderReports();
+        } else {
+            panel.classList.remove('visible');
+            btn.classList.remove('active');
+            btn.innerHTML = `<i class="bi bi-clipboard-data"></i> Performance`;
+            document.getElementById('addReportForm').classList.remove('visible');
+        }
+    }
+
+    /* ── RENDER REPORTS LIST ── */
+    async function renderReports() {
+        const list = document.getElementById('reportList');
+        list.innerHTML = `<div style="padding:24px; text-align:center; color:var(--text-dim);">Loading reports...</div>`;
+
+        try {
+            const response = await fetch(`/Report/GetStudentReports?name=${encodeURIComponent(currentStudent.name)}&level=${encodeURIComponent(selectedLevel)}`);
+            const data     = await response.json();
+            currentStudent.reports = data || [];
+        } catch (err) {
+            console.error('Load reports error:', err);
+            currentStudent.reports = [];
         }
 
-        /* ── SEARCH ── */
-        async function searchStudent() {
-    if (selectedLevel === 'All') return;
+        document.getElementById('reportsSubtitle').textContent = `${currentStudent.reports.length} report${currentStudent.reports.length !== 1 ? 's' : ''} for ${currentStudent.name}`;
 
-    const query = document.getElementById('searchInput').value.trim();
-    if (!query) return;
-
-    try {
-        const response = await fetch(`/Report/GetStudentByName?name=${encodeURIComponent(query)}&level=${encodeURIComponent(selectedLevel)}`);
-        const results  = await response.json();
-
-        if (results.length === 0) {
-            document.getElementById('emptyCard').innerHTML = `
-                <div class="empty-panel">
-                    <i class="bi bi-person-x-fill"></i>
-                    <h4>Student Not Found</h4>
-                    <p>No student named "<strong style="color:var(--text-white)">${query}</strong>" found in <strong style="color:var(--primary)">${selectedLevel}</strong>.</p>
+        if (currentStudent.reports.length === 0) {
+            list.innerHTML = `
+                <div style="padding:36px; text-align:center; color:var(--text-dim); font-size:0.85rem;">
+                    No reports yet. Click <strong style="color:var(--text-white)">Add New Report</strong> to write the first one.
                 </div>`;
-            document.getElementById('emptyCard').style.display      = '';
-            document.getElementById('studentSection').style.display = 'none';
             return;
         }
 
-        const archer = results[0];
-        currentStudent = {
-            name:    archer.name,
-            reports: []
-        };
-        reportsVisible = false;
-        renderStudent(currentStudent);
+        list.innerHTML = '';
+        const sorted = [...currentStudent.reports].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    } catch (err) {
-        console.error('Search error:', err);
-    }
-}
+        sorted.forEach((r, idx) => {
+            const dateObj = new Date(r.date + 'T00:00:00');
+            const day     = dateObj.getDate();
+            const month   = dateObj.toLocaleDateString('en-MY', { month: 'short' });
+            const year    = dateObj.getFullYear();
 
-        function renderStudent(student) {
-            document.getElementById('emptyCard').style.display      = 'none';
-            document.getElementById('studentSection').style.display = '';
-            document.getElementById('reportsPanel').classList.remove('visible');
-            document.getElementById('performanceBtn').classList.remove('active');
-            document.getElementById('addReportForm').classList.remove('visible');
+            const item = document.createElement('div');
+            item.className = 'report-item';
+            item.id = `report-${idx}`;
 
-            document.getElementById('studentAvatar').textContent = student.name.charAt(0).toUpperCase();
-            document.getElementById('studentName').textContent   = student.name;
-            document.getElementById('studentLevel').textContent  = selectedLevel;
-            document.getElementById('reportCount').textContent   = `${student.reports.length} report${student.reports.length !== 1 ? 's' : ''}`;
-        }
-
-        /* -- TOGGLE REPORTS PANEL -- */
-        async function toggleReports() {
-            reportsVisible = !reportsVisible;
-            const panel = document.getElementById('reportsPanel');
-            const btn   = document.getElementById('performanceBtn');
-
-            if (reportsVisible) {
-                panel.classList.add('visible');
-                btn.classList.add('active');
-                btn.innerHTML = `<i class="bi bi-x-lg"></i> Close`;
-                await renderReports(); 
-            } else {
-                panel.classList.remove('visible');
-                btn.classList.remove('active');
-                btn.innerHTML = `<i class="bi bi-clipboard-data"></i> Performance`;
-                document.getElementById('addReportForm').classList.remove('visible');
-            }
-        }
-
-        /* ── RENDER REPORTS LIST ── */
-       async function renderReports() {
-    const list = document.getElementById('reportList');
-    list.innerHTML = `<div style="padding:24px; text-align:center; color:var(--text-dim);">Loading reports...</div>`;
-
-    try {
-        const response = await fetch(`/Report/GetStudentReports?name=${encodeURIComponent(currentStudent.name)}&level=${encodeURIComponent(selectedLevel)}`);
-        const data = await response.json();
-        currentStudent.reports = data || [];
-    } catch (err) {
-        console.error('Load reports error:', err);
-        currentStudent.reports = [];
-    }
-
-    document.getElementById('reportsSubtitle').textContent = `${currentStudent.reports.length} report${currentStudent.reports.length !== 1 ? 's' : ''} for ${currentStudent.name}`;
-
-    if (currentStudent.reports.length === 0) {
-        list.innerHTML = `
-            <div style="padding:36px; text-align:center; color:var(--text-dim); font-size:0.85rem;">
-                No reports yet. Click <strong style="color:var(--text-white)">Add New Report</strong> to write the first one.
-            </div>`;
-        return;
-    }
-
-    list.innerHTML = '';
-
-            // Sort by date descending ï¿½ most recent first
-            const sorted = [...currentStudent.reports].sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    sorted.forEach((r, idx) => {
-        const dateObj = new Date(r.date + 'T00:00:00');
-        const day     = dateObj.getDate();
-        const month   = dateObj.toLocaleDateString('en-MY', { month: 'short' });
-        const year    = dateObj.getFullYear();
-
-        const item = document.createElement('div');
-        item.className = 'report-item';
-        item.id = `report-${idx}`;
-
-        item.innerHTML = `
-            <div class="report-item-header" onclick="toggleReportItem(${idx})">
-                <div class="report-date-block">
-                    <div class="day">${day}</div>
-                    <div class="month">${month}</div>
-                    <div class="year">${year}</div>
-                </div>
-                <div class="report-summary">
-                    <div class="report-time">
-                        <i class="bi bi-clock"></i> ${r.time}
+            item.innerHTML = `
+                <div class="report-item-header" onclick="toggleReportItem(${idx})">
+                    <div class="report-date-block">
+                        <div class="day">${day}</div>
+                        <div class="month">${month}</div>
+                        <div class="year">${year}</div>
                     </div>
-                    <div class="report-coach">
-                        <i class="bi bi-patch-check-fill"></i> ${r.coach}
+                    <div class="report-summary">
+                        <div class="report-time"><i class="bi bi-clock"></i> ${r.time}</div>
+                        <div class="report-coach"><i class="bi bi-patch-check-fill"></i> ${r.coach}</div>
                     </div>
+                    <i class="bi bi-chevron-down report-chevron"></i>
                 </div>
-                <i class="bi bi-chevron-down report-chevron"></i>
-            </div>
-            <div class="report-body">
-                <div class="report-text">${r.text}</div>
-            </div>`;
+                <div class="report-body">
+                    <div class="report-text">${r.text}</div>
+                </div>`;
 
-        list.appendChild(item);
-    });
-}
+            list.appendChild(item);
+        });
+    }
 
-        /* -- TOGGLE INDIVIDUAL REPORT -- */
-        async function toggleReportItem(idx) {
-            const item = document.getElementById(`report-${idx}`);
-            item.classList.toggle('expanded');
+    /* ── TOGGLE INDIVIDUAL REPORT ── */
+    function toggleReportItem(idx) {
+        document.getElementById(`report-${idx}`).classList.toggle('expanded');
+    }
+
+    /* ── ADD REPORT FORM ── */
+    function showAddForm() {
+        document.getElementById('addReportForm').classList.add('visible');
+        document.getElementById('reportTextarea').value = '';
+        document.getElementById('wordCount').textContent = '0 / 40 words';
+        document.getElementById('wordCount').className = 'word-count';
+        document.getElementById('submitReportBtn').disabled = false;
+        document.getElementById('reportTextarea').focus();
+    }
+
+    function hideAddForm() {
+        document.getElementById('addReportForm').classList.remove('visible');
+    }
+
+    /* ── WORD COUNT ── */
+    function updateWordCount() {
+        const text  = document.getElementById('reportTextarea').value.trim();
+        const words = text === '' ? 0 : text.split(/\s+/).length;
+        const wc    = document.getElementById('wordCount');
+        const btn   = document.getElementById('submitReportBtn');
+
+        wc.textContent = `${words} / 40 words`;
+
+        if (words > 40) {
+            wc.className = 'word-count over';
+            btn.disabled = true;
+        } else if (words >= 30) {
+            wc.className = 'word-count warning';
+            btn.disabled = false;
+        } else {
+            wc.className = 'word-count';
+            btn.disabled = false;
         }
+    }
 
-        /* -- ADD REPORT FORM -- */
-        function showAddForm() {
-            document.getElementById('addReportForm').classList.add('visible');
-            document.getElementById('reportTextarea').value = '';
-            document.getElementById('wordCount').textContent = '0 / 40 words';
-            document.getElementById('wordCount').className = 'word-count';
-            document.getElementById('submitReportBtn').disabled = false;
-            document.getElementById('reportTextarea').focus();
+    /* ── SUBMIT REPORT ── */
+    async function submitReport() {
+        const text  = document.getElementById('reportTextarea').value.trim();
+        const words = text === '' ? 0 : text.split(/\s+/).length;
+
+        if (!text) {
+            document.getElementById('reportTextarea').style.borderColor = 'var(--primary)';
+            setTimeout(() => document.getElementById('reportTextarea').style.borderColor = '', 1500);
+            return;
         }
+        if (words > 40) return;
 
-        function hideAddForm() {
-            document.getElementById('addReportForm').classList.remove('visible');
-        }
+        try {
+            const response = await fetch('/Report/AddReport', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `studentName=${encodeURIComponent(currentStudent.name)}&level=${encodeURIComponent(selectedLevel)}&reportText=${encodeURIComponent(text)}`
+            });
 
-        /* -- WORD COUNT -- */
-        function updateWordCount() {
-            const text  = document.getElementById('reportTextarea').value.trim();
-            const words = text === '' ? 0 : text.split(/\s+/).length;
-            const wc    = document.getElementById('wordCount');
-            const btn   = document.getElementById('submitReportBtn');
+            const result = await response.json();
 
-            wc.textContent = `${words} / 40 words`;
-
-            if (words > 40) {
-                wc.className = 'word-count over';
-                btn.disabled = true;
-            } else if (words >= 30) {
-                wc.className = 'word-count warning';
-                btn.disabled = false;
+            if (result.success) {
+                hideAddForm();
+                await renderReports();
+                showToast('Report saved successfully!');
             } else {
-                wc.className = 'word-count';
-                btn.disabled = false;
-            }
-        }
-
-        /* -- SUBMIT REPORT -- */
-        async function submitReport() {
-            const text  = document.getElementById('reportTextarea').value.trim();
-            const words = text === '' ? 0 : text.split(/\s+/).length;
-
-            if (!text) {
-                document.getElementById('reportTextarea').style.borderColor = 'var(--primary)';
-                setTimeout(() => document.getElementById('reportTextarea').style.borderColor = '', 1500);
-                return;
-            }
-            if (words > 40) return;
-
-            try {
-                const response = await fetch('/Report/AddReport', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `studentName=${encodeURIComponent(currentStudent.name)}&level=${encodeURIComponent(selectedLevel)}&reportText=${encodeURIComponent(text)}`
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    hideAddForm();
-                    await renderReports(); // reload reports from database
-                    showToast('Report saved successfully!');
-                } else {
-                    showToast('Failed to save report. Please try again.');
-                    console.error('AddReport error:', result.message);
-                }
-            } catch (err) {
-                console.error('Submit report error:', err);
                 showToast('Failed to save report. Please try again.');
+                console.error('AddReport error:', result.message);
             }
+        } catch (err) {
+            console.error('Submit report error:', err);
+            showToast('Failed to save. Please try again.');
         }
+    }
 
-        /* -- TOAST -- */
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastMsg').textContent = msg;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-    </script>
-
+    /* ── TOAST ── */
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toastMsg').textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+        </script>
 </body>
 </html>
 

@@ -95,5 +95,20 @@ namespace ArcheryAlley.Controllers
 
             return Json(archers);
         }
+
+        [HttpGet]
+        public JsonResult GetStudentByLevel(string level)
+        {
+            var archers = _repository.GetAllArchers()
+                .Where(a => a.LevelCategory == level)
+                .OrderBy(a => a.FullName)
+                .Select(a => new {
+                    name = a.FullName,
+                    level = a.LevelCategory ?? "Unassigned",
+                    age = a.Age ?? 0
+                })
+                .ToList();
+            return Json(archers);
+        }
     }
 }
