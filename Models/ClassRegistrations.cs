@@ -24,14 +24,6 @@ namespace ArcheryAlley.Models
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal PackagePrice { get; set; }
-        [Required]
-        [StringLength(100)]
-        public string LearningMethod { get; set; }
-        public int LearningMethodPax { get; set; }
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal LearningMethodPrice { get; set; }
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal AnnualFee { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal TotalPrice { get; set; }
