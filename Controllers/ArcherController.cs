@@ -313,9 +313,14 @@ namespace ArcheryAlley.Controllers
                 CustomerName = student.FullName,
                 PackageType = PackageType,
                 PackagePrice = PackagePrice,
+                LearningMethodPrice = PackagePrice,
+                LearningMethod = "Class",
+                LearningMethodPax = 1,
+                AnnualFee = 0,
                 TotalPrice = TotalPrice,
                 PaymentMethod = "Pending",
                 PaymentStatus = "Pending",
+                RegistrationDate = DateTime.Now,
                 TransactionId = "PEND-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
                 StudentId = StudentId
             };
@@ -374,10 +379,15 @@ namespace ArcheryAlley.Controllers
                         CustomerName = student.FullName,
                         PackageType = reg.PackageType,
                         PackagePrice = reg.PackagePrice,
+                        LearningMethodPrice = reg.PackagePrice,
+                        LearningMethod = "Class",
+                        LearningMethodPax = 1,
+                        AnnualFee = 0,
                         TotalPrice = totalPrice,
                         PaymentMethod = "Pending",
                         PaymentStatus = "Pending",
-                        TransactionId = transactionId, // Use SAME transaction ID for grouping!
+                        RegistrationDate = DateTime.Now,
+                        TransactionId = transactionId,
                         StudentId = reg.StudentId
                     };
 
