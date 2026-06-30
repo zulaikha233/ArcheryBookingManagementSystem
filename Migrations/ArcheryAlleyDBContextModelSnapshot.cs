@@ -290,13 +290,6 @@ namespace ArcheryAlley.Migrations
                 entity.Property(e => e.EmpId).HasColumnName("EmpId");
             });
 
-            modelBuilder.Entity<PerformanceReports>(entity =>
-            {
-                entity.HasKey(e => e.ReportId);
-                entity.Property(e => e.ReportDate).HasColumnType("datetime");
-                entity.Property(e => e.EmpId).HasColumnName("EmpId");
-            });
-
             modelBuilder.Entity("ArcheryAlley.Models.Rates", b =>
                 {
                     b.Property<int>("RateId")
