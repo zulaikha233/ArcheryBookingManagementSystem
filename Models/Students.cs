@@ -32,6 +32,6 @@ namespace ArcheryAlley.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        public string LevelCategory { get; set; }
+        public string LevelCategory { get; set; } = "GrassRoots";
     }
 }
