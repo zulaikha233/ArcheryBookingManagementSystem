@@ -367,7 +367,8 @@ namespace ArcheryAlley.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = "An error occurred: " + ex.Message });
+                var msg = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                return Json(new { success = false, message = "An error occurred: " + msg });
             }
         }
 
