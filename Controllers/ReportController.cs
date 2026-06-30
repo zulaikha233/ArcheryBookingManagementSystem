@@ -97,7 +97,7 @@ namespace ArcheryAlley.Controllers
         }
 
         [HttpGet]
-        public JsonResult GetStudentByLevel(string level)
+        public JsonResult GetStudentsByLevel(string level)
         {
             var archers = _repository.GetAllArchers()
                 .Where(a => a.LevelCategory == level)
