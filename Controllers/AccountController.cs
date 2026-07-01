@@ -342,6 +342,28 @@ namespace ArcheryAlley.Controllers
                 finalTotalPrice = PackagePrice;
             }
 
+            if (!StudentId.HasValue)
+            {
+                var selfStudent = _repository.GetStudentsByParentId(customer.CustomerId)
+                                    .FirstOrDefault(s => s.FullName.ToLower() == customer.FullName.ToLower());
+
+                if (selfStudent == null)
+                {
+                    int? calculatedAge = customer.Birthday.HasValue ? (DateTime.Now.Year - customer.Birthday.Value.Year) : (int?)null;
+                    selfStudent = new Students
+                    {
+                        ParentCustomerId = customer.CustomerId,
+                        FullName = customer.FullName,
+                        Age = calculatedAge,
+                        ICNumber = customer.ICNumber,
+                        LevelCategory = "GrassRoots"
+                    };
+                    _repository.AddStudent(selfStudent);
+                }
+
+                StudentId = selfStudent.StudentId;
+            }
+
             var registration = new ClassRegistrations
             {
                 CustomerEmail = email,
