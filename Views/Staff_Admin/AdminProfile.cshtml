@@ -1,0 +1,292 @@
+﻿@{
+    ViewData["Title"] = "Admin Profile";
+    Layout = "~/Views/Staff_Admin/AdminNavBar.cshtml";
+}
+
+<style>
+    .page-header { margin-bottom: 32px; }
+    .page-header p { font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+    .page-header h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; color: var(--white); }
+    .page-header h1 span { color: var(--primary); }
+
+    .profile-grid { display: grid; grid-template-columns: 300px 1fr; gap: 24px; max-width: 1000px; }
+
+    .profile-card {
+        background: var(--card-bg); border-radius: 20px;
+        border: 1px solid var(--card-border); padding: 32px 24px;
+        display: flex; flex-direction: column; align-items: center;
+        text-align: center; gap: 16px;
+        animation: fadeUp 0.4s ease both;
+    }
+
+    .avatar-wrap { position: relative; width: 120px; height: 120px; }
+    .avatar-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(249,115,22,0.4); box-shadow: 0 0 0 6px rgba(249,115,22,0.08); background: #2a2a2a; }
+    .avatar-placeholder { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #1f1f1f, #2a2a2a); border: 3px solid rgba(249,115,22,0.4); box-shadow: 0 0 0 6px rgba(249,115,22,0.08); display: flex; align-items: center; justify-content: center; font-size: 3rem; color: rgba(255,255,255,0.2); }
+    .avatar-upload-btn { position: absolute; bottom: 4px; right: 4px; width: 32px; height: 32px; background: var(--primary); border: none; border-radius: 50%; color: #fff; font-size: 0.85rem; cursor: pointer; display: none; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(249,115,22,0.5); transition: 0.2s; }
+    .avatar-upload-btn:hover { background: var(--primary-dark); transform: scale(1.1); }
+    .avatar-upload-btn.visible { display: flex; }
+    #avatarFileInput { display: none; }
+
+    .coach-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; background: rgba(249,115,22,0.15); color: var(--primary); border: 1px solid rgba(249,115,22,0.3); }
+    .coach-badge.full-time { background: rgba(220,38,38,0.15); color: #f87171; border-color: rgba(220,38,38,0.3); }
+    .coach-badge.guest     { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); border-color: rgba(255,255,255,0.12); }
+
+    .staff-name-display { font-size: 1.3rem; font-weight: 800; color: var(--white); }
+    .staff-id-display   { font-size: 0.75rem; color: var(--text-dim); letter-spacing: 1px; }
+
+    .admin-lock-note { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--text-dim); background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 12px; margin-top: 4px; }
+
+    .info-card { background: var(--card-bg); border-radius: 20px; border: 1px solid var(--card-border); padding: 32px; animation: fadeUp 0.5s ease both; }
+    .info-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .info-card-title { font-size: 1rem; font-weight: 700; color: var(--white); }
+    .info-card-sub   { font-size: 0.75rem; color: var(--text-dim); margin-top: 2px; }
+
+    .edit-btn { display: flex; align-items: center; gap: 8px; padding: 9px 18px; background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.3); border-radius: 10px; color: var(--primary); font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .edit-btn:hover { background: rgba(249,115,22,0.2); }
+    .save-btn { display: none; align-items: center; gap: 8px; padding: 9px 18px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border: none; border-radius: 10px; color: #fff; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 14px rgba(249,115,22,0.3); }
+    .save-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(249,115,22,0.4); }
+    .save-btn.visible { display: flex; }
+    .cancel-btn { display: none; align-items: center; gap: 6px; padding: 9px 14px; background: transparent; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text-dim); font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: 0.2s; margin-right: 8px; }
+    .cancel-btn:hover { border-color: rgba(255,255,255,0.25); color: var(--white); }
+    .cancel-btn.visible { display: flex; }
+
+    .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+    .field-group.full-width { grid-column: 1 / -1; }
+    .field-label { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.8px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .field-label i { font-size: 0.8rem; color: var(--primary); }
+    .field-value { font-size: 0.95rem; color: var(--white); font-weight: 500; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); min-height: 42px; }
+    .field-value.empty { color: var(--text-dim); font-style: italic; font-size: 0.85rem; }
+    .field-input { display: none; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 10px; padding: 10px 14px; color: var(--white); font-size: 0.92rem; font-family: 'Outfit', sans-serif; width: 100%; transition: 0.2s; }
+    .field-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
+    .field-input.visible { display: block; }
+    select.field-input option { background: #1a1a1a; color: var(--white); }
+    .field-input.locked { opacity: 0.5; cursor: not-allowed; pointer-events: none; border-style: dashed; }
+
+    .section-divider { grid-column: 1 / -1; border: none; border-top: 1px solid rgba(255,255,255,0.05); margin: 4px 0; }
+    .section-title { grid-column: 1 / -1; font-size: 0.7rem; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; padding-top: 4px; }
+
+    .toast { position: fixed; bottom: 30px; right: 30px; background: #1a1a1a; border: 1px solid rgba(249,115,22,0.4); border-radius: 14px; padding: 14px 20px; display: flex; align-items: center; gap: 12px; font-size: 0.88rem; font-weight: 600; color: var(--white); box-shadow: 0 10px 30px rgba(0,0,0,0.5); transform: translateY(80px); opacity: 0; transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275); z-index: 9999; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast i { color: var(--primary); font-size: 1.2rem; }
+
+    @@keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+    @@media (max-width: 768px) {
+        .page-header h1 { font-size: 1.45rem; }
+        .profile-grid { grid-template-columns: 1fr; }
+        .profile-card { flex-direction: row; text-align: left; padding: 20px; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+        .avatar-wrap { flex-shrink: 0; }
+        .fields-grid { grid-template-columns: 1fr; }
+        .info-card { padding: 20px; }
+    }
+    @@media (max-width: 480px) {
+        .profile-card { flex-direction: column; align-items: center; text-align: center; }
+    }
+</style>
+
+<div class="page-header">
+    <p>Admin Portal</p>
+    <h1>My <span>Profile</span></h1>
+</div>
+
+<div class="profile-grid">
+
+    <div class="profile-card">
+        <div class="avatar-wrap">
+            <div class="avatar-placeholder" id="avatarPlaceholder">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <img class="avatar-img" id="avatarImg" src="" alt="Profile" style="display:none;">
+            <button class="avatar-upload-btn" id="avatarUploadBtn" onclick="document.getElementById('avatarFileInput').click()" title="Change photo">
+                <i class="bi bi-camera-fill"></i>
+            </button>
+            <input type="file" id="avatarFileInput" accept="image/*" onchange="handleAvatarUpload(event)">
+        </div>
+        <div>
+            <div class="staff-name-display" id="displayName">@(ViewBag.StaffName ?? "Admin")</div>
+            <div class="staff-id-display" style="margin-top:4px;">ID: @(ViewBag.EmpId ?? "—")</div>
+        </div>
+        <div class="coach-badge part-time" id="coachBadge">
+            <i class="bi bi-patch-check-fill"></i>
+            <span id="coachBadgeText">Head Coach</span>
+        </div>
+    </div>
+
+    <div class="info-card">
+        <div class="info-card-header">
+            <div>
+                <div class="info-card-title">Personal Information</div>
+                <div class="info-card-sub">Keep your details up to date</div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <button class="cancel-btn" id="cancelBtn" onclick="cancelEdit()"><i class="bi bi-x-lg"></i> Cancel</button>
+                <button class="save-btn"   id="saveBtn"   onclick="saveProfile()"><i class="bi bi-check-lg"></i> Save</button>
+                <button class="edit-btn"   id="editBtn"   onclick="enterEditMode()"><i class="bi bi-pencil"></i> Edit Profile</button>
+            </div>
+        </div>
+
+        <div class="fields-grid">
+            <div class="section-title">Basic Info</div>
+
+            <div class="field-group">
+                <div class="field-label"><i class="bi bi-person"></i> Full Name</div>
+                <div class="field-value" id="val-name">@(ViewBag.StaffName ?? "—")</div>
+                <input class="field-input" id="inp-name" type="text" placeholder="Enter full name" value="@(ViewBag.StaffName ?? "")">
+            </div>
+
+            <div class="field-group">
+                <div class="field-label"><i class="bi bi-gender-ambiguous"></i> Gender</div>
+    
+                <div class="field-value @(string.IsNullOrEmpty(ViewBag.Gender as string) ? "empty" : "")" id="val-gender">
+                    @(string.IsNullOrEmpty(ViewBag.Gender as string) ? "Not set" : ViewBag.Gender)
+                </div>
+    
+                @{
+                    var gender = ViewBag.Gender as string ?? "";
+                }
+
+                <select class="field-input" id="inp-gender">
+                    <option value="">Select gender</option>
+                    <option value="Male" selected="@(gender == "Male")">Male</option>
+                    <option value="Female" selected="@(gender == "Female")">Female</option>
+                    <option value="Prefer not to say" selected="@(gender == "Prefer not to say")">Prefer not to say</option>
+                </select>
+            </div>
+
+            <div class="field-group">
+                <div class="field-label"><i class="bi bi-envelope"></i> Email</div>
+                <div class="field-value @(string.IsNullOrEmpty(ViewBag.Email as string) ? "empty" : "")" id="val-email">@(string.IsNullOrEmpty(ViewBag.Email as string) ? "Not set" : ViewBag.Email)</div>
+                <input class="field-input" id="inp-email" type="email" placeholder="admin@example.com" value="@(ViewBag.Email ?? "")">
+            </div>
+
+            <div class="field-group">
+                <div class="field-label"><i class="bi bi-phone"></i> Phone Number</div>
+                <div class="field-value @(string.IsNullOrEmpty(ViewBag.Phone as string) ? "empty" : "")" id="val-phone">@(string.IsNullOrEmpty(ViewBag.Phone as string) ? "Not set" : ViewBag.Phone)</div>
+                <input class="field-input" id="inp-phone" type="tel" placeholder="e.g. 01X-XXXXXXX" value="@(ViewBag.Phone ?? "")">
+            </div>
+
+            <hr class="section-divider">
+            <div class="section-title">Emergency Contact</div>
+
+            <div class="field-group">
+                <div class="field-label"><i class="bi bi-person-exclamation"></i> Contact Name</div>
+                <div class="field-value @(string.IsNullOrEmpty(ViewBag.EContactName as string) ? "empty" : "")" id="val-emgname">@(string.IsNullOrEmpty(ViewBag.EContactName as string) ? "Not set" : ViewBag.EContactName)</div>
+                <input class="field-input" id="inp-emgname" type="text" placeholder="Emergency contact name" value="@(ViewBag.EContactName ?? "")">
+            </div>
+
+            <div class="field-group">
+                <div class="field-label"><i class="bi bi-telephone-forward"></i> Contact Phone</div>
+                <div class="field-value @(string.IsNullOrEmpty(ViewBag.EContactPhone as string) ? "empty" : "")" id="val-emgphone">@(string.IsNullOrEmpty(ViewBag.EContactPhone as string) ? "Not set" : ViewBag.EContactPhone)</div>
+                <input class="field-input" id="inp-emgphone" type="tel" placeholder="e.g. 01X-XXXXXXX" value="@(ViewBag.EContactPhone ?? "")">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="saveToast">
+    <i class="bi bi-check-circle-fill"></i>
+    Profile updated successfully!
+</div>
+
+@section Scripts {
+<script>
+    function handleAvatarUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            document.getElementById('avatarPlaceholder').style.display = 'none';
+            const img = document.getElementById('avatarImg');
+            img.src = e.target.result;
+            img.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    const fields = [
+        ['val-name',     'inp-name'],
+        ['val-gender',   'inp-gender'],
+        ['val-email',    'inp-email'],
+        ['val-phone',    'inp-phone'],
+        ['val-emgname',  'inp-emgname'],
+        ['val-emgphone', 'inp-emgphone'],
+    ];
+
+    let snapshot = {};
+
+    function enterEditMode() {
+        fields.forEach(([valId, inpId]) => {
+            const val = document.getElementById(valId);
+            const inp = document.getElementById(inpId);
+            snapshot[inpId] = inp.value;
+            val.style.display = 'none';
+            inp.classList.add('visible');
+        });
+        document.getElementById('avatarUploadBtn').classList.add('visible');
+        document.getElementById('editBtn').style.display    = 'none';
+        document.getElementById('cancelBtn').classList.add('visible');
+        document.getElementById('saveBtn').classList.add('visible');
+    }
+
+    function cancelEdit() {
+        fields.forEach(([valId, inpId]) => {
+            const inp = document.getElementById(inpId);
+            inp.value = snapshot[inpId] ?? '';
+            inp.classList.remove('visible');
+            document.getElementById(valId).style.display = '';
+        });
+        document.getElementById('avatarUploadBtn').classList.remove('visible');
+        document.getElementById('editBtn').style.display    = '';
+        document.getElementById('cancelBtn').classList.remove('visible');
+        document.getElementById('saveBtn').classList.remove('visible');
+    }
+
+    async function saveProfile() {
+        const empName       = document.getElementById('inp-name').value.trim();
+        const gender        = document.getElementById('inp-gender').value;
+        const email         = document.getElementById('inp-email').value.trim();
+        const phone         = document.getElementById('inp-phone').value.trim();
+        const eContactName  = document.getElementById('inp-emgname').value.trim();
+        const eContactPhone = document.getElementById('inp-emgphone').value.trim();
+        const avatarImg     = document.getElementById('avatarImg');
+        const profilePicture = avatarImg.style.display !== 'none' ? avatarImg.src : '';
+
+        try {
+            const response = await fetch('/Account/SaveProfile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `empName=${encodeURIComponent(empName)}&gender=${encodeURIComponent(gender)}&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&eContactName=${encodeURIComponent(eContactName)}&eContactPhone=${encodeURIComponent(eContactPhone)}&profilePicture=${encodeURIComponent(profilePicture)}`
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                fields.forEach(([valId, inpId]) => {
+                    const val  = document.getElementById(valId);
+                    const inp  = document.getElementById(inpId);
+                    const text = inp.value.trim();
+                    val.textContent = text || 'Not set';
+                    val.className   = text ? 'field-value' : 'field-value empty';
+                    inp.classList.remove('visible');
+                    val.style.display = '';
+                });
+
+                if (empName) document.getElementById('displayName').textContent = empName;
+
+                document.getElementById('avatarUploadBtn').classList.remove('visible');
+                document.getElementById('editBtn').style.display    = '';
+                document.getElementById('cancelBtn').classList.remove('visible');
+                document.getElementById('saveBtn').classList.remove('visible');
+
+                const toast = document.getElementById('saveToast');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 3000);
+            }
+        } catch (err) {
+            console.error('Save profile error:', err);
+        }
+    }
+</script>
+}

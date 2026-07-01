@@ -115,5 +115,27 @@ namespace ArcheryAlley.Controllers
             ViewBag.AdminName = HttpContext.Session.GetString("UserName");
             return View("~/Views/Staff_Admin/AdminDashboard.cshtml");
         }
+
+        [HttpGet]
+        public IActionResult AdminProfile()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (string.IsNullOrEmpty(role))
+                return RedirectToAction("Login", "Account");
+
+            var empId = HttpContext.Session.GetString("EmpId");
+            var profile = _repository.GetStaffProfile(empId);
+
+            ViewBag.StaffName = profile?.EmpName ?? "";
+            ViewBag.EmpId = empId;
+            ViewBag.Gender = profile?.Gender ?? "";
+            ViewBag.Email = profile?.Email ?? "";
+            ViewBag.Phone = profile?.PhoneNumber ?? "";
+            ViewBag.EContactName = profile?.EContactName ?? "";
+            ViewBag.EContactPhone = profile?.EContactNumber ?? "";
+            ViewBag.Picture = profile?.ProfilePicture ?? "";
+
+            return View("~/Views/Staff_Admin/AdminProfile.cshtml");
+        }
     }
 }
