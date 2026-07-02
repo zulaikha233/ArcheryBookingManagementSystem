@@ -687,7 +687,7 @@
         emptyCard.innerHTML = `<div style="padding:36px; text-align:center; color:var(--text-dim);">Loading students...</div>`;
 
         try {
-            const response = await fetch(`/Report/GetStudentByLevel?level=${encodeURIComponent(level)}`);
+            const response = await fetch(`/Report/GetStudentsByLevel?level=${encodeURIComponent(level)}`);
             const students = await response.json();
 
             if (students.length === 0) {

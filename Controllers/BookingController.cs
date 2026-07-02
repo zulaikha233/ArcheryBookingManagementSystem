@@ -75,12 +75,19 @@ namespace ArcheryAlley.Controllers
             }
 
             var parent = _repository.GetCustomerByEmail(email);
+            int? selfStudentId = null;
+            if (parent != null)
+            {
+                var selfStudent = _repository.GetStudentsByParentId(parent.CustomerId).FirstOrDefault(s => s.FullName.ToLower() == parent.FullName?.ToLower());
+                selfStudentId = selfStudent?.StudentId;
+            }
+
             var students = parent != null ? _repository.GetStudentsByParentId(parent.CustomerId).Where(s => {
                 var classReg = _repository.GetClassRegistrationByStudentId(s.StudentId);
-                return classReg != null && classReg.PaymentStatus == "Success" && classReg.PackageType != "Annual Membership";
+                return s.StudentId != selfStudentId && classReg != null && classReg.PaymentStatus == "Success" && classReg.PackageType != "Annual Membership";
             }).ToList() : new List<Students>();
 
-            bool parentHasClass = classRegs.Any(cr => cr.PaymentStatus == "Success" && cr.PackageType != "Annual Membership" && cr.StudentId == null);
+            bool parentHasClass = classRegs.Any(cr => cr.PaymentStatus == "Success" && cr.PackageType != "Annual Membership" && (cr.StudentId == null || cr.StudentId == selfStudentId));
 
             _repository.SeedFixedSlots();
             HttpContext.Session.SetString("IsGuest", "false");
@@ -689,9 +696,16 @@ namespace ArcheryAlley.Controllers
             var classRegs = _repository.GetClassRegistrationsByEmail(email)
                                        .Where(cr => (cr.PaymentStatus == "Success" || cr.PaymentStatus == "Paid") && cr.PackageType != "Annual Membership").ToList();
 
+            int? selfStudentId = null;
+            if (customer != null)
+            {
+                var selfStudent = students.FirstOrDefault(s => s.FullName.ToLower() == customer.FullName?.ToLower());
+                selfStudentId = selfStudent?.StudentId;
+            }
+
             if (string.IsNullOrEmpty(archerName))
             {
-                bool mainHasReg = classRegs.Any(cr => cr.StudentId == null);
+                bool mainHasReg = classRegs.Any(cr => cr.StudentId == null || cr.StudentId == selfStudentId);
                 if (!mainHasReg && students.Any())
                 {
                     var firstRegisteredChild = students.FirstOrDefault(s => classRegs.Any(cr => cr.StudentId == s.StudentId));
@@ -749,7 +763,7 @@ namespace ArcheryAlley.Controllers
 
             // Populate Archer List from their actual children + themselves, BUT only if they have a Success/Paid class registration
             var archerList = new List<string>();
-            if (classRegs.Any(cr => cr.StudentId == null))
+            if (classRegs.Any(cr => cr.StudentId == null || cr.StudentId == selfStudentId))
             {
                 archerList.Add(customer.FullName);
             }

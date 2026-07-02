@@ -427,7 +427,16 @@ namespace ArcheryAlley.Controllers
             ViewBag.ClassRegistrations = classRegs;
             ViewBag.MembershipPayments = _repository.GetMembershipPaymentsByEmail(email);
 
-            var latestMainReg = classRegs?.Where(cr => cr.StudentId == null).OrderByDescending(cr => cr.RegistrationDate).FirstOrDefault();
+            var parent = _repository.GetCustomerByEmail(email);
+            int? selfStudentId = null;
+            if (parent != null)
+            {
+                var selfStudent = _repository.GetStudentsByParentId(parent.CustomerId).FirstOrDefault(s => s.FullName.ToLower() == parent.FullName?.ToLower());
+                selfStudentId = selfStudent?.StudentId;
+            }
+            ViewBag.SelfStudentId = selfStudentId;
+
+            var latestMainReg = classRegs?.Where(cr => cr.StudentId == null || cr.StudentId == selfStudentId).OrderByDescending(cr => cr.RegistrationDate).FirstOrDefault();
             bool mainIsCompleted = false;
             bool mainIsExpired = false;
             
@@ -445,10 +454,10 @@ namespace ArcheryAlley.Controllers
                 }
 
                 var classHistory = rawReservations
-                    .Where(r => (r.RateCode == "CLASS" || r.RateCode == "Class Session") && r.StudentId == null).ToList();
+                    .Where(r => (r.RateCode == "CLASS" || r.RateCode == "Class Session") && (r.StudentId == null || r.StudentId == selfStudentId)).ToList();
 
                 int previousCapacity = 0;
-                var previousRegs = classRegs.Where(cr => cr.StudentId == null && cr.RegistrationId != latestMainReg.RegistrationId).ToList();
+                var previousRegs = classRegs.Where(cr => (cr.StudentId == null || cr.StudentId == selfStudentId) && cr.RegistrationId != latestMainReg.RegistrationId).ToList();
                 foreach(var pr in previousRegs)
                 {
                     if (!string.IsNullOrEmpty(pr.PackageType))
@@ -475,7 +484,6 @@ namespace ArcheryAlley.Controllers
             ViewBag.MainAccountIsExpired = mainIsExpired;
 
             // Pass students (children) list
-            var parent = _repository.GetCustomerByEmail(email);
             if (parent != null)
             {
                 var students = _repository.GetStudentsByParentId(parent.CustomerId);
@@ -503,8 +511,13 @@ namespace ArcheryAlley.Controllers
             if (customer == null)
                 return RedirectToAction("CustomerLogin");
 
+            int? selfStudentId = null;
+            var selfStudent = _repository.GetStudentsByParentId(customer.CustomerId).FirstOrDefault(s => s.FullName.ToLower() == customer.FullName?.ToLower());
+            if (selfStudent != null) selfStudentId = selfStudent.StudentId;
+            ViewBag.SelfStudentId = selfStudentId;
+
             var classRegs = _repository.GetClassRegistrationsByEmail(email)
-                                      ?.Where(cr => cr.StudentId == null)
+                                      ?.Where(cr => cr.StudentId == null || cr.StudentId == selfStudentId)
                                       .OrderByDescending(cr => cr.RegistrationDate)
                                       .ToList();
                                       
@@ -521,7 +534,7 @@ namespace ArcheryAlley.Controllers
                 }
 
                 var history = _repository.GetReservationsByEmail(email)
-                    .Where(r => (r.RateCode == "CLASS" || r.RateCode == "Class Session") && r.StudentId == null).ToList();
+                    .Where(r => (r.RateCode == "CLASS" || r.RateCode == "Class Session") && (r.StudentId == null || r.StudentId == selfStudentId)).ToList();
 
                 int attendedSlots = history.Where(r => r.Attended && r.ReservedOn >= latestReg.RegistrationDate).Sum(r => Math.Max(1, r.DurationHours / 2));
                 if (attendedSlots >= totalSlots)

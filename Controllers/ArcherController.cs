@@ -29,7 +29,9 @@ namespace ArcheryAlley.Controllers
             var parent = _repository.GetCustomerByEmail(email);
             if (parent != null)
             {
-                var students = _repository.GetStudentsByParentId(parent.CustomerId);
+                var students = _repository.GetStudentsByParentId(parent.CustomerId)
+                                .Where(s => s.FullName.ToLower() != parent.FullName?.ToLower())
+                                .ToList();
                 var classRegs = _repository.GetClassRegistrationsByEmail(email);
                 var history = _repository.GetReservationsByEmail(email)
                     .Where(r => r.RateCode == "CLASS" || r.RateCode == "Class Session").ToList();

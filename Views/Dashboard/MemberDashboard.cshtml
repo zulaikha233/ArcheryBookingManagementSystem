@@ -5,7 +5,8 @@
     var classRegs = ViewBag.ClassRegistrations as IEnumerable<ArcheryAlley.Models.ClassRegistrations> ?? new List<ArcheryAlley.Models.ClassRegistrations>();
     var membershipPayments = ViewBag.MembershipPayments as IEnumerable<ArcheryAlley.Models.MembershipPayments> ?? new List<ArcheryAlley.Models.MembershipPayments>();
     var reservations = ViewBag.Reservations as IEnumerable<dynamic> ?? new List<dynamic>();
-    var parentClassRegs = classRegs.Where(cr => cr.StudentId == null);
+    int? selfStudentId = ViewBag.SelfStudentId as int?;
+    var parentClassRegs = classRegs.Where(cr => cr.StudentId == null || cr.StudentId == selfStudentId);
 
     decimal actualPending = 0;
     if (membershipPayments != null)
