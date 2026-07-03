@@ -1,0 +1,390 @@
+@{
+    ViewData["Title"] = "Gamified Progress";
+    Layout = "_MemberLayout";
+}
+
+<style>
+    /* Premium Gamified Theme Colors */
+    :root {
+        --gamify-bg: #131924;
+        --gamify-text: #f3f4f6;
+        --gamify-primary: #ff4d4d; /* Archery Alley Red */
+        --gamify-secondary: #00d2ff;
+        --gamify-success: #22c55e;
+        --gamify-card: rgba(25, 30, 40, 0.8);
+        --gamify-shadow: rgba(0, 0, 0, 0.5);
+    }
+
+    body {
+        background-color: var(--gamify-bg) !important;
+        color: var(--gamify-text) !important;
+    }
+
+    .gamify-container {
+        padding: 40px;
+        max-width: 1200px;
+        margin: 0 auto;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Header Section */
+    .gamify-header {
+        text-align: center;
+        margin-bottom: 50px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .gamify-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #fff;
+        margin-bottom: 10px;
+        letter-spacing: -1px;
+    }
+
+    .gamify-title span {
+        color: var(--gamify-primary); /* Red highlight */
+        text-transform: uppercase;
+        text-shadow: 0 0 15px rgba(255, 77, 77, 0.4);
+    }
+
+    /* Main Grid */
+    .gamify-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 30px;
+        align-items: center;
+    }
+
+    /* Cards */
+    .gamify-card {
+        background: var(--gamify-card);
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 15px 35px var(--gamify-shadow);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 77, 77, 0.15);
+        backdrop-filter: blur(10px);
+    }
+
+    /* Left Column: Overall Circular Progress */
+    .circle-progress-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .progress-circle {
+        position: relative;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: conic-gradient(var(--gamify-success) 45%, rgba(255,255,255,0.05) 0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 25px rgba(34, 197, 94, 0.2);
+    }
+
+    .progress-circle::before {
+        content: "";
+        position: absolute;
+        width: 140px;
+        height: 140px;
+        background: #1a1e28;
+        border-radius: 50%;
+        box-shadow: inset 0 5px 15px rgba(0,0,0,0.5);
+    }
+
+    .progress-value {
+        position: relative;
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #fff;
+        z-index: 1;
+    }
+
+    .progress-label {
+        margin-top: 20px;
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #9ca3af;
+        text-align: center;
+    }
+
+    /* Center Mascot */
+    .mascot-container {
+        text-align: center;
+        position: relative;
+        animation: floatMascot 3s ease-in-out infinite;
+    }
+
+    @@keyframes floatMascot {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-15px); }
+        100% { transform: translateY(0px); }
+    }
+
+    .mascot-img {
+        width: 100%;
+        max-width: 280px;
+        filter: drop-shadow(0 20px 30px rgba(0,0,0,0.4)); /* Darker shadow for image */
+    }
+
+    /* Linear Progress Bars (Right Column) */
+    .skill-bar-wrapper {
+        margin-bottom: 25px;
+    }
+
+    .skill-bar-wrapper:last-child {
+        margin-bottom: 0;
+    }
+
+    .skill-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-weight: 700;
+        color: #d1d5db;
+        font-size: 0.95rem;
+    }
+
+    .skill-track {
+        height: 14px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .skill-fill {
+        height: 100%;
+        border-radius: 20px;
+        transition: width 1s ease-in-out;
+        position: relative;
+    }
+
+    .skill-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+        background-size: 200% 100%;
+        animation: shimmer 2s infinite linear;
+    }
+
+    @@keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* Colors for specific skills */
+    .fill-blue { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .fill-orange { background: linear-gradient(90deg, #f97316, #fb923c); }
+    .fill-green { background: linear-gradient(90deg, #10b981, #34d399); }
+    .fill-purple { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+
+    /* Bottom Row: Achievements */
+    .achievements-section {
+        margin-top: 40px;
+    }
+
+    .achievements-grid {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .badge-card {
+        background: rgba(255, 77, 77, 0.03);
+        border-radius: 20px;
+        padding: 20px;
+        width: 140px;
+        text-align: center;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        border: 1px solid rgba(255, 77, 77, 0.2);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .badge-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--gamify-primary);
+        box-shadow: 0 10px 25px rgba(255, 77, 77, 0.15);
+    }
+
+    .badge-icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 10px;
+        background: rgba(255, 77, 77, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+    }
+
+    .badge-icon.locked {
+        background: rgba(255,255,255,0.03);
+        color: #6b7280;
+        filter: grayscale(100%);
+    }
+
+    .badge-title {
+        font-weight: 800;
+        font-size: 0.85rem;
+        color: #e5e7eb;
+    }
+
+    .badge-status {
+        font-size: 0.7rem;
+        font-weight: 700;
+        margin-top: 5px;
+        color: #22c55e;
+    }
+
+    .badge-status.locked {
+        color: #6b7280;
+    }
+
+    /* End of CSS */
+
+</style>
+
+<div class="gamify-container" data-aos="fade-in">
+    <!-- Header -->
+    <div class="gamify-header">
+        <h1 class="gamify-title">Your Path to <span>MASTERY</span></h1>
+        <p style="color: #6b7280; font-size: 1.1rem; font-weight: 500;">Track your archery performance journey, @ViewBag.CustomerName!</p>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="gamify-grid">
+        
+        <!-- Left: Circular Progress -->
+        <div class="gamify-card">
+            <div class="circle-progress-container">
+                <div class="progress-circle">
+                    <span class="progress-value">45<span style="font-size: 1.2rem;">%</span></span>
+                </div>
+                <div class="progress-label">Overall Mastery</div>
+                <p style="text-align: center; font-size: 0.8rem; color: #6b7280; margin-top: 10px;">Keep practicing to level up your archery skills!</p>
+            </div>
+        </div>
+
+        <!-- Center: Cute Mascot -->
+        <div class="mascot-container">
+            <!-- User Uploaded Mascot Image -->
+            <img src="~/images/Grassroot_level.png" alt="Archery Mascot" class="mascot-img" />
+        </div>
+
+        <!-- Right: Skill Linear Progress -->
+        <div class="gamify-card">
+            <h3 style="font-weight: 900; font-size: 1.3rem; margin-bottom: 25px; color: #fff; text-align: center;">Skill Progress</h3>
+            
+            <div class="skill-bar-wrapper">
+                <div class="skill-header">
+                    <span>Accuracy Rate</span>
+                    <span style="color: #3b82f6;">85%</span>
+                </div>
+                <div class="skill-track">
+                    <div class="skill-fill fill-blue" style="width: 85%;"></div>
+                </div>
+            </div>
+
+            <div class="skill-bar-wrapper">
+                <div class="skill-header">
+                    <span>Form & Posture</span>
+                    <span style="color: #f97316;">60%</span>
+                </div>
+                <div class="skill-track">
+                    <div class="skill-fill fill-orange" style="width: 60%;"></div>
+                </div>
+            </div>
+
+            <div class="skill-bar-wrapper">
+                <div class="skill-header">
+                    <span>Release Smoothness</span>
+                    <span style="color: #10b981;">75%</span>
+                </div>
+                <div class="skill-track">
+                    <div class="skill-fill fill-green" style="width: 75%;"></div>
+                </div>
+            </div>
+
+            <div class="skill-bar-wrapper">
+                <div class="skill-header">
+                    <span>Focus & Timing</span>
+                    <span style="color: #8b5cf6;">90%</span>
+                </div>
+                <div class="skill-track">
+                    <div class="skill-fill fill-purple" style="width: 90%;"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Achievements Section -->
+    <div class="achievements-section gamify-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 style="font-weight: 900; font-size: 1.5rem; color: #fff; margin: 0;">Achievements</h3>
+            <a href="#" style="color: var(--gamify-primary); font-weight: 700; text-decoration: none;">See All ></a>
+        </div>
+        
+        <div class="achievements-grid">
+            <!-- Badge 1: Grassroots -->
+            <div class="badge-card">
+                <div class="badge-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                    <i class="bi bi-award-fill"></i>
+                </div>
+                <div class="badge-title">GrassRoots</div>
+                <div class="badge-status">COMPLETED!</div>
+            </div>
+
+            <!-- Badge 2: Beginner 1 -->
+            <div class="badge-card">
+                <div class="badge-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                    <i class="bi bi-star-fill"></i>
+                </div>
+                <div class="badge-title">Beginner 1</div>
+                <div class="badge-status" style="color: #3b82f6;">IN PROGRESS</div>
+            </div>
+
+            <!-- Badge 3: Beginner 2 (Locked) -->
+            <div class="badge-card">
+                <div class="badge-icon locked">
+                    <i class="bi bi-lock-fill"></i>
+                </div>
+                <div class="badge-title" style="color: #9ca3af;">Beginner 2</div>
+                <div class="badge-status locked">LOCKED</div>
+            </div>
+
+            <!-- Badge 4: Intermediate (Locked) -->
+            <div class="badge-card">
+                <div class="badge-icon locked">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </div>
+                <div class="badge-title" style="color: #9ca3af;">Intermediate 1</div>
+                <div class="badge-status locked">LOCKED</div>
+            </div>
+            
+            <!-- Badge 5: Expert (Locked) -->
+            <div class="badge-card">
+                <div class="badge-icon locked">
+                    <i class="bi bi-trophy-fill"></i>
+                </div>
+                <div class="badge-title" style="color: #9ca3af;">Expert</div>
+                <div class="badge-status locked">LOCKED</div>
+            </div>
+        </div>
+    </div>
+</div>

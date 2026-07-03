@@ -279,7 +279,11 @@
         background: rgba(255, 255, 255, 0.08) !important;
     }
 
-    .form-control-premium::placeholder { color: rgba(255,255,255,0.2) !important; }
+    .form-control-premium::-webkit-input-placeholder { color: rgba(255, 255, 255, 0.8) !important; opacity: 1 !important; }
+    .form-control-premium::-moz-placeholder { color: rgba(255, 255, 255, 0.8) !important; opacity: 1 !important; }
+    .form-control-premium:-ms-input-placeholder { color: rgba(255, 255, 255, 0.8) !important; opacity: 1 !important; }
+    .form-control-premium::-ms-input-placeholder { color: rgba(255, 255, 255, 0.8) !important; opacity: 1 !important; }
+    .form-control-premium::placeholder { color: rgba(255, 255, 255, 0.8) !important; opacity: 1 !important; }
     
     .form-select.form-control-premium {
         padding-right: 36px !important;
