@@ -137,5 +137,16 @@ namespace ArcheryAlley.Controllers
 
             return View("~/Views/Staff_Admin/AdminProfile.cshtml");
         }
+
+        [HttpGet]
+        public IActionResult AdminAttendance()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+                return RedirectToAction("Login", "Account");
+
+            ViewBag.AdminName = HttpContext.Session.GetString("UserName");
+            return View("~/Views/Staff_Admin/AdminAttendance.cshtml");
+        }
     }
 }

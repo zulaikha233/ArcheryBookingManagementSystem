@@ -1,0 +1,453 @@
+﻿@using Microsoft.AspNetCore.Http
+@{
+    ViewData["Title"] = "Student Attendance";
+    Layout = "~/Views/Staff_Admin/AdminNavBar.cshtml";
+}
+<style>
+    .page-header { margin-bottom: 32px; }
+    .page-header p { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 6px; }
+    .page-header h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; color: var(--text-white); }
+    .page-header h1 span { color: var(--primary); }
+
+    .attendance-layout { display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start; }
+
+    .glass-card { background: var(--card-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--card-border); border-radius: var(--radius-md); box-shadow: var(--shadow-card); }
+
+    .left-panel { display: flex; flex-direction: column; gap: 20px; }
+    .calendar-widget { padding: 24px; }
+    .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .cal-month-label { font-size: 1rem; font-weight: 800; color: var(--text-white); }
+    .cal-nav-group { display: flex; gap: 4px; }
+    .cal-nav-btn { width: 32px; height: 32px; border-radius: 8px; border: none; background: var(--input-bg); color: var(--text-dim); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); font-size: 0.85rem; }
+    .cal-nav-btn:hover { background: var(--primary-subtle); color: var(--primary); }
+
+    .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+    .cal-day-label { text-align: center; font-size: 0.6rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; padding: 6px 0; }
+    .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 600; border-radius: 8px; cursor: pointer; transition: var(--transition); color: var(--text-light); position: relative; }
+    .cal-day:hover:not(.empty):not(.selected) { background: var(--input-bg); color: var(--text-white); }
+    .cal-day.today::after { content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--primary); }
+    .cal-day.selected { background: var(--primary) !important; color: #fff !important; font-weight: 800; box-shadow: var(--shadow-primary); }
+    .cal-day.empty { cursor: default; }
+    .cal-day.has-data::before { content: ''; position: absolute; top: 3px; right: 3px; width: 5px; height: 5px; border-radius: 50%; background: var(--present-color); opacity: 0.7; }
+
+    .cal-summary { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--card-border); display: none; }
+    .cal-summary.visible { display: block; }
+    .cal-summary-date { font-size: 0.72rem; color: var(--text-dim); display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .cal-summary-date i { color: var(--primary); }
+    .cal-summary-date strong { color: var(--text-white); }
+    .cal-summary-stats { display: flex; gap: 10px; }
+    .summary-chip { flex: 1; text-align: center; padding: 10px 8px; border-radius: var(--radius-sm); background: var(--input-bg); border: 1px solid var(--card-border); }
+    .summary-chip span { display: block; font-size: 1.3rem; font-weight: 800; }
+    .summary-chip p { font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+    .chip-present span { color: var(--present-color); }
+    .chip-absent span  { color: #f87171; }
+    .chip-total span   { color: var(--primary); }
+
+    .empty-panel { padding: 70px 40px; text-align: center; color: var(--text-dim); }
+    .empty-panel i { font-size: 3.2rem; color: rgba(255,77,77,0.2); margin-bottom: 18px; display: block; }
+    .empty-panel h4 { font-size: 1rem; color: rgba(255,255,255,0.45); font-weight: 700; margin-bottom: 8px; }
+    .empty-panel p  { font-size: 0.82rem; line-height: 1.6; }
+
+    .list-header { padding: 20px 24px; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; border-radius: var(--radius-md) var(--radius-md) 0 0; }
+    .list-header-left h3   { font-size: 0.95rem; font-weight: 700; color: var(--text-white); }
+    .list-header-left span { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; display: block; }
+    .list-header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    .btn-mark-all { display: flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: var(--radius-sm); background: var(--present-bg); border: 1px solid var(--present-border); color: var(--present-color); font-size: 0.78rem; font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif; transition: var(--transition); }
+    .btn-mark-all:hover { background: rgba(52,211,153,0.18); }
+
+    .filter-tabs { display: flex; gap: 6px; }
+    .filter-tab { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--input-border); background: transparent; color: var(--text-dim); font-size: 0.74rem; font-weight: 600; cursor: pointer; font-family: 'Outfit', sans-serif; transition: var(--transition); }
+    .filter-tab:hover { border-color: var(--primary); color: var(--primary); }
+    .filter-tab.active { background: var(--primary-subtle); border-color: var(--primary); color: var(--primary); }
+
+    .student-list { display: flex; flex-direction: column; }
+    .student-row { display: flex; align-items: center; padding: 16px 24px; gap: 16px; border-bottom: 1px solid rgba(255,255,255,0.03); transition: var(--transition); animation: rowIn 0.3s ease both; }
+    .student-row:last-child { border-bottom: none; }
+    .student-row:hover { background: rgba(255,255,255,0.015); }
+
+    .student-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 800; color: #fff; flex-shrink: 0; background: linear-gradient(135deg, #333a4d, #1e2233); border: 1px solid rgba(255,255,255,0.08); }
+    .student-avatar.present { background: linear-gradient(135deg, rgba(52,211,153,0.3), rgba(52,211,153,0.15)); border-color: rgba(52,211,153,0.3); }
+
+    .student-info { flex: 1; min-width: 0; }
+    .student-name { font-size: 0.92rem; font-weight: 700; color: var(--text-white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .student-meta { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .student-meta i { font-size: 0.7rem; color: var(--primary); }
+
+    .class-badge { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 2px 8px; border-radius: 20px; }
+    .badge-beginner     { background: rgba(255,77,77,0.12);   color: #FF4D4D; border: 1px solid rgba(255,77,77,0.25); }
+    .badge-intermediate { background: rgba(245,158,11,0.12);  color: #FBBF24; border: 1px solid rgba(245,158,11,0.25); }
+    .badge-advanced     { background: rgba(139,92,246,0.12);  color: #A78BFA; border: 1px solid rgba(139,92,246,0.25); }
+    .badge-private      { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.1); }
+
+    .attend-btn { display: flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: var(--radius-sm); font-size: 0.78rem; font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif; transition: var(--transition); flex-shrink: 0; border: 1px solid var(--absent-border); background: var(--absent-bg); color: var(--absent-color); }
+    .attend-btn.attended { background: var(--present-bg); border-color: var(--present-border); color: var(--present-color); }
+    .attend-btn:hover:not(.attended) { border-color: var(--present-border); color: var(--present-color); background: rgba(52,211,153,0.06); }
+    .attend-btn.attended:hover { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.3); color: #fca5a5; }
+
+    .attend-time { font-size: 0.65rem; color: var(--present-color); display: none; white-space: nowrap; text-align: right; }
+    .attend-time.visible { display: block; }
+
+    .toast-notif { position: fixed; bottom: 28px; right: 28px; background: rgba(20,22,30,0.95); border: 1px solid rgba(52,211,153,0.3); border-radius: 16px; padding: 13px 20px; display: flex; align-items: center; gap: 12px; font-size: 0.85rem; font-weight: 600; color: var(--text-white); box-shadow: 0 12px 35px rgba(0,0,0,0.5); backdrop-filter: blur(10px); transform: translateY(80px); opacity: 0; transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275); z-index: 9999; }
+    .toast-notif.show { transform: translateY(0); opacity: 1; }
+    .toast-notif i { font-size: 1.1rem; }
+    .toast-notif.present i { color: var(--present-color); }
+    .toast-notif.absent  i { color: #f87171; }
+
+    @@keyframes rowIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+    @@media (max-width: 1024px) { .attendance-layout { grid-template-columns: 1fr; } }
+    @@media (max-width: 768px) {
+        .page-header h1 { font-size: 1.5rem; }
+        .list-header { flex-direction: column; align-items: flex-start; }
+        .attend-btn span { display: none; }
+        .attend-btn { padding: 8px 12px; }
+    }
+    @@media (max-width: 380px) {
+        .cal-summary-stats { gap: 6px; }
+        .summary-chip { padding: 8px 4px; }
+    }
+</style>
+
+    @Html.AntiForgeryToken() @* Added for secure POST requests to the controller *@
+
+    <div class="page-header">
+        <p>Head Coach Portal</p>
+        <h1>Student <span>Attendance</span></h1>
+    </div>
+
+    <div class="attendance-layout">
+
+        <div class="left-panel">
+            <div class="glass-card calendar-widget">
+                <div class="cal-header">
+                    <div class="cal-month-label" id="calMonthLabel">—</div>
+                    <div class="cal-nav-group">
+                        <button class="cal-nav-btn" onclick="shiftMonth(-1)"><i class="bi bi-chevron-left"></i></button>
+                        <button class="cal-nav-btn" onclick="shiftMonth(1)"><i class="bi bi-chevron-right"></i></button>
+                    </div>
+                </div>
+                <div class="cal-grid" id="calGrid"></div>
+                <div class="cal-summary" id="calSummary">
+                    <div class="cal-summary-date">
+                        <i class="bi bi-calendar-event"></i>
+                        <strong id="summaryDateLabel">—</strong>
+                    </div>
+                    <div class="cal-summary-stats">
+                        <div class="summary-chip chip-total">
+                            <span id="statTotal">0</span><p>Students</p>
+                        </div>
+                        <div class="summary-chip chip-present">
+                            <span id="statPresent">0</span><p>Present</p>
+                        </div>
+                        <div class="summary-chip chip-absent">
+                            <span id="statAbsent">0</span><p>Absent</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="rightPanel">
+            <div class="glass-card" id="emptyCard">
+                <div class="empty-panel">
+                    <i class="bi bi-calendar2-week"></i>
+                    <h4>Select a Date</h4>
+                    <p>Pick a date on the calendar to see the list of students with class sessions and mark their attendance.</p>
+                </div>
+            </div>
+
+            <div class="glass-card" id="studentListCard" style="display:none;">
+                <div class="list-header">
+                    <div class="list-header-left">
+                        <h3 id="listTitle">Students</h3>
+                        <span id="listSubtitle">—</span>
+                    </div>
+                    <div class="list-header-right">
+                        <div class="filter-tabs">
+                            <button class="filter-tab active" data-filter="all"     onclick="applyFilter(this)">All</button>
+                            <button class="filter-tab"        data-filter="present" onclick="applyFilter(this)">Present</button>
+                            <button class="filter-tab"        data-filter="absent"  onclick="applyFilter(this)">Absent</button>
+                        </div>
+                        <button class="btn-mark-all" onclick="markAllPresent()">
+                            <i class="bi bi-check2-all"></i>
+                            <span>Mark All Present</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="student-list" id="studentList"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="toast-notif" id="toast">
+        <i class="bi bi-check-circle-fill"></i>
+        <span id="toastMsg">Attendance updated</span>
+    </div>
+
+@section Scripts {
+<script>
+    /* -- CALENDAR STATE -- */
+    const today  = new Date();
+    let calYear  = today.getFullYear();
+    let calMonth = today.getMonth();
+    let selectedDate  = null;
+    let activeFilter  = 'all';
+    let currentStudents = [];
+    const datesWithReports = new Set();
+    const MONTHS   = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const DAY_LBLS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+    /* -- XSS PROTECTION UTILITY -- */
+    function escapeHTML(str) {
+        if (!str) return '';
+        return str.replace(/[&<>'"]/g, 
+            tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+        );
+    }
+
+    /* -- CALENDAR RENDER -- */
+    function shiftMonth(offset) {
+        calMonth += offset;
+        if (calMonth > 11) { calMonth = 0; calYear++; }
+        if (calMonth < 0)  { calMonth = 11; calYear--; }
+        renderCalendar();
+    }
+
+    function renderCalendar() {
+        document.getElementById('calMonthLabel').textContent = `${MONTHS[calMonth]} ${calYear}`;
+        const grid = document.getElementById('calGrid');
+        grid.innerHTML = '';
+        DAY_LBLS.forEach(d => {
+            const el = document.createElement('div');
+            el.className = 'cal-day-label';
+            el.textContent = d;
+            grid.appendChild(el);
+        });
+        const firstDay    = new Date(calYear, calMonth, 1).getDay();
+        const blanks      = firstDay === 0 ? 6 : firstDay - 1;
+        const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+        const todayStr    = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+        for (let b = 0; b < blanks; b++) {
+            const blank = document.createElement('div');
+            blank.className = 'cal-day empty';
+            grid.appendChild(blank);
+        }
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const el = document.createElement('div');
+            el.className = 'cal-day';
+            el.textContent = d;
+            if (dateStr === todayStr)          el.classList.add('today');
+            if (dateStr === selectedDate)      el.classList.add('selected');
+            if (datesWithReports.has(dateStr)) el.classList.add('has-data');
+            el.onclick = () => selectDate(dateStr);
+            grid.appendChild(el);
+        }
+    }
+
+    /* -- DATE SELECTION -- */
+    async function selectDate(dateStr) {
+        selectedDate = dateStr;
+        activeFilter = 'all';
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        document.querySelector('.filter-tab[data-filter="all"]').classList.add('active');
+        renderCalendar();
+        const formatted = new Date(dateStr + 'T00:00:00').toLocaleDateString('en-MY', {
+            weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+        });
+        document.getElementById('summaryDateLabel').textContent = formatted;
+        document.getElementById('calSummary').classList.add('visible');
+        await renderStudentList();
+    }
+
+    /* -- STUDENT LIST -- */
+    async function renderStudentList() {
+        try {
+            const response = await fetch(`/Booking/GetAttendanceByDate?date=${selectedDate}`);
+            const students = await response.json();
+            currentStudents = students;
+            document.getElementById('emptyCard').style.display       = 'none';
+            document.getElementById('studentListCard').style.display = '';
+            const formatted = new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-MY', {
+                weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+            });
+            document.getElementById('listTitle').textContent    = students.length === 0 ? 'No Classes' : `${students.length} Student${students.length !== 1 ? 's' : ''}`;
+            document.getElementById('listSubtitle').textContent = formatted;
+            updateStats(students);
+            renderRows(students);
+        } catch (err) {
+            console.error('Failed to load students:', err);
+        }
+    }
+
+    /* -- RENDER ROWS -- */
+    function renderRows(students) {
+        const list = document.getElementById('studentList');
+        list.innerHTML = '';
+        const filtered = students.filter(s => {
+            if (activeFilter === 'present') return s.attended;
+            if (activeFilter === 'absent')  return !s.attended;
+            return true;
+        });
+        if (filtered.length === 0) {
+            list.innerHTML = `<div style="padding:36px;text-align:center;color:var(--text-dim);font-size:0.85rem;">No students match this filter.</div>`;
+            return;
+        }
+        const badgeMap = { 'Beginner':'badge-beginner', 'Intermediate':'badge-intermediate', 'Advanced':'badge-advanced', 'Private':'badge-private' };
+        filtered.forEach((s, idx) => {
+            const row = document.createElement('div');
+            row.className = 'student-row';
+            row.id = `row-${s.id}`;
+            row.style.animationDelay = `${idx * 0.04}s`;
+            const bClass = badgeMap[s.packageType] || 'badge-beginner';
+            
+            // Protected strings via escapeHTML to prevent execution vulnerabilities
+            row.innerHTML = `
+                <div class="student-avatar ${s.attended ? 'present' : ''}" id="avatar-${s.id}">
+                    ${escapeHTML(s.name.charAt(0).toUpperCase())}
+                </div>
+                <div class="student-info">
+                    <div class="student-name">${escapeHTML(s.name)}</div>
+                    <div class="student-meta">
+                        <i class="bi bi-clock"></i> ${escapeHTML(s.time)}
+                        <span class="class-badge ${bClass}">${escapeHTML(s.packageType)}</span>
+                    </div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                    <button class="attend-btn ${s.attended ? 'attended' : ''}" id="btn-${s.id}" onclick="toggleAttendance(${s.id})">
+                        <i class="bi ${s.attended ? 'bi-check-circle-fill' : 'bi-circle'}"></i>
+                        <span>${s.attended ? 'Present' : 'Mark Present'}</span>
+                    </button>
+                    <div class="attend-time ${s.attended ? 'visible' : ''}" id="time-${s.id}">
+                        ${s.attended ? 'Present' : ''}
+                    </div>
+                </div>`;
+            list.appendChild(row);
+        });
+    }
+
+    /* -- TOGGLE ATTENDANCE -- */
+    async function toggleAttendance(id) {
+        const student = currentStudents.find(s => s.id === id);
+        if (!student) return;
+
+        // 1. Toggle Local State
+        student.attended = !student.attended;
+
+        const btn    = document.getElementById(`btn-${id}`);
+        const avatar = document.getElementById(`avatar-${id}`);
+        const timeEl = document.getElementById(`time-${id}`);
+
+        // 2. Optimistic UI Update: Render changes immediately without network lag
+        if (student.attended) {
+            btn.classList.add('attended');
+            btn.innerHTML = `<i class="bi bi-check-circle-fill"></i><span>Present</span>`;
+            avatar.classList.add('present');
+            timeEl.textContent = `Marked at ${new Date().toLocaleTimeString('en-MY', {hour:'2-digit', minute:'2-digit'})}`;
+            timeEl.classList.add('visible');
+            showToast(`${student.name} marked present`, true);
+        } else {
+            btn.classList.remove('attended');
+            btn.innerHTML = `<i class="bi bi-circle"></i><span>Mark Present</span>`;
+            avatar.classList.remove('present');
+            timeEl.textContent = '';
+            timeEl.classList.remove('visible');
+            showToast(`${student.name} marked absent`, false);
+        }
+        updateStats(currentStudents);
+
+        // 3. Sync state with Server background request
+        try {
+            const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+            const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+            if (tokenElement) {
+                headers['RequestVerificationToken'] = tokenElement.value;
+            }
+
+            const response = await fetch('/Booking/ToggleAttendance', {
+                method: 'POST',
+                headers: headers,
+                body: `reservationId=${id}&attended=${student.attended}`
+            });
+
+            if (!response.ok) throw new Error("Server rejected request");
+        } catch (err) {
+            console.error('Failed to save attendance:', err);
+            showToast('Connection error. Reverting change...', false);
+            
+            // Revert state if backend synchronization fails
+            student.attended = !student.attended;
+            renderRows(currentStudents);
+            updateStats(currentStudents);
+        }
+    }
+
+    /* -- MARK ALL PRESENT -- */
+    async function markAllPresent() {
+        const targets = currentStudents.filter(s => !s.attended);
+        if (targets.length === 0) return;
+
+        // 1. Optimistic UI update: Bulk change localized records instantly
+        targets.forEach(s => s.attended = true);
+        renderRows(currentStudents);
+        updateStats(currentStudents);
+        showToast('All students marked present', true);
+
+        // 2. Dispatch operations in Parallel via Promise.all() to prevent network blocking
+        try {
+            const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+            const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+            if (tokenElement) {
+                headers['RequestVerificationToken'] = tokenElement.value;
+            }
+
+            const promises = targets.map(s => 
+                fetch('/Booking/ToggleAttendance', {
+                    method: 'POST',
+                    headers: headers,
+                    body: `reservationId=${s.id}&attended=true`
+                })
+            );
+
+            await Promise.all(promises);
+        } catch (err) {
+            console.error('Failed to sync batch attendance:', err);
+            showToast('Some changes failed to save. Please refresh.', false);
+        }
+    }
+
+    /* -- FILTER -- */
+    function applyFilter(tab) {
+        activeFilter = tab.dataset.filter;
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        renderRows(currentStudents);
+    }
+
+    /* -- STATS -- */
+    function updateStats(students) {
+        const presentCount = students.filter(s => s.attended).length;
+        document.getElementById('statTotal').textContent   = students.length;
+        document.getElementById('statPresent').textContent = presentCount;
+        document.getElementById('statAbsent').textContent  = students.length - presentCount;
+    }
+
+    /* -- TOAST -- */
+    function showToast(msg, isPresent) {
+        const toast  = document.getElementById('toast');
+        const msgEl  = document.getElementById('toastMsg');
+        const iconEl = toast.querySelector('i');
+        msgEl.textContent = msg;
+        toast.classList.remove('present', 'absent');
+        iconEl.className = isPresent ? 'bi bi-check-circle-fill' : 'bi bi-x-circle-fill';
+        toast.classList.add(isPresent ? 'present' : 'absent');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2800);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        renderCalendar();
+    });
+</script>
+}
