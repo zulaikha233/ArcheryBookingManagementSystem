@@ -52,9 +52,9 @@
     /* Main Grid */
     .gamify-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 30px;
-        align-items: center;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 40px;
+        align-items: stretch;
     }
 
     /* Cards */
@@ -97,6 +97,19 @@
         background: #1a1e28;
         border-radius: 50%;
         box-shadow: inset 0 5px 15px rgba(0,0,0,0.5);
+    }
+    
+    .progress-circle.small {
+        width: 80px;
+        height: 80px;
+        box-shadow: 0 5px 15px rgba(34, 197, 94, 0.2);
+    }
+    .progress-circle.small::before {
+        width: 60px;
+        height: 60px;
+    }
+    .progress-circle.small .progress-value {
+        font-size: 1.3rem;
     }
 
     .progress-value {
@@ -255,82 +268,138 @@
         color: #6b7280;
     }
 
+    /* Table Styling for Coach Reports */
+    .gamify-table-container {
+        overflow-x: auto;
+        margin-top: 15px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .gamify-table {
+        width: 100%;
+        border-collapse: collapse;
+        color: #d1d5db;
+        font-size: 0.95rem;
+    }
+    
+    .gamify-table th {
+        background: rgba(0, 0, 0, 0.4);
+        color: #fff;
+        font-weight: 800;
+        padding: 15px 20px;
+        text-align: left;
+        letter-spacing: 0.5px;
+    }
+    
+    .gamify-table td {
+        padding: 15px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.02);
+    }
+    
+    .gamify-table tr:hover td {
+        background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .gamify-btn-view {
+        background: rgba(0, 210, 255, 0.15);
+        color: var(--gamify-secondary);
+        border: 1px solid var(--gamify-secondary);
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+    
+    .gamify-btn-view:hover {
+        background: var(--gamify-secondary);
+        color: #000;
+        box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+    }
+
     /* End of CSS */
 
 </style>
 
 <div class="gamify-container" data-aos="fade-in">
-    <!-- Header -->
-    <div class="gamify-header">
-        <h1 class="gamify-title">Your Path to <span>MASTERY</span></h1>
-        <p style="color: #6b7280; font-size: 1.1rem; font-weight: 500;">Track your archery performance journey, @ViewBag.CustomerName!</p>
+    <!-- Header Row -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; flex-wrap: wrap; gap: 20px;">
+        <div class="gamify-header" style="margin-bottom: 0; text-align: left;">
+            <h1 class="gamify-title">Your Path to <span>MASTERY</span></h1>
+            <p style="color: #6b7280; font-size: 1.1rem; font-weight: 500;">Track your archery performance journey, @ViewBag.CustomerName!</p>
+        </div>
+
+        <!-- Small Overall Mastery Card -->
+        <div class="gamify-card" style="padding: 15px 25px; display: flex; align-items: center; gap: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
+            <div class="progress-circle small">
+                <span class="progress-value">45<span style="font-size: 0.8rem;">%</span></span>
+            </div>
+            <div>
+                <div class="progress-label" style="margin-top: 0; font-size: 1.1rem; text-align: left; color: #fff;">Overall Mastery</div>
+                <p style="font-size: 0.8rem; color: #9ca3af; margin: 2px 0 0 0;">Keep practicing!</p>
+            </div>
+        </div>
     </div>
 
     <!-- Main Grid -->
     <div class="gamify-grid">
-        
-        <!-- Left: Circular Progress -->
-        <div class="gamify-card">
-            <div class="circle-progress-container">
-                <div class="progress-circle">
-                    <span class="progress-value">45<span style="font-size: 1.2rem;">%</span></span>
-                </div>
-                <div class="progress-label">Overall Mastery</div>
-                <p style="text-align: center; font-size: 0.8rem; color: #6b7280; margin-top: 10px;">Keep practicing to level up your archery skills!</p>
-            </div>
-        </div>
-
-        <!-- Center: Cute Mascot -->
-        <div class="mascot-container">
+        <!-- Left: Cute Mascot -->
+        <div class="mascot-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
             <!-- User Uploaded Mascot Image -->
-            <img src="~/images/Grassroot_level.png" alt="Archery Mascot" class="mascot-img" />
-        </div>
-
-        <!-- Right: Skill Linear Progress -->
-        <div class="gamify-card">
-            <h3 style="font-weight: 900; font-size: 1.3rem; margin-bottom: 25px; color: #fff; text-align: center;">Skill Progress</h3>
+            <img src="~/images/Grassroot_level.png" alt="Archery Mascot" class="mascot-img" style="max-width: 320px;" />
             
-            <div class="skill-bar-wrapper">
-                <div class="skill-header">
-                    <span>Accuracy Rate</span>
-                    <span style="color: #3b82f6;">85%</span>
-                </div>
-                <div class="skill-track">
-                    <div class="skill-fill fill-blue" style="width: 85%;"></div>
-                </div>
-            </div>
-
-            <div class="skill-bar-wrapper">
-                <div class="skill-header">
-                    <span>Form & Posture</span>
-                    <span style="color: #f97316;">60%</span>
-                </div>
-                <div class="skill-track">
-                    <div class="skill-fill fill-orange" style="width: 60%;"></div>
-                </div>
-            </div>
-
-            <div class="skill-bar-wrapper">
-                <div class="skill-header">
-                    <span>Release Smoothness</span>
-                    <span style="color: #10b981;">75%</span>
-                </div>
-                <div class="skill-track">
-                    <div class="skill-fill fill-green" style="width: 75%;"></div>
-                </div>
-            </div>
-
-            <div class="skill-bar-wrapper">
-                <div class="skill-header">
-                    <span>Focus & Timing</span>
-                    <span style="color: #8b5cf6;">90%</span>
-                </div>
-                <div class="skill-track">
-                    <div class="skill-fill fill-purple" style="width: 90%;"></div>
-                </div>
+            <!-- Level Badge -->
+            <div style="margin-top: 10px; background: rgba(16, 185, 129, 0.15); border: 2px solid #10b981; padding: 8px 25px; border-radius: 30px; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 5px 15px rgba(16, 185, 129, 0.2);">
+                <i class="bi bi-award-fill" style="color: #10b981; font-size: 1.3rem;"></i>
+                <span style="color: #fff; font-weight: 800; font-size: 1.1rem; letter-spacing: 1px;">GRASSROOTS</span>
             </div>
         </div>
 
+        <!-- Right: Skill Radar Chart -->
+        <div class="gamify-card" style="display: flex; flex-direction: column;">
+            <h3 style="font-weight: 900; font-size: 1.5rem; margin-bottom: 15px; color: #fff; text-align: center;">Skill Progress</h3>
+            <div style="position: relative; flex-grow: 1; min-height: 400px; width: 100%; display: flex; justify-content: center; align-items: center;">
+                <canvas id="skillRadarChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Target Progression Section -->
+    <div class="gamify-card" style="margin-top: 40px; margin-bottom: 40px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 30px;">
+        <div style="flex: 1; min-width: 300px;">
+            <h3 style="font-weight: 900; font-size: 1.5rem; color: #fff; margin-bottom: 5px;">Target Mastery</h3>
+            <p style="color: #9ca3af; font-size: 0.95rem; margin-bottom: 25px;">Master your current target size to unlock the next level.</p>
+            
+            <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span style="font-weight: 700; color: #f3f4f6; font-size: 1.1rem;">120cm Target (Current)</span>
+                    <span style="color: #10b981; font-weight: 900; font-size: 1.1rem;">2 / 3 Sessions</span>
+                </div>
+                
+                <!-- Progress bar for 2/3 passes -->
+                <div class="skill-track" style="height: 16px; margin-bottom: 15px; background: rgba(0,0,0,0.4);">
+                    <div class="skill-fill fill-green" style="width: 66%;"></div>
+                </div>
+                
+                <p style="font-size: 0.85rem; color: #d1d5db; margin: 0; display: flex; gap: 10px; align-items: flex-start;">
+                    <i class="bi bi-info-circle-fill" style="color: var(--gamify-secondary); font-size: 1.1rem;"></i> 
+                    <span>
+                        Get a <strong>5-star rating</strong> in 1 more session and reach <strong>80% overall mastery</strong> to unlock the <strong>60cm Target</strong> for your next booking!
+                    </span>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Target Visualization Image -->
+        <div style="text-align: center; background: rgba(0,0,0,0.2); padding: 30px; border-radius: 20px; border: 1px dashed rgba(255, 77, 77, 0.3);">
+            <img src="~/images/archery_image.png" alt="120cm Target" style="width: 120px; height: 120px; object-fit: contain; margin: 0 auto 15px; display: block; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));" />
+            <h4 style="color: #fff; font-weight: 800; font-size: 1.2rem; margin: 0 0 5px 0;">120cm Target</h4>
+            <span style="font-size: 0.8rem; background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 4px 10px; border-radius: 10px; font-weight: 700; letter-spacing: 1px;">ACTIVE</span>
+        </div>
     </div>
 
     <!-- Achievements Section -->
@@ -387,4 +456,135 @@
             </div>
         </div>
     </div>
+
+    <!-- Coach Reports Section -->
+    <div class="gamify-card" style="margin-top: 40px;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 style="font-weight: 900; font-size: 1.5rem; color: #fff; margin: 0;">All Performance Reports</h3>
+        </div>
+        
+        <div class="gamify-table-container">
+            <table class="gamify-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Coach</th>
+                        <th>Session Type</th>
+                        <th>Mastery Rating</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>12 Aug 2026</td>
+                        <td>Coach Farhan</td>
+                        <td>Class Session</td>
+                        <td>
+                            <div style="color: #fbbf24; font-size: 1.1rem;">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="#" class="gamify-btn-view"><i class="bi bi-eye-fill"></i> View</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>05 Aug 2026</td>
+                        <td>Coach Amir</td>
+                        <td>Self-Training (Evaluated)</td>
+                        <td>
+                            <div style="color: #fbbf24; font-size: 1.1rem;">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star text-muted"></i>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="#" class="gamify-btn-view"><i class="bi bi-eye-fill"></i> View</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const ctx = document.getElementById('skillRadarChart').getContext('2d');
+            const skillRadarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Stance & Posture', 'Anchor Point', 'Draw & Release', 'Follow Through', 'Focus & Timing'],
+                    datasets: [{
+                        label: 'Skill Level',
+                        data: [70, 85, 60, 75, 90], // Sample data
+                        backgroundColor: 'rgba(255, 77, 77, 0.2)', // gamify-primary with opacity
+                        borderColor: '#ff4d4d',
+                        pointBackgroundColor: '#00d2ff', // gamify-secondary
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#00d2ff',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 100,
+                            angleLines: {
+                                color: 'rgba(255, 255, 255, 0.2)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.2)'
+                            },
+                            pointLabels: {
+                                color: '#f3f4f6',
+                                font: {
+                                    size: 14,
+                                    family: "'Inter', sans-serif",
+                                    weight: '700'
+                                }
+                            },
+                            ticks: {
+                                color: '#9ca3af',
+                                backdropColor: 'transparent',
+                                stepSize: 20,
+                                showLabelBackdrop: false,
+                                font: { size: 12 }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(25, 30, 40, 0.9)',
+                            titleFont: { size: 13, family: "'Inter', sans-serif" },
+                            bodyFont: { size: 12, family: "'Inter', sans-serif" },
+                            padding: 10,
+                            displayColors: false,
+                            borderColor: 'rgba(255, 77, 77, 0.3)',
+                            borderWidth: 1
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}
