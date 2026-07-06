@@ -4,179 +4,345 @@
 }
 
 <style>
-    .page-header { margin-bottom: 28px; }
-    .page-header p { font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
-    .page-header h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; color: var(--white); }
-    .page-header h1 span { color: var(--primary); }
-
-    .status-bar { display: flex; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
-    .status-chip {
-        background: var(--card-bg); border: 1px solid rgba(249,115,22,0.2);
-        border-radius: 50px; padding: 7px 16px;
-        font-size: 0.78rem; font-weight: 600; color: var(--text-dim);
-        display: flex; align-items: center; gap: 8px;
+    /* --- CSS ROOT & BASE --- */
+    :root {
+        --bg-dark: #0a0a0a;
+        --card-glass: #141414;
+        --border-glass: rgba(255, 255, 255, 0.05);
+        --text-main: #ffffff;
+        --text-muted: #888888;
+        --primary-orange: #ff6b00;
+        --primary-glow: rgba(255, 107, 0, 0.2);
     }
-    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); animation: pulse 2s infinite; }
 
-    .section-label {
-        font-size: 0.65rem; color: var(--text-dim);
-        text-transform: uppercase; letter-spacing: 2px;
-        font-weight: 700; margin-bottom: 16px;
-        display: flex; align-items: center; gap: 8px;
+    .dashboard-container {
+        max-width: 900px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
     }
-    .section-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.06); }
 
-    .dashboard-grid {
+    /* --- 1. QUICK ACTION TILES (TOP ROW) --- */
+    .quick-action-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        max-width: 1100px;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
     }
 
-    .dash-card {
-        background: var(--card-bg);
-        border-radius: 20px;
-        padding: 28px 24px;
+    .action-tile {
+        background: var(--card-glass);
+        border: 1px solid var(--border-glass);
+        border-radius: 18px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
         text-decoration: none;
-        color: var(--text-light);
-        border: 1px solid var(--card-border);
-        display: flex; flex-direction: column; gap: 14px;
-        transition: all 0.3s ease;
-        position: relative; overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         cursor: pointer;
     }
-    .dash-card::before {
-        content: ''; position: absolute; top: 0; right: 0;
-        width: 100px; height: 100px;
-        background: rgba(249,115,22,0.04);
-        border-radius: 50%; transform: translate(30px,-30px); transition: 0.3s;
+
+    .action-tile:hover {
+        background: rgba(255, 255, 255, 0.03);
+        transform: translateY(-3px);
+        border-color: rgba(255, 255, 255, 0.1);
     }
-    .dash-card:hover { transform: translateY(-4px); color: var(--text-light); }
-    .dash-card:hover::before { transform: translate(20px,-20px) scale(1.2); }
 
-    .card-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: #fff; }
-    .card-label { font-size: 0.62rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; }
-    .card-title { font-size: 1.05rem; font-weight: 700; color: var(--white); line-height: 1.3; }
-    .card-desc  { font-size: 0.78rem; color: var(--text-dim); line-height: 1.5; }
-    .card-footer-row { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
-    .card-tag { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; padding: 3px 9px; border-radius: 20px; }
-    .card-arrow { font-size: 1.1rem; transition: 0.2s; }
-    .dash-card:hover .card-arrow { transform: translateX(4px); }
-
-    .dash-card--orange { border-color: rgba(249,115,22,0.2); }
-    .dash-card--orange:hover { border-color: var(--primary); box-shadow: 0 14px 36px rgba(249,115,22,0.18); }
-    .dash-card--red { border-color: rgba(220,38,38,0.2); }
-    .dash-card--red:hover { border-color: var(--red); box-shadow: 0 14px 36px rgba(220,38,38,0.18); }
-    .dash-card--white { border-color: rgba(255,255,255,0.08); }
-    .dash-card--white:hover { border-color: rgba(255,255,255,0.35); box-shadow: 0 14px 36px rgba(255,255,255,0.05); }
-    .dash-card--purple { border-color: rgba(139,92,246,0.2); }
-    .dash-card--purple:hover { border-color: #8b5cf6; box-shadow: 0 14px 36px rgba(139,92,246,0.18); }
-    .dash-card--teal { border-color: rgba(20,184,166,0.2); }
-    .dash-card--teal:hover { border-color: #14b8a6; box-shadow: 0 14px 36px rgba(20,184,166,0.18); }
-
-    .card-icon--orange { background: linear-gradient(135deg,#f97316,#c2410c); box-shadow: 0 6px 18px rgba(249,115,22,0.4); }
-    .card-icon--red    { background: linear-gradient(135deg,#dc2626,#7f1d1d); box-shadow: 0 6px 18px rgba(220,38,38,0.4); }
-    .card-icon--white  { background: linear-gradient(135deg,#e2e8f0,#94a3b8); box-shadow: 0 6px 18px rgba(255,255,255,0.1); }
-    .card-icon--fire   { background: linear-gradient(135deg,#f97316,#dc2626); box-shadow: 0 6px 18px rgba(220,38,38,0.5); }
-    .card-icon--purple { background: linear-gradient(135deg,#8b5cf6,#6d28d9); box-shadow: 0 6px 18px rgba(139,92,246,0.4); }
-    .card-icon--teal   { background: linear-gradient(135deg,#14b8a6,#0f766e); box-shadow: 0 6px 18px rgba(20,184,166,0.4); }
-    .card-icon--white i { color: #1a1a1a; }
-
-    .card-arrow--orange { color: var(--primary); }
-    .card-arrow--red    { color: var(--red); }
-    .card-arrow--white  { color: rgba(255,255,255,0.55); }
-    .card-arrow--purple { color: #8b5cf6; }
-    .card-arrow--teal   { color: #14b8a6; }
-
-    .card-tag--orange { background: rgba(249,115,22,0.15); color: var(--primary); border: 1px solid rgba(249,115,22,0.3); }
-    .card-tag--red    { background: rgba(220,38,38,0.15); color: #f87171; border: 1px solid rgba(220,38,38,0.3); }
-    .card-tag--white  { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.45); border: 1px solid rgba(255,255,255,0.1); }
-    .card-tag--purple { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
-    .card-tag--teal   { background: rgba(20,184,166,0.15); color: #2dd4bf; border: 1px solid rgba(20,184,166,0.3); }
-
-    .dash-card:nth-child(1){animation:fadeUp 0.35s ease both}
-    .dash-card:nth-child(2){animation:fadeUp 0.42s ease both}
-    .dash-card:nth-child(3){animation:fadeUp 0.49s ease both}
-    .dash-card:nth-child(4){animation:fadeUp 0.56s ease both}
-    .dash-card:nth-child(5){animation:fadeUp 0.63s ease both}
-    .dash-card:nth-child(6){animation:fadeUp 0.70s ease both}
-    .dash-card:nth-child(7){animation:fadeUp 0.77s ease both}
-    @@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-    @@keyframes pulse  { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-    .dash-card:last-child:nth-child(3n+1) { grid-column: span 3; max-width: 360px; }
-
-    @@media (max-width: 768px) {
-        .page-header h1 { font-size: 1.45rem; }
-        .dashboard-grid { grid-template-columns: 1fr 1fr; gap: 12px; max-width: 100%; }
-        .dash-card { padding: 18px 14px; border-radius: 16px; gap: 10px; }
-        .card-icon { width: 42px; height: 42px; font-size: 1.2rem; border-radius: 12px; }
-        .card-title { font-size: 0.9rem; }
-        .card-desc  { font-size: 0.72rem; }
-        .card-tag   { font-size: 0.55rem; padding: 2px 7px; }
-        .status-chip { font-size: 0.7rem; padding: 5px 10px; }
+    .tile-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: #fff;
+        flex-shrink: 0;
     }
-    @@media (max-width: 380px) {
-        .dashboard-grid { grid-template-columns: 1fr; }
-        .card-desc { display: none; }
+
+    /* Gradients matching your reference image */
+    .icon-orange { background: linear-gradient(135deg, #ff8a00, #e52e71); box-shadow: 0 4px 15px rgba(255, 138, 0, 0.3); }
+    .icon-red    { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 4px 15px rgba(255, 65, 108, 0.3); }
+    .icon-gray   { background: linear-gradient(135deg, #606c88, #3f4c6b); box-shadow: 0 4px 15px rgba(96, 108, 136, 0.3); }
+    .icon-blue   { background: linear-gradient(135deg, #36D1DC, #5B86E5); box-shadow: 0 4px 15px rgba(54, 209, 220, 0.3); }
+
+    .tile-label {
+        color: var(--text-main);
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    /* --- 2. WELCOME & STATUS CARD (MIDDLE) --- */
+    .welcome-card {
+        background: linear-gradient(145deg, #1a1a1a, #0f0f0f);
+        border: 1px solid var(--border-glass);
+        border-radius: 24px;
+        padding: 32px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .welcome-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .emoji-hand {
+        font-size: 3rem;
+        animation: wave 2.5s infinite;
+        transform-origin: 70% 70%;
+    }
+
+    @@keyframes wave {
+        0% { transform: rotate(0deg); }
+        10% { transform: rotate(14deg); }
+        20% { transform: rotate(-8deg); }
+        30% { transform: rotate(14deg); }
+        40% { transform: rotate(-4deg); }
+        50% { transform: rotate(10deg); }
+        60%, 100% { transform: rotate(0deg); }
+    }
+
+    .welcome-text p {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin: 0 0 4px 0;
+    }
+
+    .welcome-text h2 {
+        color: var(--text-main);
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+
+    .welcome-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.06);
+        width: 100px;
+        margin-bottom: 24px;
+    }
+
+    .date-text .day {
+        color: var(--primary-orange);
+        font-size: 0.8rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin: 0 0 6px 0;
+    }
+
+    .date-text .full-date {
+        color: var(--text-main);
+        font-size: 1.6rem;
+        font-weight: 800;
+        margin: 0 0 16px 0;
+    }
+
+    .system-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--primary-orange);
+        box-shadow: 0 0 10px var(--primary-glow);
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    /* --- 3. TODAY'S ROSTER (BOTTOM) --- */
+    .roster-card {
+        background: var(--card-glass);
+        border: 1px solid var(--border-glass);
+        border-radius: 24px;
+        padding: 32px;
+    }
+
+    .roster-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .roster-header h3 {
+        color: var(--text-main);
+        font-size: 1.1rem;
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .roster-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .roster-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .coach-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--text-main);
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .coach-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .status-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .badge-present { background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); }
+    .badge-sick    { background: rgba(231, 76, 60, 0.15); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3); }
+    .badge-leave   { background: rgba(241, 196, 15, 0.15); color: #f1c40f; border: 1px solid rgba(241, 196, 15, 0.3); }
+    .badge-absent  { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border: 1px solid rgba(255, 255, 255, 0.1); }
+
+    /* --- RESPONSIVE ADJUSTMENTS --- */
+    @@media (max-width: 900px) {
+        .quick-action-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @@media (max-width: 600px) {
+        /* Forces 2-row stack exactly like the picture conceptually */
+        .quick-action-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .action-tile { padding: 12px; flex-direction: column; text-align: center; justify-content: center; height: 110px;}
+        .welcome-card, .roster-card { padding: 24px; }
+        .welcome-text h2 { font-size: 1.6rem; }
+        .emoji-hand { font-size: 2.5rem; }
     }
 </style>
 
-<div class="page-header">
-    <p>Head Coach Portal</p>
-    <h1>Hello, <span>@(ViewBag.AdminName ?? "Admin")</span> 👋</h1>
-</div>
+<div class="dashboard-container">
 
-<div class="status-bar">
-    <div class="status-chip"><div class="status-dot"></div>System Online</div>
-    <div class="status-chip"><i class="bi bi-calendar3"></i>@DateTime.Today.ToString("dddd, dd MMM yyyy")</div>
-    <div class="status-chip"><i class="bi bi-shield-fill-check" style="color:var(--primary);"></i>Admin Access</div>
-</div>
+    <div class="quick-action-grid">
+        <a href="/Slot/AdminProfile" class="action-tile">
+            <div class="tile-icon icon-orange"><i class="bi bi-person-fill"></i></div>
+            <span class="tile-label">Profile</span>
+        </a>
+        <a href="/Slot/AdminAttendance" class="action-tile">
+            <div class="tile-icon icon-red"><i class="bi bi-calendar-check-fill"></i></div>
+            <span class="tile-label">Attendance</span>
+        </a>
+        <a href="/Report/StudentPerformance" class="action-tile">
+            <div class="tile-icon icon-gray"><i class="bi bi-bar-chart-fill"></i></div>
+            <span class="tile-label">Reports</span>
+        </a>
+        <a href="/Management/ManageLanes" class="action-tile">
+            <div class="tile-icon icon-orange"><i class="bi bi-bullseye"></i></div>
+            <span class="tile-label">Targets</span>
+        </a>
+        <a href="/Rate/ManageRates" class="action-tile">
+            <div class="tile-icon icon-blue"><i class="bi bi-tags-fill"></i></div>
+            <span class="tile-label">Rates</span>
+        </a>
+        <a href="/Account/Register" class="action-tile">
+            <div class="tile-icon icon-gray"><i class="bi bi-people-fill"></i></div>
+            <span class="tile-label">Staff</span>
+        </a>
+        <a href="/Booking/BookingHistory" class="action-tile">
+            <div class="tile-icon icon-red"><i class="bi bi-clock-history"></i></div>
+            <span class="tile-label">Bookings</span>
+        </a>
+    </div>
 
-<div class="section-label">Quick Actions</div>
+    <div class="welcome-card">
+        <div class="welcome-header">
+            <div class="emoji-hand">👋</div>
+            <div class="welcome-text">
+                <p>Welcome Back, Head Coach</p>
+                <h2>@(ViewBag.AdminName ?? "Admin")</h2>
+            </div>
+        </div>
+        
+        <div class="welcome-divider"></div>
+        
+        <div class="date-text">
+            <p class="day">@DateTime.Today.ToString("dddd")</p>
+            <h3 class="full-date">@DateTime.Today.ToString("dd MMMM yyyy")</h3>
+        </div>
+        
+        <div class="system-status">
+            <span class="status-dot"></span> System Online
+        </div>
+    </div>
 
-<div class="dashboard-grid">
+    <div class="roster-card">
+        <div class="roster-header">
+            <h3>Today's Staff Roster</h3>
+        </div>
+        <div class="roster-list">
+            
+            <div class="roster-row">
+                <div class="coach-info">
+                    <div class="coach-avatar">A</div>
+                    <span>Coach Alex</span>
+                </div>
+                <div class="status-badge badge-present">Clocked In</div>
+            </div>
 
-    <a href="/Management/ManageLanes" class="dash-card dash-card--orange">
-        <div class="card-icon card-icon--orange"><i class="bi bi-bullseye"></i></div>
-        <div><div class="card-label">Facility</div><div class="card-title">Manage Targets</div><div class="card-desc">View, activate, or set lanes and targets to maintenance mode.</div></div>
-        <div class="card-footer-row"><span class="card-tag card-tag--orange">Lane Control</span><i class="bi bi-arrow-right card-arrow card-arrow--orange"></i></div>
-    </a>
+            <div class="roster-row">
+                <div class="coach-info">
+                    <div class="coach-avatar">S</div>
+                    <span>Coach Sarah</span>
+                </div>
+                <div class="status-badge badge-sick">Sick</div>
+            </div>
 
-    <a href="/Slot/AdminAttendance" class="dash-card dash-card--red">
-        <div class="card-icon card-icon--red"><i class="bi bi-calendar-check-fill"></i></div>
-        <div><div class="card-label">Records</div><div class="card-title">Student Attendance</div><div class="card-desc">Track and manage daily student attendance for all class sessions.</div></div>
-        <div class="card-footer-row"><span class="card-tag card-tag--red">Daily Tracking</span><i class="bi bi-arrow-right card-arrow card-arrow--red"></i></div>
-    </a>
+            <div class="roster-row">
+                <div class="coach-info">
+                    <div class="coach-avatar">D</div>
+                    <span>Coach David</span>
+                </div>
+                <div class="status-badge badge-absent">Not Clocked In</div>
+            </div>
 
-    <a href="/Report/StudentPerformance" class="dash-card dash-card--white">
-        <div class="card-icon card-icon--white"><i class="bi bi-bar-chart-fill"></i></div>
-        <div><div class="card-label">Analytics</div><div class="card-title">Performance Report</div><div class="card-desc">Review and manage coach remarks on student progress and scores.</div></div>
-        <div class="card-footer-row"><span class="card-tag card-tag--white">Analytics</span><i class="bi bi-arrow-right card-arrow card-arrow--white"></i></div>
-    </a>
-
-    <a href="/Rate/ManageRates" class="dash-card dash-card--teal">
-        <div class="card-icon card-icon--teal"><i class="bi bi-tags-fill"></i></div>
-        <div><div class="card-label">Finance</div><div class="card-title">Payment Rates</div><div class="card-desc">Edit session pricing, apply discounts, and manage rate categories.</div></div>
-        <div class="card-footer-row"><span class="card-tag card-tag--teal">Rate Management</span><i class="bi bi-arrow-right card-arrow card-arrow--teal"></i></div>
-    </a>
-
-    <a href="/Account/Register" class="dash-card dash-card--purple">
-        <div class="card-icon card-icon--purple"><i class="bi bi-person-plus-fill"></i></div>
-        <div><div class="card-label">Staff</div><div class="card-title">Staff Accounts</div><div class="card-desc">Add new staff, edit existing accounts, or remove staff access.</div></div>
-        <div class="card-footer-row"><span class="card-tag card-tag--purple">User Management</span><i class="bi bi-arrow-right card-arrow card-arrow--purple"></i></div>
-    </a>
-
-    <a href="/Booking/BookingHistory" class="dash-card dash-card--orange">
-        <div class="card-icon card-icon--fire"><i class="bi bi-clock-history"></i></div>
-        <div><div class="card-label">Reservations</div><div class="card-title">Booking History</div><div class="card-desc">View all past and upcoming lane reservations across all staff.</div></div>
-        <div class="card-footer-row"><span class="card-tag card-tag--orange">All Bookings</span><i class="bi bi-arrow-right card-arrow card-arrow--orange"></i></div>
-    </a>
-
-    <a href="/Slot/AdminProfile" class="dash-card dash-card--red">
-        <div class="card-icon card-icon--red"><i class="bi bi-person-circle"></i></div>
-        <div><div class="card-label">Account</div><div class="card-title">My Profile</div><div class="card-desc">View and update your admin profile, contact details and emergency information.</div></div>
-        <div class="card-footer-row"><span class="card-tag card-tag--red">Admin Info</span><i class="bi bi-arrow-right card-arrow card-arrow--red"></i></div>
-    </a>
+        </div>
+    </div>
 
 </div>
