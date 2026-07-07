@@ -874,7 +874,7 @@ namespace ArcheryAlley.Controllers
 
             var result = reservations.Select(r => new {
                 id = r.ReservationId,
-                name = r.CustomerName,
+                name = r.Student != null ? r.Student.FullName : r.CustomerName,
                 email = r.CustomerEmail,
                 packageType = r.RateCode ?? "General",
                 time = r.Slot != null

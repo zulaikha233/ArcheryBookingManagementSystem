@@ -110,5 +110,32 @@ namespace ArcheryAlley.Controllers
                 .ToList();
             return Json(archers);
         }
+
+        [HttpGet]
+        public IActionResult AdminStudentPerformance()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+                return RedirectToAction("Login", "Account");
+
+            ViewBag.AdminName = HttpContext.Session.GetString("UserName");
+            ViewBag.StaffName = HttpContext.Session.GetString("UserName");
+            return View("~/Views/Staff_Admin/AdminStudentPerformance.cshtml");
+
+        }
+
+        [HttpPost]
+        public JsonResult UpdateStudentLevel(string studentName, string newLevel)
+        {
+            try
+            {
+                _repository.UpdateStudentLevel(studentName, newLevel);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
     }
 }

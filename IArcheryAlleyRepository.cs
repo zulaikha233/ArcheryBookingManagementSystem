@@ -6,7 +6,7 @@ namespace ArcheryAlley
 {
     public interface IArcheryAlleyRepository
     {
-        public int BookSlots(int Slotid, string Empid, string CustomerName);
+        public int BookSlots(int Slotid, string Empid, string CustomerName, int? StudentId = null);
 
 
         public Roles GetRoleByEmpId(string empId);
@@ -93,11 +93,13 @@ namespace ArcheryAlley
         //Performance Reporting
         List<PerformanceReports> GetReportsByStudent(string studentName, string level);
         void AddPerformanceReport(PerformanceReports report);
+        void UpdateStudentLevel(string studentName, string newLevel);
 
-        List <Students> GetAllArchers();
+        List<Students> GetAllArchers();
 
         //staff
         Roles GetStaffProfile(string empId);
         void UpdateStaffProfile(Roles role);
+
     }
 }

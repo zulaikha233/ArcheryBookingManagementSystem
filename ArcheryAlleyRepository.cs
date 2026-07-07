@@ -80,7 +80,7 @@ namespace ArcheryAlley
             return activeTargets.Where(t => !occupiedTargets.Contains(t)).ToList();
         }
 
-        public int BookSlots(int SlotId, string EmpId, string CustomerName)
+        public int BookSlots(int SlotId, string EmpId, string CustomerName, int? StudentId = null)
         {
             var reservation = new Reservations
             {
@@ -92,7 +92,8 @@ namespace ArcheryAlley
                 TargetNo = 1, // Default for old system compatibility
                 RangeNo = 1,
                 DurationHours = 1,
-                TotalPrice = 10 // Default
+                TotalPrice = 10, // Default
+                StudentId = StudentId
             };
 
             int resId = CreateReservation(reservation);
@@ -864,6 +865,7 @@ namespace ArcheryAlley
         {
             return _context.Reservations
                 .Include(r => r.Slot)
+                .Include(r => r.Student)
                 .Where(r => r.ReservedOn.Date == date.Date && r.Status != 2)
                 .ToList();
         }
@@ -933,6 +935,17 @@ namespace ArcheryAlley
                 {
                     res.AbsentReason = reason;
                 }
+                _context.SaveChanges();
+            }
+        }
+
+        public void UpdateStudentLevel(string studentName, string newLevel)
+        {
+            var student = _context.Students
+                .FirstOrDefault(s => s.FullName.ToLower() == studentName.ToLower());
+            if (student != null)
+            {
+                student.LevelCategory = newLevel;
                 _context.SaveChanges();
             }
         }
