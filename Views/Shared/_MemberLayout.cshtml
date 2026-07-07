@@ -409,7 +409,7 @@
                     <li><a href="/Booking/MemberHistory" class="menu-item @(currentPath.Contains("MemberHistory") ? "active" : "")"><i class="bi bi-clock-history"></i> History</a></li>
                     <li><a href="/Archer/MyArchers" class="menu-item @(currentPath.Contains("MyArchers") || currentPath.Contains("AddArcher") ? "active" : "")"><i class="bi bi-people"></i> My Archers</a></li>
                     <li><a href="@Url.Action("MemberProgress", "Progress")" class="menu-item"><i class="bi bi-shield-check"></i> Progress</a></li>
-                    <li><a href="#" class="menu-item"><i class="bi bi-tools"></i> Equipment</a></li>
+                    <li><a href="javascript:void(0)" class="menu-item" onclick="Swal.fire({title: 'Coming Soon!', text: 'This feature is coming soon!', icon: 'info', confirmButtonColor: '#ff4d4d'})"><i class="bi bi-tools"></i> Equipment</a></li>
                     <li><a href="/Booking/MemberAttendance" class="menu-item @(currentPath.Contains("MemberAttendance") ? "active" : "")"><i class="bi bi-calendar-check"></i> Attendance</a></li>
                     <li><a href="/Account/MemberPayment" class="menu-item @(currentPath.Contains("MemberPayment") ? "active" : "")"><i class="bi bi-credit-card"></i> Fee / Payment</a></li>
                 </ul>
