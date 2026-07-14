@@ -271,6 +271,7 @@ namespace ArcheryAlley
             _context.SaveChanges();
         }
 
+
         public Customers GetCustomerLogin(string email, string password)
         {
             return _context.Customers.FirstOrDefault(c => c.Email == email && c.Password == password);
@@ -772,6 +773,7 @@ namespace ArcheryAlley
                 if (customer != null)
                 {
                     customer.Status = "Active";
+                    customer.MembershipExpiry = DateTime.Now.AddYears(1);
                 }
             }
 

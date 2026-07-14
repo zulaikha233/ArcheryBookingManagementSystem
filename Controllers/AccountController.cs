@@ -140,6 +140,26 @@ namespace ArcheryAlley.Controllers
                 return View("~/Views/Account/MemberLogin.cshtml");
             }
 
+            // Check if membership is expired
+            if (customer.Status == "Active" && customer.MembershipExpiry.HasValue && customer.MembershipExpiry.Value < DateTime.Now)
+            {
+                customer.Status = "Inactive";
+                _repository.UpdateCustomer(customer);
+                
+                var existingPending = _repository.GetMembershipPaymentsByEmail(customer.Email)
+                    .FirstOrDefault(m => m.Status == "Pending");
+                if (existingPending == null)
+                {
+                    _repository.AddMembershipPayment(new MembershipPayments
+                    {
+                        CustomerEmail = customer.Email,
+                        Amount = 80.00m,
+                        Status = "Pending",
+                        PaymentDate = DateTime.Now
+                    });
+                }
+            }
+
             HttpContext.Session.SetString("CustomerEmail", customer.Email);
             HttpContext.Session.SetString("CustomerName", customer.FullName ?? customer.Username);
             HttpContext.Session.SetString("CustomerPhone", customer.PhoneNumber ?? "");
@@ -403,6 +423,27 @@ namespace ArcheryAlley.Controllers
 
             ViewBag.CustomerName = HttpContext.Session.GetString("CustomerName");
             
+            var customer = _repository.GetCustomerByEmail(email);
+            if (customer != null && customer.Status == "Active" && customer.MembershipExpiry.HasValue && customer.MembershipExpiry.Value < DateTime.Now)
+            {
+                customer.Status = "Inactive";
+                _repository.UpdateCustomer(customer);
+                HttpContext.Session.SetString("CustomerStatus", "Inactive");
+                
+                var existingPending = _repository.GetMembershipPaymentsByEmail(customer.Email)
+                    .FirstOrDefault(m => m.Status == "Pending");
+                if (existingPending == null)
+                {
+                    _repository.AddMembershipPayment(new MembershipPayments
+                    {
+                        CustomerEmail = customer.Email,
+                        Amount = 80.00m,
+                        Status = "Pending",
+                        PaymentDate = DateTime.Now
+                    });
+                }
+            }
+
             var rawReservations = _repository.GetReservationsByEmail(email);
             ViewBag.Reservations = rawReservations.Select(r => new {
                 ReservationId = r.ReservationId,
@@ -679,11 +720,13 @@ namespace ArcheryAlley.Controllers
             var membershipPayments = _repository.GetMembershipPaymentsByEmail(email) ?? new List<MembershipPayments>();
             var reservations = _repository.GetReservationsByEmail(email) ?? new List<Reservations>();
             var payments = _repository.GetPaymentsByEmail(email) ?? new List<Payments>();
+            var students = _repository.GetStudentsByParentId(customer.CustomerId) ?? new List<Students>();
 
             ViewBag.ClassRegs = classRegs;
             ViewBag.MembershipPayments = membershipPayments;
             ViewBag.Reservations = reservations;
             ViewBag.Payments = payments;
+            ViewBag.Students = students;
 
             return View("~/Views/Payment/Fee/MemberPayment.cshtml", customer);
         }

@@ -26,6 +26,8 @@ namespace ArcheryAlley.Models
         [StringLength(50)]
         public string? TransactionId { get; set; }
 
+        public int? StudentId { get; set; }
+
         [Required]
         [StringLength(20)]
         public string Status { get; set; } = "Pending"; // Pending, Success, Failed
