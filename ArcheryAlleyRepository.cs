@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ArcheryAlley.Controllers;
 using ArcheryAlley.Models;
 using Azure;
 using Microsoft.EntityFrameworkCore;
@@ -920,6 +921,7 @@ namespace ArcheryAlley
                 _context.SaveChanges();
             }
         }
+
         public void UpdateAbsentReason(int groupId, string reason)
         {
             var baseReservation = _context.Reservations.FirstOrDefault(r => r.ReservationId == groupId);
@@ -948,6 +950,52 @@ namespace ArcheryAlley
                 student.LevelCategory = newLevel;
                 _context.SaveChanges();
             }
+        }
+        //Coach's Attendance Management
+        public CoachAttendance GetTodayAttendance(string empId)
+        {
+            return _context.CoachAttendance
+                .FirstOrDefault(a => a.EmpId == empId
+                                  && a.Date == DateTime.Today);
+        }
+
+        public void ClockIn(string empId)
+        {
+            var existing = GetTodayAttendance(empId);
+            if (existing != null) return; // already clocked in today
+
+            var attendance = new CoachAttendance
+            {
+                EmpId = empId,
+                Date = DateTime.Today,
+                ClockInTime = DateTime.Now,
+                Status = "Present"
+            };
+            _context.CoachAttendance.Add(attendance);
+            _context.SaveChanges();
+        }
+
+        public void ClockOut(string empId)
+        {
+            var existing = GetTodayAttendance(empId);
+            if (existing == null) return; // never clocked in
+
+            existing.ClockOutTime = DateTime.Now;
+            existing.Status = "Completed";
+            _context.SaveChanges();
+        }
+        public List<CoachAttendance> GetTodayCoachAttendance()
+        {
+            return _context.CoachAttendance
+                .Where(a => a.Date == DateTime.Today)
+                .ToList();
+        }
+
+        public List<Roles> GetAllStaff()
+        {
+            return _context.Roles
+                .Where(r => !r.RoleType) // RoleType false = Staff
+                .ToList();
         }
     }
 }

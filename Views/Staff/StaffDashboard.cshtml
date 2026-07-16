@@ -531,6 +531,34 @@
             </div>
 
             <div class="info-divider"></div>
+            <!-- ── CLOCK IN CARD ── -->
+            <div class="glass-card clock-card" id="clockCard">
+                <div class="clock-left">
+                    <div class="clock-icon" id="clockIcon">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                    </div>
+                    <div>
+                        <div class="clock-title" id="clockTitle">Not Clocked In</div>
+                        <div class="clock-sub" id="clockSub">You have not clocked in today</div>
+                    </div>
+                </div>
+                <div class="clock-right">
+                    <div class="clock-times" id="clockTimes" style="display:none;">
+                        <div class="clock-time-item" id="clockInDisplay" style="display:none;">
+                            <i class="bi bi-box-arrow-in-right" style="color:var(--present-color);"></i>
+                            <span id="clockInTime">—</span>
+                        </div>
+                        <div class="clock-time-item" id="clockOutDisplay" style="display:none;">
+                            <i class="bi bi-box-arrow-right" style="color:#f87171;"></i>
+                            <span id="clockOutTime">—</span>
+                        </div>
+                    </div>
+                    <button class="btn-clock" id="clockBtn" onclick="handleClock()">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        <span>Clock In</span>
+                    </button>
+                </div>
+            </div>
 
             <!-- Date block -->
             <div class="info-date-block">
@@ -722,6 +750,85 @@
             .nav-btn-icon { width: 34px; height: 34px; font-size: 0.95rem; }
             .nav-btn-title { font-size: 0.7rem; }
         }
+
+        /* ── CLOCK IN CARD ── */
+            .clock-card {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 22px 28px;
+                gap: 20px;
+                flex-wrap: wrap;
+                margin-top: 20px;
+            }
+
+            .clock-left {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+            }
+
+            .clock-icon {
+                width: 46px; height: 46px;
+                border-radius: 12px;
+                background: rgba(249,115,22,0.12);
+                border: 1px solid rgba(249,115,22,0.3);
+                display: flex; align-items: center; justify-content: center;
+                font-size: 1.3rem; color: var(--primary);
+                flex-shrink: 0; transition: 0.3s;
+            }
+            .clock-icon.clocked { 
+                background: rgba(52,211,153,0.12); 
+                border-color: rgba(52,211,153,0.3); 
+                color: #34D399; 
+            }
+            .clock-icon.done { 
+                background: rgba(255,255,255,0.06); 
+                border-color: rgba(255,255,255,0.1); 
+                color: rgba(255,255,255,0.4); 
+            }
+
+            .clock-title { font-size: 0.95rem; font-weight: 700; color: var(--white); }
+            .clock-sub   { font-size: 0.75rem; color: var(--text-dim); margin-top: 3px; }
+
+            .clock-right {
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                flex-wrap: wrap;
+            }
+
+            .clock-times { display: flex; gap: 16px; flex-wrap: wrap; }
+            .clock-time-item {
+                display: flex; align-items: center; gap: 6px;
+                font-size: 0.82rem; font-weight: 600; color: var(--text-dim);
+                background: var(--input-bg); border: 1px solid var(--card-border);
+                border-radius: 8px; padding: 6px 12px;
+            }
+
+            .btn-clock {
+                display: flex; align-items: center; gap: 8px;
+                padding: 10px 22px; border-radius: var(--radius-sm);
+                font-size: 0.85rem; font-weight: 700;
+                cursor: pointer; font-family: 'Outfit', sans-serif;
+                transition: 0.25s; border: none; white-space: nowrap;
+                background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+                color: #fff; box-shadow: 0 6px 18px rgba(249,115,22,0.3);
+            }
+            .btn-clock:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(249,115,22,0.4); }
+            .btn-clock.clocked {
+                background: linear-gradient(135deg, #dc2626, #7f1d1d);
+                box-shadow: 0 6px 18px rgba(220,38,38,0.3);
+            }
+            .btn-clock.clocked:hover { box-shadow: 0 10px 24px rgba(220,38,38,0.4); }
+            .btn-clock.done {
+                background: rgba(255,255,255,0.06);
+                border: 1px solid rgba(255,255,255,0.1);
+                color: var(--text-dim);
+                box-shadow: none;
+                cursor: not-allowed;
+                transform: none;
+            }
     </style>
 
     <script>
@@ -763,12 +870,113 @@
                     toggleIcon.className = 'bi bi-layout-sidebar';
                 }
             }
+            loadClockStatus(); // Load clock status on page load
         });
 
         // Auto-close mobile sidebar when screen resizes to desktop
         window.addEventListener('resize', () => {
             if (window.innerWidth > 768) closeSidebar();
         });
+                /* ── CLOCK IN/OUT ── */
+        async function handleClock() {
+            const btn = document.getElementById('clockBtn');
+            const isClocked = btn.classList.contains('clocked');
+
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(isClocked ? '/Booking/ClockOut' : '/Booking/ClockIn', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    if (!isClocked) {
+                        // Just clocked in
+                        setClockState('clocked-in', result.time, null);
+                    } else {
+                        // Just clocked out
+                        setClockState('completed', null, result.time);
+                    }
+                }
+            } catch (err) {
+                console.error('Clock error:', err);
+            }
+
+            btn.disabled = false;
+        }
+
+        function setClockState(status, clockIn, clockOut) {
+            const btn      = document.getElementById('clockBtn');
+            const icon     = document.getElementById('clockIcon');
+            const title    = document.getElementById('clockTitle');
+            const sub      = document.getElementById('clockSub');
+            const times    = document.getElementById('clockTimes');
+            const inDisp   = document.getElementById('clockInDisplay');
+            const outDisp  = document.getElementById('clockOutDisplay');
+            const inTime   = document.getElementById('clockInTime');
+            const outTime  = document.getElementById('clockOutTime');
+
+            if (status === 'clocked-in') {
+                icon.className  = 'clock-icon clocked';
+                icon.innerHTML  = '<i class="bi bi-check-circle-fill"></i>';
+                title.textContent = 'Clocked In';
+                sub.textContent   = `Clocked in at ${clockIn}`;
+                btn.className   = 'btn-clock clocked';
+                btn.innerHTML   = '<i class="bi bi-box-arrow-right"></i><span>Clock Out</span>';
+                times.style.display  = '';
+                inDisp.style.display = '';
+                inTime.textContent   = clockIn;
+
+            } else if (status === 'completed') {
+                icon.className  = 'clock-icon done';
+                icon.innerHTML  = '<i class="bi bi-moon-fill"></i>';
+                title.textContent = 'Shift Complete';
+                sub.textContent   = `Clocked out at ${clockOut}`;
+                btn.className   = 'btn-clock done';
+                btn.innerHTML   = '<i class="bi bi-check-lg"></i><span>Done for Today</span>';
+                btn.disabled    = true;
+                times.style.display   = '';
+                outDisp.style.display = '';
+                outTime.textContent   = clockOut;
+
+            } else {
+                // none — reset to default
+                icon.className  = 'clock-icon';
+                icon.innerHTML  = '<i class="bi bi-box-arrow-in-right"></i>';
+                title.textContent = 'Not Clocked In';
+                sub.textContent   = 'You have not clocked in today';
+                btn.className   = 'btn-clock';
+                btn.innerHTML   = '<i class="bi bi-box-arrow-in-right"></i><span>Clock In</span>';
+                btn.disabled    = false;
+                times.style.display = 'none';
+            }
+        }
+
+        async function loadClockStatus() {
+            try {
+                const response = await fetch('/Booking/GetClockStatus');
+                const result   = await response.json();
+
+                if (result.status === 'clocked-in') {
+                    setClockState('clocked-in', result.clockIn, null);
+                    document.getElementById('clockInTime').textContent = result.clockIn;
+                    document.getElementById('clockInDisplay').style.display = '';
+                    document.getElementById('clockTimes').style.display = '';
+                } else if (result.status === 'completed') {
+                    setClockState('completed', null, result.clockOut);
+                    document.getElementById('clockInTime').textContent  = result.clockIn;
+                    document.getElementById('clockOutTime').textContent = result.clockOut;
+                    document.getElementById('clockInDisplay').style.display  = '';
+                    document.getElementById('clockOutDisplay').style.display = '';
+                    document.getElementById('clockTimes').style.display = '';
+                }
+            } catch (err) {
+                console.error('Load clock status error:', err);
+            }
+        }
     </script>
 
 </body>

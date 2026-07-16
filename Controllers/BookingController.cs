@@ -946,5 +946,70 @@ namespace ArcheryAlley.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+        [HttpGet]
+        public JsonResult GetClockStatus()
+        {
+            var empId = HttpContext.Session.GetString("EmpId");
+            if (string.IsNullOrEmpty(empId))
+                return Json(new { status = "none" });
+
+            var attendance = _repository.GetTodayAttendance(empId);
+
+            if (attendance == null)
+                return Json(new { status = "none" });
+
+            if (attendance.ClockOutTime.HasValue)
+                return Json(new
+                {
+                    status = "completed",
+                    clockIn = attendance.ClockInTime?.ToString("hh:mm tt"),
+                    clockOut = attendance.ClockOutTime?.ToString("hh:mm tt")
+                });
+
+            return Json(new
+            {
+                status = "clocked-in",
+                clockIn = attendance.ClockInTime?.ToString("hh:mm tt")
+            });
+        }
+
+        [HttpPost]
+        public JsonResult ClockIn()
+        {
+            var empId = HttpContext.Session.GetString("EmpId");
+            if (string.IsNullOrEmpty(empId))
+                return Json(new { success = false, message = "Session expired." });
+
+            try
+            {
+                _repository.ClockIn(empId);
+                var time = DateTime.Now.ToString("hh:mm tt");
+                return Json(new { success = true, time });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult ClockOut()
+        {
+            var empId = HttpContext.Session.GetString("EmpId");
+            if (string.IsNullOrEmpty(empId))
+                return Json(new { success = false, message = "Session expired." });
+
+            try
+            {
+                _repository.ClockOut(empId);
+                var time = DateTime.Now.ToString("hh:mm tt");
+                return Json(new { success = true, time });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
     }
 }

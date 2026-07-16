@@ -1,4 +1,5 @@
 using System.IO;
+using ArcheryAlley.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -179,7 +180,9 @@ namespace ArcheryAlley.Models
                 entity.HasKey(e => e.ReportId);
                 entity.Property(e => e.ReportDate).HasColumnType("datetime");
             });
+
         }
+        public DbSet<CoachAttendance> CoachAttendance { get; set; }
 
     }
 

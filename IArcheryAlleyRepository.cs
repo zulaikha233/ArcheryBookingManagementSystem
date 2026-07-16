@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ArcheryAlley.Controllers;
 using ArcheryAlley.Models;
 
 namespace ArcheryAlley
@@ -100,6 +101,12 @@ namespace ArcheryAlley
         //staff
         Roles GetStaffProfile(string empId);
         void UpdateStaffProfile(Roles role);
+
+        CoachAttendance GetTodayAttendance(string empId);
+        void ClockIn(string empId);
+        void ClockOut(string empId);
+        List<CoachAttendance> GetTodayCoachAttendance();
+        List<Roles> GetAllStaff();
 
     }
 }

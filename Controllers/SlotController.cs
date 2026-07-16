@@ -148,5 +148,27 @@ namespace ArcheryAlley.Controllers
             ViewBag.AdminName = HttpContext.Session.GetString("UserName");
             return View("~/Views/Staff_Admin/AdminAttendance.cshtml");
         }
+
+        [HttpGet]
+        public JsonResult GetCoachRoster()
+        {
+            var allStaff = _repository.GetAllStaff();
+            var todayRecords = _repository.GetTodayCoachAttendance();
+
+            var roster = allStaff.Select(s => {
+                var record = todayRecords.FirstOrDefault(a => a.EmpId == s.EmpId);
+                return new
+                {
+                    empId = s.EmpId,
+                    name = s.EmpName,
+                    clockIn = record?.ClockInTime?.ToString("hh:mm tt"),
+                    clockOut = record?.ClockOutTime?.ToString("hh:mm tt"),
+                    status = record == null ? "Absent" :
+                                record.ClockOutTime.HasValue ? "Completed" : "Present"
+                };
+            }).ToList();
+
+            return Json(roster);
+        }
     }
 }

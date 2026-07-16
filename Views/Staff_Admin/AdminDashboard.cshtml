@@ -171,78 +171,124 @@
     }
 
     /* --- 3. TODAY'S ROSTER (BOTTOM) --- */
+    /* ── ROSTER CARD ── */
     .roster-card {
-        background: var(--card-glass);
-        border: 1px solid var(--border-glass);
-        border-radius: 24px;
-        padding: 32px;
+        margin-top: 28px;
+        max-width: 1100px;
+        overflow: hidden;
     }
 
     .roster-header {
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
-    }
-
-    .roster-header h3 {
-        color: var(--text-main);
-        font-size: 1.1rem;
-        margin: 0;
-        font-weight: 700;
-    }
-
-    .roster-list {
-        display: flex;
-        flex-direction: column;
+        justify-content: space-between;
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        flex-wrap: wrap;
         gap: 12px;
     }
 
-    .roster-row {
+    .roster-title { font-size: 0.95rem; font-weight: 700; color: var(--white); }
+    .roster-sub   { font-size: 0.72rem; color: var(--text-dim); margin-top: 3px; }
+
+    .roster-stats { display: flex; gap: 16px; }
+    .roster-stat  {
+        text-align: center;
+        padding: 8px 16px;
+        border-radius: 10px;
+        background: rgba(249,115,22,0.1);
+        border: 1px solid rgba(249,115,22,0.25);
+    }
+    .roster-stat.absent {
+        background: rgba(220,38,38,0.1);
+        border-color: rgba(220,38,38,0.25);
+    }
+    .stat-num { display: block; font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+    .roster-stat.absent .stat-num { color: var(--red); }
+    .stat-lbl { font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+    /* ── ROSTER TABS ── */
+    .roster-tabs {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 16px;
-        background: rgba(255, 255, 255, 0.02);
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.03);
+        gap: 0;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
     }
 
-    .coach-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        color: var(--text-main);
+    .roster-tab {
+        flex: 1;
+        padding: 12px;
+        background: transparent;
+        border: none;
+        color: var(--text-dim);
+        font-size: 0.82rem;
         font-weight: 600;
-        font-size: 0.95rem;
-    }
-
-    .coach-avatar {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.1);
+        cursor: pointer;
+        font-family: 'Outfit', sans-serif;
+        transition: 0.2s;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.85rem;
-        color: var(--text-muted);
+        gap: 7px;
+        border-bottom: 2px solid transparent;
     }
+    .roster-tab:hover { color: var(--primary); }
+    .roster-tab.active {
+        color: var(--primary);
+        border-bottom-color: var(--primary);
+        background: rgba(249,115,22,0.05);
+    }
+
+    /* ── ROSTER ROWS ── */
+    .roster-list { display: flex; flex-direction: column; }
+
+    .roster-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 24px;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+        transition: 0.2s;
+        gap: 12px;
+    }
+    .roster-row:last-child { border-bottom: none; }
+    .roster-row:hover { background: rgba(255,255,255,0.015); }
+
+    .coach-info { display: flex; align-items: center; gap: 12px; }
+
+    .coach-avatar {
+        width: 38px; height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.95rem; font-weight: 800; color: #fff;
+        flex-shrink: 0;
+    }
+    .coach-avatar.absent-av {
+        background: rgba(255,255,255,0.06);
+        color: var(--text-dim);
+    }
+
+    .coach-name { font-size: 0.88rem; font-weight: 600; color: var(--white); }
+    .coach-time { font-size: 0.7rem; color: var(--text-dim); margin-top: 2px; }
 
     .status-badge {
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
+        font-size: 0.65rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 1px;
+        padding: 4px 12px; border-radius: 20px;
+        flex-shrink: 0;
     }
+    .badge-present  { background: rgba(52,211,153,0.12); color: #34D399; border: 1px solid rgba(52,211,153,0.3); }
+    .badge-completed{ background: rgba(255,255,255,0.06); color: var(--text-dim); border: 1px solid rgba(255,255,255,0.1); }
+    .badge-absent   { background: rgba(220,38,38,0.1); color: #f87171; border: 1px solid rgba(220,38,38,0.25); }
 
-    .badge-present { background: rgba(46, 204, 113, 0.15); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.3); }
-    .badge-sick    { background: rgba(231, 76, 60, 0.15); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.3); }
-    .badge-leave   { background: rgba(241, 196, 15, 0.15); color: #f1c40f; border: 1px solid rgba(241, 196, 15, 0.3); }
-    .badge-absent  { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border: 1px solid rgba(255, 255, 255, 0.1); }
-
+    .roster-empty {
+        padding: 40px;
+        text-align: center;
+        color: var(--text-dim);
+        font-size: 0.85rem;
+        font-size: 0.85rem;
+    }
+    .roster-empty i { font-size: 2rem; display: block; margin-bottom: 10px; opacity: 0.3; }
     /* --- RESPONSIVE ADJUSTMENTS --- */
     @@media (max-width: 900px) {
         .quick-action-grid { grid-template-columns: repeat(3, 1fr); }
@@ -311,38 +357,131 @@
             <span class="status-dot"></span> System Online
         </div>
     </div>
-
-    <div class="roster-card">
-        <div class="roster-header">
-            <h3>Today's Staff Roster</h3>
+    <!--Mock Data-->
+<!-- ── COACH ROSTER WIDGET ── -->
+<div class="roster-card glass-card">
+    <div class="roster-header">
+        <div>
+            <div class="roster-title">Today's Staff Roster</div>
+            <div class="roster-sub" id="rosterDate">@DateTime.Today.ToString("dddd, dd MMM yyyy")</div>
         </div>
-        <div class="roster-list">
-            
-            <div class="roster-row">
-                <div class="coach-info">
-                    <div class="coach-avatar">A</div>
-                    <span>Coach Alex</span>
-                </div>
-                <div class="status-badge badge-present">Clocked In</div>
+        <div class="roster-stats">
+            <div class="roster-stat" id="statPresent">
+                <span class="stat-num" id="rosterPresentCount">—</span>
+                <span class="stat-lbl">On Field</span>
             </div>
-
-            <div class="roster-row">
-                <div class="coach-info">
-                    <div class="coach-avatar">S</div>
-                    <span>Coach Sarah</span>
-                </div>
-                <div class="status-badge badge-sick">Sick</div>
+            <div class="roster-stat absent" id="statAbsent">
+                <span class="stat-num" id="rosterAbsentCount">—</span>
+                <span class="stat-lbl">Absent</span>
             </div>
-
-            <div class="roster-row">
-                <div class="coach-info">
-                    <div class="coach-avatar">D</div>
-                    <span>Coach David</span>
-                </div>
-                <div class="status-badge badge-absent">Not Clocked In</div>
-            </div>
-
         </div>
     </div>
 
+    <!-- Tab buttons -->
+    <div class="roster-tabs">
+        <button class="roster-tab active" data-tab="present" onclick="switchRosterTab(this)">
+            <i class="bi bi-person-check-fill"></i> On Field
+        </button>
+        <button class="roster-tab" data-tab="absent" onclick="switchRosterTab(this)">
+            <i class="bi bi-person-dash-fill"></i> Absent
+        </button>
+    </div>
+
+    <!-- Present list -->
+    <div class="roster-list" id="rosterPresent"></div>
+
+    <!-- Absent list -->
+    <div class="roster-list" id="rosterAbsent" style="display:none;"></div>
+
+    <!-- Empty state -->
+    <div class="roster-empty" id="rosterEmpty" style="display:none;">
+        <i class="bi bi-person-lines-fill"></i>
+        <p>No staff data available</p>
+    </div>
 </div>
+<!-- Empty state -->
+        <div class="roster-empty" id="rosterEmpty" style="display:none;">
+            <i class="bi bi-person-lines-fill"></i>
+            <p>No staff data available</p>
+        </div>
+    </div>  ← closing of roster-card
+
+</div>  ← closing of dashboard-container
+
+@section Scripts {
+<script>
+    async function loadCoachRoster() {
+        try {
+            const response = await fetch('/Slot/GetCoachRoster');
+            const roster   = await response.json();
+
+            const present   = roster.filter(c => c.status === 'Present' || c.status === 'Completed');
+            const absent    = roster.filter(c => c.status === 'Absent');
+
+            document.getElementById('rosterPresentCount').textContent = present.length;
+            document.getElementById('rosterAbsentCount').textContent  = absent.length;
+
+            renderRosterList('rosterPresent', present, false);
+            renderRosterList('rosterAbsent',  absent,  true);
+
+        } catch (err) {
+            console.error('Load roster error:', err);
+        }
+    }
+
+    function renderRosterList(containerId, coaches, isAbsent) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+
+        if (coaches.length === 0) {
+            container.innerHTML = `
+                <div class="roster-empty">
+                    <i class="bi bi-person-lines-fill"></i>
+                    <p>${isAbsent ? 'All coaches are on the field!' : 'No coaches have clocked in yet.'}</p>
+                </div>`;
+            return;
+        }
+
+        coaches.forEach(c => {
+            const row = document.createElement('div');
+            row.className = 'roster-row';
+
+            const badgeClass = c.status === 'Present'   ? 'badge-present'   :
+                               c.status === 'Completed' ? 'badge-completed' : 'badge-absent';
+            const badgeText  = c.status === 'Present'   ? 'On Field'        :
+                               c.status === 'Completed' ? 'Shift Done'      : 'Not In';
+
+            const timeText = c.clockIn
+                ? `Clocked in at ${c.clockIn}${c.clockOut ? ` · Out at ${c.clockOut}` : ''}`
+                : 'No record today';
+
+            row.innerHTML = `
+                <div class="coach-info">
+                    <div class="coach-avatar ${isAbsent ? 'absent-av' : ''}">
+                        ${c.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                        <div class="coach-name">${c.name}</div>
+                        <div class="coach-time">${timeText}</div>
+                    </div>
+                </div>
+                <span class="status-badge ${badgeClass}">${badgeText}</span>`;
+
+            container.appendChild(row);
+        });
+    }
+
+    function switchRosterTab(tab) {
+        document.querySelectorAll('.roster-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        const isPresent = tab.dataset.tab === 'present';
+        document.getElementById('rosterPresent').style.display = isPresent ? '' : 'none';
+        document.getElementById('rosterAbsent').style.display  = isPresent ? 'none' : '';
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        loadCoachRoster();
+    });
+</script>
+}
