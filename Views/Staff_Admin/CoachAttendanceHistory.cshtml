@@ -1,0 +1,329 @@
+﻿@{
+    ViewData["Title"] = "Coach Attendance History";
+    Layout = "~/Views/Staff_Admin/AdminNavBar.cshtml";
+}
+
+<style>
+    :root {
+        --text-white: #ffffff;
+        --text-dim: #94a3b8;
+        --card-bg: rgba(34,38,48,0.6);
+        --card-border: rgba(255,255,255,0.05);
+        --input-bg: rgba(255,255,255,0.04);
+        --input-border: rgba(255,255,255,0.08);
+        --radius-sm: 12px;
+        --radius-md: 20px;
+        --shadow-card: 0 20px 40px rgba(0,0,0,0.3);
+        --transition: all 0.25s ease;
+    }
+
+    .page-header { margin-bottom: 28px; }
+    .page-header p { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 6px; }
+    .page-header h1 { font-size: 2rem; font-weight: 800; color: var(--text-white); }
+    .page-header h1 span { color: var(--primary); }
+
+    .glass-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-card);
+    }
+
+    /* ── FILTER BAR ── */
+    .filter-card { padding: 20px 24px; margin-bottom: 20px; }
+    .filter-row  { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+
+    .filter-group { display: flex; flex-direction: column; gap: 6px; }
+    .filter-label {
+        font-size: 0.62rem; color: var(--text-dim);
+        text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;
+    }
+    .filter-input, .filter-select {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: var(--radius-sm);
+        padding: 10px 14px;
+        color: var(--text-white);
+        font-size: 0.88rem;
+        font-family: 'Outfit', sans-serif;
+        transition: var(--transition);
+        min-width: 160px;
+    }
+    .filter-input:focus, .filter-select:focus {
+        outline: none; border-color: var(--primary);
+    }
+    .filter-select option { background: #1a1a1a; }
+
+    .btn-filter {
+        display: flex; align-items: center; gap: 7px;
+        padding: 10px 20px; border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border: none; color: #fff;
+        font-size: 0.85rem; font-weight: 700;
+        cursor: pointer; font-family: 'Outfit', sans-serif;
+        transition: var(--transition);
+        box-shadow: 0 4px 14px rgba(249,115,22,0.3);
+        white-space: nowrap;
+    }
+    .btn-filter:hover { transform: translateY(-1px); }
+
+    /* ── DAY GROUPS ── */
+    .history-container { display: flex; flex-direction: column; gap: 16px; }
+
+    .day-group { overflow: hidden; }
+
+    .day-header {
+        padding: 14px 24px;
+        border-bottom: 1px solid var(--card-border);
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 8px;
+    }
+    .day-date  { font-size: 0.92rem; font-weight: 700; color: var(--text-white); }
+    .day-stats { display: flex; gap: 10px; }
+    .day-stat  {
+        font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 1px; padding: 3px 10px; border-radius: 20px;
+    }
+    .day-stat-present { background: rgba(52,211,153,0.12); color: #34D399; border: 1px solid rgba(52,211,153,0.25); }
+    .day-stat-absent  { background: rgba(220,38,38,0.1);   color: #f87171; border: 1px solid rgba(220,38,38,0.25); }
+
+    /* ── COACH ROWS ── */
+    .coach-row {
+        display: flex; align-items: center;
+        padding: 12px 24px; gap: 14px;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+        transition: 0.2s;
+    }
+    .coach-row:last-child { border-bottom: none; }
+    .coach-row:hover { background: rgba(255,255,255,0.015); }
+
+    .coach-avatar {
+        width: 36px; height: 36px; border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.88rem; font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+    .coach-avatar.av-absent {
+        background: rgba(255,255,255,0.06); color: var(--text-dim);
+    }
+
+    .coach-info-col { flex: 1; min-width: 0; }
+    .coach-name-text { font-size: 0.88rem; font-weight: 600; color: var(--text-white); }
+    .coach-time-text { font-size: 0.7rem; color: var(--text-dim); margin-top: 2px; }
+
+    .status-pill {
+        font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 1px; padding: 3px 10px; border-radius: 20px; flex-shrink: 0;
+    }
+    .pill-present   { background: rgba(52,211,153,0.12); color: #34D399; border: 1px solid rgba(52,211,153,0.25); }
+    .pill-completed { background: rgba(255,255,255,0.06); color: var(--text-dim); border: 1px solid rgba(255,255,255,0.1); }
+    .pill-absent    { background: rgba(220,38,38,0.1); color: #f87171; border: 1px solid rgba(220,38,38,0.25); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+        padding: 60px 40px; text-align: center; color: var(--text-dim);
+    }
+    .empty-state i { font-size: 3rem; display: block; margin-bottom: 14px; opacity: 0.2; }
+    .empty-state p { font-size: 0.85rem; }
+
+    /* ── TOAST ── */
+    .toast-notif {
+        position: fixed; bottom: 28px; right: 28px;
+        background: rgba(20,22,30,0.95); border: 1px solid rgba(249,115,22,0.3);
+        border-radius: 16px; padding: 13px 20px;
+        display: flex; align-items: center; gap: 12px;
+        font-size: 0.85rem; font-weight: 600; color: var(--text-white);
+        box-shadow: 0 12px 35px rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+        transform: translateY(80px); opacity: 0;
+        transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275); z-index: 9999;
+    }
+    .toast-notif.show { transform: translateY(0); opacity: 1; }
+    .toast-notif i { color: var(--primary); }
+
+    @@media (max-width: 768px) {
+        .page-header h1 { font-size: 1.5rem; }
+        .filter-row { flex-direction: column; }
+        .filter-input, .filter-select { min-width: 100%; }
+        .btn-filter { width: 100%; justify-content: center; }
+    }
+</style>
+
+<div class="page-header">
+    <p>Head Coach Portal</p>
+    <h1>Coach <span>Attendance Log</span></h1>
+</div>
+
+<!-- ── FILTER BAR ── -->
+<div class="glass-card filter-card">
+    <div class="filter-row">
+        <div class="filter-group">
+            <label class="filter-label">From</label>
+            <input type="date" class="filter-input" id="filterFrom">
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">To</label>
+            <input type="date" class="filter-input" id="filterTo">
+        </div>
+        <div class="filter-group">
+            <label class="filter-label">Coach</label>
+            <select class="filter-select" id="filterCoach">
+                <option value="">All Coaches</option>
+            </select>
+        </div>
+        <button class="btn-filter" onclick="loadHistory()">
+            <i class="bi bi-search"></i> Search
+        </button>
+    </div>
+</div>
+
+<!-- ── HISTORY LIST ── -->
+<div class="history-container" id="historyContainer">
+    <div class="glass-card">
+        <div class="empty-state">
+            <i class="bi bi-calendar3"></i>
+            <p>Select a date range and click Search to view attendance history.</p>
+        </div>
+    </div>
+</div>
+
+<div class="toast-notif" id="toast">
+    <i class="bi bi-check-circle-fill"></i>
+    <span id="toastMsg">Done</span>
+</div>
+
+@section Scripts {
+<script>
+    /* ── SET DEFAULT DATE RANGE — last 7 days ── */
+    window.addEventListener('DOMContentLoaded', () => {
+        const today = new Date();
+        const week  = new Date(today);
+        week.setDate(today.getDate() - 7);
+
+        document.getElementById('filterTo').value   = today.toISOString().split('T')[0];
+        document.getElementById('filterFrom').value = week.toISOString().split('T')[0];
+
+        loadStaffDropdown();
+        loadHistory();
+    });
+
+    /* ── LOAD STAFF INTO DROPDOWN ── */
+    async function loadStaffDropdown() {
+        try {
+            const response = await fetch('/Slot/GetCoachRoster');
+            const roster   = await response.json();
+            const select   = document.getElementById('filterCoach');
+
+            roster.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value       = c.empId;
+                opt.textContent = c.name;
+                select.appendChild(opt);
+            });
+        } catch (err) {
+            console.error('Load staff dropdown error:', err);
+        }
+    }
+
+    /* ── LOAD HISTORY ── */
+    async function loadHistory() {
+        const from   = document.getElementById('filterFrom').value;
+        const to     = document.getElementById('filterTo').value;
+        const empId  = document.getElementById('filterCoach').value;
+        const container = document.getElementById('historyContainer');
+
+        if (!from || !to) {
+            showToast('Please select a date range.');
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="glass-card">
+                <div class="empty-state">
+                    <i class="bi bi-hourglass-split"></i>
+                    <p>Loading...</p>
+                </div>
+            </div>`;
+
+        try {
+            const url = `/Slot/GetCoachAttendanceHistory?from=${from}&to=${to}&empId=${empId}`;
+            const response = await fetch(url);
+            const groups   = await response.json();
+
+            if (groups.length === 0) {
+                container.innerHTML = `
+                    <div class="glass-card">
+                        <div class="empty-state">
+                            <i class="bi bi-calendar-x"></i>
+                            <p>No attendance records found for the selected period.</p>
+                        </div>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+
+            groups.forEach(group => {
+                const card = document.createElement('div');
+                card.className = 'glass-card day-group';
+
+                const allCoaches = [
+                    ...group.coaches.map(c => ({ ...c, isAbsent: false })),
+                    ...group.absent.map(c => ({ ...c, isAbsent: true, clockIn: null, clockOut: null, status: 'Absent' }))
+                ];
+
+                card.innerHTML = `
+                    <div class="day-header">
+                        <div class="day-date">${group.display}</div>
+                        <div class="day-stats">
+                            <span class="day-stat day-stat-present">${group.coaches.length} Present</span>
+                            <span class="day-stat day-stat-absent">${group.absent.length} Absent</span>
+                        </div>
+                    </div>
+                    <div class="day-coaches">
+                        ${allCoaches.map(c => {
+                            const pillClass = c.status === 'Present'   ? 'pill-present'   :
+                                             c.status === 'Completed' ? 'pill-completed' : 'pill-absent';
+                            const pillText  = c.status === 'Present'   ? 'On Field'       :
+                                             c.status === 'Completed' ? 'Shift Done'     : 'Absent';
+                            const timeText  = c.clockIn
+                                ? `In: ${c.clockIn}${c.clockOut ? ` · Out: ${c.clockOut}` : ''}`
+                                : 'No record';
+                            return `
+                                <div class="coach-row">
+                                    <div class="coach-avatar ${c.isAbsent ? 'av-absent' : ''}">
+                                        ${c.name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div class="coach-info-col">
+                                        <div class="coach-name-text">${c.name}</div>
+                                        <div class="coach-time-text">${timeText}</div>
+                                    </div>
+                                    <span class="status-pill ${pillClass}">${pillText}</span>
+                                </div>`;
+                        }).join('')}
+                    </div>`;
+
+                container.appendChild(card);
+            });
+
+        } catch (err) {
+            console.error('Load history error:', err);
+            container.innerHTML = `
+                <div class="glass-card">
+                    <div class="empty-state">
+                        <i class="bi bi-exclamation-circle"></i>
+                        <p>Failed to load attendance history. Please try again.</p>
+                    </div>
+                </div>`;
+        }
+    }
+
+    /* ── TOAST ── */
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toastMsg').textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+</script>
+}

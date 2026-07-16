@@ -107,6 +107,6 @@ namespace ArcheryAlley
         void ClockOut(string empId);
         List<CoachAttendance> GetTodayCoachAttendance();
         List<Roles> GetAllStaff();
-
+        List<CoachAttendance> GetCoachAttendanceHistory(DateTime from, DateTime to);
     }
 }

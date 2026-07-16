@@ -999,5 +999,12 @@ namespace ArcheryAlley
                 .Where(r => !r.RoleType) // RoleType false = Staff
                 .ToList();
         }
+        public List<CoachAttendance> GetCoachAttendanceHistory(DateTime from, DateTime to)
+        {
+            return _context.CoachAttendance
+                .Where(a => a.Date >= from.Date && a.Date <= to.Date)
+                .OrderByDescending(a => a.Date)
+                .ToList();
+        }
     }
 }

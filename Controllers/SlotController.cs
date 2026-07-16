@@ -170,5 +170,60 @@ namespace ArcheryAlley.Controllers
 
             return Json(roster);
         }
+        [HttpGet]
+        public IActionResult CoachAttendanceHistory()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+                return RedirectToAction("Login", "Account");
+
+            ViewBag.AdminName = HttpContext.Session.GetString("UserName");
+            return View("~/Views/Staff_Admin/CoachAttendanceHistory.cshtml");
+        }
+
+        [HttpGet]
+        public JsonResult GetCoachAttendanceHistory(string from, string to, string empId = null)
+        {
+            if (!DateTime.TryParse(from, out DateTime fromDate))
+                fromDate = DateTime.Today.AddDays(-30);
+            if (!DateTime.TryParse(to, out DateTime toDate))
+                toDate = DateTime.Today;
+
+            var allStaff = _repository.GetAllStaff();
+            var records = _repository.GetCoachAttendanceHistory(fromDate, toDate);
+
+            // Filter by coach if specified
+            if (!string.IsNullOrEmpty(empId))
+                records = records.Where(r => r.EmpId == empId).ToList();
+
+            // Group by date
+            var grouped = records
+                .GroupBy(r => r.Date)
+                .Select(g => new {
+                    date = g.Key.ToString("yyyy-MM-dd"),
+                    display = g.Key.ToString("dddd, dd MMM yyyy"),
+                    coaches = g.Select(r => {
+                        var staff = allStaff.FirstOrDefault(s => s.EmpId == r.EmpId);
+                        return new
+                        {
+                            empId = r.EmpId,
+                            name = staff?.EmpName ?? r.EmpId,
+                            clockIn = r.ClockInTime?.ToString("hh:mm tt"),
+                            clockOut = r.ClockOutTime?.ToString("hh:mm tt"),
+                            status = r.ClockOutTime.HasValue ? "Completed" : "Present"
+                        };
+                    }).ToList(),
+                    // Find absent coaches for that day
+                    absent = allStaff
+                        .Where(s => !g.Any(r => r.EmpId == s.EmpId))
+                        .Select(s => new {
+                            empId = s.EmpId,
+                            name = s.EmpName
+                        }).ToList()
+                })
+                .ToList();
+
+            return Json(grouped);
+        }
     }
 }
