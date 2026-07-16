@@ -344,6 +344,7 @@ namespace ArcheryAlley.Controllers
             public int StudentId { get; set; }
             public string PackageType { get; set; }
             public decimal PackagePrice { get; set; }
+            public decimal MembershipFee { get; set; }
         }
 
         [HttpPost]
@@ -368,8 +369,8 @@ namespace ArcheryAlley.Controllers
                     var student = _repository.GetStudentById(reg.StudentId);
                     if (student == null || student.ParentCustomerId != parent.CustomerId) continue;
 
-                    decimal totalPrice = reg.PackagePrice;
-                    totalAmount += totalPrice;
+                    decimal totalPrice = reg.PackagePrice; // Only Class Registration Price
+                    totalAmount += reg.PackagePrice + reg.MembershipFee; // Add both to the total
 
                     var classReg = new ClassRegistrations
                     {
@@ -386,6 +387,22 @@ namespace ArcheryAlley.Controllers
                     };
 
                     _repository.RegisterClassSession(classReg);
+
+                    if (reg.MembershipFee > 0)
+                    {
+                        var membershipPayment = new MembershipPayments
+                        {
+                            CustomerEmail = email,
+                            Amount = reg.MembershipFee,
+                            PaymentDate = DateTime.Now,
+                            PaymentMethod = "Pending",
+                            TransactionId = transactionId,
+                            Status = "Pending",
+                            StudentId = reg.StudentId
+                        };
+                        _repository.AddMembershipPayment(membershipPayment);
+                    }
+
                     _repository.UpdateStudentStatus(reg.StudentId, "Registered");
                 }
 

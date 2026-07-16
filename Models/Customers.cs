@@ -39,6 +39,8 @@ namespace ArcheryAlley.Models
         [StringLength(20)]
         public string Status { get; set; } = "Inactive";
 
+        public DateTime? MembershipExpiry { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }

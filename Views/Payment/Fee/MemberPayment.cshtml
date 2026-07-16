@@ -8,6 +8,7 @@
     var membershipPayments = ViewBag.MembershipPayments as IEnumerable<ArcheryAlley.Models.MembershipPayments> ?? new List<ArcheryAlley.Models.MembershipPayments>();
     var reservations = ViewBag.Reservations as IEnumerable<ArcheryAlley.Models.Reservations> ?? new List<ArcheryAlley.Models.Reservations>();
     var paymentsList = ViewBag.Payments as IEnumerable<ArcheryAlley.Models.Payments> ?? new List<ArcheryAlley.Models.Payments>();
+    var studentsList = ViewBag.Students as IEnumerable<ArcheryAlley.Models.Students> ?? new List<ArcheryAlley.Models.Students>();
 
     // Group reservations to prevent duplicate target rows
     var groupedReservations = reservations
@@ -959,6 +960,7 @@
                             {
                                 var isPaid = mp.Status == "Paid" || mp.Status == "Success";
                                 var statusText = isPaid ? "Paid" : "Pending";
+                                var archerName = mp.StudentId.HasValue ? studentsList.FirstOrDefault(s => s.StudentId == mp.StudentId)?.FullName ?? Model.Username : Model.Username;
                                 <tr class="history-row" data-status="@statusText">
                                     <!-- Date -->
                                     <td class="col-date">
@@ -973,8 +975,8 @@
                                     <!-- Archer -->
                                     <td style="font-weight: 700; text-align: center;">
                                         <div style="width: 180px; margin: 0 auto; display: flex; align-items: center; gap: 12px; justify-content: flex-start; text-align: left;">
-                                            <div class="avatar-cell-initial" style="width: 32px; height: 32px; font-size: 0.8rem; flex-shrink: 0;">@Model.Username[0].ToString().ToUpper()</div>
-                                            <span style="line-height: 1.3; word-wrap: break-word; white-space: normal;">@Html.Raw(Model.Username.Replace(" BIN ", " BIN <br/>").Replace(" BINTI ", " BINTI <br/>").Replace(" A/L ", " A/L <br/>").Replace(" A/P ", " A/P <br/>"))</span>
+                                            <div class="avatar-cell-initial" style="width: 32px; height: 32px; font-size: 0.8rem; flex-shrink: 0;">@archerName[0].ToString().ToUpper()</div>
+                                            <span style="line-height: 1.3; word-wrap: break-word; white-space: normal;">@Html.Raw(archerName.Replace(" BIN ", " BIN <br/>").Replace(" BINTI ", " BINTI <br/>").Replace(" A/L ", " A/L <br/>").Replace(" A/P ", " A/P <br/>"))</span>
                                         </div>
                                     </td>
                                     <!-- Payment -->
@@ -999,7 +1001,7 @@
                                     <!-- Action -->
                                     <td>
                                         <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
-                                            <button type="button" onclick="openViewDetailsModal({ type: 'Annual Membership', date: '@mp.PaymentDate.ToString("MMM dd, yyyy")', time: '@mp.PaymentDate.ToString("hh:mm tt")', archer: '@Model.Username', amount: 'RM @mp.Amount.ToString("F2")', status: '@statusText', method: '@(mp.PaymentMethod ?? "Online (FPX)")', refId: '@(mp.TransactionId ?? "N/A")', package: 'Annual Membership' })" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--text-dim); border-radius: 10px; height: 34px; padding: 0 14px; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='var(--text-dim)';">
+                                            <button type="button" onclick="openViewDetailsModal({ type: 'Annual Membership', date: '@mp.PaymentDate.ToString("MMM dd, yyyy")', time: '@mp.PaymentDate.ToString("hh:mm tt")', archer: '@archerName', amount: 'RM @mp.Amount.ToString("F2")', status: '@statusText', method: '@(mp.PaymentMethod ?? "Online (FPX)")', refId: '@(mp.TransactionId ?? "N/A")', package: 'Annual Membership' })" style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--text-dim); border-radius: 10px; height: 34px; padding: 0 14px; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='var(--text-dim)';">
                                                 View
                                             </button>
                                             @if (!isPaid)
@@ -1192,10 +1194,11 @@
                     <div style="display: flex; flex-direction: column; gap: 12px; max-height: 180px; overflow-y: auto; padding-right: 5px;">
                         @foreach (var mp in membershipPayments.Where(m => m.Status == "Pending" && m.Amount > 0))
                         {
+                            var archerName = mp.StudentId.HasValue ? studentsList.FirstOrDefault(s => s.StudentId == mp.StudentId)?.FullName ?? Model.Username : Model.Username;
                             <div class="d-flex justify-content-between align-items-start border-bottom pb-2 modal-breakdown-item membership-item" data-id="@mp.PaymentId" data-amount="@mp.Amount" style="border-color: rgba(255,255,255,0.05) !important;">
                                 <div style="flex: 1; padding-right: 10px;">
                                     <span class="text-white fw-bold d-block" style="font-size: 0.82rem;">Annual Membership Fee</span>
-                                    <span class="text-dim d-block" style="font-size: 0.7rem; margin-top: 2px;">Archer: <strong class="text-white">@Model.Username</strong></span>
+                                    <span class="text-dim d-block" style="font-size: 0.7rem; margin-top: 2px;">Archer: <strong class="text-white">@archerName</strong></span>
                                 </div>
                                 <div class="text-end">
                                     <span class="text-white fw-bold" style="font-size: 0.9rem;">RM @mp.Amount.ToString("N2")</span>

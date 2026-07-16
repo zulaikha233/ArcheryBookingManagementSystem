@@ -486,8 +486,8 @@
 
     <!-- Master Row layout -->
     <div class="row g-4">
-        <!-- Left Side: Wizard Forms -->
-        <div class="col-lg-12" id="wizFormCol" style="transition: all 0.3s ease;">
+        <!-- Right Side: Wizard Forms (Now placed on right using order-2) -->
+        <div class="col-lg-12 order-2" id="wizFormCol" style="transition: all 0.3s ease;">
             
             <!-- STEP 1: Personal Details -->
             <div class="wizard-step-section active" id="stepSection-1">
@@ -750,8 +750,8 @@
             </div>
         </div>
 
-        <!-- Right Side: Sticky Checkout / Summary Details -->
-        <div class="col-lg-5 d-none" id="wizSummaryCol" style="transition: all 0.3s ease;">
+        <!-- Left Side: Sticky Checkout / Summary Details (Now placed on left using order-1) -->
+        <div class="col-lg-5 d-none order-1" id="wizSummaryCol" style="transition: all 0.3s ease;">
             <div class="live-summary-card">
                 <h3 class="fw-bold text-white mb-4" style="font-size: 1.25rem; letter-spacing: 0.3px;">REGISTRATION DETAILS</h3>
 

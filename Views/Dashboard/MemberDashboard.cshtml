@@ -329,35 +329,53 @@
             </div>
         </div>
 
-        <!-- Equipment Needed -->
-        <h3 class="section-title">EQUIPMENT RECOMMENDATIONS</h3>
+        <!-- Equipment Hub -->
+        <h3 class="section-title">EQUIPMENT HUB <i class="bi bi-three-dots"></i></h3>
         <div class="equipment-grid mb-4">
-            <div class="eq-card">
-                <div class="d-flex justify-content-between mb-2">
-                    <h4 style="font-size: 1.1rem; font-weight: 800;">Bow Limbs</h4>
-                    <span class="text-primary fw-bold" style="font-size: 0.8rem;"><i class="bi bi-arrow-up"></i> Lvl 3</span>
+            <!-- Provided / Renting Items -->
+            <div class="eq-card" style="display: flex; flex-direction: column;">
+                <div class="d-flex justify-content-between mb-3 border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;">
+                    <h4 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin: 0;">Club Equipment</h4>
+                    <span class="badge" style="background: rgba(16,185,129,0.15); color: #10B981; font-weight: 700; padding: 6px 10px;">Provided</span>
                 </div>
-                <p class="text-dim" style="font-size: 0.75rem;">Coming Soon Feature</p>
-                <div class="d-flex justify-content-between align-items-end mt-4">
-                    <div>
-                        <div style="font-size: 1.4rem; color: #fff; font-weight: 800;">24 lbs</div>
-                        <div style="font-size: 0.7rem; color: var(--text-dim);">Suggested Draw</div>
-                    </div>
-                    <div style="font-size: 1.1rem; color: #4ade80; font-weight: 800;">Ready</div>
-                </div>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
+                    <li style="display: flex; align-items: center; gap: 12px; font-size: 0.9rem; color: #e5e7eb; font-weight: 500;">
+                        <i class="bi bi-check2-square text-primary" style="font-size: 1.1rem;"></i> Bow Stand
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 12px; font-size: 0.9rem; color: #e5e7eb; font-weight: 500;">
+                        <i class="bi bi-check2-square text-primary" style="font-size: 1.1rem;"></i> Glass Fibre Arrow (Renting)
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 12px; font-size: 0.9rem; color: #e5e7eb; font-weight: 500;">
+                        <i class="bi bi-check2-square text-primary" style="font-size: 1.1rem;"></i> Target
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 12px; font-size: 0.9rem; color: #e5e7eb; font-weight: 500;">
+                        <i class="bi bi-check2-square text-primary" style="font-size: 1.1rem;"></i> Plastik Training Bow
+                    </li>
+                </ul>
             </div>
-            <div class="eq-card">
-                <div class="d-flex justify-content-between mb-2">
-                    <h4 style="font-size: 1.1rem; font-weight: 800;">Arrows</h4>
-                    <span class="text-warning fw-bold" style="font-size: 0.8rem;"><i class="bi bi-arrow-right"></i> Tune</span>
+            
+            <!-- Items for Sale -->
+            <div class="eq-card" style="display: flex; flex-direction: column;">
+                <div class="d-flex justify-content-between mb-3 border-bottom pb-2" style="border-color: rgba(255,255,255,0.05) !important;">
+                    <h4 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin: 0;">Club Shop</h4>
+                    <span class="badge" style="background: rgba(245,158,11,0.15); color: #F59E0B; font-weight: 700; padding: 6px 10px;">For Sale</span>
                 </div>
-                <p class="text-dim" style="font-size: 0.75rem;">Coming Soon Feature</p>
-                <div class="d-flex justify-content-between align-items-end mt-4">
-                    <div>
-                        <div style="font-size: 1.4rem; color: #fff; font-weight: 800;">Carbon</div>
-                        <div style="font-size: 0.7rem; color: var(--text-dim);">Material Type</div>
-                    </div>
-                    <div style="font-size: 1.1rem; color: #facc15; font-weight: 800;">Upgrade</div>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; flex-grow: 1;">
+                    <li style="display: flex; align-items: center; justify-content: space-between; font-size: 0.9rem; color: #e5e7eb; font-weight: 500;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <i class="bi bi-bag-check-fill text-warning" style="font-size: 1.1rem;"></i> Score Book
+                        </div>
+                        <span style="font-weight: 800; color: #fff; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 8px;">RM 20</span>
+                    </li>
+                    <li style="display: flex; align-items: center; justify-content: space-between; font-size: 0.9rem; color: #e5e7eb; font-weight: 500;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <i class="bi bi-bag-check-fill text-warning" style="font-size: 1.1rem;"></i> Thera Band
+                        </div>
+                        <span style="font-weight: 800; color: #fff; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 8px;">RM 25</span>
+                    </li>
+                </ul>
+                <div class="mt-auto pt-3">
+                    <button onclick="window.location.href='/Equipment/MemberEquipment'" class="btn btn-sm w-100" style="background: rgba(255,255,255,0.05); color: var(--text-dim); font-weight: 700; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.1)';this.style.color='#fff';" onmouseout="this.style.background='rgba(255,255,255,0.05)';this.style.color='var(--text-dim)';">View All Items</button>
                 </div>
             </div>
         </div>

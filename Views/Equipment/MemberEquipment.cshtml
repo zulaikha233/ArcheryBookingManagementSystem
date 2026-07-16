@@ -1,0 +1,253 @@
+@{
+    ViewData["Title"] = "Equipment Hub";
+    Layout = "_MemberLayout";
+}
+
+<style>
+    /* Premium Gamified Theme Colors */
+    :root {
+        --gamify-bg: #131924;
+        --gamify-text: #f3f4f6;
+        --gamify-primary: #ff4d4d;
+        --gamify-secondary: #00d2ff;
+        --gamify-card: rgba(25, 30, 40, 0.8);
+        --gamify-shadow: rgba(0, 0, 0, 0.5);
+    }
+
+    body {
+        background-color: var(--gamify-bg) !important;
+        color: var(--gamify-text) !important;
+    }
+
+    .gamify-container {
+        padding: 40px;
+        max-width: 1200px;
+        margin: 0 auto;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .gamify-header {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+    .gamify-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #fff;
+        margin-bottom: 10px;
+        letter-spacing: -1px;
+    }
+
+    .gamify-title span {
+        color: var(--gamify-primary);
+        text-transform: uppercase;
+        text-shadow: 0 0 15px rgba(255, 77, 77, 0.4);
+    }
+
+    .eq-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+    
+    @@media (max-width: 768px) {
+        .eq-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .gamify-card {
+        background: var(--gamify-card);
+        border-radius: 24px;
+        padding: 30px;
+        box-shadow: 0 15px 35px var(--gamify-shadow);
+        border: 1px solid rgba(255, 77, 77, 0.15);
+        backdrop-filter: blur(10px);
+        transition: transform 0.3s ease;
+    }
+    
+    .gamify-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(255, 77, 77, 0.3);
+    }
+
+    .item-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .item-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 0;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+
+    .item-row:last-child {
+        border-bottom: none;
+    }
+
+    .item-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-right: 20px;
+    }
+
+    .item-icon.provided {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+    }
+
+    .item-icon.sale {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+    }
+
+    .item-name {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 5px;
+    }
+
+    .item-desc {
+        font-size: 0.8rem;
+        color: #9ca3af;
+    }
+
+    .item-price {
+        font-size: 1.2rem;
+        font-weight: 900;
+        color: #fff;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 8px 15px;
+        border-radius: 12px;
+    }
+
+    .badge-provided {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+    }
+    
+    .badge-sale {
+        background: rgba(245, 158, 11, 0.2);
+        color: #f59e0b;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+    }
+</style>
+
+<div class="gamify-container" data-aos="fade-in">
+    <div class="gamify-header">
+        <h1 class="gamify-title">Archery <span>Equipment</span> Hub</h1>
+        <p style="color: #6b7280; font-size: 1.1rem; font-weight: 500;">Everything you need to master your shots, available at the club.</p>
+    </div>
+
+    <div class="eq-grid">
+        <!-- Provided Equipment -->
+        <div class="gamify-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h3 style="color: #fff; font-weight: 900; font-size: 1.5rem; margin: 0;"><i class="bi bi-box-seam me-2" style="color: #10b981;"></i> Club Provided</h3>
+                <span class="badge-provided">Rent For Free</span>
+            </div>
+            
+            <p style="color: #9ca3af; font-size: 0.9rem; margin-bottom: 25px;">The club provides all basic training gear so you can focus on shooting without worry.</p>
+
+            <ul class="item-list">
+                <li class="item-row">
+                    <div class="d-flex align-items-center">
+                        <div class="item-icon provided"><i class="bi bi-geo-alt-fill"></i></div>
+                        <div>
+                            <div class="item-name">Bow Stand</div>
+                            <div class="item-desc">Secure place to rest your bow.</div>
+                        </div>
+                    </div>
+                </li>
+                <li class="item-row">
+                    <div class="d-flex align-items-center">
+                        <div class="item-icon provided"><i class="bi bi-arrow-up-right-square-fill"></i></div>
+                        <div>
+                            <div class="item-name">Glass Fibre Arrow</div>
+                            <div class="item-desc">Durable arrows for training (Renting).</div>
+                        </div>
+                    </div>
+                </li>
+                <li class="item-row">
+                    <div class="d-flex align-items-center">
+                        <div class="item-icon provided"><i class="bi bi-bullseye"></i></div>
+                        <div>
+                            <div class="item-name">Archery Target</div>
+                            <div class="item-desc">Standard target faces.</div>
+                        </div>
+                    </div>
+                </li>
+                <li class="item-row">
+                    <div class="d-flex align-items-center">
+                        <div class="item-icon provided"><i class="bi bi-bezier2"></i></div>
+                        <div>
+                            <div class="item-name">Plastik Training Bow</div>
+                            <div class="item-desc">Lightweight for beginners.</div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Shop Equipment -->
+        <div class="gamify-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h3 style="color: #fff; font-weight: 900; font-size: 1.5rem; margin: 0;"><i class="bi bi-shop me-2" style="color: #f59e0b;"></i> Club Shop</h3>
+                <span class="badge-sale">For Sale</span>
+            </div>
+
+            <p style="color: #9ca3af; font-size: 0.9rem; margin-bottom: 25px;">Upgrade your gear or grab essential items directly from our counter.</p>
+
+            <ul class="item-list">
+                <li class="item-row">
+                    <div class="d-flex align-items-center">
+                        <div class="item-icon sale"><i class="bi bi-journal-text"></i></div>
+                        <div>
+                            <div class="item-name">Score Book</div>
+                            <div class="item-desc">Track your progress and scores.</div>
+                        </div>
+                    </div>
+                    <div class="item-price">RM 20</div>
+                </li>
+                <li class="item-row">
+                    <div class="d-flex align-items-center">
+                        <div class="item-icon sale"><i class="bi bi-bandaid-fill"></i></div>
+                        <div>
+                            <div class="item-name">Thera Band</div>
+                            <div class="item-desc">Warm up and build strength.</div>
+                        </div>
+                    </div>
+                    <div class="item-price">RM 25</div>
+                </li>
+            </ul>
+            
+            <div style="margin-top: 30px; text-align: center; background: rgba(255, 77, 77, 0.05); padding: 20px; border-radius: 16px; border: 1px dashed rgba(255, 77, 77, 0.3);">
+                <i class="bi bi-info-circle-fill" style="color: var(--gamify-primary); font-size: 1.5rem; margin-bottom: 10px; display: inline-block;"></i>
+                <p style="margin: 0; color: #fff; font-weight: 700; font-size: 0.95rem;">Buy at the counter!</p>
+                <p style="margin: 5px 0 0 0; color: #9ca3af; font-size: 0.8rem;">To purchase items, please see our staff at the front desk before or after your session.</p>
+            </div>
+        </div>
+    </div>
+</div>

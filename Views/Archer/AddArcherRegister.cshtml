@@ -308,6 +308,19 @@
     </style>
 }
 
+<div id="introMembershipModal" class="success-modal-overlay" style="display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(10,12,18,0.9); backdrop-filter:blur(10px); z-index:9999; justify-content:center; align-items:center;">
+    <div class="success-modal-content" style="background: var(--bg-card); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; padding: 40px; max-width: 500px; width: 90%; text-align: center;">
+        <i class="bi bi-info-circle text-primary" style="font-size: 3rem; margin-bottom: 15px; display: block;"></i>
+        <h3 class="text-white fw-bold mb-3">MEMBERSHIP REQUIREMENT</h3>
+        <p class="text-dim mb-4">Please note that each archer is required to pay an annual membership fee of <strong style="color: #ff4d4d;">RM 80.00</strong> upon class registration. This fee will be included in your final payment.</p>
+        
+        <div class="d-flex justify-content-between mt-2" style="gap: 20px;">
+            <button class="btn-premium-outline w-100 d-flex justify-content-center align-items-center" onclick="window.location.href='/Archer/MyArchers'">CANCEL</button>
+            <button class="btn-premium w-100 d-flex justify-content-center align-items-center" onclick="document.getElementById('introMembershipModal').style.display='none'">PROCEED</button>
+        </div>
+    </div>
+</div>
+
 <div class="wizard-container py-3">
     <div class="text-center mb-5 page-header">
         <h1 class="text-white fw-extrabold mb-2" style="font-size: 2.2rem; letter-spacing: -0.5px;">CLASS <span style="color: var(--primary);">REGISTRATION</span></h1>
@@ -428,24 +441,8 @@
                     <div id="scrollableArcherList" style="max-height: 180px; overflow-y: auto; padding-right: 10px; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
                         <!-- JS POPULATED -->
                     </div>
-                </div>
 
-                <!-- Payment Summary Breakdown -->
-                <div class="mt-4">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-white fw-semibold" id="summaryArchersRegLabel" style="font-size: 0.95rem;">Archers Registration (0 pax)</span>
-                        <span class="text-white fw-semibold" id="summaryCalculationBreakdownText" style="font-size: 0.95rem;">RM 0.00 &times; 0</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-white fw-semibold" style="font-size: 0.95rem; opacity: 0.8;">Service Fee</span>
-                        <span class="text-white fw-semibold" style="font-size: 0.95rem; opacity: 0.8;">RM 0.00</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span class="text-white fw-semibold" style="font-size: 0.95rem; opacity: 0.8;">Tax</span>
-                        <span class="text-white fw-semibold" style="font-size: 0.95rem; opacity: 0.8;">RM 0.00</span>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between mt-3 pt-3 border-top" style="border-color: rgba(255,255,255,0.05) !important;">
+                    <div class="d-flex justify-content-between mt-1" style="padding-right: 10px;">
                         <span class="text-white fw-bold" style="font-size: 1.05rem;">Total</span>
                         <span class="text-white fw-bold" style="font-size: 1.05rem;" id="summaryTotalBox">RM 0.00</span>
                     </div>
@@ -574,7 +571,10 @@
         function updateSummary() {
             const count = selectedArchers.length;
             const price = selectedPackagePrice;
-            const total = count * price;
+            const membershipFee = 80.00;
+            const pkgTotal = count * price;
+            const memTotal = count * membershipFee;
+            const total = pkgTotal + memTotal;
 
             document.getElementById('summaryPackageNameBox').innerText = selectedPackageName;
             document.getElementById('summaryPackageDetailsBox').innerText = `${count} archer${count > 1 ? 's' : ''}`;
@@ -582,16 +582,17 @@
             let archerHtml = '';
             selectedArchers.forEach(a => {
                 archerHtml += `
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="text-white fw-semibold" style="font-size: 0.95rem;">${a.name}</div>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div class="text-white fw-semibold" style="font-size: 0.95rem;">Class Registration (${a.name})</div>
                         <div class="text-white fw-bold">RM ${price.toFixed(2)}</div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: rgba(255,255,255,0.05) !important;">
+                        <div class="text-white fw-semibold" style="font-size: 0.95rem;">Membership Fee</div>
+                        <div class="text-white fw-bold">RM 80.00</div>
                     </div>
                 `;
             });
             document.getElementById('scrollableArcherList').innerHTML = archerHtml;
-
-            document.getElementById('summaryArchersRegLabel').innerText = `Archers Registration (${count} pax)`;
-            document.getElementById('summaryCalculationBreakdownText').innerHTML = `RM ${price.toFixed(2)} &times; ${count}`;
             document.getElementById('summaryTotalBox').innerText = `RM ${total.toFixed(2)}`;
         }
 
@@ -616,7 +617,8 @@
             const payload = selectedArchers.map(a => ({
                 StudentId: a.id,
                 PackageType: selectedPackageName,
-                PackagePrice: selectedPackagePrice
+                PackagePrice: selectedPackagePrice,
+                MembershipFee: 80.00
             }));
 
             try {
