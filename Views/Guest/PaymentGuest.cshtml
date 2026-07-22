@@ -1,4 +1,4 @@
-﻿@model ArcheryAlley.Models.PaymentViewModel
+@model ArcheryAlley.Models.PaymentViewModel
 
 @{
     ViewData["Title"] = "PAYMENT";
@@ -105,7 +105,7 @@
 
                         <!-- Customer Details -->
                         <div class="payment-detail-box p-4 mb-4">
-                            <h5 class="fw-bold mb-3" style="font-size: 0.9rem;">Customer Details <span class="text-dim fw-normal">(Optional)</span></h5>
+                            <h5 class="fw-bold mb-3" style="font-size: 0.9rem;">Customer Details <span class="text-danger fw-bold">*</span></h5>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label-premium">Customer Name</label>
@@ -293,8 +293,15 @@
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> PROCESSING...';
 
-        const nameInput = document.getElementById("guestName").value.trim() || "Guest User";
-        const phoneInput = document.getElementById("guestPhone").value.trim() || "0000000000";
+        const nameInput = document.getElementById("guestName").value.trim();
+        const phoneInput = document.getElementById("guestPhone").value.trim();
+
+        if (!nameInput || !phoneInput) {
+            showNotif("Please provide both Customer Name and Contact Number.", 'warning');
+            btn.disabled = false;
+            btn.innerHTML = 'CONFIRM & PAY <i class="bi bi-shield-check ms-2"></i>';
+            return;
+        }
 
         const formData = new FormData();
         formData.append("SlotId", "@Model.SlotId");

@@ -61,7 +61,7 @@
             flex-direction: column;
             padding: 24px 0 0;
             height: 100vh;
-            overflow: hidden;
+            overflow: visible;
             position: relative;
             z-index: 1000;
         }
@@ -69,6 +69,7 @@
         .profile-section {
             text-align: center;
             padding: 0 20px 16px;
+            margin-top: 35px;
             border-bottom: 1px solid var(--border-color);
             flex-shrink: 0;
         }
@@ -83,6 +84,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .avatar-inner {
@@ -95,6 +97,7 @@
             justify-content: center;
             font-size: 1.6rem;
             color: var(--primary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .welcome-text {
@@ -332,6 +335,72 @@
                 height: calc(100vh - 70px);
                 overflow-y: auto;
             }
+        }
+        
+        /* ─── DESKTOP COLLAPSIBLE SIDEBAR ─── */
+        .sidebar {
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        .sidebar.collapsed .profile-section .welcome-text,
+        .sidebar.collapsed .profile-section .user-name,
+        .sidebar.collapsed .profile-section .status-badge,
+        .sidebar.collapsed .profile-section .action-btns {
+            display: none;
+        }
+        .sidebar.collapsed .avatar-ring {
+            width: 40px;
+            height: 40px;
+            padding: 2px;
+            margin-bottom: 0;
+        }
+        .sidebar.collapsed .avatar-inner {
+            font-size: 1rem;
+        }
+        .sidebar.collapsed .profile-section {
+            padding: 0 10px 16px;
+        }
+        .sidebar.collapsed .menu-label {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .sidebar.collapsed .menu-item span {
+            display: none;
+        }
+        .sidebar.collapsed #menu-arrow {
+            display: none;
+        }
+        .sidebar.collapsed .submenu {
+            display: none !important;
+        }
+        .sidebar-toggle-btn {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            background: transparent;
+            color: var(--primary);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            font-size: 1.6rem;
+            transition: color 0.3s;
+        }
+        .sidebar-toggle-btn:hover {
+            color: #ff6b6b;
+        }
+        .sidebar.collapsed .sidebar-toggle-btn {
+            right: auto;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        @@media (max-width: 992px) {
+            .sidebar-toggle-btn { display: none; }
+        }
 
     </style>
     @RenderSection("Styles", required: false)
@@ -342,16 +411,20 @@
         
         <!-- Mobile Header -->
         <div class="mobile-header">
-            <h5 class="m-0 fw-900 text-white" style="letter-spacing: 1px;"><i class="bi bi-bullseye text-primary me-2"></i> ARCHERY ALLEY</h5>
             <button class="mobile-toggle-btn" onclick="toggleMobileSidebar()">
                 <i class="bi bi-list fs-1 text-white"></i>
             </button>
+            <h5 class="m-0 fw-900 text-white" style="letter-spacing: 1px;"><i class="bi bi-bullseye text-primary me-2"></i> AKMA ARCHERY</h5>
         </div>
         
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
 
         <!-- ─── LEFT SIDEBAR ─── -->
         <aside class="sidebar">
+            <button class="sidebar-toggle-btn" onclick="toggleDesktopSidebar()">
+                <i class="bi bi-layout-sidebar"></i>
+            </button>
+            
             <div class="profile-section">
                 <div class="avatar-ring">
                     <div class="avatar-inner">
@@ -386,37 +459,37 @@
                         var isCalendar = currentPath.Contains("MemberCalendar");
                         var isBookingSection = isBooking || isClassBooking;
                     }
-                    <li><a href="/Account/MemberDashboard" class="menu-item @(isDashboard ? "active" : "")"><i class="bi bi-house-door"></i> Dashboard</a></li>
+                    <li><a href="/Account/MemberDashboard" class="menu-item @(isDashboard ? "active" : "")"><i class="bi bi-house-door"></i> <span>Dashboard</span></a></li>
                     <li>
                         <a href="javascript:void(0)" class="menu-item @(isBookingSection ? "active" : "")" onclick="toggleBookingMenu()">
-                            <i class="bi bi-bullseye"></i> Book Session
+                            <i class="bi bi-bullseye"></i> <span>Book Session</span>
                             <i class="bi bi-chevron-down ms-auto" id="menu-arrow" style="font-size: 0.8rem; transition: 0.3s; margin-left: auto;"></i>
                         </a>
                         <ul class="submenu" id="booking-submenu" style="display: @(isBookingSection ? "block" : "none");">
                             <li>
                                 <a href="/Booking/ClassBooking" class="menu-item @(isClassBooking ? "active" : "")">
-                                    <i class="bi bi-mortarboard me-2"></i> Class Booking
+                                    <i class="bi bi-mortarboard me-2"></i> <span>Class Booking</span>
                                 </a>
                             </li>
                             <li>
                                 <a href="/Booking/GetFreeSlots" class="menu-item @(isBooking ? "active" : "")">
-                                    <i class="bi bi-grid-3x3 me-2"></i> Target Booking
+                                    <i class="bi bi-grid-3x3 me-2"></i> <span>Target Booking</span>
                                 </a>
                             </li>
                         </ul>
                     </li>
-                    <li><a href="/Booking/MemberCalendar" class="menu-item @(isCalendar ? "active" : "")"><i class="bi bi-calendar3"></i> Calendar</a></li>
-                    <li><a href="/Booking/MemberHistory" class="menu-item @(currentPath.Contains("MemberHistory") ? "active" : "")"><i class="bi bi-clock-history"></i> History</a></li>
-                    <li><a href="/Archer/MyArchers" class="menu-item @(currentPath.Contains("MyArchers") || currentPath.Contains("AddArcher") ? "active" : "")"><i class="bi bi-people"></i> My Archers</a></li>
-                    <li><a href="@Url.Action("MemberProgress", "Progress")" class="menu-item"><i class="bi bi-shield-check"></i> Progress</a></li>
-                    <li><a href="@Url.Action("MemberEquipment", "Equipment")" class="menu-item @(currentPath.Contains("Equipment") ? "active" : "")"><i class="bi bi-tools"></i> Equipment</a></li>
-                    <li><a href="/Booking/MemberAttendance" class="menu-item @(currentPath.Contains("MemberAttendance") ? "active" : "")"><i class="bi bi-calendar-check"></i> Attendance</a></li>
-                    <li><a href="/Account/MemberPayment" class="menu-item @(currentPath.Contains("MemberPayment") ? "active" : "")"><i class="bi bi-credit-card"></i> Fee / Payment</a></li>
+                    <li><a href="/Booking/MemberCalendar" class="menu-item @(isCalendar ? "active" : "")"><i class="bi bi-calendar3"></i> <span>Calendar</span></a></li>
+                    <li><a href="/Booking/MemberHistory" class="menu-item @(currentPath.Contains("MemberHistory") ? "active" : "")"><i class="bi bi-clock-history"></i> <span>History</span></a></li>
+                    <li><a href="/Archer/MyArchers" class="menu-item @(currentPath.Contains("MyArchers") || currentPath.Contains("AddArcher") ? "active" : "")"><i class="bi bi-people"></i> <span>My Archers</span></a></li>
+                    <li><a href="@Url.Action("MemberProgress", "Progress")" class="menu-item"><i class="bi bi-shield-check"></i> <span>Progress</span></a></li>
+                    <li><a href="@Url.Action("MemberEquipment", "Equipment")" class="menu-item @(currentPath.Contains("Equipment") ? "active" : "")"><i class="bi bi-tools"></i> <span>Equipment</span></a></li>
+                    <li><a href="/Booking/MemberAttendance" class="menu-item @(currentPath.Contains("MemberAttendance") ? "active" : "")"><i class="bi bi-calendar-check"></i> <span>Attendance</span></a></li>
+                    <li><a href="/Account/MemberPayment" class="menu-item @(currentPath.Contains("MemberPayment") ? "active" : "")"><i class="bi bi-credit-card"></i> <span>Fee / Payment</span></a></li>
                 </ul>
 
                 <p class="menu-label" style="margin-top: 40px;">SYSTEM</p>
                 <ul class="menu-list">
-                    <li><a href="/Account/Logout" class="menu-item text-danger"><i class="bi bi-box-arrow-left"></i> Logout</a></li>
+                    <li><a href="/Account/Logout" class="menu-item text-danger"><i class="bi bi-box-arrow-left"></i> <span>Logout</span></a></li>
                 </ul>
             </div>
         </aside>
@@ -437,6 +510,19 @@
             const overlay = document.getElementById('sidebarOverlay');
             sidebar.classList.toggle('show');
             overlay.classList.toggle('show');
+        }
+
+        function toggleDesktopSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('collapsed');
+            
+            // Auto close submenu if collapsing
+            if (sidebar.classList.contains('collapsed')) {
+                const submenu = document.getElementById("booking-submenu");
+                const arrow = document.getElementById("menu-arrow");
+                if (submenu) submenu.style.display = "none";
+                if (arrow) arrow.style.transform = "none";
+            }
         }
 
         function toggleBookingMenu() {

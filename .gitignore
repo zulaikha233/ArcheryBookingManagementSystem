@@ -361,3 +361,24 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# ===== CUSTOM: Archery Booking System =====
+# Publish output folder - no need to track
+PleskDeployFinal/
+PublishOutput/
+
+# Temp SQL scripts generated during deployment
+full_schema.sql
+check.sql
+update_cust_col.sql
+update_db.sql
+UpdateEmpIdToString.sql
+*.sql
+
+# Zip files
+*.zip
+publish.zip
+
+# Sensitive config files - contains DB credentials
+appsettings.json
+appsettings.*.json

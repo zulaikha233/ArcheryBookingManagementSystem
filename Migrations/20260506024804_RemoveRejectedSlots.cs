@@ -11,9 +11,9 @@ namespace ArcheryAlley.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // migrationBuilder.DropForeignKey(
-            //     name: "FK_Reservations_Roles",
-            //     table: "Reservations");
+            migrationBuilder.DropForeignKey(
+                name: "FK_Reservations_Roles",
+                table: "Reservations");
 
             migrationBuilder.DropTable(
                 name: "RejectedSlots");

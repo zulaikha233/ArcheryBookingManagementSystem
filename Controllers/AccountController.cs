@@ -230,7 +230,7 @@ namespace ArcheryAlley.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.ErrorMessage = "An error occurred: " + ex.Message;
+                ViewBag.ErrorMessage = "An error occurred: " + ex.Message + (ex.InnerException != null ? " Inner: " + ex.InnerException.Message : "");
                 return View("~/Views/Account/MemberRegister.cshtml");
             }
         }

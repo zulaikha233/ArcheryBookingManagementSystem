@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Guest Booking";
 }
 
@@ -209,13 +209,16 @@
         
         try {
             const response = await fetch(`/Booking/GetAvailableSlotsAjax?date=${bookingData.date}`);
-            const slots = await response.json();
+            let slots = await response.json();
             
             morningGrid.innerHTML = "";
+            
+            // Filter to only show daytime 2-hour slots (same as Member Target Booking)
+            slots = slots.filter(slot => !slot.isNight && slot.slotDurationHours === 2);
+            
             bookingData.allAvailableSlots = slots;
 
             slots.forEach(slot => {
-                if (slot.isNight) return; // Guests cannot book night sessions
                 const card = document.createElement("div");
                 card.className = "slot-card";
                 card.id = `slot-${slot.slotId}`;

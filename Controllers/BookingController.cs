@@ -578,7 +578,7 @@ namespace ArcheryAlley.Controllers
                     _repository.AddPayment(payment);
                 }
 
-                return Json(new { success = true, bookingCode = firstId });
+                return Json(new { success = true, bookingCode = firstId?.ToString("D4") });
             }
             catch (Exception ex)
             {
