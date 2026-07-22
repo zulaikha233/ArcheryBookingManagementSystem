@@ -1,0 +1,786 @@
+﻿@{
+    ViewData["Title"] = "Manage Staff";
+    Layout = "~/Views/Staff_Admin/AdminNavBar.cshtml";
+}
+
+<style>
+    :root {
+        --text-white: #ffffff;
+        --text-dim: #94a3b8;
+        --card-bg: rgba(34,38,48,0.6);
+        --card-border: rgba(255,255,255,0.05);
+        --input-bg: rgba(255,255,255,0.04);
+        --input-border: rgba(255,255,255,0.08);
+        --radius-sm: 12px;
+        --radius-md: 20px;
+        --shadow-card: 0 20px 40px rgba(0,0,0,0.3);
+        --shadow-primary: 0 10px 25px rgba(249,115,22,0.25);
+        --transition: all 0.25s ease;
+    }
+
+    .page-header {
+        margin-bottom: 28px;
+    }
+
+        .page-header p {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            margin-bottom: 6px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-white);
+        }
+
+            .page-header h1 span {
+                color: var(--primary);
+            }
+
+    .glass-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-card);
+    }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .btn-add {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border: none;
+        color: #fff;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: 'Outfit', sans-serif;
+        transition: var(--transition);
+        box-shadow: var(--shadow-primary);
+    }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+        }
+
+    .staff-count {
+        font-size: 0.78rem;
+        color: var(--text-dim);
+    }
+
+        .staff-count span {
+            color: var(--text-white);
+            font-weight: 700;
+        }
+
+    /* ── COACH CARDS GRID ── */
+    .staff-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .staff-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        transition: var(--transition);
+    }
+
+        .staff-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(249,115,22,0.3);
+            box-shadow: 0 14px 36px rgba(249,115,22,0.1);
+        }
+
+    /* Card top strip */
+    .card-strip {
+        height: 6px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    }
+
+    .card-body {
+        padding: 22px;
+    }
+
+    /* Avatar + name row */
+    .card-identity {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .staff-avatar {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #fff;
+        flex-shrink: 0;
+        box-shadow: var(--shadow-primary);
+        overflow: hidden;
+    }
+
+        .staff-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .staff-name {
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--text-white);
+    }
+
+    .staff-id {
+        font-size: 0.7rem;
+        color: var(--text-dim);
+        margin-top: 3px;
+        letter-spacing: 1px;
+    }
+
+    /* Info rows */
+    .card-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 18px;
+    }
+
+    .info-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.78rem;
+        color: var(--text-dim);
+    }
+
+        .info-row i {
+            color: var(--primary);
+            font-size: 0.8rem;
+            width: 14px;
+            flex-shrink: 0;
+        }
+
+        .info-row span {
+            color: var(--text-white);
+        }
+
+    /* Card actions */
+    .card-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border-radius: var(--radius-sm);
+        font-size: 0.72rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: 'Outfit', sans-serif;
+        transition: var(--transition);
+        border: none;
+        white-space: nowrap;
+    }
+
+    .btn-view-profile {
+        background: rgba(249,115,22,0.12);
+        color: var(--primary);
+        border: 1px solid rgba(249,115,22,0.3);
+    }
+
+        .btn-view-profile:hover {
+            background: rgba(249,115,22,0.2);
+        }
+
+    .btn-change-pw {
+        background: rgba(255,255,255,0.05);
+        color: var(--text-dim);
+        border: 1px solid var(--card-border);
+    }
+
+        .btn-change-pw:hover {
+            border-color: rgba(255,255,255,0.2);
+            color: var(--text-white);
+        }
+
+    .btn-remove {
+        background: rgba(220,38,38,0.1);
+        color: #f87171;
+        border: 1px solid rgba(220,38,38,0.25);
+    }
+
+        .btn-remove:hover {
+            background: rgba(220,38,38,0.2);
+        }
+
+    /* ── MODALS ── */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.8);
+        backdrop-filter: blur(8px);
+        z-index: 9000;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+    .modal-box {
+        background: #111318;
+        border: 1px solid var(--card-border);
+        border-radius: 24px;
+        padding: 36px;
+        width: 90%;
+        max-width: 440px;
+        box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+        animation: modalIn 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+    }
+
+    @@keyframes modalIn {
+        from {
+            opacity: 0;
+            transform: scale(0.92)
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1)
+        }
+    }
+
+    .modal-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--text-white);
+        margin-bottom: 6px;
+    }
+
+    .modal-sub {
+        font-size: 0.78rem;
+        color: var(--text-dim);
+        margin-bottom: 24px;
+    }
+
+    .modal-input {
+        width: 100%;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: var(--radius-sm);
+        padding: 12px 16px;
+        color: var(--text-white);
+        font-size: 0.9rem;
+        font-family: 'Outfit', sans-serif;
+        margin-bottom: 20px;
+        transition: var(--transition);
+    }
+
+        .modal-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    .btn-modal-cancel {
+        padding: 10px 18px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--input-border);
+        background: transparent;
+        color: var(--text-dim);
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: 'Outfit', sans-serif;
+        transition: var(--transition);
+    }
+
+        .btn-modal-cancel:hover {
+            color: var(--text-white);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+    .btn-modal-confirm {
+        padding: 10px 22px;
+        border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border: none;
+        color: #fff;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: 'Outfit', sans-serif;
+        transition: var(--transition);
+        box-shadow: var(--shadow-primary);
+    }
+
+        .btn-modal-confirm:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-modal-confirm.danger {
+            background: linear-gradient(135deg, #dc2626, #7f1d1d);
+            box-shadow: 0 6px 18px rgba(220,38,38,0.3);
+        }
+
+    /* Profile modal info */
+    .profile-modal-avatar {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #fff;
+        margin: 0 auto 16px;
+        box-shadow: var(--shadow-primary);
+        overflow: hidden;
+    }
+
+        .profile-modal-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .profile-modal-name {
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--text-white);
+        margin-bottom: 4px;
+    }
+
+    .profile-modal-id {
+        text-align: center;
+        font-size: 0.72rem;
+        color: var(--text-dim);
+        margin-bottom: 20px;
+    }
+
+    .profile-divider {
+        height: 1px;
+        background: var(--card-border);
+        margin-bottom: 16px;
+    }
+
+    .profile-info-row {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 8px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+        font-size: 0.82rem;
+    }
+
+        .profile-info-row:last-child {
+            border-bottom: none;
+        }
+
+    .profile-info-label {
+        color: var(--text-dim);
+        min-width: 120px;
+        flex-shrink: 0;
+    }
+
+    .profile-info-value {
+        color: var(--text-white);
+        font-weight: 600;
+    }
+
+    /* ── TOAST ── */
+    .toast-notif {
+        position: fixed;
+        bottom: 28px;
+        right: 28px;
+        background: rgba(20,22,30,0.95);
+        border: 1px solid rgba(249,115,22,0.3);
+        border-radius: 16px;
+        padding: 13px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-white);
+        box-shadow: 0 12px 35px rgba(0,0,0,0.5);
+        backdrop-filter: blur(10px);
+        transform: translateY(80px);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+        z-index: 9999;
+    }
+
+        .toast-notif.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast-notif i {
+            color: var(--primary);
+        }
+
+    @@keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(16px)
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0)
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .staff-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .modal-box {
+            padding: 24px;
+        }
+    }
+</style>
+
+<!-- ── PAGE HEADER ── -->
+<div class="page-header">
+    <p>Head Coach Portal</p>
+    <h1>Manage <span>Staff</span></h1>
+</div>
+
+<!-- ── TOP BAR ── -->
+<div class="top-bar">
+    <div class="staff-count">Showing <span id="staffCountText">—</span> registered coaches</div>
+    <button class="btn-add" onclick="openAddModal()">
+        <i class="bi bi-person-plus-fill"></i> Add New Coach
+    </button>
+</div>
+
+<!-- ── STAFF CARDS ── -->
+<div class="staff-grid" id="staffGrid">
+    <div style="grid-column:1/-1; padding:60px; text-align:center; color:var(--text-dim);">
+        Loading coaches...
+    </div>
+</div>
+
+<!-- ── PASSWORD MODAL ── -->
+<div class="modal-overlay" id="pwModal">
+    <div class="modal-box">
+        <div class="modal-title">Change Password</div>
+        <div class="modal-sub" id="pwModalSub">Set a new password for this coach.</div>
+        <input type="password" class="modal-input" id="pwInput" placeholder="Enter new password">
+        <input type="password" class="modal-input" id="pwConfirm" placeholder="Confirm new password">
+        <div class="modal-actions">
+            <button class="btn-modal-cancel" onclick="closeModal('pwModal')">Cancel</button>
+            <button class="btn-modal-confirm" onclick="confirmChangePassword()">
+                <i class="bi bi-check-lg"></i> Update Password
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── REMOVE MODAL ── -->
+<div class="modal-overlay" id="removeModal">
+    <div class="modal-box">
+        <div class="modal-title">Remove Coach</div>
+        <div class="modal-sub" id="removeModalSub">This will permanently remove this coach account. This action cannot be undone.</div>
+        <div class="modal-actions">
+            <button class="btn-modal-cancel" onclick="closeModal('removeModal')">Cancel</button>
+            <button class="btn-modal-confirm danger" onclick="confirmRemove()">
+                <i class="bi bi-trash-fill"></i> Remove Coach
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── PROFILE MODAL ── -->
+<div class="modal-overlay" id="profileModal">
+    <div class="modal-box" style="max-width:480px;">
+        <div class="profile-modal-avatar" id="profileModalAvatar">—</div>
+        <div class="profile-modal-name" id="profileModalName">—</div>
+        <div class="profile-modal-id" id="profileModalId">—</div>
+        <div class="profile-divider"></div>
+        <div id="profileModalInfo"></div>
+        <div class="modal-actions" style="margin-top:20px;">
+            <button class="btn-modal-confirm" onclick="closeModal('profileModal')">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── ADD COACH MODAL ── -->
+<div class="modal-overlay" id="addModal">
+    <div class="modal-box">
+        <div class="modal-title">Add New Coach</div>
+        <div class="modal-sub">Fill in the details to register a new coach account.</div>
+        <input type="text" class="modal-input" id="addName" placeholder="Full Name">
+        <input type="password" class="modal-input" id="addPassword" placeholder="Password">
+        <div class="modal-actions">
+            <button class="btn-modal-cancel" onclick="closeModal('addModal')">Cancel</button>
+            <button class="btn-modal-confirm" onclick="confirmAddCoach()">
+                <i class="bi bi-person-plus-fill"></i> Register Coach
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast-notif" id="toast">
+    <i class="bi bi-check-circle-fill"></i>
+    <span id="toastMsg">Done</span>
+</div>
+
+@section Scripts {
+    <script>
+        let allStaff      = [];
+        let selectedEmpId = null;
+
+        /* ── LOAD STAFF ON PAGE LOAD ── */
+        window.addEventListener('DOMContentLoaded', () => {
+            loadStaff();
+        });
+
+        async function loadStaff() {
+            try {
+                const response = await fetch('/Slot/GetAllStaffJson');
+                allStaff = await response.json();
+
+                document.getElementById('staffCountText').textContent = allStaff.length;
+                renderCards(allStaff);
+            } catch (err) {
+                console.error('Load staff error:', err);
+            }
+        }
+
+        /* ── RENDER CARDS ── */
+        function renderCards(staff) {
+            const grid = document.getElementById('staffGrid');
+
+            if (staff.length === 0) {
+                grid.innerHTML = `<div style="grid-column:1/-1; padding:60px; text-align:center; color:var(--text-dim);">No coaches registered yet.</div>`;
+                return;
+            }
+
+            grid.innerHTML = '';
+
+            staff.forEach((s, idx) => {
+                const card = document.createElement('div');
+                card.className = 'staff-card';
+                card.style.animation = `fadeUp 0.3s ease ${idx * 0.06}s both`;
+
+                const avatarContent = s.picture
+                    ? `<img src="${s.picture}" alt="${s.name}">`
+                    : s.name.charAt(0).toUpperCase();
+
+                card.innerHTML = `
+                    <div class="card-strip"></div>
+                    <div class="card-body">
+                        <div class="card-identity">
+                            <div class="staff-avatar">${avatarContent}</div>
+                            <div>
+                                <div class="staff-name">${s.name}</div>
+                                <div class="staff-id">${s.empId}</div>
+                            </div>
+                        </div>
+                        <div class="card-info">
+                            <div class="info-row"><i class="bi bi-envelope-fill"></i><span>${s.email}</span></div>
+                            <div class="info-row"><i class="bi bi-phone-fill"></i><span>${s.phone}</span></div>
+                            <div class="info-row"><i class="bi bi-gender-ambiguous"></i><span>${s.gender}</span></div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-action btn-view-profile" onclick="openProfileModal('${s.empId}')">
+                                <i class="bi bi-person-lines-fill"></i> Profile
+                            </button>
+                            <button class="btn-action btn-change-pw" onclick="openPwModal('${s.empId}', '${s.name}')">
+                                <i class="bi bi-key-fill"></i> Password
+                            </button>
+                            <button class="btn-action btn-remove" onclick="openRemoveModal('${s.empId}', '${s.name}')">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                        </div>
+                    </div>`;
+
+                grid.appendChild(card);
+            });
+        }
+
+        /* ── PROFILE MODAL ── */
+        function openProfileModal(empId) {
+            const s = allStaff.find(x => x.empId === empId);
+            if (!s) return;
+
+            const avatarEl = document.getElementById('profileModalAvatar');
+            avatarEl.innerHTML = s.picture
+                ? `<img src="${s.picture}" alt="${s.name}">`
+                : s.name.charAt(0).toUpperCase();
+
+            document.getElementById('profileModalName').textContent = s.name;
+            document.getElementById('profileModalId').textContent   = s.empId;
+
+            document.getElementById('profileModalInfo').innerHTML = `
+                <div class="profile-info-row"><span class="profile-info-label">Email</span><span class="profile-info-value">${s.email}</span></div>
+                <div class="profile-info-row"><span class="profile-info-label">Phone</span><span class="profile-info-value">${s.phone}</span></div>
+                <div class="profile-info-row"><span class="profile-info-label">Gender</span><span class="profile-info-value">${s.gender}</span></div>
+                <div class="profile-info-row"><span class="profile-info-label">Emergency Contact</span><span class="profile-info-value">${s.eContact}</span></div>
+                <div class="profile-info-row"><span class="profile-info-label">Emergency Phone</span><span class="profile-info-value">${s.ePhone}</span></div>`;
+
+            openModal('profileModal');
+        }
+
+        /* ── PASSWORD MODAL ── */
+        function openPwModal(empId, name) {
+            selectedEmpId = empId;
+            document.getElementById('pwModalSub').textContent = `Set a new password for ${name}.`;
+            document.getElementById('pwInput').value   = '';
+            document.getElementById('pwConfirm').value = '';
+            openModal('pwModal');
+        }
+
+        async function confirmChangePassword() {
+            const pw  = document.getElementById('pwInput').value.trim();
+            const pw2 = document.getElementById('pwConfirm').value.trim();
+
+            if (!pw) { showToast('Please enter a password.'); return; }
+            if (pw !== pw2) { showToast('Passwords do not match.'); return; }
+            if (pw.length < 4) { showToast('Password must be at least 4 characters.'); return; }
+
+            try {
+                const response = await fetch('/Slot/UpdateStaffPassword', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `empId=${encodeURIComponent(selectedEmpId)}&newPassword=${encodeURIComponent(pw)}`
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    closeModal('pwModal');
+                    showToast('Password updated successfully!');
+                } else {
+                    showToast(result.message || 'Failed to update password.');
+                }
+            } catch (err) {
+                console.error('Change password error:', err);
+            }
+        }
+
+        /* ── REMOVE MODAL ── */
+        function openRemoveModal(empId, name) {
+            selectedEmpId = empId;
+            document.getElementById('removeModalSub').textContent =
+                `This will permanently remove ${name}'s account. This action cannot be undone.`;
+            openModal('removeModal');
+        }
+
+        async function confirmRemove() {
+            try {
+                const response = await fetch('/Slot/DeactivateStaff', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `empId=${encodeURIComponent(selectedEmpId)}`
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    closeModal('removeModal');
+                    showToast('Coach removed successfully.');
+                    await loadStaff(); // refresh the list
+                } else {
+                    showToast(result.message || 'Failed to remove coach.');
+                }
+            } catch (err) {
+                console.error('Remove staff error:', err);
+            }
+        }
+
+        /* ── ADD COACH MODAL ── */
+        function openAddModal() {
+            document.getElementById('addName').value     = '';
+            document.getElementById('addPassword').value = '';
+            openModal('addModal');
+        }
+
+        async function confirmAddCoach() {
+            const name     = document.getElementById('addName').value.trim();
+            const password = document.getElementById('addPassword').value.trim();
+
+            if (!name)     { showToast('Please enter a name.');     return; }
+            if (!password) { showToast('Please enter a password.'); return; }
+
+            try {
+                const response = await fetch('/Slot/ManageStaff', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `EmpName=${encodeURIComponent(name)}&Password=${encodeURIComponent(password)}&RoleType=false`
+                });
+
+                // Register redirects on success so check if we get redirected
+                if (response.ok || response.redirected) {
+                    closeModal('addModal');
+                    showToast(`${name} has been registered as a coach.`);
+                    await loadStaff();
+                }
+            } catch (err) {
+                console.error('Add coach error:', err);
+                showToast('Failed to register coach. Please try again.');
+            }
+        }
+
+        /* ── MODAL HELPERS ── */
+        function openModal(id)  { document.getElementById(id).classList.add('open'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+        /* ── TOAST ── */
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+    </script>
+}

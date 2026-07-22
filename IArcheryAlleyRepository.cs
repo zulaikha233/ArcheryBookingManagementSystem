@@ -108,5 +108,9 @@ namespace ArcheryAlley
         List<CoachAttendance> GetTodayCoachAttendance();
         List<Roles> GetAllStaff();
         List<CoachAttendance> GetCoachAttendanceHistory(DateTime from, DateTime to);
+        // Staff Account Management
+        void UpdateStaffPassword(string empId, string newPassword);
+        void DeactivateStaff(string empId);
+        Roles GetStaffById(string empId);
     }
 }

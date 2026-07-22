@@ -1006,5 +1006,30 @@ namespace ArcheryAlley
                 .OrderByDescending(a => a.Date)
                 .ToList();
         }
+        // Add and manage coaches and staff members, including their roles, profiles, and attendance records. This includes methods to retrieve staff by ID, update their passwords, and deactivate their accounts.
+        public Roles GetStaffById(string empId)
+        {
+            return _context.Roles.FirstOrDefault(r => r.EmpId == empId);
+        }
+
+        public void UpdateStaffPassword(string empId, string newPassword)
+        {
+            var staff = _context.Roles.FirstOrDefault(r => r.EmpId == empId);
+            if (staff != null)
+            {
+                staff.Password = newPassword;
+                _context.SaveChanges();
+            }
+        }
+
+        public void DeactivateStaff(string empId)
+        {
+            var staff = _context.Roles.FirstOrDefault(r => r.EmpId == empId);
+            if (staff != null)
+            {
+                _context.Roles.Remove(staff);
+                _context.SaveChanges();
+            }
+        }
     }
 }

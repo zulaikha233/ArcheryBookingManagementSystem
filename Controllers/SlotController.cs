@@ -225,5 +225,68 @@ namespace ArcheryAlley.Controllers
 
             return Json(grouped);
         }
+        //Staff Account Management
+        [HttpGet]
+        public IActionResult ManageStaff()
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            if (role != "Admin")
+                return RedirectToAction("Login", "Account");
+
+            ViewBag.AdminName = HttpContext.Session.GetString("UserName");
+            return View("~/Views/Staff_Admin/ManageStaff.cshtml");
+        }
+
+        [HttpGet]
+        public JsonResult GetAllStaffJson()
+        {
+            var staff = _repository.GetAllStaff();
+            var result = staff.Select(s => new {
+                empId = s.EmpId,
+                name = s.EmpName,
+                gender = s.Gender ?? "—",
+                email = s.Email ?? "—",
+                phone = s.PhoneNumber ?? "—",
+                eContact = s.EContactName ?? "—",
+                ePhone = s.EContactNumber ?? "—",
+                picture = s.ProfilePicture ?? ""
+            });
+            return Json(result);
+        }
+
+        [HttpPost]
+        public JsonResult UpdateStaffPassword(string empId, string newPassword)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 4)
+                    return Json(new { success = false, message = "Password must be at least 4 characters." });
+
+                _repository.UpdateStaffPassword(empId, newPassword);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult DeactivateStaff(string empId)
+        {
+            try
+            {
+                var adminEmpId = HttpContext.Session.GetString("EmpId");
+                if (empId == adminEmpId)
+                    return Json(new { success = false, message = "You cannot remove your own account." });
+
+                _repository.DeactivateStaff(empId);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
     }
 }
