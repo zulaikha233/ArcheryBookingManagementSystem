@@ -288,5 +288,30 @@ namespace ArcheryAlley.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+        [HttpPost]
+        public JsonResult RegisterStaffJson(string empName, string password)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(empName))
+                    return Json(new { success = false, message = "Name is required." });
+                if (string.IsNullOrWhiteSpace(password))
+                    return Json(new { success = false, message = "Password is required." });
+
+                var role = new Roles
+                {
+                    EmpName = empName,
+                    Password = password,
+                    RoleType = false // Staff
+                };
+
+                _repository.RegisterStaff(role);
+                return Json(new { success = true, empId = role.EmpId });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
     }
 }

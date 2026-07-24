@@ -745,7 +745,34 @@
             openModal('addModal');
         }
 
-        async function confirmAddCoach() {
+async function confirmAddCoach() {
+    const name     = document.getElementById('addName').value.trim();
+    const password = document.getElementById('addPassword').value.trim();
+
+    if (!name)     { showToast('Please enter a name.');     return; }
+    if (!password) { showToast('Please enter a password.'); return; }
+
+    try {
+        const response = await fetch('/Slot/RegisterStaffJson', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `empName=${encodeURIComponent(name)}&password=${encodeURIComponent(password)}`
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            closeModal('addModal');
+            showToast(`${name} has been registered. ID: ${result.empId}`);
+            await loadStaff();
+        } else {
+            showToast(result.message || 'Failed to register coach.');
+        }
+    } catch (err) {
+        console.error('Add coach error:', err);
+        showToast('Failed to register coach. Please try again.');
+    }
+        }async function confirmAddCoach() {
             const name     = document.getElementById('addName').value.trim();
             const password = document.getElementById('addPassword').value.trim();
 
@@ -753,24 +780,26 @@
             if (!password) { showToast('Please enter a password.'); return; }
 
             try {
-                const response = await fetch('/Slot/ManageStaff', {
+                const response = await fetch('/Slot/RegisterStaffJson', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `EmpName=${encodeURIComponent(name)}&Password=${encodeURIComponent(password)}&RoleType=false`
+                    body: `empName=${encodeURIComponent(name)}&password=${encodeURIComponent(password)}`
                 });
 
-                // Register redirects on success so check if we get redirected
-                if (response.ok || response.redirected) {
+                const result = await response.json();
+
+                if (result.success) {
                     closeModal('addModal');
-                    showToast(`${name} has been registered as a coach.`);
+                    showToast(`${name} has been registered. ID: ${result.empId}`);
                     await loadStaff();
+                } else {
+                    showToast(result.message || 'Failed to register coach.');
                 }
             } catch (err) {
                 console.error('Add coach error:', err);
                 showToast('Failed to register coach. Please try again.');
             }
         }
-
         /* ── MODAL HELPERS ── */
         function openModal(id)  { document.getElementById(id).classList.add('open'); }
         function closeModal(id) { document.getElementById(id).classList.remove('open'); }
